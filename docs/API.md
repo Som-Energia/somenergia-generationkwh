@@ -13,4 +13,7 @@
     - produccio(soci, dataInici, dataFinal): corbaKwh
     - dretsNoGastats(soci, dataInici, dataFinal): corbaKwh
     - dretsCaducats(soci, dataInici, dataFinal): corbaKwh
-    - dretsEnPerillDeCaducarse(soci, dataInici, dataFinal) : (kwh, data)*
+    - dretsEnPerillDeCaducarse(soci, dataInici, dataFinal) : (kwh, data)+
+
+![Module Diagram](GenKWh-Components.png)
+
