@@ -2,6 +2,8 @@
 
 OpenERP module and library to manage [Som Energia]'s Generation kWh
 
+[![Build Status](https://travis-ci.org/Som-Energia/somenergia-generationkwh.svg?branch=master)](https://travis-ci.org/Som-Energia/somenergia-generationkwh)
+
 [Generation kWh] is a campaign to make feasible electricity autoproduction
 in the Spanish market.
 Such market has been quite hostile to the development of renewable and
