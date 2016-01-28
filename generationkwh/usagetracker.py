@@ -16,6 +16,19 @@ class UsageTracker(object):
             )
 
     def use_kwh(self, member, start, end, fare, period, kwh):
+        production = self._curves.production(start, end) # member?
+        periodMask = self._curves.periodMask(fare, period, start, end)
+        usage = self._curves.usage(member, start, end)
+
+        allocated = 0
+        for i, (p, u, m) in enumerate(zip(production, usage, periodMask)):
+            used = min(kwh-allocated, p-u)
+            usage[i] += used
+            allocated += used
+
+        return allocated
+            
+
         # Pseudo code spike, discard with real tests
         return 69
 
@@ -32,7 +45,7 @@ class UsageTracker(object):
             usebin += used # TODO in the array, i mean
             if allocated == kwh: break
 
-        self._use.set(member, start, end, faremask)
+        self._curves.setUsage(member, start, end, faremask, usage)
 
         return allocated
 
@@ -52,7 +65,7 @@ class UsageTracker(object):
             if deallocated == kwh: break
         return 69
 
-        self._use.set(member, start, end, faremask, usage)
+        self._curves.setUsage(member, start, end, faremask, usage)
 
 import unittest
 
@@ -72,6 +85,9 @@ class CurveProvider_MockUp(object):
 
     def periodMask(self, fare, period, start, end):
         return self._periodMask
+
+    def setUsage(self, member, start, end, newValues):
+        self._usage = newValues
 
 class UsageTracker_Test(unittest.TestCase):
 
@@ -117,7 +133,7 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
         t = UsageTracker(curves)
-        kwh = t.available_kwh(4, '2015-01-02', '2015-01-02', '2.0A', 'P1')
+        kwh = t.available_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1')
         self.assertEqual(kwh, 3)
 
     def test_available_manyBinsProduction_used(self):
@@ -128,7 +144,7 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
         t = UsageTracker(curves)
-        kwh = t.available_kwh(4, '2015-01-02', '2015-01-02', '2.0A', 'P1')
+        kwh = t.available_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1')
         self.assertEqual(kwh, 4)
 
     def test_available_manyBinsProduction_usedMasked(self):
@@ -139,7 +155,78 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
         t = UsageTracker(curves)
-        kwh = t.available_kwh(4, '2015-01-02', '2015-01-02', '2.0A', 'P1')
+        kwh = t.available_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1')
         self.assertEqual(kwh, 2)
+
+    def test_use_halfBin(self):
+        curves=CurveProvider_MockUp(
+            production=[5,3],
+            usage=[0,0],
+            periodMask=[1,1],
+            )
+
+        t = UsageTracker(curves)
+        real = t.use_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1', 4)
+        self.assertEqual(
+            [4,0], curves.usage('soci', '2015-01-02', '2015-01-02'))
+
+    def test_use_fullBin(self):
+        curves=CurveProvider_MockUp(
+            production=[5,3],
+            usage=[0,0],
+            periodMask=[1,1],
+            )
+
+        t = UsageTracker(curves)
+        real = t.use_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1', 5)
+        self.assertEqual(
+            [5,0], curves.usage('soci', '2015-01-02', '2015-01-02'))
+        self.assertEqual(5, real)
+
+    def test_use_pastBin(self):
+        curves=CurveProvider_MockUp(
+            production=[5,3],
+            usage=[0,0],
+            periodMask=[1,1],
+            )
+
+        t = UsageTracker(curves)
+        real = t.use_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1', 6)
+        self.assertEqual(
+            [5,1], curves.usage('soci', '2015-01-02', '2015-01-02'))
+        self.assertEqual(6, real)
+
+    def test_use_beyondAvailable(self):
+        curves=CurveProvider_MockUp(
+            production=[5,3],
+            usage=[0,0],
+            periodMask=[1,1],
+            )
+
+        t = UsageTracker(curves)
+        real = t.use_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1', 9)
+        self.assertEqual(
+             [5,3], curves.usage('soci', '2015-01-02', '2015-01-02'))
+        self.assertEqual(8, real)
+
+    def test_use_previouslyUsed(self):
+        curves=CurveProvider_MockUp(
+            production=[5,3],
+            usage=[1,0],
+            periodMask=[1,1],
+            )
+
+        t = UsageTracker(curves)
+        real = t.use_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1', 2)
+        self.assertEqual(
+             [3,0], curves.usage('soci', '2015-01-02', '2015-01-02'))
+        self.assertEqual(2, real)
+
+    """
+    TODO:
+    - previous uses
+    - masked is not used
+    """
+        
 
 
