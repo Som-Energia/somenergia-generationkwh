@@ -1,0 +1,10 @@
+language: python
+python:
+  - "2.7"
+install: "pip install -r requirements.txt"
+script: coverage run --source generationkwh ./setup.py test
+install:
+- pip install coveralls
+after_success:
+- coveralls
+
