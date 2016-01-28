@@ -18,9 +18,10 @@ The goal of the campaign is to collect investment from cooperative members
 for new renewable production projects.
 Investors don't get an interest rate in exchange for their investment
 but the right to use kWh produced in such plants at cost price,
-instead the price derived from the official auction.
-Being a marginalist auction, the inclusion of expensive fossil sources
-into the national mix, raises the final price to be paid for every source.
+instead of the price derived from the official auction.
+Official auction use a marginalist method so that the inclusion
+in the mix of expensive fossil sources, raises final prices
+to be paid for every source, even cheaper renewable sources.
 
 This package holds the business logic to handle the use rights
 coming from the production plants related to this campaing and
