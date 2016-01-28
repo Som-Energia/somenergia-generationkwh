@@ -79,7 +79,7 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
         t = UsageTracker(curves)
-        kwh = t.available_kwh(4, '2015-01-02', '2015-01-02', '2.0A', 'P1')
+        kwh = t.available_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1')
         self.assertEqual(kwh, 0)
 
     def test_available_singleBinProduction(self):
@@ -90,7 +90,7 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
         t = UsageTracker(curves)
-        kwh = t.available_kwh(4, '2015-01-02', '2015-01-02', '2.0A', 'P1')
+        kwh = t.available_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1')
         self.assertEqual(kwh, 2)
 
     def test_available_manyBinsProduction_getAdded(self):
@@ -101,7 +101,7 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
         t = UsageTracker(curves)
-        kwh = t.available_kwh(4, '2015-01-02', '2015-01-02', '2.0A', 'P1')
+        kwh = t.available_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1')
         self.assertEqual(kwh, 5)
 
 
