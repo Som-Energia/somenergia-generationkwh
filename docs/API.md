@@ -1,19 +1,30 @@
 
-- AssignadorGenKwh
-  - kwhDisponibles(contracte, periode, dataInici, dataFinal) : kwh
-  - gasta(contracte, periode, dataInici, dataFinal, kwh)
-  - retorna(contracte, periode, dataInici, dataFinal, kwh)
+-  Generationkwh.Dealer
 
-- TrackerConsumGenKwh
-  - protocol per l'Assignador
-    - disponible(soci, periode, dataInici, dataFinal): corbaKwh
-    - gasta(soci, periode, dataInici, dataFinal, kwh)
-    - retorna(soci, periode, dataInici, dataFinal, kwh)
-  - protocol Estadistiques (per la info de la factura i la OV)
-    - produccio(soci, dataInici, dataFinal): corbaKwh
-    - dretsNoGastats(soci, dataInici, dataFinal): corbaKwh
-    - dretsCaducats(soci, dataInici, dataFinal): corbaKwh
-    - dretsEnPerillDeCaducarse(soci, dataInici, dataFinal) : (kwh, data)+
+  - `available_kwh(contract, start_date, end_date, periode) : kwh`
+  - `use_kwh(contract, start_date, end_date, periode, kwh): actualKwh`
+  - `refund_kwh(contract, start_date, end_date, periode, kwh)`
+
+- Generationkwh UseTracker
+
+  - Dealer protocol (used by Generationkwh.Dealer)
+
+    - `available_kwh(soci, start_date, end_date, periode): kwh`
+    - `use_kwh(soci, start_date, end_date, periode, kwh)`
+    - `refund_kwh(soci, start_date, end_date, periode, kwh)`
+
+  - protocol Stats (used by Virtual Office and Invoice Generator)
+
+    - `disponible(soci, start_date, end_date): corbaKwh`
+    - `produccio(soci, start_date, end_date): corbaKwh`
+    - `dretsNoGastats(soci, start_date, end_date): corbaKwh`
+    - `dretsCaducats(soci, start_date, end_date): corbaKwh`
+    - `dretsEnPerillDeCaducarse(soci, start_date, end_date) : (kwh, data)+`
+
 
 ![Module Diagram](GenKWh-Components.png)
+
+
+
+
 
