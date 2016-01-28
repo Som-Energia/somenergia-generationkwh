@@ -43,9 +43,7 @@ class UsageTracker(object):
 
         return deallocated
 
-
 import unittest
-
 
 class CurveProvider_MockUp(object):
 
@@ -65,6 +63,7 @@ class CurveProvider_MockUp(object):
 
     def setUsage(self, member, start, end, newValues):
         self._usage = newValues
+
 
 class UsageTracker_Test(unittest.TestCase):
 
@@ -240,7 +239,6 @@ class UsageTracker_Test(unittest.TestCase):
         self.assertEqual(3, real)
 
     def test_refund_beyondUsed(self):
-        # TODO: Is that the proper behaviour?
         curves=CurveProvider_MockUp(
             production=[5,3],
             usage=[2,2],
