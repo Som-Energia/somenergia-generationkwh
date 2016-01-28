@@ -13,11 +13,11 @@ The goal of the campaign is to collect investment for new renovable
 production plants from the cooperative members not in exchange of
 an interest but in exchage of the right to use the kWh produced
 at the cost of production, instead of the prices derived from the
-marginalistic auction which tend to be higher due to the introduction
-into the mix of expensive fossile sources which raises the final
-auction price.
+official action which fixes the market price and tend to be
+higher due to the introduction into the mix of expensive fossile
+sources.
 
-This module holds the business logic to handle the rights coming
+This package holds the business logic to handle the rights coming
 from the production plants related to this campaing and transfer
 them to user invoices.
 
