@@ -64,6 +64,7 @@ class CurveProvider_MockUp(object):
     def setUsage(self, member, start, end, newValues):
         self._usage = newValues
 
+unittest.TestCase.__str__ = unittest.TestCase.id
 
 class UsageTracker_Test(unittest.TestCase):
 
