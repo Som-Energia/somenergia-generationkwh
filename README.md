@@ -6,8 +6,8 @@ OpenERP module and library to manage [Som Energia]'s Generation kWh
 in the Spanish market, which has been quite hostile to the development
 of reneable and auto-production (at least as it is in 2015).
 
-[Generation kWh]:(https://generationkwh.org)
-[Som Energia]:(https://somenergia.coop)
+[Generation kWh]:https://generationkwh.org
+[Som Energia]:https://somenergia.coop
 
 The goal of the campaign is to collect investment for new renovable
 production plants from the cooperative members not in exchange of
