@@ -6,7 +6,9 @@ class UsageTracker(object):
         self._curves = curveProvider
 
     def available_kwh(self, member, start, end, fare, period):
-        return 0
+        production = self._curves.production(start, end) # member?
+
+        return production[0]
 
     def use_kwh(self, member, start, end, fare, period, kwh):
         # Pseudo code spike, discard with real tests
@@ -78,5 +80,16 @@ class UsageTracker_Test(unittest.TestCase):
         t = UsageTracker(curves)
         kwh = t.available_kwh(4, '2015-01-02', '2015-01-02', '2.0A', 'P1')
         self.assertEqual(kwh, 0)
+
+    def test_available_singleBinProduction(self):
+        curves=CurveProvider_MockUp(
+            production=[2,0],
+            usage=[0,0],
+            periodMask=[1,1],
+            )
+
+        t = UsageTracker(curves)
+        kwh = t.available_kwh(4, '2015-01-02', '2015-01-02', '2.0A', 'P1')
+        self.assertEqual(kwh, 2)
 
 
