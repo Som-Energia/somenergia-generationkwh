@@ -13,7 +13,7 @@ class CurveProvider_MockUp(object):
     def usage(self, member, start, end):
         return self._usage
 
-    def production(self, start, end):
+    def production(self, member, start, end):
         return self._production
 
     def periodMask(self, fare, period, start, end):

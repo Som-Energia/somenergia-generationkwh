@@ -8,7 +8,7 @@ class UsageTracker(object):
         self._curves = curveProvider
 
     def available_kwh(self, member, start, end, fare, period):
-        production = self._curves.production(start, end) # member?
+        production = self._curves.production(member, start, end)
         periodMask = self._curves.periodMask(fare, period, start, end)
         usage = self._curves.usage(member, start, end)
         return sum(
@@ -18,7 +18,7 @@ class UsageTracker(object):
             )
 
     def use_kwh(self, member, start, end, fare, period, kwh):
-        production = self._curves.production(start, end) # member?
+        production = self._curves.production(member, start, end)
         periodMask = self._curves.periodMask(fare, period, start, end)
         usage = self._curves.usage(member, start, end)
 
@@ -32,7 +32,7 @@ class UsageTracker(object):
         return allocated
 
     def refund_kwh(self, member, start, end, fare, period, kwh):
-        production = self._curves.production(start, end) # member?
+        production = self._curves.production(member, start, end)
         periodMask = self._curves.periodMask(fare, period, start, end)
         usage = self._curves.usage(member, start, end)
 
