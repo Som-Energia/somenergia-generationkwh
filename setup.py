@@ -16,6 +16,7 @@ setup(
 	scripts=[
 		],
 	install_requires=[
+		'libfacturacioatr',
 	],
 	include_package_data = True,
 	test_suite = 'generationkwh',
