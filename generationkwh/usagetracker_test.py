@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from generationkwh.usagetracker import UsageTracker
 import unittest

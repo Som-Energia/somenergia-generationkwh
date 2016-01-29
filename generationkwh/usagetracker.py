@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 class UsageTracker(object):
     """UsageTracker manages the available use rights for a given partner.
     """
