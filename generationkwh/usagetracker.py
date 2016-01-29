@@ -35,7 +35,7 @@ class UsageTracker(object):
         usage = self._curves.usage(member, start, end)
 
         deallocated = 0
-        for i, (u, m) in enumerate(zip(usage, periodMask)):
+        for i, (u, m) in reversed(list(enumerate(zip(usage, periodMask)))):
             if not m: continue # not in period
             unused = min(kwh-deallocated, u)
             usage[i] -= unused
@@ -64,6 +64,7 @@ class CurveProvider_MockUp(object):
     def setUsage(self, member, start, end, newValues):
         self._usage = newValues
 
+# Readable verbose testcase listing
 unittest.TestCase.__str__ = unittest.TestCase.id
 
 class UsageTracker_Test(unittest.TestCase):
@@ -225,10 +226,9 @@ class UsageTracker_Test(unittest.TestCase):
              [1,0], curves.usage('soci', '2015-01-02', '2015-01-02'))
         self.assertEqual(2, real)
 
-    def test_refund_severalBins_refundsForward(self):
-        # TODO: Is that the proper behaviour?
+    def test_refund_severalBins_refundsBackward(self):
         curves=CurveProvider_MockUp(
-            production=[5,3],
+            production=[3,5],
             usage=[2,2],
             periodMask=[1,1],
             )
@@ -236,7 +236,7 @@ class UsageTracker_Test(unittest.TestCase):
         t = UsageTracker(curves)
         real = t.refund_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1', 3)
         self.assertEqual(
-             [0,1], curves.usage('soci', '2015-01-02', '2015-01-02'))
+             [1,0], curves.usage('soci', '2015-01-02', '2015-01-02'))
         self.assertEqual(3, real)
 
     def test_refund_beyondUsed(self):
