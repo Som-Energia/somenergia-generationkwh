@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 from setuptools import setup, find_packages
 
 readme = open("README.md").read()
