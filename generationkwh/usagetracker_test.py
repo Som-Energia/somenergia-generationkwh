@@ -19,9 +19,6 @@ class CurveProvider_MockUp(object):
     def periodMask(self, fare, period, start, end):
         return self._periodMask
 
-    def setUsage(self, member, start, end, newValues):
-        self._usage = newValues
-
 # Readable verbose testcase listing
 unittest.TestCase.__str__ = unittest.TestCase.id
 
