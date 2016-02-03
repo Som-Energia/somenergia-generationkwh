@@ -6,7 +6,8 @@ readme = open("README.md").read()
 setup(
 	name = "somenergia-generationkwh",
 	version = "0.2",
-	description = "OpenERP module and library to manage Som Energia's Generation kWh",
+	description =
+		"OpenERP module and library to manage Som Energia's Generation kWh",
 	author = "Som Energia SCCL",
 	author_email = "info@somenergia.coop",
 	url = 'https://github.com/Som-Energia/somenergia-generationkwh',
@@ -16,7 +17,7 @@ setup(
 	scripts=[
 		],
 	install_requires=[
-		'libfacturacioatr',
+#		'libfacturacioatr',
 	],
 	include_package_data = True,
 	test_suite = 'generationkwh',
