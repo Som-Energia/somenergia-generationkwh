@@ -29,5 +29,4 @@ class CurveProvider_Test(unittest.TestCase):
 		self.fail("It works!")
 
 
-
-
+# vim: ts=4 sw=4 et
