@@ -22,6 +22,7 @@ class CurveProvider(object):
 			within start and end days, included.
 		"""
 
+import unittest
 class CurveProvider_Test(unittest.TestCase):
 
 	def test_me(self):
