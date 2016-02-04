@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 from setuptools import setup, find_packages
 
 readme = open("README.md").read()
