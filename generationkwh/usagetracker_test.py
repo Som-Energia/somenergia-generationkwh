@@ -3,6 +3,7 @@
 from generationkwh.usagetracker import UsageTracker
 import unittest
 
+
 class CurveProvider_MockUp(object):
 
     def __init__(self, production, usage, periodMask):
@@ -19,8 +20,10 @@ class CurveProvider_MockUp(object):
     def periodMask(self, fare, period, start, end):
         return self._periodMask
 
+
 # Readable verbose testcase listing
 unittest.TestCase.__str__ = unittest.TestCase.id
+
 
 class UsageTracker_Test(unittest.TestCase):
 

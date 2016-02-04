@@ -25,7 +25,7 @@ class CurveProvider(object):
 import unittest
 class CurveProvider_Test(unittest.TestCase):
 
-	def test_me(self):
+	def _test_me(self):
 		self.fail("It works!")
 
 
