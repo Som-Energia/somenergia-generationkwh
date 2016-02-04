@@ -2,8 +2,11 @@
 
 """
 TODO:
+- Fares dictionary should be at libfacturacioatr
 - Extend fare selection to all fares
 - Use numpy arrays
+- Where to get holidays?
+- Date parameter should be dates not strings
 """
 
 import numpy
@@ -12,10 +15,10 @@ try:
 except ImportError:
     libfacturacioatr = None
 
+import datetime
 
 def date(string):
-    from datetime import datetime
-    return datetime.strptime(string, '%Y-%m-%d').date()
+    return datetime.datetime.strptime(string, '%Y-%m-%d').date()
 
 class FarePeriodProvider(object):
     def __init__(self, holidays=[]):
@@ -23,7 +26,6 @@ class FarePeriodProvider(object):
 
     def mask(self, begin_date, end_date, fare, period):
         import libfacturacioatr
-        import datetime
         begin = date(begin_date)
         end = date(end_date)
         fares = {
