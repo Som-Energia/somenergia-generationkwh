@@ -32,10 +32,10 @@ class FarePeriodCurve(object):
             '3.0A': libfacturacioatr.tarifes.Tarifa30A,
         }
         t = fares[fare]({},{},
-            begin,
-            end,
-            data_inici_periode=begin,
-            data_final_periode=end,
+            '1970-01-01',
+            '1970-01-01',
+            data_inici_periode='1970-01-01',
+            data_final_periode='1970-01-01',
             )
         startMonth = begin.year*12 + begin.month-1
         endMonth = end.year*12 + end.month-1
@@ -46,7 +46,7 @@ class FarePeriodCurve(object):
                 holidays=self.holidays
                 ).matrix
             for month in xrange(startMonth, endMonth+1)], [])
-        return allDays[begin.day-1:][:(end-begin).days+1]
+        return allDays[begin.day-1:] [:(end-begin).days+1]
 
 
 # vim: ts=4 sw=4 et
