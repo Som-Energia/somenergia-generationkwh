@@ -17,6 +17,7 @@ setup(
 	scripts=[
 		],
 	install_requires=[
+		'yamlns',
 #		'libfacturacioatr',
 	],
 	include_package_data = True,
