@@ -14,6 +14,10 @@ class CurveProvider(object):
         self._investmentProvider = investments
 
     def activeShares(self, member, start, end):
+
+        if end<start:
+            return numpy.array([], dtype=int)
+
         def activeSharesADay(day, member):
             if self._investmentProvider is None:
                 raise UnconfiguredDataProvider("InvestmentProvider")
@@ -179,6 +183,14 @@ class CurveProvider_Test(unittest.TestCase):
             ],
             +25*[0]
             +25*[3]
+            )
+
+    def test_activeShares_swappedDatesReturnsEmpty(self):
+        self.assertActiveSharesEqual(
+            'member', '2016-02-21', '2015-02-22',
+            [
+            ],
+            []
             )
 
     def test_activeShares_fullCase(self):
