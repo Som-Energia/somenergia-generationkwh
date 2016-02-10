@@ -2,6 +2,9 @@
 import datetime
 import numpy
 
+class UnconfiguredDataProvider(Exception):
+    pass
+
 class CurveProvider(object):
     """ Provides hourly curves required to track
         generationkwh member usage.
@@ -11,6 +14,9 @@ class CurveProvider(object):
         self._shareProvider = shares
 
     def activeShares(self, member, start, end):
+        if self._shareProvider is None:
+            raise UnconfiguredDataProvider("MemberSharesProvider")
+
         def activeSharesADay(day, member):
             return sum(
                 share.shares
@@ -61,6 +67,12 @@ class SharesProvider_Mockup(object):
         return self._contracts
 
 class CurveProvider_Test(unittest.TestCase):
+
+    def test_shares_whenNoShareProvider(self):
+        curves = CurveProvider()
+        with self.assertRaises(UnconfiguredDataProvider) as assertion:
+            curves.activeShares('member', isodate('2015-02-21'), isodate('2015-02-21'))
+        self.assertEqual(assertion.exception.args[0], "MemberSharesProvider")
 
     def assertShareCurveEquals(self, member, start, end, shares, expectation):
         sharesprovider = SharesProvider_Mockup(shares)
@@ -166,15 +178,16 @@ class CurveProvider_Test(unittest.TestCase):
 
     def test_shares_fullCase(self):
         self.assertShareCurveEquals(
-            'member', '2015-02-11', '2015-02-17',
+            'member', '2015-02-11', '2016-03-11',
             [
                 ('member', '2015-02-10', '2015-02-22', 3),
                 ('member', '2015-01-11', '2015-02-11', 5),
                 ('member', '2015-02-13', '2015-02-14', 7),
                 ('member', '2015-02-16', '2015-02-24', 11),
-                ('other',  '2015-02-12', '2015-02-22', 13),
-                (None,     '2015-02-12', '2015-02-22', 17),
-                ('member', '2014-02-12', '2014-02-22', 13),
+                # ignored
+                ('member', '2014-02-12', '2014-02-22', 13), # early
+                ('member', '2017-02-12', '2017-02-22', 17), # late
+                ('other',  '2015-02-12', '2015-02-22', 21), # other
             ],
             +25*[8] # 11
             +25*[3] # 12
@@ -183,6 +196,14 @@ class CurveProvider_Test(unittest.TestCase):
             +25*[3] # 15
             +25*[14] # 16
             +25*[14] # 17
+            +25*[14] # 18
+            +25*[14] # 19
+            +25*[14] # 20
+            +25*[14] # 21
+            +25*[14] # 22
+            +25*[11] # 23
+            +25*[11] # 24
+            +25*381*[0] # 25 and so
             )
 
 
