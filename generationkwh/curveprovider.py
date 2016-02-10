@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 
 class CurveProvider(object):
-	""" Provides hourly curves required to track
-		generationkwh member usage.
-	"""
+    """ Provides hourly curves required to track
+        generationkwh member usage.
+    """
+
+    def __init__(self, shares=None):
+        self._shareProvider = shares
+
+    def activeShares(self, member, start, end):
+        return +25*[0]
 
 	def production(self, member, start, end):
 		""" Returns acquainted productions rights for
@@ -24,10 +30,25 @@ class CurveProvider(object):
 
 import unittest
 
+class SharesProvider_Mockup(object):
+    def __init__(self, shareContracts):
+        self._contracts = shareContracts
+
+    def shareContracts(self):
+        return self._contracts
+
 class CurveProvider_Test(unittest.TestCase):
 
-	def _test_me(self):
-		self.fail("It works!")
+    def test_shares_singleDay_noShares(self):
+        shares = SharesProvider_Mockup([
+            ])
+        curves = CurveProvider(shares = shares)
+        shares = curves.activeShares('member', '2015-02-21', '2015-02-21')
+        self.assertEqual(shares,
+            +25*[0]
+            )
+        
+
 
 
 # vim: ts=4 sw=4 et
