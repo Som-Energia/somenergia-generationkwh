@@ -13,7 +13,8 @@ class CurveProvider(object):
             sum(
                 share.shares
                 for share in self._shareProvider.shareContracts()
-                if member is None or share.member == member
+                if (member is None or share.member == member)
+                and share.end == start
             )]
 
     def production(self, member, start, end):
@@ -38,7 +39,7 @@ from yamlns import namespace as ns
 
 def isodate(date):
     import datetime
-    return datetime.datetime.strptime(date, '%Y-%m-%d').date
+    return datetime.datetime.strptime(date, '%Y-%m-%d').date()
 
 class SharesProvider_Mockup(object):
     def __init__(self, shareContracts):
@@ -55,7 +56,7 @@ class CurveProvider_Test(unittest.TestCase):
     def assertShareCurveEquals(self, member, start, end, shares, expectation):
         sharesprovider = SharesProvider_Mockup(shares)
         curves = CurveProvider(shares = sharesprovider)
-        result = curves.activeShares(member, start, end)
+        result = curves.activeShares(member, isodate(start), isodate(end))
         self.assertEqual(result, expectation)
 
     def test_shares_singleDay_noShares(self):
@@ -89,7 +90,7 @@ class CurveProvider_Test(unittest.TestCase):
             'member', '2015-02-21', '2015-02-21',
             [
                 ('member', '2015-02-21', '2015-02-21', 3),
-                ('other', '2015-02-21', '2015-02-21', 5),
+                ('other', '2015-02-21', '2015-02-21', 5), # different member
             ],
             +25*[3]
             )
@@ -104,6 +105,15 @@ class CurveProvider_Test(unittest.TestCase):
             +25*[8]
             )
  
+    def test_shares_expiredActionsNotCounted(self):
+        self.assertShareCurveEquals(
+            'member', '2015-02-21', '2015-02-21',
+            [
+                ('member', '2015-02-21', '2015-02-21', 3),
+                ('member', '2014-02-21', '2015-02-20', 5),
+            ],
+            +25*[3]
+            )
         
 
 
