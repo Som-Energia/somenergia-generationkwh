@@ -23,6 +23,7 @@ class CurveProvider(object):
 		"""
 
 import unittest
+
 class CurveProvider_Test(unittest.TestCase):
 
 	def _test_me(self):
