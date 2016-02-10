@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 
 class CurveProvider(object):
     """ Provides hourly curves required to track
@@ -9,14 +10,22 @@ class CurveProvider(object):
         self._shareProvider = shares
 
     def activeShares(self, member, start, end):
-        return +25*((end-start).days+1)*[
-            sum(
+        def activeShares(day, member):
+            return sum(
                 share.shares
                 for share in self._shareProvider.shareContracts()
                 if (member is None or share.member == member)
-                and share.end >= start
-                and share.start <= start # TODO: wrong on purpose
+                and share.end >= day
+                and share.start <= day
+            )
+        hoursADay=25
+        return sum( [
+            hoursADay*[activeShares(day,member)]
+            for day in (
+                start+datetime.timedelta(days=i)
+                for i in xrange((end-start).days+1)
             )]
+        ,[])
 
     def production(self, member, start, end):
         """ Returns acquainted productions rights for
@@ -39,7 +48,6 @@ import unittest
 from yamlns import namespace as ns
 
 def isodate(date):
-    import datetime
     return datetime.datetime.strptime(date, '%Y-%m-%d').date()
 
 class SharesProvider_Mockup(object):
@@ -133,6 +141,26 @@ class CurveProvider_Test(unittest.TestCase):
                 ('member', '2015-02-21', '2015-02-22', 3),
             ],
             +25*[3]
+            +25*[3]
+            )
+
+    def test_shares_lastDaysNotActive(self):
+        self.assertShareCurveEquals(
+            'member', '2015-02-21', '2015-02-22',
+            [
+                ('member', '2015-02-21', '2015-02-21', 3),
+            ],
+            +25*[3]
+            +25*[0]
+            )
+
+    def test_shares_firstDaysNotActive(self):
+        self.assertShareCurveEquals(
+            'member', '2015-02-21', '2015-02-22',
+            [
+                ('member', '2015-02-22', '2015-02-26', 3),
+            ],
+            +25*[0]
             +25*[3]
             )
 
