@@ -9,12 +9,13 @@ class CurveProvider(object):
         self._shareProvider = shares
 
     def activeShares(self, member, start, end):
-        return +25*[
+        return +25*((end-start).days+1)*[
             sum(
                 share.shares
                 for share in self._shareProvider.shareContracts()
                 if (member is None or share.member == member)
-                and share.end == start
+                and share.end >= start
+                and share.start <= start # TODO: wrong on purpose
             )]
 
     def production(self, member, start, end):
@@ -90,7 +91,7 @@ class CurveProvider_Test(unittest.TestCase):
             'member', '2015-02-21', '2015-02-21',
             [
                 ('member', '2015-02-21', '2015-02-21', 3),
-                ('other', '2015-02-21', '2015-02-21', 5), # different member
+                ('other', '2015-02-21', '2015-02-21', 5),
             ],
             +25*[3]
             )
@@ -114,7 +115,26 @@ class CurveProvider_Test(unittest.TestCase):
             ],
             +25*[3]
             )
-        
+ 
+    def test_shares_unactivatedActions(self):
+        self.assertShareCurveEquals(
+            'member', '2015-02-21', '2015-02-21',
+            [
+                ('member', '2015-02-21', '2015-02-21', 3),
+                ('member', '2015-02-22', '2016-02-20', 5),
+            ],
+            +25*[3]
+            )
+
+    def test_shares_twoDays(self):
+        self.assertShareCurveEquals(
+            'member', '2015-02-21', '2015-02-22',
+            [
+                ('member', '2015-02-21', '2015-02-22', 3),
+            ],
+            +25*[3]
+            +25*[3]
+            )
 
 
 
