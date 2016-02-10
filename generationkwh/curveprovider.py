@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+import numpy
 
 class CurveProvider(object):
     """ Provides hourly curves required to track
@@ -10,7 +11,7 @@ class CurveProvider(object):
         self._shareProvider = shares
 
     def activeShares(self, member, start, end):
-        def activeShares(day, member):
+        def activeSharesADay(day, member):
             return sum(
                 share.shares
                 for share in self._shareProvider.shareContracts()
@@ -19,13 +20,12 @@ class CurveProvider(object):
                 and share.start <= day
             )
         hoursADay=25
-        return sum( [
-            hoursADay*[activeShares(day,member)]
-            for day in (
-                start+datetime.timedelta(days=i)
-                for i in xrange((end-start).days+1)
-            )]
-        ,[])
+        nDays=(end-start).days+1
+        result = numpy.zeros(nDays*hoursADay, dtype=numpy.int)
+        for i in xrange(nDays):
+            day=start+datetime.timedelta(days=i)
+            result[i*hoursADay:(i+1)*hoursADay] = activeSharesADay(day,member)
+        return result
 
     def production(self, member, start, end):
         """ Returns acquainted productions rights for
@@ -66,7 +66,7 @@ class CurveProvider_Test(unittest.TestCase):
         sharesprovider = SharesProvider_Mockup(shares)
         curves = CurveProvider(shares = sharesprovider)
         result = curves.activeShares(member, isodate(start), isodate(end))
-        self.assertEqual(result, expectation)
+        self.assertEqual(list(result), expectation)
 
     def test_shares_singleDay_noShares(self):
         self.assertShareCurveEquals(
@@ -162,6 +162,27 @@ class CurveProvider_Test(unittest.TestCase):
             ],
             +25*[0]
             +25*[3]
+            )
+
+    def test_shares_fullCase(self):
+        self.assertShareCurveEquals(
+            'member', '2015-02-11', '2015-02-17',
+            [
+                ('member', '2015-02-10', '2015-02-22', 3),
+                ('member', '2015-01-11', '2015-02-11', 5),
+                ('member', '2015-02-13', '2015-02-14', 7),
+                ('member', '2015-02-16', '2015-02-24', 11),
+                ('other',  '2015-02-12', '2015-02-22', 13),
+                (None,     '2015-02-12', '2015-02-22', 17),
+                ('member', '2014-02-12', '2014-02-22', 13),
+            ],
+            +25*[8] # 11
+            +25*[3] # 12
+            +25*[10] # 13
+            +25*[10] # 14
+            +25*[3] # 15
+            +25*[14] # 16
+            +25*[14] # 17
             )
 
 
