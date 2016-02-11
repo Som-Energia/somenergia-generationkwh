@@ -2,41 +2,11 @@
 import datetime
 import numpy
 
-class UnconfiguredDataProvider(Exception):
-    pass
 
 class CurveProvider(object):
     """ Provides hourly curves required to track
         generationkwh member usage.
     """
-
-    def __init__(self, investments=None):
-        self._investmentProvider = investments
-
-    def activeSharesAtDay(self, member, day):
-        if self._investmentProvider is None:
-            raise UnconfiguredDataProvider("InvestmentProvider")
-
-        return sum(
-            investment.shares
-            for investment in self._investmentProvider.shareContracts()
-            if (member is None or investment.member == member)
-            and investment.activationEnd >= day
-            and investment.activationStart <= day
-        )
-
-    def activeShares(self, member, start, end):
-
-        if end<start:
-            return numpy.array([], dtype=int)
-
-        hoursADay=25
-        nDays=(end-start).days+1
-        result = numpy.zeros(nDays*hoursADay, dtype=numpy.int)
-        for i in xrange(nDays):
-            day=start+datetime.timedelta(days=i)
-            result[i*hoursADay:(i+1)*hoursADay] = self.activeSharesAtDay(member, day)
-        return result
 
     def production(self, member, start, end):
         """ Returns acquainted productions rights for
@@ -54,6 +24,44 @@ class CurveProvider(object):
             the period is active por a given fare
             within start and end days, included.
         """
+
+
+class UnconfiguredDataProvider(Exception):
+    pass
+
+class ActiveSharesCurve(object):
+    """ Provides the shares that are active at a give
+        day, or either daily or hourly in a date span.
+        You need to feed this object with an investment
+        provider.
+    """
+    def __init__(self, investments=None):
+        self._investmentProvider = investments
+
+    def atDay(self, member, day):
+        if self._investmentProvider is None:
+            raise UnconfiguredDataProvider("InvestmentProvider")
+
+        return sum(
+            investment.shares
+            for investment in self._investmentProvider.shareContracts()
+            if (member is None or investment.member == member)
+            and investment.activationEnd >= day
+            and investment.activationStart <= day
+        )
+
+    def hourly(self, member, start, end):
+
+        if end<start:
+            return numpy.array([], dtype=int)
+
+        hoursADay=25
+        nDays=(end-start).days+1
+        result = numpy.zeros(nDays*hoursADay, dtype=numpy.int)
+        for i in xrange(nDays):
+            day=start+datetime.timedelta(days=i)
+            result[i*hoursADay:(i+1)*hoursADay] = self.atDay(member, day)
+        return result
 
 import unittest
 from yamlns import namespace as ns
@@ -76,28 +84,28 @@ class InvestmentProvider_MockUp(object):
     def shareContracts(self):
         return self._contracts
 
-class CurveProvider_Test(unittest.TestCase):
+class ActiveSharesCurve_Test(unittest.TestCase):
 
-    def test_activeSharesAtDay_whenNoShareProvider(self):
-        curves = CurveProvider()
+    def test_atDay(self):
+        curve = ActiveSharesCurve()
         with self.assertRaises(UnconfiguredDataProvider) as assertion:
-            curves.activeSharesAtDay('member', isodate('2015-02-21'))
+            curve.atDay('member', isodate('2015-02-21'))
         self.assertEqual(assertion.exception.args[0], "InvestmentProvider")
 
-    def assert_activeSharesAtDay_equal(self, member, day, investments, expectation):
+    def assert_atDay_equal(self, member, day, investments, expectation):
         investmentsProvider = InvestmentProvider_MockUp(investments)
-        curves = CurveProvider(investments = investmentsProvider)
-        self.assertEqual(expectation, curves.activeSharesAtDay(member, isodate(day)))
+        curve = ActiveSharesCurve(investments = investmentsProvider)
+        self.assertEqual(expectation, curve.atDay(member, isodate(day)))
 
-    def test_activeSharesAtDay_noShares(self):
-        self.assert_activeSharesAtDay_equal(
+    def test_atDay_noShares(self):
+        self.assert_atDay_equal(
             'member', '2015-02-21',
             [],
             0
         )
 
-    def test_activeSharesAtDay_singleShare(self):
-        self.assert_activeSharesAtDay_equal(
+    def test_atDay_singleShare(self):
+        self.assert_atDay_equal(
             'member', '2015-02-21',
             [
                 ('member', '2015-02-21', '2015-02-21', 3),
@@ -105,8 +113,8 @@ class CurveProvider_Test(unittest.TestCase):
             3
         )
 
-    def test_activeSharesAtDay_multipleShares_getAdded(self):
-        self.assert_activeSharesAtDay_equal(
+    def test_atDay_multipleShares_getAdded(self):
+        self.assert_atDay_equal(
             'member', '2015-02-21',
             [
                 ('member', '2015-02-21', '2015-02-21', 3),
@@ -115,8 +123,8 @@ class CurveProvider_Test(unittest.TestCase):
             8
             )
 
-    def test_activeSharesAtDay_otherMembersIgnored(self):
-        self.assert_activeSharesAtDay_equal(
+    def test_atDay_otherMembersIgnored(self):
+        self.assert_atDay_equal(
             'member', '2015-02-21',
             [
                 ('member', '2015-02-21', '2015-02-21', 3),
@@ -125,8 +133,8 @@ class CurveProvider_Test(unittest.TestCase):
             3
             )
 
-    def test_activeSharesAtDay_allMembersCountedIfNoneSelected(self):
-        self.assert_activeSharesAtDay_equal(
+    def test_atDay_allMembersCountedIfNoneSelected(self):
+        self.assert_atDay_equal(
             None, '2015-02-21',
             [
                 ('member', '2015-02-21', '2015-02-21', 3),
@@ -135,8 +143,8 @@ class CurveProvider_Test(unittest.TestCase):
             8
             )
  
-    def test_activeSharesAtDay_expiredActionsNotCounted(self):
-        self.assert_activeSharesAtDay_equal(
+    def test_atDay_expiredActionsNotCounted(self):
+        self.assert_atDay_equal(
             'member', '2015-02-21',
             [
                 ('member', '2015-02-21', '2015-02-21', 3),
@@ -145,8 +153,8 @@ class CurveProvider_Test(unittest.TestCase):
             3
             )
  
-    def test_activeSharesAtDay_unactivatedActions(self):
-        self.assert_activeSharesAtDay_equal(
+    def test_atDay_unactivatedActions(self):
+        self.assert_atDay_equal(
             'member', '2015-02-21',
             [
                 ('member', '2015-02-21', '2015-02-21', 3),
@@ -155,26 +163,26 @@ class CurveProvider_Test(unittest.TestCase):
             3
             )
 
-    def test_activeShares_whenNoShareProvider(self):
-        curves = CurveProvider()
+    def test_hourly_whenNoShareProvider(self):
+        curve = ActiveSharesCurve()
         with self.assertRaises(UnconfiguredDataProvider) as assertion:
-            curves.activeShares('member', isodate('2015-02-21'), isodate('2015-02-21'))
+            curve.hourly('member', isodate('2015-02-21'), isodate('2015-02-21'))
         self.assertEqual(assertion.exception.args[0], "InvestmentProvider")
 
     def assertActiveSharesEqual(self, member, start, end, investments, expectation):
         provider = InvestmentProvider_MockUp(investments)
-        curves = CurveProvider(investments = provider)
-        result = curves.activeShares(member, isodate(start), isodate(end))
+        curve = ActiveSharesCurve(investments = provider)
+        result = curve.hourly(member, isodate(start), isodate(end))
         self.assertEqual(list(result), expectation)
 
-    def test_activeShares_singleDay_noShares(self):
+    def test_hourly_singleDay_noShares(self):
         self.assertActiveSharesEqual(
             'member', '2015-02-21', '2015-02-21',
             [],
             +25*[0]
         )
 
-    def test_activeShares_singleDay_singleShare(self):
+    def test_hourly_singleDay_singleShare(self):
         self.assertActiveSharesEqual(
             'member', '2015-02-21', '2015-02-21',
             [
@@ -183,7 +191,7 @@ class CurveProvider_Test(unittest.TestCase):
             +25*[3]
         )
 
-    def test_activeShares_singleDay_multipleShare(self):
+    def test_hourly_singleDay_multipleShare(self):
         self.assertActiveSharesEqual(
             'member', '2015-02-21', '2015-02-21',
             [
@@ -193,7 +201,7 @@ class CurveProvider_Test(unittest.TestCase):
             +25*[8]
             )
 
-    def test_activeShares_otherMembersIgnored(self):
+    def test_hourly_otherMembersIgnored(self):
         self.assertActiveSharesEqual(
             'member', '2015-02-21', '2015-02-21',
             [
@@ -203,7 +211,7 @@ class CurveProvider_Test(unittest.TestCase):
             +25*[3]
             )
 
-    def test_activeShares_allMembersCountedIfNoneSelected(self):
+    def test_hourly_allMembersCountedIfNoneSelected(self):
         self.assertActiveSharesEqual(
             None, '2015-02-21', '2015-02-21',
             [
@@ -213,7 +221,7 @@ class CurveProvider_Test(unittest.TestCase):
             +25*[8]
             )
  
-    def test_activeShares_expiredActionsNotCounted(self):
+    def test_hourly_expiredActionsNotCounted(self):
         self.assertActiveSharesEqual(
             'member', '2015-02-21', '2015-02-21',
             [
@@ -223,7 +231,7 @@ class CurveProvider_Test(unittest.TestCase):
             +25*[3]
             )
  
-    def test_activeShares_unactivatedActions(self):
+    def test_hourly_unactivatedActions(self):
         self.assertActiveSharesEqual(
             'member', '2015-02-21', '2015-02-21',
             [
@@ -233,7 +241,7 @@ class CurveProvider_Test(unittest.TestCase):
             +25*[3]
             )
 
-    def test_activeShares_twoDays(self):
+    def test_hourly_twoDays(self):
         self.assertActiveSharesEqual(
             'member', '2015-02-21', '2015-02-22',
             [
@@ -243,7 +251,7 @@ class CurveProvider_Test(unittest.TestCase):
             +25*[3]
             )
 
-    def test_activeShares_lastDaysNotActive(self):
+    def test_hourly_lastDaysNotActive(self):
         self.assertActiveSharesEqual(
             'member', '2015-02-21', '2015-02-22',
             [
@@ -253,7 +261,7 @@ class CurveProvider_Test(unittest.TestCase):
             +25*[0]
             )
 
-    def test_activeShares_firstDaysNotActive(self):
+    def test_hourly_firstDaysNotActive(self):
         self.assertActiveSharesEqual(
             'member', '2015-02-21', '2015-02-22',
             [
@@ -263,7 +271,7 @@ class CurveProvider_Test(unittest.TestCase):
             +25*[3]
             )
 
-    def test_activeShares_swappedDatesReturnsEmpty(self):
+    def test_hourly_swappedDatesReturnsEmpty(self):
         self.assertActiveSharesEqual(
             'member', '2016-02-21', '2015-02-22',
             [
@@ -271,7 +279,7 @@ class CurveProvider_Test(unittest.TestCase):
             []
             )
 
-    def test_activeShares_fullCase(self):
+    def test_hourly_fullCase(self):
         self.assertActiveSharesEqual(
             'member', '2015-02-11', '2016-03-11',
             [
