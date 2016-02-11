@@ -78,6 +78,83 @@ class InvestmentProvider_MockUp(object):
 
 class CurveProvider_Test(unittest.TestCase):
 
+    def test_activeSharesAtDay_whenNoShareProvider(self):
+        curves = CurveProvider()
+        with self.assertRaises(UnconfiguredDataProvider) as assertion:
+            curves.activeSharesAtDay('member', isodate('2015-02-21'))
+        self.assertEqual(assertion.exception.args[0], "InvestmentProvider")
+
+    def assert_activeSharesAtDay_equal(self, member, day, investments, expectation):
+        investmentsProvider = InvestmentProvider_MockUp(investments)
+        curves = CurveProvider(investments = investmentsProvider)
+        self.assertEqual(expectation, curves.activeSharesAtDay(member, isodate(day)))
+
+    def test_activeSharesAtDay_noShares(self):
+        self.assert_activeSharesAtDay_equal(
+            'member', '2015-02-21',
+            [],
+            0
+        )
+
+    def test_activeSharesAtDay_singleShare(self):
+        self.assert_activeSharesAtDay_equal(
+            'member', '2015-02-21',
+            [
+                ('member', '2015-02-21', '2015-02-21', 3),
+            ],
+            3
+        )
+
+    def test_activeSharesAtDay_multipleShares_getAdded(self):
+        self.assert_activeSharesAtDay_equal(
+            'member', '2015-02-21',
+            [
+                ('member', '2015-02-21', '2015-02-21', 3),
+                ('member', '2015-02-21', '2015-02-21', 5),
+            ],
+            8
+            )
+
+    def test_activeSharesAtDay_otherMembersIgnored(self):
+        self.assert_activeSharesAtDay_equal(
+            'member', '2015-02-21',
+            [
+                ('member', '2015-02-21', '2015-02-21', 3),
+                ('other', '2015-02-21', '2015-02-21', 5),
+            ],
+            3
+            )
+
+    def test_activeSharesAtDay_allMembersCountedIfNoneSelected(self):
+        self.assert_activeSharesAtDay_equal(
+            None, '2015-02-21',
+            [
+                ('member', '2015-02-21', '2015-02-21', 3),
+                ('other', '2015-02-21', '2015-02-21', 5),
+            ],
+            8
+            )
+ 
+    def test_activeSharesAtDay_expiredActionsNotCounted(self):
+        self.assert_activeSharesAtDay_equal(
+            'member', '2015-02-21',
+            [
+                ('member', '2015-02-21', '2015-02-21', 3),
+                ('member', '2014-02-21', '2015-02-20', 5),
+            ],
+            3
+            )
+ 
+    def test_activeSharesAtDay_unactivatedActions(self):
+        self.assert_activeSharesAtDay_equal(
+            'member', '2015-02-21',
+            [
+                ('member', '2015-02-21', '2015-02-21', 3),
+                ('member', '2015-02-22', '2016-02-20', 5),
+            ],
+            3
+            )
+
     def test_activeShares_whenNoShareProvider(self):
         curves = CurveProvider()
         with self.assertRaises(UnconfiguredDataProvider) as assertion:
