@@ -3,24 +3,23 @@
 """
 TODO:
 - Fares dictionary should be at libfacturacioatr
-- Extend fare selection to all fares
+- Include all fares
 - Use numpy arrays
 - Where to get holidays?
 - Date parameter should be dates not strings
 """
 
-import numpy
+import datetime
 try:
     import libfacturacioatr
 except ImportError:
     libfacturacioatr = None
 
-import datetime
 
 def date(string):
     return datetime.datetime.strptime(string, '%Y-%m-%d').date()
 
-class FarePeriodProvider(object):
+class FarePeriodCurve(object):
     def __init__(self, holidays=[]):
         self.holidays = holidays
 
@@ -47,8 +46,7 @@ class FarePeriodProvider(object):
                 holidays=self.holidays
                 ).matrix
             for month in xrange(startMonth, endMonth+1)], [])
-        allDays = allDays[begin.day-1:]
-        return allDays[:(end-begin).days+1]
+        return allDays[begin.day-1:][:(end-begin).days+1]
 
 
 import unittest
@@ -56,14 +54,14 @@ import unittest
 @unittest.skipIf(libfacturacioatr is None,
     'non-free libfacturacioatr module is not installed' )
 
-class FarePeriodProvider_Test(unittest.TestCase):
+class FarePeriodCurve_Test(unittest.TestCase):
 
-    def assertArrayEqual(self, expected, result):
+    def assertArrayEqual(self, result, expected):
         # TODO: Change this as we turn it into a numpy array
-        return self.assertEqual(expected, result)
+        return self.assertEqual(list(result), expected)
 
     def test_20A_singleMonth(self):
-        p = FarePeriodProvider()
+        p = FarePeriodCurve()
 
         mask = p.mask('2015-12-01', '2015-12-31', '2.0A', 'P1')
 
@@ -72,7 +70,7 @@ class FarePeriodProvider_Test(unittest.TestCase):
             )
 
     def test_30A_P1_singleMonth(self):
-        p = FarePeriodProvider()
+        p = FarePeriodCurve()
 
         mask = p.mask('2015-12-01', '2015-12-31', '3.0A', 'P1')
 
@@ -89,7 +87,7 @@ class FarePeriodProvider_Test(unittest.TestCase):
             )
 
     def test_30A_P3_singleMonth(self):
-        p = FarePeriodProvider()
+        p = FarePeriodCurve()
 
         mask = p.mask('2015-12-01', '2015-12-31', '3.0A', 'P3')
 
@@ -106,7 +104,7 @@ class FarePeriodProvider_Test(unittest.TestCase):
             )
 
     def test_30A_P1_singleMonth_withHolidays(self):
-        p = FarePeriodProvider(holidays=[
+        p = FarePeriodCurve(holidays=[
             date('2015-12-25'),
         ])
 
@@ -125,7 +123,7 @@ class FarePeriodProvider_Test(unittest.TestCase):
             )
 
     def test_30A_P1_startedMonth(self):
-        p = FarePeriodProvider(holidays=[
+        p = FarePeriodCurve(holidays=[
             date('2015-12-25'),
         ])
 
@@ -142,7 +140,7 @@ class FarePeriodProvider_Test(unittest.TestCase):
             )
 
     def test_30A_P1_partialMonth(self):
-        p = FarePeriodProvider(holidays=[
+        p = FarePeriodCurve(holidays=[
             date('2015-12-25'),
         ])
 
@@ -158,7 +156,7 @@ class FarePeriodProvider_Test(unittest.TestCase):
             )
 
     def test_30A_P1_singleDay(self):
-        p = FarePeriodProvider(holidays=[
+        p = FarePeriodCurve(holidays=[
             date('2015-12-25'),
         ])
 
@@ -169,7 +167,7 @@ class FarePeriodProvider_Test(unittest.TestCase):
             )
 
     def test_30A_P1_accrossMonths(self):
-        p = FarePeriodProvider(holidays=[
+        p = FarePeriodCurve(holidays=[
             date('2015-12-25'),
         ])
 
