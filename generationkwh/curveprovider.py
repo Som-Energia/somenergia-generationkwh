@@ -13,28 +13,29 @@ class CurveProvider(object):
     def __init__(self, investments=None):
         self._investmentProvider = investments
 
+    def activeSharesAtDay(self, member, day):
+        if self._investmentProvider is None:
+            raise UnconfiguredDataProvider("InvestmentProvider")
+
+        return sum(
+            investment.shares
+            for investment in self._investmentProvider.shareContracts()
+            if (member is None or investment.member == member)
+            and investment.activationEnd >= day
+            and investment.activationStart <= day
+        )
+
     def activeShares(self, member, start, end):
 
         if end<start:
             return numpy.array([], dtype=int)
 
-        def activeSharesADay(day, member):
-            if self._investmentProvider is None:
-                raise UnconfiguredDataProvider("InvestmentProvider")
-
-            return sum(
-                investment.shares
-                for investment in self._investmentProvider.shareContracts()
-                if (member is None or investment.member == member)
-                and investment.activationEnd >= day
-                and investment.activationStart <= day
-            )
         hoursADay=25
         nDays=(end-start).days+1
         result = numpy.zeros(nDays*hoursADay, dtype=numpy.int)
         for i in xrange(nDays):
             day=start+datetime.timedelta(days=i)
-            result[i*hoursADay:(i+1)*hoursADay] = activeSharesADay(day,member)
+            result[i*hoursADay:(i+1)*hoursADay] = self.activeSharesAtDay(member, day)
         return result
 
     def production(self, member, start, end):
