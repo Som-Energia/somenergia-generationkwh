@@ -8,7 +8,7 @@
   "depends": ['base', 'som_polissa_soci'],
   "init_xml": [],
   "demo_xml": [],
-  "update_xml": [],
+  "update_xml": ["generationkwh_api_data.xml"],
   "active": False,
   "installable": True
 }
