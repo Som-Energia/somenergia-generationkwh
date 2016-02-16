@@ -109,11 +109,11 @@ class ActiveSharesCurve_Test(unittest.TestCase):
             curve.hourly('member', isodate('2015-02-21'), isodate('2015-02-21'))
         self.assertEqual(assertion.exception.args[0], "InvestmentProvider")
 
-    def assertActiveSharesEqual(self, member, start, end, investments, expectation):
+    def assertActiveSharesEqual(self, member, start, end, investments, expected):
         provider = InvestmentProvider_MockUp(investments)
         curve = ActiveSharesCurve(investments = provider)
         result = curve.hourly(member, isodate(start), isodate(end))
-        self.assertEqual(list(result), expectation)
+        self.assertEqual(list(result), expected)
 
     def test_hourly_singleDay_noShares(self):
         self.assertActiveSharesEqual(
