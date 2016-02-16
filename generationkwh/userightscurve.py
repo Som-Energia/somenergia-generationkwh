@@ -23,6 +23,11 @@ class UseRightsCurve(object):
         That error is bigger for the naive approximation, as the
         error in every period change is up to N kWh if you have N shares.
         The eager version limits the error a 1 kWh.
+
+        On the other hand the Naive version simplifies communicating
+        the members the hourly kWh available by providing a single
+        kWh/share curve instead of having different curves for each
+        number of shares.
     """
     def __init__(self, activeShares, rightsPerShare, eager=False):
         self._activeShares = activeShares
