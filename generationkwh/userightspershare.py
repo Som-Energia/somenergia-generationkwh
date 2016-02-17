@@ -2,6 +2,8 @@
 
 # TODO:
 # - total active shares in a day = 0
+# - consider successive remainders
+# - caching values
 
 import numpy
 
@@ -10,13 +12,19 @@ class UserRightsPerShare(object):
         Provides the hourly curve of kWh available for a member
         with a given number of shares.
     """
-    def __init__(self, production, activeShares):
+    def __init__(self, production, activeShares, cache=None):
         self._production = production
         self._activeShares = activeShares
+        self._cache = cache
 
     def get(self, nshares, start, end):
         hoursADay = 25
-        return self._production.get(start, end)/self._activeShares.hourly(None, start, end)*nshares//1000
+        activeShares = self._activeShares.hourly(None, start, end)
+        production = self._production.get(start, end)
+
+        fraction = production*nshares/activeShares
+        fraction = numpy.concatenate( ([0],fraction) )
+        return numpy.diff(fraction.cumsum()//1000)
 
 
 import unittest
@@ -31,6 +39,18 @@ class Curve_MockUp(object):
 
     def hourly(self, *args, **kwd):
         return self._value
+
+class Cache_Mockup(object):
+    def __init__(self, curve, date, remainder):
+        self._curve = curve
+        self._date = date
+        self._remainder = remainder
+
+    def lastRemainder(self, nShares):
+        return self._date, self._remainder
+
+    def get(self, nshares, start, end):
+        return self._curve
 
 
 def isodate(date):
@@ -99,15 +119,20 @@ class UserRightsPerShare_Test(unittest.TestCase):
             expected = 25*[2],
             )
 
-    def _test_get_withRemainder(self):
+    def test_get_withRemainder(self):
         self.assertUserRightsPerShareEquals(
-            production = 25*[500],
-            activeShares = 25*[1],
+            production = 25*[1000],
+            activeShares = 25*[2],
             nShares=1,
             start='2015-01-02',
             end='2015-01-02',
             expected = 12*[0,1]+[0],
             )
+
+
+
+
+
 
 
 
