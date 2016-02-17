@@ -130,7 +130,49 @@ class UserRightsPerShare_Test(unittest.TestCase):
             )
 
 
+    def assertCachedResults(self,
+        cache,
+        cacheDate,
+        cacheRemainder,
+        production,
+        activeShares,
+        nShares,
+        start,
+        end,
+        expected,
+        expectedCache,
+        expectedCacheDate,
+        expectedCacheRemainder,
+        ):
+        cache = Cache_Mockup(cache, cacheDate, cacheRemainder)
 
+        curve = UserRightsPerShare(
+            production = Curve_MockUp(production),
+            activeShares = Curve_MockUp(activeShares),
+            cache = cache,
+            )
+        result = curve.get(
+            nshares=nShares,
+            start=isodate(start),
+            end=isodate(end),
+            )
+        self.assertEqual(list(result), expected)
+
+    def test_cache(self):
+        self.assertCachedResults(
+            cache = [],
+            cacheDate = None,
+            cacheRemainder = 0.0,
+            production = 25*[1000],
+            activeShares = 25*[1],
+            nShares=1,
+            start='2015-01-02',
+            end='2015-01-02',
+            expected = 12*[0,1]+[0],
+            expectedCache = 12*[0,1]+[0],
+            expectedCacheDate = '2015-01-02',
+            expectedCacheRemainder = 0,
+            )
 
 
 
