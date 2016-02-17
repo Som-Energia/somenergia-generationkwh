@@ -26,7 +26,9 @@
 
 ![Module Diagram](GenKWh-Components.png)
 
+## Inside the Use Tracker
 
+![Details of the Usage Tracker](GenKWh-UsageTrackerDetails.png)
 
 
 
