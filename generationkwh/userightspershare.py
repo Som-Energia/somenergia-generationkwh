@@ -17,13 +17,15 @@ class UserRightsPerShare(object):
         self._cache = cache
 
     def get(self, nshares, start, end):
-        activeShares = self._activeShares.hourly(None, start, end)
-        assert activeShares.dtype == 'int64', "ActiveShares base type is not integer"
+        cacheDate, cacheRemainder = self._cache.lastRemainder(nshares) if self._cache else (None, 0)
 
-        production = self._production.get(start, end)
+        productionStart = start if cacheDate is None else max(start, cacheDate+datetime.timedelta(days=1))
+
+        production = self._production.get(productionStart, end)
         assert production.dtype == 'int64', "Production base type is not integer"
 
-        cacheDate, cacheRemainder = self._cache.lastRemainder(nshares) if self._cache else (None, 0)
+        activeShares = self._activeShares.hourly(None, start, end)
+        assert activeShares.dtype == 'int64', "ActiveShares base type is not integer"
 
         with numpy.errstate(divide='ignore'):
             fraction = production*nshares/activeShares
@@ -31,9 +33,11 @@ class UserRightsPerShare(object):
         integral = fraction.cumsum()
 
         result = numpy.diff(integral//1000)
-        if self._cache is not None:
-            self._cache.update(nshares, result, end, integral[-1]%1000)
-        return result
+        if self._cache is None:
+            return result
+
+        self._cache.update(nshares, result, end, integral[-1]%1000)
+        return self._cache.get(nshares, start, end)
 
 
 import unittest
@@ -72,6 +76,39 @@ def isodate(date):
 
 
 class UserRightsPerShare_Test(unittest.TestCase):
+
+    def test_get_floatProductionFailsAssertion(self):
+        production = [3.2]
+        activeShares = [1]
+        curve = UserRightsPerShare(
+            production = Curve_MockUp(production),
+            activeShares = Curve_MockUp(activeShares),
+            )
+        with self.assertRaises(AssertionError) as failure:
+            curve.get(
+                nshares=1,
+                start=isodate('2015-01-02'),
+                end=isodate('2015-01-02'),
+                )
+        self.assertEqual(failure.exception.args[0],
+            "Production base type is not integer" )
+
+    def test_get_floatSharesFailsAssertion(self):
+        production = [3]
+        activeShares = [3.2]
+        curve = UserRightsPerShare(
+            production = Curve_MockUp(production),
+            activeShares = Curve_MockUp(activeShares),
+            )
+        with self.assertRaises(AssertionError) as failure:
+            curve.get(
+                nshares=1,
+                start=isodate('2015-01-02'),
+                end=isodate('2015-01-02'),
+                )
+        self.assertEqual(failure.exception.args[0],
+            "ActiveShares base type is not integer" )
+
 
     def assertUserRightsPerShareEquals(self,
         production,
@@ -169,7 +206,7 @@ class UserRightsPerShare_Test(unittest.TestCase):
         expectedCacheRemainder,
         ):
 
-        cache = Cache_Mockup(numpy.array(cache), cacheDate, cacheRemainder)
+        cache = Cache_Mockup(numpy.array(cache), cacheDate and isodate(cacheDate), cacheRemainder)
 
         curve = UserRightsPerShare(
             production = Curve_MockUp(production),
@@ -235,37 +272,21 @@ class UserRightsPerShare_Test(unittest.TestCase):
             expectedCacheRemainder = 0,
             )
 
-    def test_get_floatProductionFailsAssertion(self):
-        production = [3.2]
-        activeShares = [1]
-        curve = UserRightsPerShare(
-            production = Curve_MockUp(production),
-            activeShares = Curve_MockUp(activeShares),
+    def test_cache_usingCacheData(self):
+        self.assertCachedResults(
+            cache = 25*[8],
+            cacheDate = '2015-01-01',
+            cacheRemainder = 0,
+            production = 25*[1000],
+            activeShares = 25*[1],
+            nShares=1,
+            start='2015-01-01',
+            end='2015-01-02',
+            expected = 25*[8] + 25*[1],
+            expectedCache = 25*[8] + 25*[1],
+            expectedCacheDate = '2015-01-02',
+            expectedCacheRemainder = 0,
             )
-        with self.assertRaises(AssertionError) as failure:
-            curve.get(
-                nshares=1,
-                start=isodate('2015-01-02'),
-                end=isodate('2015-01-02'),
-                )
-        self.assertEqual(failure.exception.args[0],
-            "Production base type is not integer" )
-
-    def test_get_floatSharesFailsAssertion(self):
-        production = [3]
-        activeShares = [3.2]
-        curve = UserRightsPerShare(
-            production = Curve_MockUp(production),
-            activeShares = Curve_MockUp(activeShares),
-            )
-        with self.assertRaises(AssertionError) as failure:
-            curve.get(
-                nshares=1,
-                start=isodate('2015-01-02'),
-                end=isodate('2015-01-02'),
-                )
-        self.assertEqual(failure.exception.args[0],
-            "ActiveShares base type is not integer" )
 
 
 
