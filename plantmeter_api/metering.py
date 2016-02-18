@@ -40,7 +40,7 @@ class GenerationVirtualPlant(osv.osv):
             for plant in vplant.plants if plant.enabled]}))
         
         backend = 'mongodb://{user}:{password}@{hostname}/{dbname}' # TO BE FIXED 
-        return _vplant.get_kwh(start, end, dict(context, **{'backend':backend}))
+        return _vplant.get_kwh(start, end, dict(context, backend=backend}))
 
     _columns = {
         'name': fields.char('Name', size=50),
