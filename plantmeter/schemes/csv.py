@@ -16,14 +16,19 @@ class CSVScheme(BaseScheme):
 
     def get(self, start, end=None):
         def extract(line):
-            items = line.split(':')
-            return {'datetime': items[0], 'ae': items[1]} 
+            items = line.split(';')
+            return {'datetime': datetime.datetime.strptime(items[0], '%Y-%m-%d %H:%M'), 'ae': items[1]} 
 
         with open(self.res, 'rb') as csvfile:
             content = csvfile.readlines()
-            return [extract(line) for date in daterange(start, end) 
-                   for line in content 
-                       if extract(line)['datetime'].startswith(date.strftime('%Y-%m-%d'))]
+            return [[measure
+		   for date in daterange(start, end) 
+	           for measure in (
+			extract(line)
+			for line in content[1:]
+			)
+                   if measure['datetime'].date() == date.date()
+		]]
 
     def disconnect(self):
         pass
