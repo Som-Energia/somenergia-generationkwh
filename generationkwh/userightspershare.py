@@ -16,11 +16,14 @@ class UserRightsPerShare(object):
         self._activeShares = activeShares
         self._cache = cache
 
-    def computeRights(self, previousRemainder, production, nshares, activeShares):
+    def computeRights(self, remainder, production, nshares, activeShares):
+
+        assert production.dtype == 'int64', "Production base type is not integer"
+        assert activeShares.dtype == 'int64', "ActiveShares base type is not integer"
 
         with numpy.errstate(divide='ignore'):
             fraction = production*nshares/activeShares
-        fraction = numpy.concatenate( ([previousRemainder],fraction) )
+        fraction = numpy.concatenate( ([remainder],fraction) )
         integral = fraction.cumsum()
 
         result = numpy.diff(integral//1000)
@@ -34,21 +37,15 @@ class UserRightsPerShare(object):
         productionStart = start if cacheDate is None else max(start, cacheDate+datetime.timedelta(days=1))
 
         production = self._production.get(productionStart, end)
-        assert production.dtype == 'int64', "Production base type is not integer"
-
         activeShares = self._activeShares.hourly(None, start, end)
-        assert activeShares.dtype == 'int64', "ActiveShares base type is not integer"
 
-        with numpy.errstate(divide='ignore'):
-            fraction = production*nshares/activeShares
-        fraction = numpy.concatenate( ([cacheRemainder],fraction) )
-        integral = fraction.cumsum()
+        result, remainder = self.computeRights(
+            cacheRemainder, production, nshares, activeShares)
 
-        result = numpy.diff(integral//1000)
         if self._cache is None:
             return result
 
-        self._cache.update(nshares, result, end, integral[-1]%1000)
+        self._cache.update(nshares, result, end, remainder)
         return self._cache.get(nshares, start, end)
 
 
@@ -100,7 +97,7 @@ class UserRightsPerShare_Test(unittest.TestCase):
 
         curve = UserRightsPerShare()
         result, resultingRemainder = curve.computeRights(
-            remainder,
+            remainder = remainder,
             production=numpy.array(production),
             nshares=nShares,
             activeShares = numpy.array(activeShares),
@@ -176,33 +173,25 @@ class UserRightsPerShare_Test(unittest.TestCase):
             )
 
     def test_get_floatProductionFailsAssertion(self):
-        production = [3.2]
-        activeShares = [1]
-        curve = UserRightsPerShare(
-            production = Curve_MockUp(production),
-            activeShares = Curve_MockUp(activeShares),
-            )
+        curve = UserRightsPerShare()
         with self.assertRaises(AssertionError) as failure:
-            curve.get(
+            curve.computeRights(
+                remainder = 0,
                 nshares=1,
-                start=isodate('2015-01-02'),
-                end=isodate('2015-01-02'),
+                production = numpy.array([3.2]),
+                activeShares  = numpy.array([3]),
                 )
         self.assertEqual(failure.exception.args[0],
             "Production base type is not integer" )
 
     def test_get_floatSharesFailsAssertion(self):
-        production = [3]
-        activeShares = [3.2]
-        curve = UserRightsPerShare(
-            production = Curve_MockUp(production),
-            activeShares = Curve_MockUp(activeShares),
-            )
+        curve = UserRightsPerShare()
         with self.assertRaises(AssertionError) as failure:
-            curve.get(
-                nshares=1,
-                start=isodate('2015-01-02'),
-                end=isodate('2015-01-02'),
+            curve.computeRights(
+                remainder = 0,
+                nshares = 1,
+                production = numpy.array([3]),
+                activeShares  = numpy.array([3.2]),
                 )
         self.assertEqual(failure.exception.args[0],
             "ActiveShares base type is not integer" )
