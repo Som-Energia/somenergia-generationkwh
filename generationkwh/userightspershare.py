@@ -16,7 +16,7 @@ class UserRightsPerShare(object):
         self._activeShares = activeShares
         self._cache = cache
 
-    def computeRights(self, remainder, production, nshares, activeShares):
+    def computeRights(self, production, activeShares, nshares=1, remainder=0):
 
         assert production.dtype == 'int64', "Production base type is not integer"
         assert activeShares.dtype == 'int64', "ActiveShares base type is not integer"
@@ -40,7 +40,11 @@ class UserRightsPerShare(object):
         activeShares = self._activeShares.hourly(None, start, end)
 
         result, remainder = self.computeRights(
-            cacheRemainder, production, nshares, activeShares)
+            production = production,
+            activeShares = activeShares,
+            nshares = nshares,
+            remainder = cacheRemainder,
+            )
 
         if self._cache is None:
             return result
@@ -97,10 +101,10 @@ class UserRightsPerShare_Test(unittest.TestCase):
 
         curve = UserRightsPerShare()
         result, resultingRemainder = curve.computeRights(
-            remainder = remainder,
             production=numpy.array(production),
-            nshares=nShares,
             activeShares = numpy.array(activeShares),
+            nshares=nShares,
+            remainder = remainder,
             )
         self.assertEqual(list(result), expected)
         self.assertEqual(resultingRemainder, expectedRemainder)
@@ -176,25 +180,25 @@ class UserRightsPerShare_Test(unittest.TestCase):
         curve = UserRightsPerShare()
         with self.assertRaises(AssertionError) as failure:
             curve.computeRights(
-                remainder = 0,
-                nshares=1,
                 production = numpy.array([3.2]),
                 activeShares  = numpy.array([3]),
+                nshares=1,
+                remainder = 0,
                 )
         self.assertEqual(failure.exception.args[0],
-            "Production base type is not integer" )
+            "Production base type is not integer")
 
     def test_get_floatSharesFailsAssertion(self):
         curve = UserRightsPerShare()
         with self.assertRaises(AssertionError) as failure:
             curve.computeRights(
-                remainder = 0,
-                nshares = 1,
                 production = numpy.array([3]),
                 activeShares  = numpy.array([3.2]),
+                nshares = 1,
+                remainder = 0,
                 )
         self.assertEqual(failure.exception.args[0],
-            "ActiveShares base type is not integer" )
+            "ActiveShares base type is not integer")
 
 
     def assertUserRightsPerShareEquals(self,
