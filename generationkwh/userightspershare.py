@@ -11,7 +11,7 @@ class UserRightsPerShare(object):
         Provides the hourly curve of kWh available for a member
         with a given number of shares.
     """
-    def __init__(self, production, activeShares, cache=None):
+    def __init__(self, production=None, activeShares=None, cache=None):
         self._production = production
         self._activeShares = activeShares
         self._cache = cache
@@ -98,10 +98,7 @@ class UserRightsPerShare_Test(unittest.TestCase):
         remainder = 0,
         ):
 
-        curve = UserRightsPerShare(
-            production = Curve_MockUp(production),
-            activeShares = Curve_MockUp(activeShares),
-            )
+        curve = UserRightsPerShare()
         result, resultingRemainder = curve.computeRights(
             remainder,
             production=numpy.array(production),
