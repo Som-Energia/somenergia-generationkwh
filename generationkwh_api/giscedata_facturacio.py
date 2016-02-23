@@ -30,7 +30,7 @@ class GiscedataFacturacioFactura(osv.osv):
 
             inv_data = self.read(cursor, uid, inv_id, inv_fields, context)
 
-            contract_id = inv_data['polissa_id']
+            contract_id = inv_data['polissa_id'][0]
             start_date = inv_data['data_inici']
             end_date = inv_data['data_final']
 
