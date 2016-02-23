@@ -13,34 +13,115 @@ class GiscedataFacturacioFactura(osv.osv):
     _name = 'giscedata.facturacio.factura'
     _inherit = 'giscedata.facturacio.factura'
 
-    def apply_gkwh(self, cursor, uid, ids, context=None):
-        """Apliquem l'operació del gkwh.
+    def get_gkwh_period(self, cursor, uid, product_id, context=None):
+        """" Get's linked Generation kWh period
+            product_id: product.product id
         """
+        res = None
+        per_obj = self.pool.get('giscedata.polissa.tarifa.periodes')
+
+        if isinstance(product_id, (tuple, list)):
+            product_id = product_id[0]
+
+        per_ids = per_obj.search(
+            cursor, uid, [('product_id', '=', product_id)], context=context
+        )
+
+        if per_ids:
+            res = per_obj.read(
+                cursor, uid, per_ids[0], ['product_gkwh_id'], context=context
+            )['product_gkwh_id'][0]
+
+        return res
+
+    def apply_gkwh(self, cursor, uid, ids, context=None):
+        """Apply gkwh transform"""
         if context is None:
             context = {}
 
         if not isinstance(ids, (tuple, list)):
             ids = [ids]
 
+        inv_obj = self.pool.get('giscedata.facturacio.factura')
+        invlines_obj = self.pool.get('giscedata.facturacio.factura.linia')
+        pricelist_obj = self.pool.get('product.pricelist')
+
         gkwh_dealer_obj = self.pool.get('generationkwh.dealer')
-        inv_fields = ['polissa_id', 'data_inici', 'data_final']
+        inv_fields = ['polissa_id', 'data_inici', 'data_final', 'llista_preu',
+                      'tarifa_acces_id', 'linies_energia']
+
+        line_fields = ['data_desde', 'data_fins', 'product_id', 'quantity',
+                       'multi', 'tipus', 'name', 'price_unit_multi', 'tipus',
+                       'uos_id', 'account_id', 'invoice_line_tax_id',
+                       'uom_multi_id'
+                       ]
 
         for inv_id in ids:
             # Test if contract is gkwh enabled
-
             inv_data = self.read(cursor, uid, inv_id, inv_fields, context)
 
             contract_id = inv_data['polissa_id'][0]
             start_date = inv_data['data_inici']
             end_date = inv_data['data_final']
+            pricelist = inv_data['llista_preu'][0]
 
             is_gkwh = gkwh_dealer_obj.is_active(
-                cursor, uid, contract_id, start_date, end_date, context=None
+                cursor, uid, contract_id, start_date, end_date, context=context
             )
 
             if not is_gkwh:
                 return
 
+            # Get energy periods
+            for line_id in inv_data['linies_energia']:
+                line_vals = False
+                line_vals = invlines_obj.read(
+                    cursor, uid, line_id, line_fields, context=context
+                )
+
+                # GkWh invoice line creation
+                product_gkwh_id = self.get_gkwh_period(
+                    cursor, uid, line_vals['product_id'][0], context=context
+                )
+
+                vals = line_vals.copy()
+
+                if 'id' in vals:
+                    del vals['id']
+
+                invoice_line_tax_id = [
+                    (6, 0, line_vals['invoice_line_tax_id'])
+                ]
+
+                price_unit = pricelist_obj.price_get(
+                    cursor, uid, [pricelist], product_gkwh_id, 1,
+                    context={'date': end_date}
+                )[pricelist]
+
+                gkwh_quantity = 10.0
+
+                # substract from original line
+                new_quantity = line_vals['quantity'] - gkwh_quantity
+                invlines_obj.write(
+                    cursor, uid, line_id, {'quantity': new_quantity}
+                )
+
+                # create gkwh line
+                vals.update({
+                    'factura_id': inv_id,
+                    'data_desde': line_vals['data_desde'],
+                    'data_fins': line_vals['data_fins'],
+                    'product_id': product_gkwh_id,
+                    'quantity': gkwh_quantity,
+                    'price_unit_multi': price_unit,
+                    'account_id': vals['account_id'][0],
+                    'invoice_line_tax_id': invoice_line_tax_id,
+                    'name': '{0} GkWh'.format(line_vals['name']),
+                    'uos_id': line_vals['uos_id'][0],
+                })
+                invlines_obj.create(cursor, uid, vals)
+
+            inv_obj.button_reset_taxes(cursor, uid, [inv_id], context=context)
 
 GiscedataFacturacioFactura()
 
