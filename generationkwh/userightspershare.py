@@ -18,8 +18,10 @@ class UserRightsPerShare(object):
 
     def computeRights(self, production, activeShares, nshares=1, remainder=0):
 
-        assert production.dtype == 'int64', "Production base type is not integer"
-        assert activeShares.dtype == 'int64', "ActiveShares base type is not integer"
+        assert production.dtype == 'int64', (
+            "Production base type is not integer")
+        assert activeShares.dtype == 'int64', (
+            "ActiveShares base type is not integer")
 
         with numpy.errstate(divide='ignore'):
             fraction = production*nshares/activeShares
@@ -32,9 +34,11 @@ class UserRightsPerShare(object):
         return result, remainder
 
     def get(self, nshares, start, end):
-        cacheDate, cacheRemainder = self._cache.lastRemainder(nshares) if self._cache else (None, 0)
+        cacheDate, cacheRemainder = (
+            self._cache.lastRemainder(nshares) if self._cache else (None, 0))
 
-        productionStart = start if cacheDate is None else max(start, cacheDate+datetime.timedelta(days=1))
+        productionStart = start if cacheDate is None else max(
+            start, cacheDate+datetime.timedelta(days=1))
 
         production = self._production.get(productionStart, end)
         activeShares = self._activeShares.hourly(None, start, end)
@@ -297,7 +301,11 @@ class UserRightsPerShare_Test(unittest.TestCase):
         expectedCacheRemainder,
         ):
 
-        cache = Cache_Mockup(numpy.array(cache), cacheDate and isodate(cacheDate), cacheRemainder)
+        cache = Cache_Mockup(
+            numpy.array(cache),
+            cacheDate and isodate(cacheDate),
+            cacheRemainder,
+            )
 
         curve = UserRightsPerShare(
             production = Curve_MockUp(production),
