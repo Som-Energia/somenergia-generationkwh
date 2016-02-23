@@ -7,16 +7,43 @@ from osv import osv, fields
 from generationkwh.dealer import Dealer
 
 
+class GenerationkWhInvestments(osv.osv):
+
+    _name = 'generationkwh.investments'
+
+    _columns = dict(
+        member_id=fields.many2one(
+            'res.partner',
+            'gkwh_investment',
+            required=True,
+            help="Member who purchased the shares",
+            ),
+        nshares=fields.integer(
+            required=True,
+            help="Number of shares purchased",
+            ),
+        purchase_date=fields.date(
+            "Purchase Date",
+            required=True,
+            help="When the shares where bought",
+            ),
+        activation_date=fields.date(
+            "Activation Date",
+            help="When the shares start to provide electricity use rigths",
+            ),
+        deactivation_date=fields.date(
+            "Deactivation Date",
+            help="When the shares stop to provide electricity use rights",
+            ),
+        )
+
+GenerationkWhInvestments()
+
+
 class GenerationkWhDealer(osv.osv):
 
     _name = 'generationkwh.dealer'
     _auto = False
-
-
-    def _createDealer(self, cursor, uid):
-        # TODO: Feed the dealer with data sources
-        return Dealer()
-
 
     def is_active(self, cursor, uid,
                   contract_id, start_date, end_date,
@@ -60,8 +87,11 @@ class GenerationkWhDealer(osv.osv):
         return dealer.refund_kwh(
             contract_id, start_date, end_date, fare, period, kwh)
 
+    def _createDealer(self, cursor, uid):
+        # TODO: Feed the dealer with data sources
+        return Dealer()
+
+
 GenerationkWhDealer()
-
-
 
 # vim: ts=4 sw=4 et
