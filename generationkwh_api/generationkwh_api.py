@@ -39,6 +39,27 @@ class GenerationkWhInvestments(osv.osv):
 
 GenerationkWhInvestments()
 
+class InvestmentProvider():
+    def __init__(self, erp, cursor, uid, context=None):
+        self.erp = erp
+        self.cursor = cursor
+        self.uid = uid
+        self.context = context
+
+    def shareContracts(self, member, day):
+
+        investments = self.erp.read(
+            self.cursor, self.uid,
+            'generationkwh.investments',
+            [
+                ('activation_date','<=',day),
+                ('deactivation_date','>=',day),
+                ('member','==',member),
+            ])
+
+
+
+
 
 class GenerationkWhDealer(osv.osv):
 
