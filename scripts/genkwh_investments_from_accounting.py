@@ -2,8 +2,6 @@
 description = """
 Generates investments from the accounting logs.
 """
-waitingMonths = 12
-returningYears = 25
 
 import erppeek
 import datetime
@@ -11,20 +9,81 @@ from dateutil.relativedelta import relativedelta
 import dbconfig
 from yamlns import namespace as ns
 
-c = erppeek.Client(**dbconfig.erppeek)
+def parseArgumments():
+    import argparse
+    parser = argparse.ArgumentParser()
+
+    subparsers = parser.add_subparsers(
+        title="Subcommands",
+        dest='subcommand',
+        )
+    create = subparsers.add_parser('create',
+        help="create investments objects from accounting information",
+        )
+    activate = subparsers.add_parser('activate',
+        help="activate the investments",
+        )
+    clear = subparsers.add_parser('clear',
+        help="clear investments objects",
+        )
+    extend = subparsers.add_parser('extend',
+        help="extend the expiration date of a set of investments",
+        )
+"""
+    for sub in activate,create: 
+        sub.add_argument(
+            '--force',
+            action='store_true',
+            help="do it even if they where already computed",
+            )
+"""
+    for sub in activate,create,clear: 
+        sub.add_argument(
+            '--start',
+            type=isodate,
+            metavar='ISODATE',
+            help="first purchase date to be considered",
+            )
+        sub.add_argument(
+            '--stop',
+            type=isodate,
+            metavar='ISODATE',
+            help="last purchase date to be considered",
+            )
+        sub.add_argument(
+            '--wait',
+            '-w',
+            dest='waitingMonths',
+            type=int,
+            metavar='DAYS',
+            help="number of days from the purchase date until they provide usufruct"
+            )
+        sub.add_argument(
+            '--expires',
+            '-x',
+            dest='expirationYears',
+            type=int,
+            metavar='YEARS',
+            help="number of years the shares will provide usufruct"
+            )
+    return parser.parse_args(namespace=ns())
+
+def isodatetime(string):
+    return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
 
 def isodate(string):
-    return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S").date()
+    return datetime.datetime.strptime(string, "%Y-%m-%d").date()
 
 def clear():
     allinvestments = c.search('generationkwh.investments')
     c.unlink('generationkwh.investments', allinvestments)
 
-def generate():
-    paymentlines = c.read( 'payment.line',
-        [('name','like','GKWH')],
-#        order='partner_id',
-        )
+def create(start=None, stop=None, waitingMonths=None, expirationYears=None, **_):
+    criteria = [('name','like','GKWH')]
+    if stop: criteria.append(('create_date', '<=', str(stop)))
+    if start: criteria.append(('create_date', '>=', str(start)))
+
+    paymentlines = c.read( 'payment.line', criteria)
 
     for payment in paymentlines:
         payment = ns(payment)
@@ -34,21 +93,34 @@ def generate():
             purchase_date=payment.create_date,
             activation_date=(
                 None if waitingMonths is None else
-                str(isodate(payment.create_date)
+                str(isodatetime(payment.create_date)
                     +relativedelta(months=waitingMonths))
                 ),
             deactivation_date=(
                 None if waitingMonths is None else
-                None if returningYears is None else
-                str(isodate(payment.create_date)
+                None if expirationYears is None else
+                str(isodatetime(payment.create_date)
                     +relativedelta(
-                        years=returningYears,
+                        years=expirationYears,
                         months=waitingMonths,
                         )
-                    ),
+                    )
                 ),
             ))
-            
-clear()
-generate()
+
+c = erppeek.Client(**dbconfig.erppeek)
+
+def main():
+    args = parseArgumments()
+    print args.dump()
+    subcommand = args.subcommand
+    del args.subcommand
+    clear()
+    globals()[subcommand](**args)
+#    create()
+
+if __name__ == '__main__':
+    main()
+
+
 
