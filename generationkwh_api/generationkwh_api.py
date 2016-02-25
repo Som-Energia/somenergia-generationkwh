@@ -37,6 +37,15 @@ class GenerationkWhInvestments(osv.osv):
             ),
         )
 
+    def boo(self, cursor, uid, context=None):
+        return "Hola"
+
+    def getList(self, cursor, uid, member=None, start=None, end=None,
+            context=None):
+        provider = InvestmentProvider(self, cursor, uid, context)
+        return provider.shareContracts(member, start, end)
+        
+
 GenerationkWhInvestments()
 
 class InvestmentProvider():
@@ -46,16 +55,30 @@ class InvestmentProvider():
         self.uid = uid
         self.context = context
 
-    def shareContracts(self, member, day):
+    def shareContracts(self, member=None, start=None, end=None):
+        def isodate(date):
+            import datetime
+            return datetime.datetime.strptime(date, '%Y-%m-%d').date()
 
-        investments = self.erp.read(
+        filters = []
+        if member: filters.append( ('member','==',member) )
+        if start: filters.append( ('deactivation_date','>=',start) )
+        if end: filters.append( ('activation_date','>=',end) )
+
+        contracts = self.erp.search(
             self.cursor, self.uid,
-            'generationkwh.investments',
-            [
-                ('activation_date','<=',day),
-                ('deactivation_date','>=',day),
-                ('member','==',member),
-            ])
+            'generationkwh.investments', filters)
+
+        return [
+            (
+                c['member'],
+                isodate(c['activation_date']),
+                isodate(c['deactivation_date']),
+                c['nshares'],
+            )
+            for c in contracts
+        ]
+ 
 
 
 
