@@ -17,6 +17,9 @@ def parseArgumments():
         title="Subcommands",
         dest='subcommand',
         )
+    list = subparsers.add_parser('list',
+        help="list investments objects",
+        )
     create = subparsers.add_parser('create',
         help="create investments objects from accounting information",
         )
@@ -29,7 +32,7 @@ def parseArgumments():
     extend = subparsers.add_parser('extend',
         help="extend the expiration date of a set of investments",
         )
-"""
+    """
     for sub in activate,create: 
         sub.add_argument(
             '--force',
@@ -74,9 +77,12 @@ def isodatetime(string):
 def isodate(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d").date()
 
-def clear():
+def clear(**args):
     allinvestments = c.search('generationkwh.investments')
     c.unlink('generationkwh.investments', allinvestments)
+
+def list():
+    print c.GenerationkwhInvestments.boo()
 
 def create(start=None, stop=None, waitingMonths=None, expirationYears=None, **_):
     criteria = [('name','like','GKWH')]
