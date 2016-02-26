@@ -37,11 +37,9 @@ class GenerationkWhInvestments(osv.osv):
             ),
         )
 
-    def boo(self, cursor, uid, context=None):
-        return "Hola"
-
-    def getList(self, cursor, uid, member=None, start=None, end=None,
+    def get_list(self, cursor, uid, member=None, start=None, end=None,
             context=None):
+        print member, start, end
         provider = InvestmentProvider(self, cursor, uid, context)
         return provider.shareContracts(member, start, end)
         
@@ -58,22 +56,31 @@ class InvestmentProvider():
     def shareContracts(self, member=None, start=None, end=None):
         def isodate(date):
             import datetime
-            return datetime.datetime.strptime(date, '%Y-%m-%d').date()
+            return date and datetime.datetime.strptime(date, '%Y-%m-%d').date()
+        def isodatetime(date):
+            import datetime
+            return date and datetime.datetime.strptime(date, '%Y-%m-%d')
 
         filters = []
-        if member: filters.append( ('member','==',member) )
-        if start: filters.append( ('deactivation_date','>=',start) )
-        if end: filters.append( ('activation_date','>=',end) )
+        if member: filters.append( ('member_id','=',member) )
+        if start: filters += [
+            ('deactivation_date','>=',start),
+            ('deactivation_date','!=',None),
+            ]
+        if end: filters += [
+            ('activation_date','>=',end),
+            ('activation_date','!=',None),
+            ]
 
-        contracts = self.erp.search(
-            self.cursor, self.uid,
-            'generationkwh.investments', filters)
+        Investments = self.erp.pool.get('generationkwh.investments')
+        ids = Investments.search(self.cursor, self.uid, filters)
+        contracts = Investments.read(self.cursor, self.uid, ids)
 
         return [
             (
-                c['member'],
-                isodate(c['activation_date']),
-                isodate(c['deactivation_date']),
+                c['member_id'][0],
+                isodatetime(c['activation_date']),
+                isodatetime(c['deactivation_date']),
                 c['nshares'],
             )
             for c in contracts

@@ -40,7 +40,14 @@ def parseArgumments():
             help="do it even if they where already computed",
             )
 """
-    for sub in activate,create,clear: 
+    for sub in list,: 
+        sub.add_argument(
+            '--member',
+            type=int,
+            metavar='MEMBERID',
+            help="filter by member",
+            )
+    for sub in activate,create,clear,list: 
         sub.add_argument(
             '--start',
             type=isodate,
@@ -53,6 +60,7 @@ def parseArgumments():
             metavar='ISODATE',
             help="last purchase date to be considered",
             )
+    for sub in activate,create: 
         sub.add_argument(
             '--wait',
             '-w',
@@ -81,10 +89,14 @@ def clear(**args):
     allinvestments = c.search('generationkwh.investments')
     c.unlink('generationkwh.investments', allinvestments)
 
-def list():
-    print c.GenerationkwhInvestments.boo()
+def list(member=None, start=None, stop=None):
+    print u'\n'.join(( u"\t".join([unicode(c) for c in line])
+        for line in c.GenerationkwhInvestments.get_list(
+            member=member, start=start, end=stop)
+        ))
 
 def create(start=None, stop=None, waitingMonths=None, expirationYears=None, **_):
+    clear()
     criteria = [('name','like','GKWH')]
     if stop: criteria.append(('create_date', '<=', str(stop)))
     if start: criteria.append(('create_date', '>=', str(start)))
@@ -121,9 +133,7 @@ def main():
     print args.dump()
     subcommand = args.subcommand
     del args.subcommand
-    clear()
     globals()[subcommand](**args)
-#    create()
 
 if __name__ == '__main__':
     main()
