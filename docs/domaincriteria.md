@@ -5,8 +5,10 @@ This file holds a log of statements that capture conclusions on discussions with
 
 People involved in the discussion are [marked within brackets].
 
-**Embrace the change: These are not immutable laws. Just a log to know who you are to talk if you consider them wrong.**
-
+**Embrace the change:**
+These are not immutable laws at all.
+If you think some criteria are no longer true,
+this is a log providing way to track who you need to talk to.
 
 Invoices
 --------
@@ -18,8 +20,8 @@ Production and shares
 ---------------------
 
 - Production must be divided by the total shares of each activated plant. [Nuria-David]
-	- Not by the total of active owned shares. [Nuria-David]
-	- Not all the production has to be dealt if not all shares have been bought [Nuria-David]
+	- Not dividing by the total of active owned shares. [Nuria-David]
+	- Collorary 1: when not all shares are bought, remaining production goes to the cooperative. [Nuria-David]
 - Plants are activated for generation at an arbitrary date. [Nuria-David]
 - There is no deactivation date for plants (by now, to be reconsidered later). [Nuria-David]
 - Activation date for owned shares is fixed by adding a given number of days (delay, _carencia_) to the purchase date [Nuria-David]
@@ -34,6 +36,7 @@ Doubts
 - DOUBT: [David] Do shares expire a number of years after the purchase date or after the activation date?
 - DOUBT: [David] Can a plant be activated before metering is available? Consequences?
 - DOUBT: [David] Can a plant be activated after metering is available? Consequences?
+- DOUBT: [David] Defining the time span of the plant shares. When they get extinct?
 
 
 
