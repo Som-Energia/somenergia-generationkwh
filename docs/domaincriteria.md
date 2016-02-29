@@ -33,16 +33,10 @@ Production and shares
 Doubts
 ------
 
-- DOUBT: [David] Do shares expire a number of years after the purchase date or after the activation date?
-- DOUBT: [David] Can a plant be activated before metering is available? Consequences?
-- DOUBT: [David] Can a plant be activated after metering is available? Consequences?
-- DOUBT: [David] Defining the time span of the plant shares. When they get extinct?
-
-
-
-
-
-
-
+- [David] Do shares expire a number of years after the purchase date or after the activation date?
+- [David] Can a plant be activated before metering is available? Consequences?
+- [David] Can a plant be activated after metering is available? Consequences?
+- [David] Defining the time span of the plant shares. When they get extinct?
+- [David] When is a contract considered to be activated for GenkWh? If active during the invoicing period?
 
 
