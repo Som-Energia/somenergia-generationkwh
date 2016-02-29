@@ -14,7 +14,7 @@ Invoices
 --------
 
 - Generation kWh Line Product Name format 'Pn Gkwh' [Marc-Agusti]
-- Even when a contract hasn't got GkWh shares, the invoice line is created, with quantity 0 [Marc-Agusti]
+- A contract with Generation kWh activated, must show 'Pn GkWh' invoice lines even if assigned production is 0 kWh [Marc-Agusti]
 
 Production and shares
 ---------------------
