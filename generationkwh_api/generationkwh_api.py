@@ -37,7 +37,7 @@ class GenerationkWhInvestments(osv.osv):
             ),
         )
 
-    def get_list(self, cursor, uid,
+    def active_investments(self, cursor, uid,
             member, start, end,
             context=None):
         print member, start, end

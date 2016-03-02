@@ -17,8 +17,8 @@ def parseArgumments():
         title="Subcommands",
         dest='subcommand',
         )
-    list = subparsers.add_parser('list',
-        help="list investments objects",
+    listactive = subparsers.add_parser('listactive',
+        help="list active investments objects",
         )
     create = subparsers.add_parser('create',
         help="create investments objects from accounting information",
@@ -32,22 +32,20 @@ def parseArgumments():
     extend = subparsers.add_parser('extend',
         help="extend the expiration date of a set of investments",
         )
-    """
     for sub in activate,create: 
         sub.add_argument(
             '--force',
             action='store_true',
             help="do it even if they where already computed",
             )
-"""
-    for sub in list,: 
+    for sub in listactive,: 
         sub.add_argument(
             '--member',
             type=int,
             metavar='MEMBERID',
             help="filter by member",
             )
-    for sub in activate,create,clear,list: 
+    for sub in activate,create,clear,listactive: 
         sub.add_argument(
             '--start',
             type=isodate,
@@ -64,10 +62,11 @@ def parseArgumments():
         sub.add_argument(
             '--wait',
             '-w',
-            dest='waitingMonths',
+            dest='waitingDays',
             type=int,
             metavar='DAYS',
-            help="number of days from the purchase date until they provide usufruct"
+            help="number of days from the purchase date until "
+                "they provide usufruct",
             )
         sub.add_argument(
             '--expires',
@@ -89,15 +88,18 @@ def clear(**args):
     allinvestments = c.search('generationkwh.investments')
     c.unlink('generationkwh.investments', allinvestments)
 
-def list(member=None, start=None, stop=None):
+def listactive(member=None, start=None, stop=None):
     print u'\n'.join(( u"\t".join([unicode(c) for c in line])
-        for line in c.GenerationkwhInvestments.get_list(
+        for line in c.GenerationkwhInvestments.active_investments(
             member, start and str(start), stop and str(stop))
         ))
 
-def create(start=None, stop=None, waitingMonths=None,
-        expirationYears=None, **_):
-    clear()
+def create(start=None, stop=None,
+        waitingDays=None,
+        expirationYears=None,
+        force=False,
+        **_):
+    if force: clear()
     criteria = [('name','like','GKWH')]
     if stop: criteria.append(('create_date', '<=', str(stop)))
     if start: criteria.append(('create_date', '>=', str(start)))
@@ -111,21 +113,56 @@ def create(start=None, stop=None, waitingMonths=None,
             nshares=-payment.amount_currency//100,
             purchase_date=payment.create_date,
             activation_date=(
-                None if waitingMonths is None else
+                None if waitingDays is None else
                 str(isodatetime(payment.create_date)
-                    +relativedelta(months=waitingMonths))
+                    +relativedelta(days=waitingDays))
                 ),
             deactivation_date=(
-                None if waitingMonths is None else
+                None if waitingDays is None else
                 None if expirationYears is None else
                 str(isodatetime(payment.create_date)
                     +relativedelta(
                         years=expirationYears,
-                        months=waitingMonths,
+                        days=waitingDays,
                         )
                     )
                 ),
             ))
+
+def activate(
+        waitingDays,
+        start=None, stop=None,
+        expirationYears=None,
+        force=False,
+        **_):
+    criteria = []
+    if not force: criteria.append(('activation_date', '=', False))
+    if stop: criteria.append(('purchase_date', '<=', str(stop)))
+    if start: criteria.append(('purchase_date', '>=', str(start)))
+
+    paymentlines = c.read( 'generationkwh.investments', criteria)
+
+    for payment in paymentlines:
+        payment = ns(payment)
+        updateDict = dict(
+            activation_date=(
+                str(isodate(payment.purchase_date)
+                    +relativedelta(days=waitingDays))
+                ),
+            )
+        if expirationYears:
+            updateDict.update(
+                deactivation_date=(
+                    str(isodate(payment.purchase_date)
+                        +relativedelta(
+                            years=expirationYears,
+                            days=waitingDays,
+                            )
+                        )
+                    ),
+                )
+        print payment.dump(), ns(updateDict).dump()
+        c.write('generationkwh.investments', payment.id, updateDict)
 
 c = erppeek.Client(**dbconfig.erppeek)
 
