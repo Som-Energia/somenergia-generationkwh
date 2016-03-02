@@ -166,7 +166,6 @@ def activate(
                         )
                     ),
                 )
-        print payment.dump(), ns(updateDict).dump()
         c.write('generationkwh.investments', payment.id, updateDict)
 
 import unittest
