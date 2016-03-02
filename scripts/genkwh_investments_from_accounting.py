@@ -17,6 +17,9 @@ def parseArgumments():
         title="Subcommands",
         dest='subcommand',
         )
+    runtest = subparsers.add_parser('runtest',
+        help="runs tests",
+        )
     listactive = subparsers.add_parser('listactive',
         help="list active investments objects",
         )
@@ -88,11 +91,13 @@ def clear(**args):
     allinvestments = c.search('generationkwh.investments')
     c.unlink('generationkwh.investments', allinvestments)
 
-def listactive(member=None, start=None, stop=None):
-    print u'\n'.join(( u"\t".join([unicode(c) for c in line])
+def listactive(member=None, start=None, stop=None, csv=False):
+    csvdata = u''.join(( u"\t".join([unicode(c) for c in line])+'\n'
         for line in c.GenerationkwhInvestments.active_investments(
             member, start and str(start), stop and str(stop))
         ))
+    if csv: return csvdata
+    print csvdata
 
 def create(start=None, stop=None,
         waitingDays=None,
@@ -163,6 +168,90 @@ def activate(
                 )
         print payment.dump(), ns(updateDict).dump()
         c.write('generationkwh.investments', payment.id, updateDict)
+
+import unittest
+import sys
+class MeTest(unittest.TestCase):
+    def setUp(self):
+        self.maxDiff=None
+
+    def test_clean(self):
+        clear()
+        data = listactive(csv=True)
+        self.assertEqual(data,'')
+
+    def test_create_toEarly(self):
+        clear()
+        create(stop="2015-06-18")
+        data = listactive(csv=True)
+        self.assertMultiLineEqual(data,
+            "550\tFalse\tFalse\t3\n"
+            "42\tFalse\tFalse\t3\n"
+            )
+    def test_create_firsts(self):
+        clear()
+        create(stop="2015-06-18")
+        data = listactive(csv=True)
+        self.assertMultiLineEqual(data,
+            "550\tFalse\tFalse\t3\n"
+            "42\tFalse\tFalse\t3\n"
+            )
+    def test_create_more(self):
+        clear()
+        create(stop="2015-06-19")
+        data = listactive(csv=True)
+        self.assertMultiLineEqual(data,
+            "550\tFalse\tFalse\t3\n"
+            "42\tFalse\tFalse\t3\n"
+            "1377\tFalse\tFalse\t20\n"
+            "7238\tFalse\tFalse\t15\n"
+            "4063\tFalse\tFalse\t70\n"
+            "2\tFalse\tFalse\t15\n"
+            "2609\tFalse\tFalse\t12\n"
+            )
+    def test_create_justSecondDay(self):
+        clear()
+        create(start='2015-06-19', stop="2015-06-19")
+        data = listactive(csv=True)
+        self.assertMultiLineEqual(data,
+            "1377\tFalse\tFalse\t20\n"
+            "7238\tFalse\tFalse\t15\n"
+            "4063\tFalse\tFalse\t70\n"
+            "2\tFalse\tFalse\t15\n"
+            "2609\tFalse\tFalse\t12\n"
+            )
+
+    def test_create_waitTwoDays(self):
+        clear()
+        create(stop="2015-06-19", waitingDays=2)
+        data = listactive(csv=True)
+        self.assertMultiLineEqual(data,
+            "550\t20150620T00:00:00\tFalse\t3\n"
+            "42\t20150620T00:00:00\tFalse\t3\n"
+            "1377\t20150621T00:00:00\tFalse\t20\n"
+            "7238\t20150621T00:00:00\tFalse\t15\n"
+            "4063\t20150621T00:00:00\tFalse\t70\n"
+            "2\t20150621T00:00:00\tFalse\t15\n"
+            "2609\t20150621T00:00:00\tFalse\t12\n"
+            )
+
+    def test_create_expireOneYear(self):
+        clear()
+        create(stop="2015-06-19", waitingDays=2, expirationYears=1)
+        data = listactive(csv=True)
+        self.assertMultiLineEqual(data,
+            "550\t20150620T00:00:00\t20160620T00:00:00\t3\n"
+            "42\t20150620T00:00:00\t20160620T00:00:00\t3\n"
+            "1377\t20150621T00:00:00\t20160621T00:00:00\t20\n"
+            "7238\t20150621T00:00:00\t20160621T00:00:00\t15\n"
+            "4063\t20150621T00:00:00\t20160621T00:00:00\t70\n"
+            "2\t20150621T00:00:00\t20160621T00:00:00\t15\n"
+            "2609\t20150621T00:00:00\t20160621T00:00:00\t12\n"
+            )
+
+def runtest():
+    sys.argv.remove("runtest")
+    unittest.main()
 
 c = erppeek.Client(**dbconfig.erppeek)
 
