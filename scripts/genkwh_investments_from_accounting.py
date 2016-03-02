@@ -92,10 +92,11 @@ def clear(**args):
 def list(member=None, start=None, stop=None):
     print u'\n'.join(( u"\t".join([unicode(c) for c in line])
         for line in c.GenerationkwhInvestments.get_list(
-            member=member, start=start, end=stop)
+            member, start and str(start), stop and str(stop))
         ))
 
-def create(start=None, stop=None, waitingMonths=None, expirationYears=None, **_):
+def create(start=None, stop=None, waitingMonths=None,
+        expirationYears=None, **_):
     clear()
     criteria = [('name','like','GKWH')]
     if stop: criteria.append(('create_date', '<=', str(stop)))

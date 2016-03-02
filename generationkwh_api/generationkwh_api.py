@@ -37,7 +37,8 @@ class GenerationkWhInvestments(osv.osv):
             ),
         )
 
-    def get_list(self, cursor, uid, member=None, start=None, end=None,
+    def get_list(self, cursor, uid,
+            member, start, end,
             context=None):
         print member, start, end
         provider = InvestmentProvider(self, cursor, uid, context)
@@ -63,13 +64,14 @@ class InvestmentProvider():
 
         filters = []
         if member: filters.append( ('member_id','=',member) )
-        if start: filters += [
-            ('deactivation_date','>=',start),
-            ('deactivation_date','!=',None),
-            ]
         if end: filters += [
-            ('activation_date','>=',end),
-            ('activation_date','!=',None),
+            ('activation_date','<=',end),
+            ('activation_date','!=',False),
+            ]
+        if start: filters += [
+            '|',
+            ('deactivation_date','>=',start),
+            ('deactivation_date','=',False),
             ]
 
         Investments = self.erp.pool.get('generationkwh.investments')
