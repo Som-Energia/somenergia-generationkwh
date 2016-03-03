@@ -106,7 +106,8 @@ def create(start=None, stop=None,
         **_):
     if force: clear()
 
-    c.GenerationkwhInvestments.create_investments_from_accounting(
+#    c.GenerationkwhInvestments.create_investments_from_accounting(
+    c.GenerationkwhInvestments.create_investments_from_paymentlines(
         start, stop, waitingDays, expirationYears)
 
 def activate(

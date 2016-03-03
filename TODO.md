@@ -9,8 +9,11 @@
 - Mock-up: ContractChooser: Given a contract choose member to take rights from
 - Dealer dependency injection for ContractChooser
 - Dealer dependency injection for UsageTracker
-- Inquire: Which model access rights are right
-- Inquire: Proper table to take the investments from
+- Ask: Which model access rights are right
+- [DONE] Ask: Proper table to take the investments from
+- Investments: Put investment creation from accounting under test
+- Investments: Janitoring: mode lines without partner
+- Investments: Janitoring: mode lines without dates
 
 
 

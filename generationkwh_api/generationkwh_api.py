@@ -6,14 +6,13 @@ from osv import osv, fields
 
 from generationkwh.dealer import Dealer
 
+import datetime
+from dateutil.relativedelta import relativedelta
+
 def isodatetime(string):
-    import datetime
     return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
 def isodate(date):
-    import datetime
     return date and datetime.datetime.strptime(date, '%Y-%m-%d')
-
-from dateutil.relativedelta import relativedelta
 
 
 class GenerationkWhInvestments(osv.osv):
@@ -55,6 +54,50 @@ class GenerationkWhInvestments(osv.osv):
 
 
     def create_investments_from_accounting(self, cursor, uid,
+            start, stop, waitingDays, expirationYears,
+            context=None):
+
+        tail = [0,False,False, context]
+
+        Account = self.pool.get('account.account')
+        MoveLine = self.pool.get('account.move.line')
+        Partner = self.pool.get('res.partner')
+
+        accountIds = Account.search(cursor, uid, [('code','ilike','163500%')], *tail)
+        print 'accountIds',len(accountIds)
+
+        criteria = [('account_id','in',accountIds)]
+        if stop: criteria.append(('date_created', '<=', str(stop)))
+        if start: criteria.append(('date_created', '>=', str(start)))
+
+        movelinesids = MoveLine.search(cursor, uid, criteria, 0,False,'date asc', context)
+        print 'movelinesids', movelinesids
+        for line in MoveLine.browse(cursor, uid, movelinesids, context):
+            partnerid = line.partner_id.id
+            if not partnerid:
+                # Handle cases with no partner_id
+                membercode = int(line.account_id.code[4:])
+                partnerid = Partner.search(cursor, uid, [('ref', 'ilike', '%'+str(membercode).zfill(6))])[0]
+            activation = None
+            deactivation = None
+            if waitingDays is not None:
+                activation = str(
+                    isodate(line.date_created)
+                    +relativedelta(days=waitingDays))
+
+                if expirationYears is not None:
+                    deactivation = str(
+                        isodatetime(activation)
+                        +relativedelta(years=expirationYears))
+            self.create(cursor, uid, dict(
+                member_id=partnerid,
+                nshares=(line.credit-line.debit)//100,
+                purchase_date=line.date_created,
+                activation_date=activation,
+                deactivation_date=deactivation,
+                ))
+ 
+    def create_investments_from_paymentlines(self, cursor, uid,
             start, stop, waitingDays, expirationYears,
             context=None):
 
