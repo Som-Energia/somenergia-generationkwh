@@ -105,34 +105,9 @@ def create(start=None, stop=None,
         force=False,
         **_):
     if force: clear()
-    criteria = [('name','like','GKWH')]
-    if stop: criteria.append(('create_date', '<=', str(stop)))
-    if start: criteria.append(('create_date', '>=', str(start)))
 
-    paymentlines = c.read( 'payment.line', criteria)
-
-    for payment in paymentlines:
-        payment = ns(payment)
-        c.create('generationkwh.investments', dict(
-            member_id=payment.partner_id[0],
-            nshares=-payment.amount_currency//100,
-            purchase_date=payment.create_date,
-            activation_date=(
-                None if waitingDays is None else
-                str(isodatetime(payment.create_date)
-                    +relativedelta(days=waitingDays))
-                ),
-            deactivation_date=(
-                None if waitingDays is None else
-                None if expirationYears is None else
-                str(isodatetime(payment.create_date)
-                    +relativedelta(
-                        years=expirationYears,
-                        days=waitingDays,
-                        )
-                    )
-                ),
-            ))
+    c.GenerationkwhInvestments.create_investments_from_accounting(
+        start, stop, waitingDays, expirationYears)
 
 def activate(
         waitingDays,

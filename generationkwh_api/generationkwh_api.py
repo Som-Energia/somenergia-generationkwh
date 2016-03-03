@@ -6,6 +6,15 @@ from osv import osv, fields
 
 from generationkwh.dealer import Dealer
 
+def isodatetime(string):
+    import datetime
+    return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
+def isodate(date):
+    import datetime
+    return date and datetime.datetime.strptime(date, '%Y-%m-%d')
+
+from dateutil.relativedelta import relativedelta
+
 
 class GenerationkWhInvestments(osv.osv):
 
@@ -40,8 +49,41 @@ class GenerationkWhInvestments(osv.osv):
     def active_investments(self, cursor, uid,
             member, start, end,
             context=None):
+
         provider = InvestmentProvider(self, cursor, uid, context)
         return provider.shareContracts(member, start, end)
+
+
+    def create_investments_from_accounting(self, cursor, uid,
+            start, stop, waitingDays, expirationYears,
+            context=None):
+
+        criteria = [('name','like','GKWH')]
+        if stop: criteria.append(('create_date', '<=', str(stop)))
+        if start: criteria.append(('create_date', '>=', str(start)))
+
+        PaymentLine = self.pool.get('payment.line')
+        paymentlineids = PaymentLine.search(cursor, uid, criteria, 0,0,False, context)
+        for payment in PaymentLine.browse(cursor, uid, paymentlineids, context):
+            activation = None
+            deactivation = None
+            if waitingDays is not None:
+                activation = str(
+                    isodatetime(payment.create_date)
+                    +relativedelta(days=waitingDays))
+
+                if expirationYears is not None:
+                    deactivation = str(
+                        isodatetime(activation)
+                        +relativedelta(years=expirationYears))
+
+            self.create(cursor, uid, dict(
+                member_id=payment.partner_id.id,
+                nshares=-payment.amount_currency//100,
+                purchase_date=payment.create_date,
+                activation_date=activation,
+                deactivation_date=deactivation,
+                ))
  
 
 GenerationkWhInvestments()
@@ -55,13 +97,6 @@ class InvestmentProvider():
         self.context = context
 
     def shareContracts(self, member=None, start=None, end=None):
-        def isodate(date):
-            import datetime
-            return date and datetime.datetime.strptime(date, '%Y-%m-%d').date()
-        def isodatetime(date):
-            import datetime
-            return date and datetime.datetime.strptime(date, '%Y-%m-%d')
-
         filters = []
         if member: filters.append( ('member_id','=',member) )
         if end: filters += [
@@ -81,8 +116,8 @@ class InvestmentProvider():
         return [
             (
                 c['member_id'][0],
-                isodatetime(c['activation_date']),
-                isodatetime(c['deactivation_date']),
+                isodate(c['activation_date']),
+                isodate(c['deactivation_date']),
                 c['nshares'],
             )
             for c in contracts
