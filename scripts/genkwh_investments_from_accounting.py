@@ -145,20 +145,20 @@ def activate(
     if stop: criteria.append(('purchase_date', '<=', str(stop)))
     if start: criteria.append(('purchase_date', '>=', str(start)))
 
-    paymentlines = c.read( 'generationkwh.investments', criteria)
+    investments = c.read( 'generationkwh.investments', criteria)
 
-    for payment in paymentlines:
-        payment = ns(payment)
+    for investment in investments:
+        investment = ns(investment)
         updateDict = dict(
             activation_date=(
-                str(isodate(payment.purchase_date)
+                str(isodate(investment.purchase_date)
                     +relativedelta(days=waitingDays))
                 ),
             )
         if expirationYears:
             updateDict.update(
                 deactivation_date=(
-                    str(isodate(payment.purchase_date)
+                    str(isodate(investment.purchase_date)
                         +relativedelta(
                             years=expirationYears,
                             days=waitingDays,
@@ -166,7 +166,7 @@ def activate(
                         )
                     ),
                 )
-        c.write('generationkwh.investments', payment.id, updateDict)
+        c.write('generationkwh.investments', investment.id, updateDict)
 
 import unittest
 import sys

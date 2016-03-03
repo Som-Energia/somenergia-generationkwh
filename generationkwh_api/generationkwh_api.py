@@ -40,12 +40,12 @@ class GenerationkWhInvestments(osv.osv):
     def active_investments(self, cursor, uid,
             member, start, end,
             context=None):
-        print member, start, end
         provider = InvestmentProvider(self, cursor, uid, context)
         return provider.shareContracts(member, start, end)
-        
+ 
 
 GenerationkWhInvestments()
+
 
 class InvestmentProvider():
     def __init__(self, erp, cursor, uid, context=None):
@@ -87,10 +87,6 @@ class InvestmentProvider():
             )
             for c in contracts
         ]
- 
-
-
-
 
 
 class GenerationkWhDealer(osv.osv):
