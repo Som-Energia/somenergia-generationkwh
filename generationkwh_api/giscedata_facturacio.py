@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 from osv import osv
+from tools.translate import _
 import netsvc
 from datetime import datetime
 
@@ -20,6 +21,22 @@ class GiscedataFacturacioFactura(osv.osv):
         res = None
         per_obj = self.pool.get('giscedata.polissa.tarifa.periodes')
 
+        per_id = self.get_fare_period(cursor, uid, product_id, context=None)
+
+        if per_id:
+            res = per_obj.read(
+                cursor, uid, per_id, ['product_gkwh_id'], context=context
+            )['product_gkwh_id'][0]
+
+        return res
+
+    def get_fare_period(self, cursor, uid, product_id, context=None):
+        """" Get's fare period from line product
+            product_id: product.product id
+        """
+        res = None
+        per_obj = self.pool.get('giscedata.polissa.tarifa.periodes')
+
         if isinstance(product_id, (tuple, list)):
             product_id = product_id[0]
 
@@ -28,9 +45,7 @@ class GiscedataFacturacioFactura(osv.osv):
         )
 
         if per_ids:
-            res = per_obj.read(
-                cursor, uid, per_ids[0], ['product_gkwh_id'], context=context
-            )['product_gkwh_id'][0]
+            return per_ids[0]
 
         return res
 
@@ -45,6 +60,7 @@ class GiscedataFacturacioFactura(osv.osv):
         inv_obj = self.pool.get('giscedata.facturacio.factura')
         invlines_obj = self.pool.get('giscedata.facturacio.factura.linia')
         pricelist_obj = self.pool.get('product.pricelist')
+        partner_obj = self.pool.get('res.partner')
 
         gkwh_dealer_obj = self.pool.get('generationkwh.dealer')
         inv_fields = ['polissa_id', 'data_inici', 'data_final', 'llista_preu',
@@ -78,10 +94,11 @@ class GiscedataFacturacioFactura(osv.osv):
                 line_vals = invlines_obj.read(
                     cursor, uid, line_id, line_fields, context=context
                 )
+                line_product_id = line_vals['product_id'][0]
 
                 # GkWh invoice line creation
                 product_gkwh_id = self.get_gkwh_period(
-                    cursor, uid, line_vals['product_id'][0], context=context
+                    cursor, uid, line_product_id, context=context
                 )
 
                 vals = line_vals.copy()
@@ -98,28 +115,54 @@ class GiscedataFacturacioFactura(osv.osv):
                     context={'date': end_date}
                 )[pricelist]
 
-                gkwh_quantity = 10.0
+                # Get available gkwh rights
+                # returns a list of rights x member
+                fare = inv_data['tarifa_acces_id'][0]
+                period = self.get_fare_period(
+                    cursor, uid, line_product_id, context=context
+                )
+                line_quantity = line_vals['quantity']
 
-                # substract from original line
-                new_quantity = line_vals['quantity'] - gkwh_quantity
-                invlines_obj.write(
-                    cursor, uid, line_id, {'quantity': new_quantity}
+                gkwh_quantity_dict = gkwh_dealer_obj.use_kwh(
+                    cursor, uid, contract_id, start_date, end_date, fare,
+                    period, line_quantity
                 )
 
-                # create gkwh line
                 vals.update({
                     'factura_id': inv_id,
                     'data_desde': line_vals['data_desde'],
                     'data_fins': line_vals['data_fins'],
                     'product_id': product_gkwh_id,
-                    'quantity': gkwh_quantity,
                     'price_unit_multi': price_unit,
                     'account_id': vals['account_id'][0],
                     'invoice_line_tax_id': invoice_line_tax_id,
-                    'name': '{0} GkWh'.format(line_vals['name']),
                     'uos_id': line_vals['uos_id'][0],
                 })
-                invlines_obj.create(cursor, uid, vals)
+                # original line quantity counter
+                new_quantity = line_quantity
+                for gkwh_line in gkwh_quantity_dict:
+                    gkwh_quantity = gkwh_line['kwh']
+                    gwkh_owner_id = gkwh_line['member_id']
+
+                    gwkh_owner_name = partner_obj.read(
+                        cursor, uid, gwkh_owner_id, ['name'], context=context
+                    )['name']
+
+                    # substract from original line quantity
+                    new_quantity -= gkwh_quantity
+
+                    invlines_obj.write(
+                        cursor, uid, line_id, {'quantity': new_quantity}
+                    )
+
+                    # create gkwh line
+                    vals.update({
+                        'quantity': gkwh_quantity,
+                        'name': _(u'{0} GkWh de "{1}"').format(
+                            line_vals['name'], gwkh_owner_name
+                        ),
+                    })
+                    invlines_obj.create(cursor, uid, vals, context)
 
             inv_obj.button_reset_taxes(cursor, uid, [inv_id], context=context)
 

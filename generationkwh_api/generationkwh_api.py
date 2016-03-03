@@ -44,7 +44,7 @@ class GenerationkWhDealer(osv.osv):
 
     def refund_kwh(self, cursor, uid,
                    contract_id, start_date, end_date, fare, period, kwh,
-                   context=None):
+                   partner_id, context=None):
         """Refunds the indicated kwh, marking them as available again, for the
            contract, date interval, fare and period and returns the ones
            efectively used.
