@@ -9,6 +9,18 @@ import numpy
 import datetime
 from .backends import urlparse
 
+"""
+- More than an meassure
+- Summer daylight
+- Priority for newer meassuers the same hour
+- Check mandatory fields
+- remove urlparse dependency on backends
+- disconnect, context handlers...
+- notice gaps
+- last meassure
+- first meassure
+"""
+
 class MongoTimeCurve(object):
     """Consolidates curve data in a mongo database"""
 
@@ -29,9 +41,9 @@ class MongoTimeCurve(object):
             datetime = {
                 '$gte': start,
                 '$lte': stop+datetime.timedelta(days=1)
-            },
+            }
         )
-  
+
         points = [x for x in self.collection.find(filters, [field,'datetime'])]
         if not points : return data
         point = ns(points[0])
