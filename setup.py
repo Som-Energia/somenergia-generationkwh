@@ -17,6 +17,7 @@ setup(
 	scripts=[
 		],
 	install_requires=[
+        'xlrd',
 	],
 	include_package_data = True,
 	test_suite = 'plantmeter',
