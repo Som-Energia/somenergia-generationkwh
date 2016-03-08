@@ -83,7 +83,7 @@ class Measurement(object):
 import unittest
 from datetime import datetime
 from plantmeter.resource import *
-#@unittest.skip("be patient!!")
+@unittest.skip("be patient!!")
 class Resource_Test(unittest.TestCase):
     def test_get(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -108,7 +108,7 @@ class Resource_Test(unittest.TestCase):
                 )
 
       
-    def _test_update(self):
+    def test_update(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         m1 = Meter('meter1','meter1 description',True,uri=uri)
         p1 = Plant('plant1','plant1 description',True)
@@ -116,8 +116,8 @@ class Resource_Test(unittest.TestCase):
         vp1 = VirtualPlant('vplant1','vplant1 description',True)
         vp1.plants.append(p1)
         context = {'backend': 'mongodb://localhost/somenergia'}
-        m1.update_kwh(date(2015,9,4),date(2015,9,5), context)
-        #m1.update_kwh(datetime(2015,9,4,0,0,0),datetime(2015,9,5,0,0,0), context)
+        #m1.update_kwh(date(2015,9,4),date(2015,9,5), context)
+        m1.update_kwh(datetime(2015,9,4,0,0,0),datetime(2015,9,5,0,0,0), context)
         self.assertEqual(
             list(vp1.get_kwh(
                 datetime(2015,9,4,0,0,0),
@@ -131,6 +131,7 @@ class Resource_Test(unittest.TestCase):
                 )
 
 from pymongo import Connection
+@unittest.skip("be patient!!")
 class Meter_Test(unittest.TestCase):
     def setUp(self):
         c = Connection()
@@ -178,5 +179,7 @@ class Meter_Test(unittest.TestCase):
             5,  3,  1,  0,  0,  0,  0,  5,  4,  8, 17, 34, 12, 12,  5,  3,  1, 
             0,  0,  0,  0]
             )
+
+unittest.TestCase.__str__ = unittest.TestCase.id
 
 # vim: et ts=4 sw=4
