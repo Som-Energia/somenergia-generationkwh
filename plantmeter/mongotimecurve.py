@@ -23,9 +23,16 @@ class MongoTimeCurve(object):
 
     def get(self, start, stop, filter, field):
         ndays = (stop-start).days+1
-        data = numpy.array(ndays*25*[0])
+        data = numpy.zeros(ndays*25, numpy.int)
+        filters = dict(
+            name = filter,
+            datetime = {
+                '$gte': start,
+                '$lte': stop+datetime.timedelta(days=1)
+            },
+        )
   
-        points = [x for x in self.collection.find({}, [field,'datetime'])]
+        points = [x for x in self.collection.find(filters, [field,'datetime'])]
         if not points : return data
         point = ns(points[0])
         timeindex = (point.datetime.date()-start.date()).days*25+  point.datetime.hour
@@ -134,11 +141,24 @@ class MongoTimeCurve_Test(unittest.TestCase):
             str(+22*[0]+[10,0,0])
             )
 
+    def test_get_withOutsideData(self):
+        mtc = MongoTimeCurve(self.dburi, self.collection)
+        mtc.fillPoint(ns(
+            datetime=isodatetime('2015-01-02 23:00:00'),
+            name='miplanta',
+            ae=10,
+            ))
 
-            
+        curve = mtc.get(
+            start=isodate('2015-01-01'),
+            stop=isodate('2015-01-01'),
+            filter='miplanta',
+            field='ae',
+            )
+        self.assertEqual(
+            list(curve),
+            +25*[0])
 
-        
-        
 
 
 
