@@ -7,36 +7,55 @@ from yamlns import namespace as ns
 import json
 import numpy
 import datetime
+from .backends import urlparse
 
 class MongoTimeCurve(object):
     """Consolidates curve data in a mongo database"""
 
     def __init__(self, uri, collection):
         ""
-        self.data=numpy.array([0]*25)
+        self.connection = Connection()
+        self.config = urlparse(uri)
+        self.collectionName = collection
+        self.databasename = self.config['db'] 
+        self.db = self.connection[self.databasename]
+        self.collection = self.db[collection]
 
     def get(self, start, stop, filter, field):
-        return self.data
+        ndays = (stop-start).days+1
+        data = numpy.array(ndays*25*[0])
+  
+        points = [x for x in self.collection.find({}, [field])]
+        if not points : return data
+        data[-2]=points[0].get(field)
+        return data
 
     def fillPoint(self, data):
-        self.data[-2]=10
+        counter = self.db['counters'].find_and_modify(
+            {'_id': self.collectionName},
+            {'$inc': {'counter': 1}}
+        )
+        data.update({'create_at': datetime.datetime.now()})
+        return self.collection.insert(data)
         
 
 def isodatetime(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
 
 def isodate(string):
-    return datetime.datetime.strptime(string, "%Y-%m-%d").date()
+    return datetime.datetime.strptime(string, "%Y-%m-%d")
 
 class MongoTimeCurve_Test(unittest.TestCase):
 
     def setUp(self):
-        c = Connection()
         self.databasename = 'generationkwh_test'
+        self.collection = 'generation'
+        self.dburi = 'mongodb://localhost/{}'.format(self.databasename)
+
+        c = Connection()
         c.drop_database(self.databasename)
         self.db = c[self.databasename]
-        self.collection = self.db['generation']
-        self.dburi = 'mongodb://localhost/{}'.format(self.databasename)
+        counters = self.db['counters']
 
 
     def tearDown(self):
@@ -73,6 +92,26 @@ class MongoTimeCurve_Test(unittest.TestCase):
         self.assertEqual(
             list(curve),
             [0]*23+[10,0])
+
+    def test_get_twoDays(self):
+        mtc = MongoTimeCurve(self.dburi, self.collection)
+        mtc.fillPoint(ns(
+            datetime=isodatetime('2015-01-01 23:00:00'),
+            name='miplanta',
+            ae=10,
+            ))
+
+        curve = mtc.get(
+            start=isodate('2014-12-31'),
+            stop=isodate('2015-01-01'),
+            filter='miplanta',
+            field='ae',
+            )
+        self.assertEqual(
+            list(curve),
+            +25*[0]
+            +23*[0]+[10,0]
+            )
 
 
             
