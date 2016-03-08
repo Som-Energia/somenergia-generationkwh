@@ -178,3 +178,5 @@ class Meter_Test(unittest.TestCase):
             5,  3,  1,  0,  0,  0,  0,  5,  4,  8, 17, 34, 12, 12,  5,  3,  1, 
             0,  0,  0,  0]
             )
+
+# vim: et ts=4 sw=4
