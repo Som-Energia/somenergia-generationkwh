@@ -6,6 +6,13 @@ from plantmeter.backends import get_backend
 from plantmeter.schemes import get_scheme
 from plantmeter.models.plant import * 
 
+"""
+TODOs
+- Ordre
+- Duplicats
+- Gaps
+- Padding
+"""
 
 def local_file(filename):
     return os.path.join(os.path.abspath(os.path.dirname(__file__)), filename)
@@ -145,7 +152,7 @@ class Meter_Test(unittest.TestCase):
                 datetime(2015,9,5,0,0,0),
                 self.context)),
             25*[0]
-                )
+            )
 
     def test_get_afterUpdate(self):
         m = Meter('meter1','meter1 description',True,uri=self.uri)
@@ -157,6 +164,7 @@ class Meter_Test(unittest.TestCase):
                 self.context)),
             [0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 5, 4, 8, 17, 34, 12, 12, 5, 3, 1, 0, 0, 0, 0]
             )
+
     def _test_get(self):
         m = Meter('meter1','meter1 description',True,uri=self.uri)
         self.assertEqual(
@@ -164,9 +172,9 @@ class Meter_Test(unittest.TestCase):
                 datetime(2015,9,4,0,0,0),
                 datetime(2015,9,5,0,0,0),
                 self.context)),
-                [ 6,  3,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  3,  5, 
-                12, 12, 34, 17,  8,  4,  5,  6,  3,  0,  0,  0,  0,  0,  0,  0,  0,
-                0,  0,  0,  0,  0,  0,  0,  0,  3,  6,  5,  4,  8, 17, 34, 12, 12,
-                5,  3,  1,  0,  0,  0,  0,  5,  4,  8, 17, 34, 12, 12,  5,  3,  1, 
-                0,  0,  0,  0]
-                )
+            [ 6,  3,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  3,  5, 
+            12, 12, 34, 17,  8,  4,  5,  6,  3,  0,  0,  0,  0,  0,  0,  0,  0,
+            0,  0,  0,  0,  0,  0,  0,  0,  3,  6,  5,  4,  8, 17, 34, 12, 12,
+            5,  3,  1,  0,  0,  0,  0,  5,  4,  8, 17, 34, 12, 12,  5,  3,  1, 
+            0,  0,  0,  0]
+            )
