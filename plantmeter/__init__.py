@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import os
 
-from osconf import config_from_environment
+#from osconf import config_from_environment
 
 try:
     VERSION = __import__('pkg_resources') \
