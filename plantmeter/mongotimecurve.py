@@ -361,20 +361,21 @@ class MongoTimeCurve_Test(unittest.TestCase):
         lastdate = mtc.lastDate('miplanta')
         self.assertEqual(lastdate,isodate('2015-01-02'))
 
-    def test_firstDate_withSeveralPoints_takesFirst(self):
+    def setupPoints(self, points):
         mtc = MongoTimeCurve(self.dburi, self.collection)
-
-        mtc.fillPoint(
-            datetime=isodatetime('2015-01-01 23:00:00'),
-            name='miplanta',
-            ae=30,
+        for datetime, plant, value in points:
+            mtc.fillPoint(
+                datetime=isodatetime(datetime),
+                name=plant,
+                ae=value,
             )
+        return mtc
 
-        mtc.fillPoint(
-            datetime=isodatetime('2015-01-02 23:00:00'),
-            name='miplanta',
-            ae=30,
-            )
+    def test_firstDate_withSeveralPoints_takesFirst(self):
+        mtc = self.setupPoints([
+            ('2015-01-01 23:00:00', 'miplanta', 30),
+            ('2015-01-02 23:00:00', 'miplanta', 30),
+            ])
 
         lastdate = mtc.firstDate('miplanta')
         self.assertEqual(lastdate,isodate('2015-01-01'))
