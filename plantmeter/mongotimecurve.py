@@ -57,7 +57,7 @@ class MongoTimeCurve(object):
             data[timeindex]=point.get(field)
         return data
 
-    def fillPoint(self, data):
+    def fillPoint(self, **data):
 
         for requiredField in ('name', 'datetime'):
             if requiredField not in data:
@@ -138,7 +138,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
     def test_get_withSingleData(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
-        mtc.fillPoint(ns(
+        mtc.fillPoint(**ns(
             datetime=isodatetime('2015-01-01 23:00:00'),
             name='miplanta',
             ae=10,
@@ -156,7 +156,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
     def test_get_twoDays(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
-        mtc.fillPoint(ns(
+        mtc.fillPoint(**ns(
             datetime=isodatetime('2015-01-01 23:00:00'),
             name='miplanta',
             ae=10,
@@ -176,7 +176,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
     def test_get_differentTime(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
-        mtc.fillPoint(ns(
+        mtc.fillPoint(**ns(
             datetime=isodatetime('2015-01-01 22:00:00'),
             name='miplanta',
             ae=10,
@@ -195,7 +195,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
     def test_get_withOutsideData(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
-        mtc.fillPoint(ns(
+        mtc.fillPoint(**ns(
             datetime=isodatetime('2015-01-02 23:00:00'),
             name='miplanta',
             ae=10,
@@ -213,12 +213,12 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
     def test_get_withTwoPoints(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
-        mtc.fillPoint(ns(
+        mtc.fillPoint(**ns(
             datetime=isodatetime('2015-01-01 23:00:00'),
             name='miplanta',
             ae=10,
             ))
-        mtc.fillPoint(ns(
+        mtc.fillPoint(**ns(
             datetime=isodatetime('2015-01-01 1:00:00'),
             name='miplanta',
             ae=10,
@@ -236,7 +236,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
     def test_get_differentNameIgnored(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
-        mtc.fillPoint(ns(
+        mtc.fillPoint(**ns(
             datetime=isodatetime('2015-01-01 23:00:00'),
             name='otraplanta',
             ae=10,
@@ -255,13 +255,13 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
     def test_get_prioritizesNewest(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
-        mtc.fillPoint(ns(
+        mtc.fillPoint(**ns(
             datetime=isodatetime('2015-01-01 23:00:00'),
             name='miplanta',
             ae=10,
             ))
 
-        mtc.fillPoint(ns(
+        mtc.fillPoint(**ns(
             datetime=isodatetime('2015-01-01 23:00:00'),
             name='miplanta',
             ae=30,
@@ -279,7 +279,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
     def test_get_summerPointsPadsLeft(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
-        mtc.fillPoint(ns(
+        mtc.fillPoint(**ns(
             datetime=isodatetime('2015-08-01 23:00:00'),
             name='miplanta',
             ae=10,
@@ -298,7 +298,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
     def test_fillPoint_complaintsMissingDatetime(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
         with self.assertRaises(Exception) as ass:
-            mtc.fillPoint(ns(
+            mtc.fillPoint(**ns(
                 name='miplanta',
                 ae=10,
                 ))
@@ -308,7 +308,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
     def test_fillPoint_complaintsMissingName(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
         with self.assertRaises(Exception) as ass:
-            mtc.fillPoint(ns(
+            mtc.fillPoint(**ns(
                 datetime=isodatetime('2015-08-01 23:00:00'),
                 ae=10,
                 ))
@@ -324,7 +324,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
     def test_lastDate_withOnePoint_takesIt(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
 
-        mtc.fillPoint(ns(
+        mtc.fillPoint(**ns(
             datetime=isodatetime('2015-01-01 23:00:00'),
             name='miplanta',
             ae=30,
@@ -336,7 +336,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
     def test_lastDate_withForeignPoint_ignored(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
 
-        mtc.fillPoint(ns(
+        mtc.fillPoint(**ns(
             datetime=isodatetime('2015-01-01 23:00:00'),
             name='otraplanta',
             ae=30,
@@ -348,13 +348,13 @@ class MongoTimeCurve_Test(unittest.TestCase):
     def test_lastDate_withSeveralPoints_takesLast(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
 
-        mtc.fillPoint(ns(
+        mtc.fillPoint(**ns(
             datetime=isodatetime('2015-01-01 23:00:00'),
             name='miplanta',
             ae=30,
             ))
 
-        mtc.fillPoint(ns(
+        mtc.fillPoint(**ns(
             datetime=isodatetime('2015-01-02 23:00:00'),
             name='miplanta',
             ae=30,
@@ -366,13 +366,13 @@ class MongoTimeCurve_Test(unittest.TestCase):
     def test_firstDate_withSeveralPoints_takesFirst(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
 
-        mtc.fillPoint(ns(
+        mtc.fillPoint(**ns(
             datetime=isodatetime('2015-01-01 23:00:00'),
             name='miplanta',
             ae=30,
             ))
 
-        mtc.fillPoint(ns(
+        mtc.fillPoint(**ns(
             datetime=isodatetime('2015-01-02 23:00:00'),
             name='miplanta',
             ae=30,
