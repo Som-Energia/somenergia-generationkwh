@@ -71,15 +71,16 @@ class MongoTimeCurve(object):
         return self.collection.insert(data)
 
     def lastDate(self, name):
-        points = list(
-            self.collection
+        for point in (self.collection
                 .find(dict(name=name))
                 .sort('datetime', pymongo.DESCENDING)
-            )
-        if not points: return None
-        return datetime.datetime.combine(
-            ns(points[0]).datetime.date(),
-            datetime.time(0,0,0))
+                .limit(1)
+                ):
+            return datetime.datetime.combine(
+                ns(point).datetime.date(),
+                datetime.time(0,0,0))
+
+        return None
 
 
 def isodatetime(string):
