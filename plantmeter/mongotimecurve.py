@@ -314,49 +314,33 @@ class MongoTimeCurve_Test(unittest.TestCase):
             "Missing 'name'")
 
     def test_lastDate_whenNoPoint_returnsNone(self):
-        mtc = MongoTimeCurve(self.dburi, self.collection)
+        mtc = self.setupPoints([
+            ])
 
         lastdate = mtc.lastDate('miplanta')
         self.assertEqual(lastdate,None)
 
     def test_lastDate_withOnePoint_takesIt(self):
-        mtc = MongoTimeCurve(self.dburi, self.collection)
-
-        mtc.fillPoint(
-            datetime=isodatetime('2015-01-01 23:00:00'),
-            name='miplanta',
-            ae=30,
-            )
+        mtc = self.setupPoints([
+            ('2015-01-01 23:00:00', 'miplanta', 30),
+            ])
 
         lastdate = mtc.lastDate('miplanta')
         self.assertEqual(lastdate,isodate('2015-01-01'))
 
     def test_lastDate_withForeignPoint_ignored(self):
-        mtc = MongoTimeCurve(self.dburi, self.collection)
-
-        mtc.fillPoint(
-            datetime=isodatetime('2015-01-01 23:00:00'),
-            name='otraplanta',
-            ae=30,
-            )
+        mtc = self.setupPoints([
+            ('2015-01-01 23:00:00', 'otraplanta', 30)
+            ])
 
         lastdate = mtc.lastDate('miplanta')
         self.assertEqual(lastdate,None)
       
     def test_lastDate_withSeveralPoints_takesLast(self):
-        mtc = MongoTimeCurve(self.dburi, self.collection)
-
-        mtc.fillPoint(
-            datetime=isodatetime('2015-01-01 23:00:00'),
-            name='miplanta',
-            ae=30,
-            )
-
-        mtc.fillPoint(
-            datetime=isodatetime('2015-01-02 23:00:00'),
-            name='miplanta',
-            ae=30,
-            )
+        mtc = self.setupPoints([
+            ('2015-01-01 23:00:00', 'miplanta', 30),
+            ('2015-01-02 23:00:00', 'miplanta', 30),
+            ])
 
         lastdate = mtc.lastDate('miplanta')
         self.assertEqual(lastdate,isodate('2015-01-02'))
