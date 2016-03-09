@@ -17,7 +17,7 @@ from .backends import urlparse
 - remove urlparse dependency on backends
 - disconnect, context handlers...
 - notice gaps
-- last meassure
++ last meassure
 - first meassure
 """
 
@@ -300,13 +300,13 @@ class MongoTimeCurve_Test(unittest.TestCase):
         self.assertEqual(ass.exception.args[0],
             "Missing 'name'")
 
-    def test_lastDate_whenNoPoint(self):
+    def test_lastDate_whenNoPoint_returnsNone(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
 
         lastdate = mtc.lastDate('miplanta')
         self.assertEqual(lastdate,None)
 
-    def test_lastDate_withOnePoint(self):
+    def test_lastDate_withOnePoint_takesIt(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
 
         mtc.fillPoint(ns(
@@ -318,7 +318,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
         lastdate = mtc.lastDate('miplanta')
         self.assertEqual(lastdate,isodate('2015-01-01'))
 
-    def test_lastDate_withForeignPointIgnored(self):
+    def test_lastDate_withForeignPoint_ignored(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
 
         mtc.fillPoint(ns(
@@ -330,7 +330,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
         lastdate = mtc.lastDate('miplanta')
         self.assertEqual(lastdate,None)
       
-    def test_lastDate_withForeignPointIgnored(self):
+    def test_lastDate_withSeveralPoints_takesLast(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
 
         mtc.fillPoint(ns(
@@ -347,8 +347,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
         lastdate = mtc.lastDate('miplanta')
         self.assertEqual(lastdate,isodate('2015-01-02'))
-    
-
+ 
 
 
 
