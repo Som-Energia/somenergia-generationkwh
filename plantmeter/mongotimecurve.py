@@ -10,9 +10,9 @@ import datetime
 from .backends import urlparse
 
 """
-- More than one meassure
++ More than one meassure
++ Different name ignored
 - Summer daylight
-- Different name ignored
 - Priority for newer meassuers the same hour
 - Check mandatory fields
 - remove urlparse dependency on backends
@@ -38,7 +38,7 @@ class MongoTimeCurve(object):
         ndays = (stop-start).days+1
         data = numpy.zeros(ndays*25, numpy.int)
         filters = dict(
-#            name = filter,
+            name = filter,
             datetime = {
                 '$gte': start,
                 '$lte': stop+datetime.timedelta(days=1)
@@ -197,6 +197,24 @@ class MongoTimeCurve_Test(unittest.TestCase):
         self.assertEqual(
             list(curve),
             [0,10]+21*[0]+[10,0])
+
+    def test_get_differentNameIgnored(self):
+        mtc = MongoTimeCurve(self.dburi, self.collection)
+        mtc.fillPoint(ns(
+            datetime=isodatetime('2015-01-01 23:00:00'),
+            name='otraplanta',
+            ae=10,
+            ))
+
+        curve = mtc.get(
+            start=isodate('2015-01-01'),
+            stop=isodate('2015-01-01'),
+            filter='miplanta',
+            field='ae',
+            )
+        self.assertEqual(
+            list(curve),
+            +25*[0])
 
 
 
