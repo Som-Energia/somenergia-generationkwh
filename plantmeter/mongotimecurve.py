@@ -2,7 +2,6 @@
 
 import pymongo
 from yamlns import namespace as ns
-import json
 import numpy
 import datetime
 from .backends import urlparse

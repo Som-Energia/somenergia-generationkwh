@@ -4,21 +4,6 @@ from .mongotimecurve import MongoTimeCurve
 import pymongo
 import datetime
 
-"""
-+ More than one meassure
-+ Different name ignored
-+ Priority for newer meassuers the same hour
-+ Summer daylight
-+ Check mandatory fields
-+ last meassure
-+ first meassure
-- Properly detect summer daylight change
-- disconnect, context handlers...
-- notice gaps
-- remove urlparse dependency on backends
-
-"""
-
 import unittest
 
 def isodatetime(string):
