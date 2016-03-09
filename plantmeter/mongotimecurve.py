@@ -71,9 +71,10 @@ class MongoTimeCurve(object):
         return self.collection.insert(data)
 
     def _firstLastDate(self, name, last=True):
+        order = pymongo.DESCENDING if last else pymongo.ASCENDING
         for point in (self.collection
                 .find(dict(name=name))
-                .sort('datetime', pymongo.DESCENDING)
+                .sort('datetime', order)
                 .limit(1)
                 ):
             return datetime.datetime.combine(
@@ -84,6 +85,9 @@ class MongoTimeCurve(object):
 
     def lastDate(self, name):
         return self._firstLastDate(name)
+
+    def firstDate(self, name):
+        return self._firstLastDate(name, last=False)
 
 
 def isodatetime(string):
@@ -351,6 +355,24 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
         lastdate = mtc.lastDate('miplanta')
         self.assertEqual(lastdate,isodate('2015-01-02'))
+
+    def test_firstDate_withSeveralPoints_takesFirst(self):
+        mtc = MongoTimeCurve(self.dburi, self.collection)
+
+        mtc.fillPoint(ns(
+            datetime=isodatetime('2015-01-01 23:00:00'),
+            name='miplanta',
+            ae=30,
+            ))
+
+        mtc.fillPoint(ns(
+            datetime=isodatetime('2015-01-02 23:00:00'),
+            name='miplanta',
+            ae=30,
+            ))
+
+        lastdate = mtc.firstDate('miplanta')
+        self.assertEqual(lastdate,isodate('2015-01-01'))
  
 
 
