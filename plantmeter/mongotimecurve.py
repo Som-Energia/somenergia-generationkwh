@@ -11,8 +11,9 @@ from .backends import urlparse
 + More than one meassure
 + Different name ignored
 + Priority for newer meassuers the same hour
-- Summer daylight
-- Check mandatory fields
++ Summer daylight
+- Properly detect summer daylight change
++ Check mandatory fields
 - remove urlparse dependency on backends
 - disconnect, context handlers...
 - notice gaps
@@ -57,13 +58,29 @@ class MongoTimeCurve(object):
         return data
 
     def fillPoint(self, data):
+
+        for requiredField in ('name', 'datetime'):
+            if requiredField not in data:
+                raise Exception("Missing '{}'".format(requiredField))
+
         counter = self.db['counters'].find_and_modify(
             {'_id': self.collectionName},
             {'$inc': {'counter': 1}}
         )
         data.update({'create_at': datetime.datetime.now()})
         return self.collection.insert(data)
-        
+
+    def lastDate(self, name):
+        points = list(
+            self.collection
+                .find(dict(name=name))
+                .sort('datetime', pymongo.DESCENDING)
+            )
+        if not points: return None
+        return datetime.datetime.combine(
+            ns(points[0]).datetime.date(),
+            datetime.time(0,0,0))
+
 
 def isodatetime(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
@@ -262,6 +279,77 @@ class MongoTimeCurve_Test(unittest.TestCase):
         self.assertEqual(
             list(curve),
             +24*[0]+[10])
+
+    def test_fillPoint_complaintsMissingDatetime(self):
+        mtc = MongoTimeCurve(self.dburi, self.collection)
+        with self.assertRaises(Exception) as ass:
+            mtc.fillPoint(ns(
+                name='miplanta',
+                ae=10,
+                ))
+        self.assertEqual(ass.exception.args[0],
+            "Missing 'datetime'")
+
+    def test_fillPoint_complaintsMissingName(self):
+        mtc = MongoTimeCurve(self.dburi, self.collection)
+        with self.assertRaises(Exception) as ass:
+            mtc.fillPoint(ns(
+                datetime=isodatetime('2015-08-01 23:00:00'),
+                ae=10,
+                ))
+        self.assertEqual(ass.exception.args[0],
+            "Missing 'name'")
+
+    def test_lastDate_whenNoPoint(self):
+        mtc = MongoTimeCurve(self.dburi, self.collection)
+
+        lastdate = mtc.lastDate('miplanta')
+        self.assertEqual(lastdate,None)
+
+    def test_lastDate_withOnePoint(self):
+        mtc = MongoTimeCurve(self.dburi, self.collection)
+
+        mtc.fillPoint(ns(
+            datetime=isodatetime('2015-01-01 23:00:00'),
+            name='miplanta',
+            ae=30,
+            ))
+
+        lastdate = mtc.lastDate('miplanta')
+        self.assertEqual(lastdate,isodate('2015-01-01'))
+
+    def test_lastDate_withForeignPointIgnored(self):
+        mtc = MongoTimeCurve(self.dburi, self.collection)
+
+        mtc.fillPoint(ns(
+            datetime=isodatetime('2015-01-01 23:00:00'),
+            name='otraplanta',
+            ae=30,
+            ))
+
+        lastdate = mtc.lastDate('miplanta')
+        self.assertEqual(lastdate,None)
+      
+    def test_lastDate_withForeignPointIgnored(self):
+        mtc = MongoTimeCurve(self.dburi, self.collection)
+
+        mtc.fillPoint(ns(
+            datetime=isodatetime('2015-01-01 23:00:00'),
+            name='miplanta',
+            ae=30,
+            ))
+
+        mtc.fillPoint(ns(
+            datetime=isodatetime('2015-01-02 23:00:00'),
+            name='miplanta',
+            ae=30,
+            ))
+
+        lastdate = mtc.lastDate('miplanta')
+        self.assertEqual(lastdate,isodate('2015-01-02'))
+    
+
+
 
 
 
