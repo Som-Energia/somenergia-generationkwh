@@ -12,6 +12,7 @@ from .backends import urlparse
 """
 - More than one meassure
 - Summer daylight
+- Different name ignored
 - Priority for newer meassuers the same hour
 - Check mandatory fields
 - remove urlparse dependency on backends
@@ -37,21 +38,20 @@ class MongoTimeCurve(object):
         ndays = (stop-start).days+1
         data = numpy.zeros(ndays*25, numpy.int)
         filters = dict(
-            name = filter,
+#            name = filter,
             datetime = {
                 '$gte': start,
                 '$lte': stop+datetime.timedelta(days=1)
             }
         )
 
-        points = [x for x in self.collection.find(filters, [field,'datetime'])]
-        if not points : return data
-        point = ns(points[0])
-        timeindex = (
-            +25*(point.datetime.date()-start.date()).days
-            +point.datetime.hour
-            )
-        data[timeindex]=point.get(field)
+        for x in self.collection.find(filters, [field,'datetime']):
+            point = ns(x)
+            timeindex = (
+                +25*(point.datetime.date()-start.date()).days
+                +point.datetime.hour
+                )
+            data[timeindex]=point.get(field)
         return data
 
     def fillPoint(self, data):
@@ -86,6 +86,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
         c = Connection()
         c.drop_database('generationkwh_test')
 
+    
 
     def test_get_whenEmpty(self):
         mtc = MongoTimeCurve(self.dburi, self.collection)
@@ -173,6 +174,29 @@ class MongoTimeCurve_Test(unittest.TestCase):
         self.assertEqual(
             list(curve),
             +25*[0])
+
+    def test_get_withTwoPoints(self):
+        mtc = MongoTimeCurve(self.dburi, self.collection)
+        mtc.fillPoint(ns(
+            datetime=isodatetime('2015-01-01 23:00:00'),
+            name='miplanta',
+            ae=10,
+            ))
+        mtc.fillPoint(ns(
+            datetime=isodatetime('2015-01-01 1:00:00'),
+            name='miplanta',
+            ae=10,
+            ))
+
+        curve = mtc.get(
+            start=isodate('2015-01-01'),
+            stop=isodate('2015-01-01'),
+            filter='miplanta',
+            field='ae',
+            )
+        self.assertEqual(
+            list(curve),
+            [0,10]+21*[0]+[10,0])
 
 
 
