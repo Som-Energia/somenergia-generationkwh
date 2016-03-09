@@ -5,7 +5,6 @@ from yamlns import namespace as ns
 import json
 import numpy
 import datetime
-import datetime as dt
 from .backends import urlparse
 
 """
@@ -13,13 +12,14 @@ from .backends import urlparse
 + Different name ignored
 + Priority for newer meassuers the same hour
 + Summer daylight
-- Properly detect summer daylight change
 + Check mandatory fields
-- remove urlparse dependency on backends
++ last meassure
++ first meassure
+- Properly detect summer daylight change
 - disconnect, context handlers...
 - notice gaps
-+ last meassure
-- first meassure
+- remove urlparse dependency on backends
+
 """
 
 class MongoTimeCurve(object):
@@ -68,7 +68,7 @@ class MongoTimeCurve(object):
             {'$inc': {'counter': 1}}
         )
         data.update(
-            create_at = dt.datetime.now()
+            create_at = datetime.datetime.now()
             )
         return self.collection.insert(data)
 
@@ -313,6 +313,16 @@ class MongoTimeCurve_Test(unittest.TestCase):
         self.assertEqual(ass.exception.args[0],
             "Missing 'name'")
 
+    def setupPoints(self, points):
+        mtc = MongoTimeCurve(self.dburi, self.collection)
+        for datetime, plant, value in points:
+            mtc.fillPoint(
+                datetime=isodatetime(datetime),
+                name=plant,
+                ae=value,
+            )
+        return mtc
+
     def test_lastDate_whenNoPoint_returnsNone(self):
         mtc = self.setupPoints([
             ])
@@ -344,16 +354,6 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
         lastdate = mtc.lastDate('miplanta')
         self.assertEqual(lastdate,isodate('2015-01-02'))
-
-    def setupPoints(self, points):
-        mtc = MongoTimeCurve(self.dburi, self.collection)
-        for datetime, plant, value in points:
-            mtc.fillPoint(
-                datetime=isodatetime(datetime),
-                name=plant,
-                ae=value,
-            )
-        return mtc
 
     def test_firstDate_withSeveralPoints_takesFirst(self):
         mtc = self.setupPoints([
