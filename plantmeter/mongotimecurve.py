@@ -10,7 +10,7 @@ import datetime
 from .backends import urlparse
 
 """
-- More than an meassure
+- More than one meassure
 - Summer daylight
 - Priority for newer meassuers the same hour
 - Check mandatory fields
@@ -47,7 +47,10 @@ class MongoTimeCurve(object):
         points = [x for x in self.collection.find(filters, [field,'datetime'])]
         if not points : return data
         point = ns(points[0])
-        timeindex = (point.datetime.date()-start.date()).days*25+  point.datetime.hour
+        timeindex = (
+            +25*(point.datetime.date()-start.date()).days
+            +point.datetime.hour
+            )
         data[timeindex]=point.get(field)
         return data
 
