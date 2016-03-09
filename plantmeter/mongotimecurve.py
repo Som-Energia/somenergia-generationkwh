@@ -70,8 +70,9 @@ class MongoTimeCurve(object):
         data.update({'create_at': datetime.datetime.now()})
         return self.collection.insert(data)
 
-    def _firstLastDate(self, name, last=True):
-        order = pymongo.DESCENDING if last else pymongo.ASCENDING
+    def _firstLastDate(self, name, first=False):
+        """returns the date of the first or last item of a given name"""
+        order = pymongo.ASCENDING if first else pymongo.DESCENDING
         for point in (self.collection
                 .find(dict(name=name))
                 .sort('datetime', order)
@@ -87,7 +88,7 @@ class MongoTimeCurve(object):
         return self._firstLastDate(name)
 
     def firstDate(self, name):
-        return self._firstLastDate(name, last=False)
+        return self._firstLastDate(name, first=True)
 
 
 def isodatetime(string):
