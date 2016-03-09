@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import unittest
-
 import pymongo
 from yamlns import namespace as ns
 import json
@@ -12,8 +10,8 @@ from .backends import urlparse
 """
 + More than one meassure
 + Different name ignored
-- Summer daylight
 + Priority for newer meassuers the same hour
+- Summer daylight
 - Check mandatory fields
 - remove urlparse dependency on backends
 - disconnect, context handlers...
@@ -48,7 +46,10 @@ class MongoTimeCurve(object):
         for x in self.collection.find(filters, [field,'datetime']).sort(
                 'create_at',pymongo.ASCENDING):
             point = ns(x)
+            monthAndDay = point.datetime.month, point.datetime.day
+            summerOffset = 1 if (3,26) < monthAndDay < (10,26) else 0
             timeindex = (
+                +summerOffset
                 +25*(point.datetime.date()-start.date()).days
                 +point.datetime.hour
                 )
@@ -69,6 +70,8 @@ def isodatetime(string):
 
 def isodate(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d")
+
+import unittest
 
 class MongoTimeCurve_Test(unittest.TestCase):
 
@@ -242,6 +245,23 @@ class MongoTimeCurve_Test(unittest.TestCase):
             list(curve),
             +23*[0]+[30,0])
 
+    def test_get_summerPointsPadsLeft(self):
+        mtc = MongoTimeCurve(self.dburi, self.collection)
+        mtc.fillPoint(ns(
+            datetime=isodatetime('2015-08-01 23:00:00'),
+            name='miplanta',
+            ae=10,
+            ))
+
+        curve = mtc.get(
+            start=isodate('2015-08-01'),
+            stop=isodate('2015-08-01'),
+            filter='miplanta',
+            field='ae',
+            )
+        self.assertEqual(
+            list(curve),
+            +24*[0]+[10])
 
 
 
