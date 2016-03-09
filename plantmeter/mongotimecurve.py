@@ -67,7 +67,11 @@ class MongoTimeCurve(object):
             {'_id': self.collectionName},
             {'$inc': {'counter': 1}}
         )
-        data.update({'create_at': datetime.datetime.now()})
+        data.update(
+            create_at = datetime.datetime.now(),
+            datetime = data['datetime'],
+            name = data['name'],
+            )
         return self.collection.insert(data)
 
     def _firstLastDate(self, name, first=False):
@@ -84,11 +88,13 @@ class MongoTimeCurve(object):
 
         return None
 
-    def lastDate(self, name):
-        return self._firstLastDate(name)
-
     def firstDate(self, name):
+        """returns the date of the first item of a given name"""
         return self._firstLastDate(name, first=True)
+
+    def lastDate(self, name):
+        """returns the date of the last item of a given name"""
+        return self._firstLastDate(name)
 
 
 def isodatetime(string):
