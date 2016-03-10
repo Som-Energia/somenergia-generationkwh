@@ -35,6 +35,12 @@ def parseArgumments():
     extend = subparsers.add_parser('extend',
         help="extend the expiration date of a set of investments",
         )
+    for sub in runtest,: 
+        sub.add_argument(
+            '--accept',
+            action='store_true',
+            help="accept changed b2b data",
+            )
     for sub in activate,create: 
         sub.add_argument(
             '--force',
@@ -263,44 +269,24 @@ class MeTest(unittest.TestCase):
         clear()
         create(start='2015-06-19', stop="2015-06-19")
         data = listactive(csv=True)
-        self.assertMultiLineEqual(data,
-            "1377\tFalse\tFalse\t20\n"
-            "7238\tFalse\tFalse\t15\n"
-            "4063\tFalse\tFalse\t70\n"
-            "2\tFalse\tFalse\t15\n"
-            "2609\tFalse\tFalse\t12\n"
-            )
+        self.assertB2BEqual(data)
 
-    def _test_create_waitTwoDays(self):
+    def test_create_waitTwoDays(self):
         clear()
         create(stop="2015-06-19", waitingDays=2)
         data = listactive(csv=True)
-        self.assertMultiLineEqual(data,
-            "550\t20150620T00:00:00\tFalse\t3\n"
-            "42\t20150620T00:00:00\tFalse\t3\n"
-            "1377\t20150621T00:00:00\tFalse\t20\n"
-            "7238\t20150621T00:00:00\tFalse\t15\n"
-            "4063\t20150621T00:00:00\tFalse\t70\n"
-            "2\t20150621T00:00:00\tFalse\t15\n"
-            "2609\t20150621T00:00:00\tFalse\t12\n"
-            )
+        self.assertB2BEqual(data)
 
-    def _test_create_expireOneYear(self):
+    def test_create_expireOneYear(self):
         clear()
         create(stop="2015-06-19", waitingDays=2, expirationYears=1)
         data = listactive(csv=True)
-        self.assertMultiLineEqual(data,
-            "550\t20150620T00:00:00\t20160620T00:00:00\t3\n"
-            "42\t20150620T00:00:00\t20160620T00:00:00\t3\n"
-            "1377\t20150621T00:00:00\t20160621T00:00:00\t20\n"
-            "7238\t20150621T00:00:00\t20160621T00:00:00\t15\n"
-            "4063\t20150621T00:00:00\t20160621T00:00:00\t70\n"
-            "2\t20150621T00:00:00\t20160621T00:00:00\t15\n"
-            "2609\t20150621T00:00:00\t20160621T00:00:00\t12\n"
-            )
+        self.assertB2BEqual(data)
 
-def runtest():
+def runtest(accept=False):
+    unittest.TestCase.acceptMode=accept
     sys.argv.remove("runtest")
+    if accept: sys.argv.remove("--accept")
     unittest.main()
 
 c = erppeek.Client(**dbconfig.erppeek)

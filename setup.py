@@ -18,6 +18,7 @@ setup(
 		],
 	install_requires=[
 		'yamlns',
+        'b2btest',
 #		'libfacturacioatr',
 	],
 	include_package_data = True,
