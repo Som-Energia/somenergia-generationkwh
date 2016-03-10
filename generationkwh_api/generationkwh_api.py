@@ -56,6 +56,16 @@ class GenerationkWhInvestments(osv.osv):
     def create_investments_from_accounting(self, cursor, uid,
             start, stop, waitingDays, expirationYears,
             context=None):
+        """
+            Takes accounting information and generates GenkWh investments
+            purchased among start and stop dates.
+            If waitingDays is not None, activation date is set those
+            days after the purchase date.
+            If expirationYears is not None, expiration date is set, those
+            years after the activation date.
+            TODO: Confirm that the expiration is relative to the activation
+            instead the purchase.
+        """
 
         tail = [0,False,False, context]
 
@@ -63,21 +73,21 @@ class GenerationkWhInvestments(osv.osv):
         MoveLine = self.pool.get('account.move.line')
         Partner = self.pool.get('res.partner')
 
-        accountIds = Account.search(cursor, uid, [('code','ilike','163500%')], *tail)
-        print 'accountIds',len(accountIds)
+        accountIds = Account.search(cursor, uid, [('code','ilike','163500%')])
 
         criteria = [('account_id','in',accountIds)]
         if stop: criteria.append(('date_created', '<=', str(stop)))
         if start: criteria.append(('date_created', '>=', str(start)))
 
-        movelinesids = MoveLine.search(cursor, uid, criteria, 0,False,'date asc', context)
-        print 'movelinesids', movelinesids
-        for line in MoveLine.browse(cursor, uid, movelinesids, context):
+        movelinesids = MoveLine.search(cursor, uid, criteria, 0,False,'account_id', context)
+        for line in MoveLine.browse(cursor, uid, movelinesids, context, ):
             partnerid = line.partner_id.id
             if not partnerid:
                 # Handle cases with no partner_id
                 membercode = int(line.account_id.code[4:])
-                partnerid = Partner.search(cursor, uid, [('ref', 'ilike', '%'+str(membercode).zfill(6))])[0]
+                partnerid = Partner.search(cursor, uid, [
+                    ('ref', 'ilike', '%'+str(membercode).zfill(6))
+                    ])[0]
             activation = None
             deactivation = None
             if waitingDays is not None:
@@ -89,6 +99,7 @@ class GenerationkWhInvestments(osv.osv):
                     deactivation = str(
                         isodatetime(activation)
                         +relativedelta(years=expirationYears))
+
             self.create(cursor, uid, dict(
                 member_id=partnerid,
                 nshares=(line.credit-line.debit)//100,
@@ -96,7 +107,7 @@ class GenerationkWhInvestments(osv.osv):
                 activation_date=activation,
                 deactivation_date=deactivation,
                 ))
- 
+
     def create_investments_from_paymentlines(self, cursor, uid,
             start, stop, waitingDays, expirationYears,
             context=None):
@@ -106,7 +117,7 @@ class GenerationkWhInvestments(osv.osv):
         if start: criteria.append(('create_date', '>=', str(start)))
 
         PaymentLine = self.pool.get('payment.line')
-        paymentlineids = PaymentLine.search(cursor, uid, criteria, 0,0,False, context)
+        paymentlineids = PaymentLine.search(cursor, uid, criteria, 0,None,None,context)
         for payment in PaymentLine.browse(cursor, uid, paymentlineids, context):
             activation = None
             deactivation = None
@@ -163,7 +174,7 @@ class InvestmentProvider():
                 isodate(c['deactivation_date']),
                 c['nshares'],
             )
-            for c in contracts
+            for c in sorted(contracts, key=lambda x: x['id'] )
         ]
 
 

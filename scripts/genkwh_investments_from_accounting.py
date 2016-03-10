@@ -92,10 +92,15 @@ def clear(**args):
     c.unlink('generationkwh.investments', allinvestments)
 
 def listactive(member=None, start=None, stop=None, csv=False):
-    csvdata = u''.join(( u"\t".join([unicode(c) for c in line])+'\n'
-        for line in c.GenerationkwhInvestments.active_investments(
-            member, start and str(start), stop and str(stop))
-        ))
+    def buildcsv(data):
+        return u''.join((
+            u"\t".join((
+                unicode(c) for c in line
+                ))+'\n'
+            for line in data))
+
+    csvdata = buildcsv(c.GenerationkwhInvestments.active_investments(
+            member, start and str(start), stop and str(stop)))
     if csv: return csvdata
     print csvdata
 
@@ -106,7 +111,16 @@ def create(start=None, stop=None,
         **_):
     if force: clear()
 
-#    c.GenerationkwhInvestments.create_investments_from_accounting(
+    c.GenerationkwhInvestments.create_investments_from_accounting(
+        start, stop, waitingDays, expirationYears)
+
+def create_fromPaymentLines(start=None, stop=None,
+        waitingDays=None,
+        expirationYears=None,
+        force=False,
+        **_):
+    if force: clear()
+
     c.GenerationkwhInvestments.create_investments_from_paymentlines(
         start, stop, waitingDays, expirationYears)
 
@@ -145,35 +159,37 @@ def activate(
         c.write('generationkwh.investments', investment.id, updateDict)
 
 import unittest
+import b2btest
 import sys
 class MeTest(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
+        self.b2bdatapath="b2bdata"
 
     def test_clean(self):
         clear()
         data = listactive(csv=True)
         self.assertEqual(data,'')
 
-    def test_create_toEarly(self):
+    def test_create_fromPaymentLines_toEarly(self):
         clear()
-        create(stop="2015-06-18")
+        create_fromPaymentLines(stop="2015-06-18")
         data = listactive(csv=True)
         self.assertMultiLineEqual(data,
             "550\tFalse\tFalse\t3\n"
             "42\tFalse\tFalse\t3\n"
             )
-    def test_create_firsts(self):
+    def test_create_fromPaymentLines_firsts(self):
         clear()
-        create(stop="2015-06-18")
+        create_fromPaymentLines(stop="2015-06-18")
         data = listactive(csv=True)
         self.assertMultiLineEqual(data,
             "550\tFalse\tFalse\t3\n"
             "42\tFalse\tFalse\t3\n"
             )
-    def test_create_more(self):
+    def test_create_fromPaymentLines_more(self):
         clear()
-        create(stop="2015-06-19")
+        create_fromPaymentLines(stop="2015-06-19")
         data = listactive(csv=True)
         self.assertMultiLineEqual(data,
             "550\tFalse\tFalse\t3\n"
@@ -184,7 +200,66 @@ class MeTest(unittest.TestCase):
             "2\tFalse\tFalse\t15\n"
             "2609\tFalse\tFalse\t12\n"
             )
-    def test_create_justSecondDay(self):
+    def test_create_fromPaymentLines_justSecondDay(self):
+        clear()
+        create_fromPaymentLines(start='2015-06-19', stop="2015-06-19")
+        data = listactive(csv=True)
+        self.assertMultiLineEqual(data,
+            "1377\tFalse\tFalse\t20\n"
+            "7238\tFalse\tFalse\t15\n"
+            "4063\tFalse\tFalse\t70\n"
+            "2\tFalse\tFalse\t15\n"
+            "2609\tFalse\tFalse\t12\n"
+            )
+
+    def test_create_fromPaymentLines_waitTwoDays(self):
+        clear()
+        create_fromPaymentLines(stop="2015-06-19", waitingDays=2)
+        data = listactive(csv=True)
+        self.assertMultiLineEqual(data,
+            "550\t20150620T00:00:00\tFalse\t3\n"
+            "42\t20150620T00:00:00\tFalse\t3\n"
+            "1377\t20150621T00:00:00\tFalse\t20\n"
+            "7238\t20150621T00:00:00\tFalse\t15\n"
+            "4063\t20150621T00:00:00\tFalse\t70\n"
+            "2\t20150621T00:00:00\tFalse\t15\n"
+            "2609\t20150621T00:00:00\tFalse\t12\n"
+            )
+
+    def test_create_fromPaymentLines_expireOneYear(self):
+        clear()
+        create_fromPaymentLines(stop="2015-06-19", waitingDays=2, expirationYears=1)
+        data = listactive(csv=True)
+        self.assertMultiLineEqual(data,
+            "550\t20150620T00:00:00\t20160620T00:00:00\t3\n"
+            "42\t20150620T00:00:00\t20160620T00:00:00\t3\n"
+            "1377\t20150621T00:00:00\t20160621T00:00:00\t20\n"
+            "7238\t20150621T00:00:00\t20160621T00:00:00\t15\n"
+            "4063\t20150621T00:00:00\t20160621T00:00:00\t70\n"
+            "2\t20150621T00:00:00\t20160621T00:00:00\t15\n"
+            "2609\t20150621T00:00:00\t20160621T00:00:00\t12\n"
+            )
+
+    def test_create_toEarly(self):
+        clear()
+        create(stop="2015-06-29")
+        data = listactive(csv=True)
+        self.assertEqual(data,'')
+
+    def test_create_firstDay_shouldShowFirstContractBatch(self):
+        self.acceptMode = True
+        clear()
+        create(stop="2015-06-30")
+        data = listactive(csv=True)
+        self.assertB2BEqual(data)
+
+    def test_create_more_shouldAddNext(self):
+        clear()
+        create(stop="2015-07-31")
+        data = listactive(csv=True)
+        self.assertB2BEqual(data)
+
+    def _test_create_justSecondDay(self):
         clear()
         create(start='2015-06-19', stop="2015-06-19")
         data = listactive(csv=True)
@@ -196,7 +271,7 @@ class MeTest(unittest.TestCase):
             "2609\tFalse\tFalse\t12\n"
             )
 
-    def test_create_waitTwoDays(self):
+    def _test_create_waitTwoDays(self):
         clear()
         create(stop="2015-06-19", waitingDays=2)
         data = listactive(csv=True)
@@ -210,7 +285,7 @@ class MeTest(unittest.TestCase):
             "2609\t20150621T00:00:00\tFalse\t12\n"
             )
 
-    def test_create_expireOneYear(self):
+    def _test_create_expireOneYear(self):
         clear()
         create(stop="2015-06-19", waitingDays=2, expirationYears=1)
         data = listactive(csv=True)
