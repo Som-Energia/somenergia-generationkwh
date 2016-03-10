@@ -4,7 +4,6 @@ import pymongo
 from yamlns import namespace as ns
 import numpy
 import datetime
-from .backends import urlparse
 
 """
 + More than one meassure
@@ -17,20 +16,17 @@ from .backends import urlparse
 - Properly detect summer daylight change
 - disconnect, context handlers...
 - notice gaps
-- remove urlparse dependency on backends
++ remove urlparse dependency on backends
 
 """
 
 class MongoTimeCurve(object):
     """Consolidates curve data in a mongo database"""
 
-    def __init__(self, uri, collection):
+    def __init__(self, mongodb, collection):
         ""
-        self.connection = pymongo.Connection()
-        self.config = urlparse(uri)
+        self.db = mongodb
         self.collectionName = collection
-        self.databasename = self.config['db'] 
-        self.db = self.connection[self.databasename]
         self.collection = self.db[collection]
 
     def get(self, start, stop, filter, field):
@@ -96,4 +92,4 @@ class MongoTimeCurve(object):
         return self._firstLastDate(name)
 
 
-# vim: ts ts=4 sw=4
+# vim: et ts=4 sw=4

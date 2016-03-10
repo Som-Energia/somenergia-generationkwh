@@ -17,21 +17,17 @@ class MongoTimeCurve_Test(unittest.TestCase):
     def setUp(self):
         self.databasename = 'generationkwh_test'
         self.collection = 'generation'
-        self.dburi = 'mongodb://localhost/{}'.format(self.databasename)
 
         c = pymongo.Connection()
         c.drop_database(self.databasename)
         self.db = c[self.databasename]
-        counters = self.db['counters']
-
 
     def tearDown(self):
         c = pymongo.Connection()
         c.drop_database('generationkwh_test')
-
     
     def setupPoints(self, points):
-        mtc = MongoTimeCurve(self.dburi, self.collection)
+        mtc = MongoTimeCurve(self.db, self.collection)
         for datetime, plant, value in points:
             mtc.fillPoint(
                 datetime=isodatetime(datetime),
@@ -181,7 +177,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             +24*[0]+[10])
 
     def test_fillPoint_complaintsMissingDatetime(self):
-        mtc = MongoTimeCurve(self.dburi, self.collection)
+        mtc = MongoTimeCurve(self.db, self.collection)
         with self.assertRaises(Exception) as ass:
             mtc.fillPoint(
                 name='miplanta',
@@ -191,7 +187,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             "Missing 'datetime'")
 
     def test_fillPoint_complaintsMissingName(self):
-        mtc = MongoTimeCurve(self.dburi, self.collection)
+        mtc = MongoTimeCurve(self.db, self.collection)
         with self.assertRaises(Exception) as ass:
             mtc.fillPoint(
                 datetime=isodatetime('2015-08-01 23:00:00'),
@@ -240,9 +236,36 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
         lastdate = mtc.firstDate('miplanta')
         self.assertEqual(lastdate,isodate('2015-01-01'))
+
+    def setupDatePoints(self, date, name, values):
+        return self.setupPoints([
+            (date+" {:02}:00:00".format(i), name, value)
+            for i, value in enumerate(values)
+            ])
+
+    def test_setupDatePoints(self):
+        mtc = self.setupDatePoints('2015-01-01', 'miplanta', range(1,25))
+
+        curve = mtc.get(
+            start=isodate('2015-01-01'),
+            stop=isodate('2015-01-01'),
+            filter='miplanta',
+            field='ae',
+            )
+        self.assertEqual(
+            list(curve),
+            list(range(1,25))+[0])
+
+    def _test_lastFullDate_withNoPoints(self):
+        mtc = self.setupDatePoints([
+            ('2015-01-01', 'miplanta', [1]*24+[0]),
+            ])
+
+        lastdate = mtc.lastFullDate('miplanta')
+        self.assertEqual(lastdate,)
  
 
 
 
 
-# vim: ts ts=4 sw=4
+# vim: et ts=4 sw=4
