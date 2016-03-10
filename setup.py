@@ -17,6 +17,9 @@ setup(
 	scripts=[
 		],
 	install_requires=[
+        'pymongo<3.0',
+        'marshmallow==2.0.0b2',
+        'numpy',
         'xlrd',
         'yamlns',
 	],
