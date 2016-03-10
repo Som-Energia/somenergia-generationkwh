@@ -13,10 +13,9 @@ import datetime
 + Check mandatory fields
 + last meassure
 + first meassure
-- Properly detect summer daylight change
-- disconnect, context handlers...
-- notice gaps
 + remove urlparse dependency on backends
+- Properly detect summer daylight change
+- lastFullDate: proper implementation
 
 """
 
