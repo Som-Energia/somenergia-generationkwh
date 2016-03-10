@@ -256,13 +256,11 @@ class MongoTimeCurve_Test(unittest.TestCase):
             list(curve),
             list(range(1,25))+[0])
 
-    def _test_lastFullDate_withNoPoints(self):
-        mtc = self.setupDatePoints([
-            ('2015-01-01', 'miplanta', [1]*24+[0]),
-            ])
+    def test_lastFullDate_withNoPoints(self):
+        mtc = self.setupDatePoints('2015-01-01', 'miplanta', [1]*24)
 
         lastdate = mtc.lastFullDate('miplanta')
-        self.assertEqual(lastdate,)
+        self.assertEqual(lastdate,isodate('2015-01-01'))
  
 
 

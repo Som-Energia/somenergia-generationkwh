@@ -91,5 +91,9 @@ class MongoTimeCurve(object):
         """returns the date of the last item of a given name"""
         return self._firstLastDate(name)
 
+    def lastFullDate(self,name):
+        # TODO: dumb implementation, if there is a single point consider it filled
+        return self.lastDate(name)
+
 
 # vim: et ts=4 sw=4
