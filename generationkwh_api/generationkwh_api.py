@@ -206,7 +206,7 @@ class GenerationkWhDealer(osv.osv):
             contract_id, start_date, end_date, fare, period)
 
     def use_kwh(self, cursor, uid,
-                contract_ia, start_date, end_date, fare, period, kwh,
+                contract_id, start_date, end_date, fare, period, kwh,
                 context=None):
         """Marks the indicated kwh as used, if available, for the contract,
            date interval, fare and period and returns the ones efectively used.
@@ -225,7 +225,7 @@ class GenerationkWhDealer(osv.osv):
         dealer = self._createDealer(cursor, uid)
 
         return dealer.refund_kwh(
-            contract_id, start_date, end_date, fare, period, kwh)
+            contract_id, start_date, end_date, fare, period, kwh, partner_id)
 
     def _createDealer(self, cursor, uid):
         # TODO: Feed the dealer with data sources

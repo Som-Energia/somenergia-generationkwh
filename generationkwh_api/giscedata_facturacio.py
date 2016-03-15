@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 from osv import osv, fields
 from tools.translate import _
+from tools import cache
 import netsvc
 from datetime import datetime
 
@@ -40,8 +41,13 @@ class GiscedataFacturacioFactura(osv.osv):
         if isinstance(product_id, (tuple, list)):
             product_id = product_id[0]
 
+        search_vals = [
+            '|', ('product_id', '=', product_id),
+            ('product_gkwh_id', '=', product_id)
+        ]
+
         per_ids = per_obj.search(
-            cursor, uid, [('product_id', '=', product_id)], context=context
+            cursor, uid, search_vals, context=context
         )
 
         if per_ids:
@@ -173,7 +179,8 @@ class GiscedataFacturacioFactura(osv.osv):
                         }
                     )
 
-            inv_obj.button_reset_taxes(cursor, uid, [inv_id], context=context)
+            self.inv_obj.button_reset_taxes(cursor, uid, [inv_id],
+                                            context=context)
 
     def _ff_is_gkwh(self, cursor, uid, ids, field_name, arg, context=None):
         """Returns true if invoice has gkwh lines"""
@@ -217,3 +224,80 @@ class GiscedataFacturacioFacturador(osv.osv):
         return factures
 
 GiscedataFacturacioFacturador()
+
+
+class GiscedataFacturacioFacturaLinia(osv.osv):
+    """Generation kwH invoice line management"""
+
+    _name = 'giscedata.facturacio.factura.linia'
+    _inherit = 'giscedata.facturacio.factura.linia'
+
+    @cache()
+    def get_gkwh_products(self, cursor, uid, context=None):
+        """Returns generation kwh products list"""
+        pcat_obj = self.pool.get('product.category')
+        product_obj = self.pool.get('product.product')
+
+        cat_ids = pcat_obj.search(
+            cursor, uid, [('name', '=', 'Generation kWh')]
+        )
+        return product_obj.search(cursor, uid, [('categ_id', 'in', cat_ids)])
+
+    def is_gkwh(self, cursor, uid, ids, context=None):
+        """Checks invoice line is gkwh"""
+        if not isinstance(ids, (tuple, list)):
+            ids = [ids]
+
+        res = dict([(i, False) for i in ids])
+
+        # check if product is gkwh
+        l_vals = self.read(cursor, uid, ids, ['product_id'], context=context)
+        gkwh_products = self.get_gkwh_products(cursor, uid)
+        for l in l_vals:
+            if l['product_id'] and l['product_id'][0] in gkwh_products:
+                res[l['id']] = True
+        return res
+
+    def unlink(self, cursor, uid, ids, context=None):
+        """Return gkwh rights to owner when gkwh invoice line is droped"""
+        fact_obj = self.pool.get('giscedata.facturacio.factura')
+        gkwh_lineowner_obj = self.pool.get('generationkwh.invoice.line.owner')
+        gkwh_dealer_obj = self.pool.get('generationkwh.dealer')
+
+        is_gkwh_vals = self.is_gkwh(cursor, uid, ids, context=context)
+        for line_id, value in is_gkwh_vals.items():
+            if value:
+                # reads owner
+                line = self.browse(cursor, uid, line_id, context=context)
+                glo_ids = gkwh_lineowner_obj.search(
+                    cursor, uid, [('factura_line_id', '=', line_id)]
+                )
+                glo_vals = gkwh_lineowner_obj.read(
+                    cursor, uid, glo_ids, ['owner_id']
+                )[0]
+                owner_id = glo_vals['owner_id'][0]
+                gkwh_lineowner_obj.unlink(cursor, uid, glo_ids)
+                contract_id = line.factura_id.polissa_id.id
+                fare_id = line.factura_id.tarifa_acces_id.id
+                period_id = fact_obj.get_fare_period(
+                    cursor, uid, line.product_id.id, context=context
+                )
+                # returns rights through dealer
+                gkwh_dealer_obj.refund_kwh(
+                    cursor,
+                    uid,
+                    contract_id,
+                    line.data_desde,
+                    line.data_fins,
+                    fare_id,
+                    period_id,
+                    line.quantity,
+                    owner_id,
+                    context=context
+                )
+
+        return super(GiscedataFacturacioFacturaLinia, self).unlink(
+            cursor, uid, ids, context
+        )
+
+GiscedataFacturacioFacturaLinia()
