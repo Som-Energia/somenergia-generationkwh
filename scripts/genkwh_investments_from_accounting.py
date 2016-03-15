@@ -167,7 +167,7 @@ def activate(
 import unittest
 import b2btest
 import sys
-class MeTest(unittest.TestCase):
+class InvestmentManagement_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
