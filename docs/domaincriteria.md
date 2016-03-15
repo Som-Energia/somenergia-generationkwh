@@ -28,7 +28,8 @@ Production and shares
 - Delay can be different for share batches. Batches can be set either
 	- by selecting by purchase date (between two dates) or
 	- by purchasing order (till the nth action). [Nuria-David]
-- The purchase date is the date the member orders, not the payment day [Gijsbert-Marc-Eduard]
+- [Deprecated] The purchase date is the date the member orders, not the payment day [Gijsbert-Marc-Eduard]
+- The purchase date is the date of the accounting movement [Marc-Eduard-Carles-Agusti-David pending of confirmation from Gijsbert]
 
 Doubts
 ------

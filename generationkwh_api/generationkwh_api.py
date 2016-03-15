@@ -80,7 +80,7 @@ class GenerationkWhInvestments(osv.osv):
         if start: criteria.append(('date_created', '>=', str(start)))
 
         print
-        movelinesids = MoveLine.search(cursor, uid, criteria, 0,False,'account_id', context)
+        movelinesids = MoveLine.search(cursor, uid, criteria, order='date_created asc, id asc', context=context)
         for line in MoveLine.browse(cursor, uid, movelinesids, context):
             print 'Moveline', start, stop, line.id, line.date_created
             partnerid = line.partner_id.id

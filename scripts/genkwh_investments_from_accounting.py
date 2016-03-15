@@ -260,25 +260,25 @@ class InvestmentManagement_Test(unittest.TestCase):
 
     def test_create_firstAndSecondBatch(self):
         clear()
-        create(stop="2015-07-31")
+        create(stop="2015-07-03")
         data = listactive(csv=True)
         self.assertB2BEqual(data)
 
     def test_create_justSecondBatch(self):
         clear()
-        create(start='2015-06-30', stop="2015-07-31")
+        create(start='2015-07-02', stop="2015-07-03")
         data = listactive(csv=True)
         self.assertB2BEqual(data)
 
     def test_create_waitTwoDays(self):
         clear()
-        create(stop="2015-06-19", waitingDays=2)
+        create(stop="2015-06-30", waitingDays=2)
         data = listactive(csv=True)
         self.assertB2BEqual(data)
 
     def test_create_expireOneYear(self):
         clear()
-        create(stop="2015-06-19", waitingDays=2, expirationYears=1)
+        create(stop="2015-06-30", waitingDays=2, expirationYears=1)
         data = listactive(csv=True)
         self.assertB2BEqual(data)
 
