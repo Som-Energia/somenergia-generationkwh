@@ -55,4 +55,58 @@ class GenerationkWhDealer(osv.osv):
 
 GenerationkWhDealer()
 
+
+class GenerationkWhInvoiceLineOwner(osv.osv):
+    """ Class with the relation between generation invoice line and rights owner
+    """
+
+    _name = 'generationkwh.invoice.line.owner'
+
+    def name_get(self, cursor, uid, ids, context=None):
+        """GkWH name"""
+        res = []
+        glo_vals = self.read(cursor, uid, ids, ['factura_line_id'])
+        for glo in glo_vals:
+            res.append((glo['id'], glo['factura_line_id'][1]))
+
+        return res
+
+    def _ff_invoice_number(self, cursor, uid, ids, field_name, arg,
+                           context=None ):
+        """Invoice Number"""
+        if not ids:
+            return []
+        res = dict([(i, False) for i in ids])
+        f_obj = self.pool.get('giscedata.facturacio.factura')
+
+        glo_vals = self.read(cursor, uid, ids, ['factura_id'])
+        inv_ids = [g['factura_id'][0] for g in glo_vals]
+        inv_vals = f_obj.read(cursor, uid, inv_ids, ['number'])
+        inv_dict = dict([(i['id'], i['number']) for i in inv_vals])
+        for glo_val in glo_vals:
+            glo_id = glo_val['id']
+            glo_number = inv_dict[glo_val['factura_id'][0]]
+            res.update({glo_id: glo_number})
+
+        return res
+
+    _columns = {
+        'factura_id': fields.many2one(
+            'giscedata.facturacio.factura', 'Factura', required=True,
+            readonly=True
+        ),
+        'factura_number': fields.function(
+            _ff_invoice_number, string='Num. Factura', method=True, type='char',
+            size='64',
+        ),
+        'factura_line_id': fields.many2one(
+            'giscedata.facturacio.factura.linia', 'Línia de factura',
+            required=True, readonly=True
+        ),
+        'owner_id': fields.many2one(
+            'res.partner', 'Soci Generation', required=True, readonly=True
+        ),
+    }
+
+GenerationkWhInvoiceLineOwner()
 # vim: ts=4 sw=4 et

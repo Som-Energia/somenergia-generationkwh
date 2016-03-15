@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-from osv import osv
+from osv import osv, fields
 from tools.translate import _
 import netsvc
 from datetime import datetime
@@ -62,6 +62,7 @@ class GiscedataFacturacioFactura(osv.osv):
         pricelist_obj = self.pool.get('product.pricelist')
         partner_obj = self.pool.get('res.partner')
 
+        gkwh_lineowner_obj = self.pool.get('generationkwh.invoice.line.owner')
         gkwh_dealer_obj = self.pool.get('generationkwh.dealer')
         inv_fields = ['polissa_id', 'data_inici', 'data_final', 'llista_preu',
                       'tarifa_acces_id', 'linies_energia']
@@ -142,10 +143,10 @@ class GiscedataFacturacioFactura(osv.osv):
                 new_quantity = line_quantity
                 for gkwh_line in gkwh_quantity_dict:
                     gkwh_quantity = gkwh_line['kwh']
-                    gwkh_owner_id = gkwh_line['member_id']
+                    gkwh_owner_id = gkwh_line['member_id']
 
                     gwkh_owner_name = partner_obj.read(
-                        cursor, uid, gwkh_owner_id, ['name'], context=context
+                        cursor, uid, gkwh_owner_id, ['name'], context=context
                     )['name']
 
                     # substract from original line quantity
@@ -162,9 +163,40 @@ class GiscedataFacturacioFactura(osv.osv):
                             line_vals['name'], gwkh_owner_name
                         ),
                     })
-                    invlines_obj.create(cursor, uid, vals, context)
+                    iline_id = invlines_obj.create(cursor, uid, vals, context)
+                    # owner line object creation
+                    gkwh_lineowner_obj.create(
+                        cursor, uid, {
+                            'factura_id': inv_id,
+                            'factura_line_id': iline_id,
+                            'owner_id': gkwh_owner_id
+                        }
+                    )
 
             inv_obj.button_reset_taxes(cursor, uid, [inv_id], context=context)
+
+    def _ff_is_gkwh(self, cursor, uid, ids, field_name, arg, context=None):
+        """Returns true if invoice has gkwh lines"""
+        if not ids:
+            return []
+        res = dict([(i, False) for i in ids])
+
+        vals = self.read(cursor, uid, ids, ['gkwh_linia_ids'])
+        for val in vals:
+            res.update({val['id']: bool(val['gkwh_linia_ids'])})
+
+        return res
+
+    _columns = {
+        'gkwh_linia_ids': fields.one2many(
+            'generationkwh.invoice.line.owner', 'factura_id',
+            'Propietaris Generation kWH', readonly=True
+        ),
+        'is_gkwh': fields.function(
+            _ff_is_gkwh, method=True, string='Te Generation', type='boolean',
+            stored=True,
+        )
+    }
 
 GiscedataFacturacioFactura()
 
