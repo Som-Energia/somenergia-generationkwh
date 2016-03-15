@@ -82,6 +82,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p1_e_tarifa_20A_new">
+            <field name="product_gkwh_id" ref="p1_gkwh_tarifa_20A_new"/>
+        </record>
         <!-- TARIFA 2.1A -->
         <record model="product.product" id="p1_gkwh_tarifa_20A">
             <field name="name">P1</field>
@@ -91,6 +94,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p1_e_tarifa_20A">
+            <field name="product_gkwh_id" ref="p1_gkwh_tarifa_20A"/>
         </record>
         <!-- TARIFA 2.0DHA -->
         <record model="product.product" id="p1_gkwh_tarifa_20DHA_new">
@@ -102,6 +108,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p1_e_tarifa_20DHA_new">
+            <field name="product_gkwh_id" ref="p1_gkwh_tarifa_20DHA_new"/>
+        </record>
         <record model="product.product" id="p2_gkwh_tarifa_20DHA_new">
             <field name="name">P2</field>
             <field name="categ_id" ref="categ_gkwh_t20DHA_new"/>
@@ -110,6 +119,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p2_e_tarifa_20DHA_new">
+            <field name="product_gkwh_id" ref="p2_gkwh_tarifa_20DHA_new"/>
         </record>
         <!-- TARIFA 2.0DHS -->
         <record model="product.product" id="p1_gkwh_tarifa_20DHS">
@@ -121,6 +133,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p1_e_tarifa_20DHS">
+            <field name="product_gkwh_id" ref="p1_gkwh_tarifa_20DHS"/>
+        </record>
         <record model="product.product" id="p2_gkwh_tarifa_20DHS">
             <field name="name">P2</field>
             <field name="categ_id" ref="categ_gkwh_t20DHS"/>
@@ -130,6 +145,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p2_e_tarifa_20DHS">
+            <field name="product_gkwh_id" ref="p2_gkwh_tarifa_20DHS"/>
+        </record>
         <record model="product.product" id="p3_gkwh_tarifa_20DHS">
             <field name="name">P3</field>
             <field name="categ_id" ref="categ_gkwh_t20DHS"/>
@@ -138,6 +156,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p3_e_tarifa_20DHS">
+            <field name="product_gkwh_id" ref="p3_gkwh_tarifa_20DHS"/>
         </record>
         <!-- TARIFA 2.1DHA -->
         <record model="product.product" id="p1_gkwh_tarifa_20DHA">
@@ -149,6 +170,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p1_e_tarifa_20DHA">
+            <field name="product_gkwh_id" ref="p1_gkwh_tarifa_20DHA"/>
+        </record>
         <record model="product.product" id="p2_gkwh_tarifa_20DHA">
             <field name="name">P2</field>
             <field name="categ_id" ref="categ_gkwh_t20DHA"/>
@@ -157,6 +181,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p2_e_tarifa_20DHA">
+            <field name="product_gkwh_id" ref="p2_gkwh_tarifa_20DHA"/>
         </record>
         <!-- TARIFA 2.1DHS -->
         <record model="product.product" id="p1_gkwh_tarifa_21DHS">
@@ -168,6 +195,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p1_e_tarifa_21DHS">
+            <field name="product_gkwh_id" ref="p1_gkwh_tarifa_21DHS"/>
+        </record>
         <record model="product.product" id="p2_gkwh_tarifa_21DHS">
             <field name="name">P2</field>
             <field name="categ_id" ref="categ_gkwh_t21DHS"/>
@@ -177,6 +207,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p2_e_tarifa_21DHS">
+            <field name="product_gkwh_id" ref="p2_gkwh_tarifa_21DHS"/>
+        </record>
         <record model="product.product" id="p3_gkwh_tarifa_21DHS">
             <field name="name">P3</field>
             <field name="categ_id" ref="categ_gkwh_t21DHS"/>
@@ -185,6 +218,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p3_e_tarifa_21DHS">
+            <field name="product_gkwh_id" ref="p3_gkwh_tarifa_21DHS"/>
         </record>
         <!-- TARIFA 3.0A -->
         <record model="product.product" id="p1_gkwh_tarifa_30A">
@@ -196,6 +232,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p1_e_tarifa_30A">
+            <field name="product_gkwh_id" ref="p1_gkwh_tarifa_30A"/>
+        </record>
         <record model="product.product" id="p2_gkwh_tarifa_30A">
             <field name="name">P2</field>
             <field name="categ_id" ref="categ_gkwh_t30A"/>
@@ -204,6 +243,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p2_e_tarifa_30A">
+            <field name="product_gkwh_id" ref="p2_gkwh_tarifa_30A"/>
         </record>
         <record model="product.product" id="p3_gkwh_tarifa_30A">
             <field name="name">P3</field>
@@ -214,6 +256,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p3_e_tarifa_30A">
+            <field name="product_gkwh_id" ref="p3_gkwh_tarifa_30A"/>
+        </record>
         <record model="product.product" id="p4_gkwh_tarifa_30A">
             <field name="name">P4</field>
             <field name="categ_id" ref="categ_gkwh_t30A"/>
@@ -222,6 +267,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p4_e_tarifa_30A">
+            <field name="product_gkwh_id" ref="p4_gkwh_tarifa_30A"/>
         </record>
         <record model="product.product" id="p5_gkwh_tarifa_30A">
             <field name="name">P5</field>
@@ -232,6 +280,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p5_e_tarifa_30A">
+            <field name="product_gkwh_id" ref="p5_gkwh_tarifa_30A"/>
+        </record>
         <record model="product.product" id="p6_gkwh_tarifa_30A">
             <field name="name">P6</field>
             <field name="categ_id" ref="categ_gkwh_t30A"/>
@@ -240,6 +291,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p6_e_tarifa_30A">
+            <field name="product_gkwh_id" ref="p6_gkwh_tarifa_30A"/>
         </record>
         <!-- TARIFA 3.1A -->
         <record model="product.product" id="p1_gkwh_tarifa_31A">
@@ -251,6 +305,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p1_e_tarifa_31A">
+            <field name="product_gkwh_id" ref="p1_gkwh_tarifa_31A"/>
+        </record>
         <record model="product.product" id="p2_gkwh_tarifa_31A">
             <field name="name">P2</field>
             <field name="categ_id" ref="categ_gkwh_t31A"/>
@@ -260,7 +317,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P3_gkwh_tarifa_31A">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p2_e_tarifa_31A">
+            <field name="product_gkwh_id" ref="p2_gkwh_tarifa_31A"/>
+        </record>
+        <record model="product.product" id="p3_gkwh_tarifa_31A">
             <field name="name">P3</field>
             <field name="categ_id" ref="categ_gkwh_t31A"/>
             <field name="type">service</field>
@@ -269,7 +329,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P4_gkwh_tarifa_31A">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p3_e_tarifa_31A">
+            <field name="product_gkwh_id" ref="p3_gkwh_tarifa_31A"/>
+        </record>
+        <record model="product.product" id="p4_gkwh_tarifa_31A">
             <field name="name">P4</field>
             <field name="categ_id" ref="categ_gkwh_t31A"/>
             <field name="type">service</field>
@@ -278,7 +341,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P5_gkwh_tarifa_31A">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p4_e_tarifa_31A">
+            <field name="product_gkwh_id" ref="p4_gkwh_tarifa_31A"/>
+        </record>
+        <record model="product.product" id="p5_gkwh_tarifa_31A">
             <field name="name">P5</field>
             <field name="categ_id" ref="categ_gkwh_t31A"/>
             <field name="type">service</field>
@@ -287,7 +353,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P6_gkwh_tarifa_31A">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p5_e_tarifa_31A">
+            <field name="product_gkwh_id" ref="p5_gkwh_tarifa_31A"/>
+        </record>
+        <record model="product.product" id="p6_gkwh_tarifa_31A">
             <field name="name">P6</field>
             <field name="categ_id" ref="categ_gkwh_t31A"/>
             <field name="type">service</field>
@@ -295,6 +364,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p6_e_tarifa_31A">
+            <field name="product_gkwh_id" ref="p6_gkwh_tarifa_31A"/>
         </record>
         <!-- TARIFA 3.1A LB-->
         <record model="product.product" id="p1_gkwh_tarifa_31A_LB">
@@ -306,6 +378,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p1_e_tarifa_31A_LB">
+            <field name="product_gkwh_id" ref="p1_gkwh_tarifa_31A_LB"/>
+        </record>
         <record model="product.product" id="p2_gkwh_tarifa_31A_LB">
             <field name="name">P2</field>
             <field name="categ_id" ref="categ_gkwh_t31A_LB"/>
@@ -315,7 +390,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P3_gkwh_tarifa_31A_LB">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p2_e_tarifa_31A_LB">
+            <field name="product_gkwh_id" ref="p2_gkwh_tarifa_31A_LB"/>
+        </record>
+        <record model="product.product" id="p3_gkwh_tarifa_31A_LB">
             <field name="name">P3</field>
             <field name="categ_id" ref="categ_gkwh_t31A_LB"/>
             <field name="type">service</field>
@@ -324,7 +402,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P4_gkwh_tarifa_31A_LB">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p3_e_tarifa_31A_LB">
+            <field name="product_gkwh_id" ref="p3_gkwh_tarifa_31A_LB"/>
+        </record>
+        <record model="product.product" id="p4_gkwh_tarifa_31A_LB">
             <field name="name">P4</field>
             <field name="categ_id" ref="categ_gkwh_t31A_LB"/>
             <field name="type">service</field>
@@ -333,7 +414,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P5_gkwh_tarifa_31A_LB">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p4_e_tarifa_31A_LB">
+            <field name="product_gkwh_id" ref="p4_gkwh_tarifa_31A_LB"/>
+        </record>
+        <record model="product.product" id="p5_gkwh_tarifa_31A_LB">
             <field name="name">P5</field>
             <field name="categ_id" ref="categ_gkwh_t31A_LB"/>
             <field name="type">service</field>
@@ -342,7 +426,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P6_gkwh_tarifa_31A_LB">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p5_e_tarifa_31A_LB">
+            <field name="product_gkwh_id" ref="p5_gkwh_tarifa_31A_LB"/>
+        </record>
+        <record model="product.product" id="p6_gkwh_tarifa_31A_LB">
             <field name="name">P6</field>
             <field name="categ_id" ref="categ_gkwh_t31A_LB"/>
             <field name="type">service</field>
@@ -350,6 +437,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p6_e_tarifa_31A_LB">
+            <field name="product_gkwh_id" ref="p6_gkwh_tarifa_31A_LB"/>
         </record>
         <!-- TARIFA 6.1-->
         <record model="product.product" id="p1_gkwh_tarifa_61">
@@ -361,6 +451,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p1_e_tarifa_61">
+            <field name="product_gkwh_id" ref="p1_gkwh_tarifa_61"/>
+        </record>
         <record model="product.product" id="p2_gkwh_tarifa_61">
             <field name="name">P2</field>
             <field name="categ_id" ref="categ_gkwh_t61"/>
@@ -370,7 +463,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P3_gkwh_tarifa_61">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p2_e_tarifa_61">
+            <field name="product_gkwh_id" ref="p2_gkwh_tarifa_61"/>
+        </record>
+        <record model="product.product" id="p3_gkwh_tarifa_61">
             <field name="name">P3</field>
             <field name="categ_id" ref="categ_gkwh_t61"/>
             <field name="type">service</field>
@@ -379,7 +475,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P4_gkwh_tarifa_61">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p3_e_tarifa_61">
+            <field name="product_gkwh_id" ref="p3_gkwh_tarifa_61"/>
+        </record>
+        <record model="product.product" id="p4_gkwh_tarifa_61">
             <field name="name">P4</field>
             <field name="categ_id" ref="categ_gkwh_t61"/>
             <field name="type">service</field>
@@ -388,7 +487,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P5_gkwh_tarifa_61">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p4_e_tarifa_61">
+            <field name="product_gkwh_id" ref="p4_gkwh_tarifa_61"/>
+        </record>
+        <record model="product.product" id="p5_gkwh_tarifa_61">
             <field name="name">P5</field>
             <field name="categ_id" ref="categ_gkwh_t61"/>
             <field name="type">service</field>
@@ -397,7 +499,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P6_gkwh_tarifa_61">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p5_e_tarifa_61">
+            <field name="product_gkwh_id" ref="p5_gkwh_tarifa_61"/>
+        </record>
+        <record model="product.product" id="p6_gkwh_tarifa_61">
             <field name="name">P6</field>
             <field name="categ_id" ref="categ_gkwh_t61"/>
             <field name="type">service</field>
@@ -405,6 +510,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p6_e_tarifa_61">
+            <field name="product_gkwh_id" ref="p6_gkwh_tarifa_61"/>
         </record>
         <!-- TARIFA 6.1A -->
         <record model="product.product" id="p1_gkwh_tarifa_61a">
@@ -416,6 +524,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p1_e_tarifa_61a">
+            <field name="product_gkwh_id" ref="p1_gkwh_tarifa_61a"/>
+        </record>
         <record model="product.product" id="p2_gkwh_tarifa_61a">
             <field name="name">P2</field>
             <field name="categ_id" ref="categ_gkwh_t61a"/>
@@ -425,7 +536,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P3_gkwh_tarifa_61a">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p2_e_tarifa_61a">
+            <field name="product_gkwh_id" ref="p2_gkwh_tarifa_61a"/>
+        </record>
+        <record model="product.product" id="p3_gkwh_tarifa_61a">
             <field name="name">P3</field>
             <field name="categ_id" ref="categ_gkwh_t61a"/>
             <field name="type">service</field>
@@ -434,7 +548,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P4_gkwh_tarifa_61a">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p3_e_tarifa_61a">
+            <field name="product_gkwh_id" ref="p3_gkwh_tarifa_61a"/>
+        </record>
+        <record model="product.product" id="p4_gkwh_tarifa_61a">
             <field name="name">P4</field>
             <field name="categ_id" ref="categ_gkwh_t61a"/>
             <field name="type">service</field>
@@ -443,7 +560,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P5_gkwh_tarifa_61a">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p4_e_tarifa_61a">
+            <field name="product_gkwh_id" ref="p4_gkwh_tarifa_61a"/>
+        </record>
+        <record model="product.product" id="p5_gkwh_tarifa_61a">
             <field name="name">P5</field>
             <field name="categ_id" ref="categ_gkwh_t61a"/>
             <field name="type">service</field>
@@ -452,7 +572,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P6_gkwh_tarifa_61a">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p5_e_tarifa_61a">
+            <field name="product_gkwh_id" ref="p5_gkwh_tarifa_61a"/>
+        </record>
+        <record model="product.product" id="p6_gkwh_tarifa_61a">
             <field name="name">P6</field>
             <field name="categ_id" ref="categ_gkwh_t61a"/>
             <field name="type">service</field>
@@ -460,6 +583,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p6_e_tarifa_61a">
+            <field name="product_gkwh_id" ref="p6_gkwh_tarifa_61a"/>
         </record>
         <!-- TARIFA 6.1B -->
         <record model="product.product" id="p1_gkwh_tarifa_61b">
@@ -471,6 +597,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p1_e_tarifa_61b">
+            <field name="product_gkwh_id" ref="p1_gkwh_tarifa_61b"/>
+        </record>
         <record model="product.product" id="p2_gkwh_tarifa_61b">
             <field name="name">P2</field>
             <field name="categ_id" ref="categ_gkwh_t61b"/>
@@ -480,7 +609,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P3_gkwh_tarifa_61b">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p2_e_tarifa_61b">
+            <field name="product_gkwh_id" ref="p2_gkwh_tarifa_61b"/>
+        </record>
+        <record model="product.product" id="p3_gkwh_tarifa_61b">
             <field name="name">P3</field>
             <field name="categ_id" ref="categ_gkwh_t61b"/>
             <field name="type">service</field>
@@ -489,7 +621,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P4_gkwh_tarifa_61b">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p3_e_tarifa_61b">
+            <field name="product_gkwh_id" ref="p3_gkwh_tarifa_61b"/>
+        </record>
+        <record model="product.product" id="p4_gkwh_tarifa_61b">
             <field name="name">P4</field>
             <field name="categ_id" ref="categ_gkwh_t61b"/>
             <field name="type">service</field>
@@ -498,7 +633,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P5_gkwh_tarifa_61b">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p4_e_tarifa_61b">
+            <field name="product_gkwh_id" ref="p4_gkwh_tarifa_61b"/>
+        </record>
+        <record model="product.product" id="p5_gkwh_tarifa_61b">
             <field name="name">P5</field>
             <field name="categ_id" ref="categ_gkwh_t61b"/>
             <field name="type">service</field>
@@ -507,7 +645,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P6_gkwh_tarifa_61b">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p5_e_tarifa_61b">
+            <field name="product_gkwh_id" ref="p5_gkwh_tarifa_61b"/>
+        </record>
+        <record model="product.product" id="p6_gkwh_tarifa_61b">
             <field name="name">P6</field>
             <field name="categ_id" ref="categ_gkwh_t61b"/>
             <field name="type">service</field>
@@ -515,6 +656,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p6_e_tarifa_61b">
+            <field name="product_gkwh_id" ref="p6_gkwh_tarifa_61b"/>
         </record>
         <!-- TARIFA 6.2 -->
         <record model="product.product" id="p1_gkwh_tarifa_62">
@@ -526,6 +670,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p1_e_tarifa_62">
+            <field name="product_gkwh_id" ref="p1_gkwh_tarifa_62"/>
+        </record>
         <record model="product.product" id="p2_gkwh_tarifa_62">
             <field name="name">P2</field>
             <field name="categ_id" ref="categ_gkwh_t62"/>
@@ -535,7 +682,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P3_gkwh_tarifa_62">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p2_e_tarifa_62">
+            <field name="product_gkwh_id" ref="p2_gkwh_tarifa_62"/>
+        </record>
+        <record model="product.product" id="p3_gkwh_tarifa_62">
             <field name="name">P3</field>
             <field name="categ_id" ref="categ_gkwh_t62"/>
             <field name="type">service</field>
@@ -544,7 +694,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P4_gkwh_tarifa_62">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p3_e_tarifa_62">
+            <field name="product_gkwh_id" ref="p3_gkwh_tarifa_62"/>
+        </record>
+        <record model="product.product" id="p4_gkwh_tarifa_62">
             <field name="name">P4</field>
             <field name="categ_id" ref="categ_gkwh_t62"/>
             <field name="type">service</field>
@@ -553,7 +706,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P5_gkwh_tarifa_62">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p4_e_tarifa_62">
+            <field name="product_gkwh_id" ref="p4_gkwh_tarifa_62"/>
+        </record>
+        <record model="product.product" id="p5_gkwh_tarifa_62">
             <field name="name">P5</field>
             <field name="categ_id" ref="categ_gkwh_t62"/>
             <field name="type">service</field>
@@ -562,7 +718,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P6_gkwh_tarifa_62">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p5_e_tarifa_62">
+            <field name="product_gkwh_id" ref="p5_gkwh_tarifa_62"/>
+        </record>
+        <record model="product.product" id="p6_gkwh_tarifa_62">
             <field name="name">P6</field>
             <field name="categ_id" ref="categ_gkwh_t62"/>
             <field name="type">service</field>
@@ -570,6 +729,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p6_e_tarifa_62">
+            <field name="product_gkwh_id" ref="p6_gkwh_tarifa_62"/>
         </record>
         <!-- TARIFA 6.3 -->
         <record model="product.product" id="p1_gkwh_tarifa_63">
@@ -581,6 +743,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p1_e_tarifa_63">
+            <field name="product_gkwh_id" ref="p1_gkwh_tarifa_63"/>
+        </record>
         <record model="product.product" id="p2_gkwh_tarifa_63">
             <field name="name">P2</field>
             <field name="categ_id" ref="categ_gkwh_t63"/>
@@ -590,7 +755,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P3_gkwh_tarifa_63">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p2_e_tarifa_63">
+            <field name="product_gkwh_id" ref="p2_gkwh_tarifa_63"/>
+        </record>
+        <record model="product.product" id="p3_gkwh_tarifa_63">
             <field name="name">P3</field>
             <field name="categ_id" ref="categ_gkwh_t63"/>
             <field name="type">service</field>
@@ -599,7 +767,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P4_gkwh_tarifa_63">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p3_e_tarifa_63">
+            <field name="product_gkwh_id" ref="p3_gkwh_tarifa_63"/>
+        </record>
+        <record model="product.product" id="p4_gkwh_tarifa_63">
             <field name="name">P4</field>
             <field name="categ_id" ref="categ_gkwh_t63"/>
             <field name="type">service</field>
@@ -608,7 +779,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P5_gkwh_tarifa_63">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p4_e_tarifa_63">
+            <field name="product_gkwh_id" ref="p4_gkwh_tarifa_63"/>
+        </record>
+        <record model="product.product" id="p5_gkwh_tarifa_63">
             <field name="name">P5</field>
             <field name="categ_id" ref="categ_gkwh_t63"/>
             <field name="type">service</field>
@@ -617,7 +791,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P6_gkwh_tarifa_63">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p5_e_tarifa_63">
+            <field name="product_gkwh_id" ref="p5_gkwh_tarifa_63"/>
+        </record>
+        <record model="product.product" id="p6_gkwh_tarifa_63">
             <field name="name">P6</field>
             <field name="categ_id" ref="categ_gkwh_t63"/>
             <field name="type">service</field>
@@ -625,6 +802,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p6_e_tarifa_63">
+            <field name="product_gkwh_id" ref="p6_gkwh_tarifa_63"/>
         </record>
         <!-- TARIFA 6.4 -->
         <record model="product.product" id="p1_gkwh_tarifa_64">
@@ -636,6 +816,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p1_e_tarifa_64">
+            <field name="product_gkwh_id" ref="p1_gkwh_tarifa_64"/>
+        </record>
         <record model="product.product" id="p2_gkwh_tarifa_64">
             <field name="name">P2</field>
             <field name="categ_id" ref="categ_gkwh_t64"/>
@@ -645,7 +828,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P3_gkwh_tarifa_64">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p2_e_tarifa_64">
+            <field name="product_gkwh_id" ref="p2_gkwh_tarifa_64"/>
+        </record>
+        <record model="product.product" id="p3_gkwh_tarifa_64">
             <field name="name">P3</field>
             <field name="categ_id" ref="categ_gkwh_t64"/>
             <field name="type">service</field>
@@ -654,7 +840,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P4_gkwh_tarifa_64">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p3_e_tarifa_64">
+            <field name="product_gkwh_id" ref="p3_gkwh_tarifa_64"/>
+        </record>
+        <record model="product.product" id="p4_gkwh_tarifa_64">
             <field name="name">P4</field>
             <field name="categ_id" ref="categ_gkwh_t64"/>
             <field name="type">service</field>
@@ -663,7 +852,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P5_gkwh_tarifa_64">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p4_e_tarifa_64">
+            <field name="product_gkwh_id" ref="p4_gkwh_tarifa_64"/>
+        </record>
+        <record model="product.product" id="p5_gkwh_tarifa_64">
             <field name="name">P5</field>
             <field name="categ_id" ref="categ_gkwh_t64"/>
             <field name="type">service</field>
@@ -672,7 +864,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P6_gkwh_tarifa_64">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p5_e_tarifa_64">
+            <field name="product_gkwh_id" ref="p5_gkwh_tarifa_64"/>
+        </record>
+        <record model="product.product" id="p6_gkwh_tarifa_64">
             <field name="name">P6</field>
             <field name="categ_id" ref="categ_gkwh_t64"/>
             <field name="type">service</field>
@@ -680,6 +875,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p6_e_tarifa_64">
+            <field name="product_gkwh_id" ref="p6_gkwh_tarifa_64"/>
         </record>
         <!-- TARIFA 6.5 -->
         <record model="product.product" id="p1_gkwh_tarifa_65">
@@ -691,6 +889,9 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p1_e_tarifa_65">
+            <field name="product_gkwh_id" ref="p1_gkwh_tarifa_65"/>
+        </record>
         <record model="product.product" id="p2_gkwh_tarifa_65">
             <field name="name">P2</field>
             <field name="categ_id" ref="categ_gkwh_t65"/>
@@ -700,7 +901,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P3_gkwh_tarifa_65">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p2_e_tarifa_65">
+            <field name="product_gkwh_id" ref="p2_gkwh_tarifa_65"/>
+        </record>
+        <record model="product.product" id="p3_gkwh_tarifa_65">
             <field name="name">P3</field>
             <field name="categ_id" ref="categ_gkwh_t65"/>
             <field name="type">service</field>
@@ -709,7 +913,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P4_gkwh_tarifa_65">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p3_e_tarifa_65">
+            <field name="product_gkwh_id" ref="p3_gkwh_tarifa_65"/>
+        </record>
+        <record model="product.product" id="p4_gkwh_tarifa_65">
             <field name="name">P4</field>
             <field name="categ_id" ref="categ_gkwh_t65"/>
             <field name="type">service</field>
@@ -718,7 +925,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P5_gkwh_tarifa_65">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p4_e_tarifa_65">
+            <field name="product_gkwh_id" ref="p4_gkwh_tarifa_65"/>
+        </record>
+        <record model="product.product" id="p5_gkwh_tarifa_65">
             <field name="name">P5</field>
             <field name="categ_id" ref="categ_gkwh_t65"/>
             <field name="type">service</field>
@@ -727,7 +937,10 @@
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
         </record>
-        <record model="product.product" id="P6_gkwh_tarifa_65">
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p5_e_tarifa_65">
+            <field name="product_gkwh_id" ref="p5_gkwh_tarifa_65"/>
+        </record>
+        <record model="product.product" id="p6_gkwh_tarifa_65">
             <field name="name">P6</field>
             <field name="categ_id" ref="categ_gkwh_t65"/>
             <field name="type">service</field>
@@ -735,6 +948,9 @@
             <field name="supply_method">buy</field>
             <field name="uom_id" ref="giscedata_polissa.uom_eneg_elec"/>
             <field name="uom_po_id" ref="giscedata_polissa.uom_eneg_elec"/>
+        </record>
+        <record model="giscedata.polissa.tarifa.periodes" id="giscedata_polissa.p6_e_tarifa_65">
+            <field name="product_gkwh_id" ref="p6_gkwh_tarifa_65"/>
         </record>
     </data>
 </openerp>

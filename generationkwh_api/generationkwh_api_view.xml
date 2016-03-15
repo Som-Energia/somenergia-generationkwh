@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_gkwh_invoice_line_owner_form">
+            <field name="name">generationkwh.invoice.line.owner.form</field>
+            <field name="model">generationkwh.invoice.line.owner</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Propietari Drets GkWh Factura">
+                    <field name="factura_id"/>
+                    <field name="factura_number"/>
+                    <field name="factura_line_id"/>
+                    <field name="owner_id"/>
+                </form>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_gkwh_invoice_line_owner_tree">
+            <field name="name">generationkwh.invoice.line.owner.tree</field>
+            <field name="model">generationkwh.invoice.line.owner</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Propietari Drets GkWh Factura">
+                    <field name="factura_id"/>
+                    <field name="factura_number"/>
+                    <field name="factura_line_id"/>
+                    <field name="owner_id"/>
+                </tree>
+            </field>
+        </record>
+    </data>
+</openerp>
