@@ -196,7 +196,7 @@ class GenerationkWhDealer(osv.osv):
                   context=None):
         """ Returns True if contract_id has generation kwh activated
             during the period"""
-        dealer = self._createDealer(cursor, uid)
+        dealer = self._createDealer(cursor, uid, context)
 
         return dealer.is_active(
             contract_id, start_date, end_date)
@@ -206,7 +206,7 @@ class GenerationkWhDealer(osv.osv):
                           context=None):
         """ Returns generationkwh [kWh] available for contract_id during the
             date interval, fare and period"""
-        dealer = self._createDealer(cursor, uid)
+        dealer = self._createDealer(cursor, uid, context)
 
         return dealer.get_available_kwh(
             contract_id, start_date, end_date, fare, period)
@@ -217,7 +217,7 @@ class GenerationkWhDealer(osv.osv):
         """Marks the indicated kwh as used, if available, for the contract,
            date interval, fare and period and returns the ones efectively used.
         """
-        dealer = self._createDealer(cursor, uid)
+        dealer = self._createDealer(cursor, uid, context)
         return dealer.use_kwh(
             contract_id, start_date, end_date, fare, period, kwh)
 
@@ -228,13 +228,14 @@ class GenerationkWhDealer(osv.osv):
            contract, date interval, fare and period and returns the ones
            efectively used.
         """
-        dealer = self._createDealer(cursor, uid)
+        dealer = self._createDealer(cursor, uid, context)
 
         return dealer.refund_kwh(
             contract_id, start_date, end_date, fare, period, kwh)
 
-    def _createDealer(self, cursor, uid):
+    def _createDealer(self, cursor, uid, context):
         # TODO: Feed the dealer with data sources
+        investments = InvestmentProvider(self, cursor, uid, context)
         return Dealer()
 
 
