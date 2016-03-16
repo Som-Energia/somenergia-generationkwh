@@ -353,7 +353,7 @@ class InvestmentManagement_Test(unittest.TestCase):
         self.assertB2BEqual(data)
 
     def test_listactive_withStart_excludeExpired_shouldBeSecondBatch(self):
-        # expired contracts do not show if start is specified and it is earlier
+        # Expired contracts do not show if start is specified and it is earlier
         clear()
         create(stop="2015-07-03", waitingDays=0, expirationYears=1)
         data = listactive(csv=True, start="2016-07-01")
@@ -368,7 +368,7 @@ class InvestmentManagement_Test(unittest.TestCase):
         self.assertB2BEqual(data)
 
     def test_listactive_withStartAndNoExpirationRunForEver_shouldBeSecondBatch(self):
-        # While they have no deactivation date, they remain active
+        # Active with no deactivation keeps being active for ever
         clear()
         create(stop="2015-06-30", waitingDays=0, expirationYears=1) # unlisted
         create(start="2015-07-03", stop="2015-07-03", waitingDays=0) # listed
