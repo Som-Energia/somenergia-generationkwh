@@ -41,6 +41,12 @@ def parseArgumments():
             action='store_true',
             help="accept changed b2b data",
             )
+        sub.add_argument(
+            '--verbose',
+            '-v',
+            action='store_true',
+            help="verbose messages",
+            )
     for sub in activate,create: 
         sub.add_argument(
             '--force',
@@ -282,15 +288,63 @@ class InvestmentManagement_Test(unittest.TestCase):
         data = listactive(csv=True)
         self.assertB2BEqual(data)
 
-def runtest(accept=False):
+    def test_create_inTwoBatches(self):
+        clear()
+        create(stop="2015-06-30", waitingDays=0, expirationYears=1)
+        create(stop="2015-07-03")
+        data = listactive(csv=True)
+
+    def test_listactive_withMember(self):
+        clear()
+        create(stop="2015-06-30")
+        data = listactive(csv=True, member=550)
+        self.assertMultiLineEqual(data,
+            '550\tFalse\tFalse\t3\n'
+            '550\tFalse\tFalse\t2\n'
+        )
+
+    def test_listactive_withStop_shouldBeFirstBatch(self):
+        clear()
+        create(stop="2015-07-03", waitingDays=0, expirationYears=1)
+        data = listactive(csv=True, stop="2015-06-30")
+        self.assertB2BEqual(data)
+
+    def test_listactive_withStopAndNoActivatedInvestments_shouldBeFirstBatch(self):
+        # Second batch is not activated, and is not shown even if we extend stop
+        clear()
+        create(stop="2015-06-30", waitingDays=0, expirationYears=1)
+        create(stop="2015-07-03")
+        data = listactive(csv=True, stop="2020-07-03")
+        self.assertB2BEqual(data)
+
+    def test_listactive_withStart_excludeExpired_shouldBeSecondBatch(self):
+        # expired contracts do not show if start is specified
+        clear()
+        create(stop="2015-07-03", waitingDays=0, expirationYears=1)
+        data = listactive(csv=True, start="2016-07-01")
+        self.assertB2BEqual(data)
+
+    def _test_listactive_withStartAndNoActivatedInvestments_shouldBeFirstBatch(self):
+        clear()
+        create(stop="2015-06-30", waitingDays=0, expirationYears=1)
+        create(stop="2015-07-03")
+        data = listactive(csv=True, start="2020-06-30")
+        self.assertB2BEqual(data)
+
+
+def runtest(accept=False, verbose=False):
     unittest.TestCase.acceptMode=accept
     sys.argv.remove("runtest")
     if accept: sys.argv.remove("--accept")
+    unittest.TestCase.__str__ = unittest.TestCase.id
+    sys.argv.append('--verbose')
     unittest.main()
 
 c = erppeek.Client(**dbconfig.erppeek)
 
 def main():
+    # Calls the function homonimous to the subcommand
+    # with the options as paramteres
     args = parseArgumments()
     print args.dump()
     subcommand = args.subcommand
