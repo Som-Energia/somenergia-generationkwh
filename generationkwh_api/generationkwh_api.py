@@ -151,6 +151,15 @@ class InvestmentProvider():
         self.context = context
 
     def shareContracts(self, member=None, start=None, end=None):
+        """
+            List active investments between start and end, both included,
+            for the member of for any member if member is None.
+            If start is not specified, it lists activated before end.
+            If end is not specified, it list activated and not deactivated
+            before start.
+            If neither start or end are specified all investments are listed
+            active or not.
+        """
         filters = []
         print end
         if member: filters.append( ('member_id','=',member) )

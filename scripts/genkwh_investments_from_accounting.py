@@ -104,6 +104,15 @@ def clear(**args):
     c.unlink('generationkwh.investments', allinvestments)
 
 def listactive(member=None, start=None, stop=None, csv=False):
+    """
+        List active investments between start and stop, both included,
+        for the member of for any member if member is None.
+        If start is not specified, it lists activated before stop.
+        If stop is not specified, it list activated and not deactivated
+        before start.
+        If neither start or stop are specified all investments are listed
+        active or not.
+    """
     def buildcsv(data):
         return u''.join((
             u"\t".join((
