@@ -50,7 +50,6 @@ class GenerationkWhInvestments(osv.osv):
             context=None):
 
         provider = InvestmentProvider(self, cursor, uid, context)
-        print 'erp', end
         return provider.shareContracts(member, start, end)
 
 
@@ -80,7 +79,6 @@ class GenerationkWhInvestments(osv.osv):
 
         movelinesids = MoveLine.search(cursor, uid, criteria, order='date_created asc, id asc', context=context)
         for line in MoveLine.browse(cursor, uid, movelinesids, context):
-#            print 'Moveline', start, stop, line.id, line.date_created
             partnerid = line.partner_id.id
             if not partnerid:
                 # Handle cases with no partner_id
@@ -161,7 +159,6 @@ class InvestmentProvider():
             active or not.
         """
         filters = []
-        print end
         if member: filters.append( ('member_id','=',member) )
         if end: filters += [
             ('activation_date','<=',end), # No activation also filtered

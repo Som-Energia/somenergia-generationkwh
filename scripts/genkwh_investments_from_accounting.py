@@ -355,7 +355,6 @@ def runtest(accept=False, verbose=False):
     sys.argv.remove("runtest")
     if accept: sys.argv.remove("--accept")
     unittest.TestCase.__str__ = unittest.TestCase.id
-    sys.argv.append('--verbose')
     unittest.main()
 
 c = erppeek.Client(**dbconfig.erppeek)
