@@ -158,10 +158,13 @@ class InvestmentProvider():
             ('activation_date','<=',end), # No activation also filtered
             ]
         if start: filters += [
-#            '|',
+            '&', 
+            ('activation_date','!=',False),
+            '|', 
             ('deactivation_date','>=',start),
-#            ('deactivation_date','=',False),
+            ('deactivation_date','=',False),
             ]
+
         Investments = self.erp.pool.get('generationkwh.investments')
         ids = Investments.search(self.cursor, self.uid, filters)
         contracts = Investments.read(self.cursor, self.uid, ids)

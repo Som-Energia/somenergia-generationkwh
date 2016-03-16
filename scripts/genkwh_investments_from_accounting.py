@@ -169,6 +169,41 @@ def activate(
                     ),
                 )
         c.write('generationkwh.investments', investment.id, updateDict)
+"""
+import os
+
+def loadErp(dbcfg):
+    if hasattr(loadErp, 'pool'):
+        return loadErp.db, loadErp.pool
+
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),"../../erp/server/bin")))
+
+    import netsvc
+    import tools
+    tools.config['db_name'] = dbcfg.database
+    tools.config['db_host'] = dbcfg.host
+    tools.config['db_user'] = dbcfg.user
+    tools.config['db_password'] = dbcfg.password
+    tools.config['db_port'] = dbcfg.port
+    tools.config['root_path'] = "../erp/server"
+    tools.config['addons_path'] = "../erp/server/bin/addons"
+    tools.config['log_level'] = None #'warn'
+    tools.config['log_file'] = open('/dev/null','w')
+    #tools.config['log_handler'] = [':WARNING']
+    tools.config['init'] = []
+    tools.config['demo'] = []
+    tools.config['update'] = []
+
+    import pooler
+    import osv
+
+    osv_ = osv.osv.osv_pool()
+    loadErp.db,loadErp.pool = pooler.get_db_and_pool(tools.config['db_name'])
+    netsvc.SERVICES['im_a_worker'] = True
+
+    return loadErp.db, loadErp.pool
+db, pool = loadErp(ns(dbconfig.psycopg))
+"""
 
 import unittest
 import b2btest
@@ -313,22 +348,31 @@ class InvestmentManagement_Test(unittest.TestCase):
         # Second batch is not activated, and is not shown even if we extend stop
         clear()
         create(stop="2015-06-30", waitingDays=0, expirationYears=1)
-        create(stop="2015-07-03")
+        create(start="2015-07-03", stop="2015-07-03")
         data = listactive(csv=True, stop="2020-07-03")
         self.assertB2BEqual(data)
 
     def test_listactive_withStart_excludeExpired_shouldBeSecondBatch(self):
-        # expired contracts do not show if start is specified
+        # expired contracts do not show if start is specified and it is earlier
         clear()
         create(stop="2015-07-03", waitingDays=0, expirationYears=1)
         data = listactive(csv=True, start="2016-07-01")
         self.assertB2BEqual(data)
 
-    def _test_listactive_withStartAndNoActivatedInvestments_shouldBeFirstBatch(self):
+    def test_listactive_withStartAndNoActivatedInvestments_shouldBeFirstBatch(self):
+        # Unactivated contracts are not listed if start is specified
         clear()
-        create(stop="2015-06-30", waitingDays=0, expirationYears=1)
-        create(stop="2015-07-03")
-        data = listactive(csv=True, start="2020-06-30")
+        create(stop="2015-06-30", waitingDays=0, expirationYears=1) # listed
+        create(start="2015-07-03", stop="2015-07-03") # unlisted
+        data = listactive(csv=True, start="2016-06-30")
+        self.assertB2BEqual(data)
+
+    def test_listactive_withStartAndNoExpirationRunForEver_shouldBeSecondBatch(self):
+        # While they have no deactivation date, they remain active
+        clear()
+        create(stop="2015-06-30", waitingDays=0, expirationYears=1) # unlisted
+        create(start="2015-07-03", stop="2015-07-03", waitingDays=0) # listed
+        data = listactive(csv=True, start="2036-06-30")
         self.assertB2BEqual(data)
 
 
