@@ -178,41 +178,6 @@ def activate(
                     ),
                 )
         c.write('generationkwh.investments', investment.id, updateDict)
-"""
-import os
-
-def loadErp(dbcfg):
-    if hasattr(loadErp, 'pool'):
-        return loadErp.db, loadErp.pool
-
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),"../../erp/server/bin")))
-
-    import netsvc
-    import tools
-    tools.config['db_name'] = dbcfg.database
-    tools.config['db_host'] = dbcfg.host
-    tools.config['db_user'] = dbcfg.user
-    tools.config['db_password'] = dbcfg.password
-    tools.config['db_port'] = dbcfg.port
-    tools.config['root_path'] = "../erp/server"
-    tools.config['addons_path'] = "../erp/server/bin/addons"
-    tools.config['log_level'] = None #'warn'
-    tools.config['log_file'] = open('/dev/null','w')
-    #tools.config['log_handler'] = [':WARNING']
-    tools.config['init'] = []
-    tools.config['demo'] = []
-    tools.config['update'] = []
-
-    import pooler
-    import osv
-
-    osv_ = osv.osv.osv_pool()
-    loadErp.db,loadErp.pool = pooler.get_db_and_pool(tools.config['db_name'])
-    netsvc.SERVICES['im_a_worker'] = True
-
-    return loadErp.db, loadErp.pool
-db, pool = loadErp(ns(dbconfig.psycopg))
-"""
 
 import unittest
 import b2btest
