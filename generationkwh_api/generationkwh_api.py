@@ -45,6 +45,12 @@ class GenerationkWhInvestments(osv.osv):
             ),
         )
 
+    def holidays(self, cursor, uid,
+            start, stop,
+            context=None):
+        holidaysProvider = HolidaysProvider(self, cursor, uid, context)
+        return holidaysProvider.get(start, stop)
+
     def active_investments(self, cursor, uid,
             member, start, end,
             context=None):
@@ -140,13 +146,16 @@ class GenerationkWhInvestments(osv.osv):
 
 GenerationkWhInvestments()
 
+class ErpWrapper(object):
 
-class InvestmentProvider():
     def __init__(self, erp, cursor, uid, context=None):
         self.erp = erp
         self.cursor = cursor
         self.uid = uid
         self.context = context
+
+
+class InvestmentProvider(ErpWrapper):
 
     def shareContracts(self, member=None, start=None, end=None):
         """
@@ -185,6 +194,17 @@ class InvestmentProvider():
             for c in sorted(contracts, key=lambda x: x['id'] )
         ]
 
+class HolidaysProvider(ErpWrapper):
+    def get(self, start, stop):
+        Holidays = self.erp.pool.get('giscedata.dfestius')
+        ids = Holidays.search(self.cursor, self.uid, [
+            ('name', '>=', start),
+            ('name', '<=', stop),
+            ], 0,None,None,self.context)
+        return [
+            h['name']
+            for h in Holidays.read(self.cursor, self.uid, ids, ['name'], self.context)
+            ]
 
 class GenerationkWhDealer(osv.osv):
 
@@ -236,6 +256,7 @@ class GenerationkWhDealer(osv.osv):
     def _createDealer(self, cursor, uid, context):
         # TODO: Feed the dealer with data sources
         investments = InvestmentProvider(self, cursor, uid, context)
+        holidays = HolidaysProvider(self, cursor, uid, context)
         return Dealer()
 
 

@@ -182,6 +182,21 @@ def activate(
 import unittest
 import b2btest
 import sys
+
+
+class Holidays_Test(unittest.TestCase):
+    def setUp(self):
+        self.maxDiff=None
+        self.b2bdatapath="b2bdata"
+
+    def test_holidays(self):
+        self.assertEqual(
+            c.GenerationkwhInvestments.holidays("2015-12-25", "2015-12-25"),
+            [
+                '2015-12-25',
+            ])
+
+    
 class InvestmentManagement_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
