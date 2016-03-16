@@ -14,6 +14,68 @@ def isodatetime(string):
 def isodate(date):
     return date and datetime.datetime.strptime(date, '%Y-%m-%d')
 
+# Data providers
+
+class ErpWrapper(object):
+
+    def __init__(self, erp, cursor, uid, context=None):
+        self.erp = erp
+        self.cursor = cursor
+        self.uid = uid
+        self.context = context
+
+class InvestmentProvider(ErpWrapper):
+
+    def shareContracts(self, member=None, start=None, end=None):
+        """
+            List active investments between start and end, both included,
+            for the member of for any member if member is None.
+            If start is not specified, it lists activated before end.
+            If end is not specified, it list activated and not deactivated
+            before start.
+            If neither start or end are specified all investments are listed
+            active or not.
+        """
+        filters = []
+        if member: filters.append( ('member_id','=',member) )
+        if end: filters += [
+            ('activation_date','<=',end), # No activation also filtered
+            ]
+        if start: filters += [
+            '&', 
+            ('activation_date','!=',False),
+            '|', 
+            ('deactivation_date','>=',start),
+            ('deactivation_date','=',False),
+            ]
+
+        Investments = self.erp.pool.get('generationkwh.investments')
+        ids = Investments.search(self.cursor, self.uid, filters)
+        contracts = Investments.read(self.cursor, self.uid, ids)
+
+        return [
+            (
+                c['member_id'][0],
+                isodate(c['activation_date']),
+                isodate(c['deactivation_date']),
+                c['nshares'],
+            )
+            for c in sorted(contracts, key=lambda x: x['id'] )
+        ]
+
+class HolidaysProvider(ErpWrapper):
+    def get(self, start, stop):
+        Holidays = self.erp.pool.get('giscedata.dfestius')
+        ids = Holidays.search(self.cursor, self.uid, [
+            ('name', '>=', start),
+            ('name', '<=', stop),
+            ], 0,None,None,self.context)
+        return [
+            h['name']
+            for h in Holidays.read(self.cursor, self.uid, ids, ['name'], self.context)
+            ]
+
+# Models
 
 class GenerationkWhInvestments(osv.osv):
 
@@ -45,6 +107,7 @@ class GenerationkWhInvestments(osv.osv):
             ),
         )
 
+    # TODO: Move it elsewhere
     def holidays(self, cursor, uid,
             start, stop,
             context=None):
@@ -142,69 +205,9 @@ class GenerationkWhInvestments(osv.osv):
                 activation_date=activation,
                 deactivation_date=deactivation,
                 ))
- 
 
 GenerationkWhInvestments()
 
-class ErpWrapper(object):
-
-    def __init__(self, erp, cursor, uid, context=None):
-        self.erp = erp
-        self.cursor = cursor
-        self.uid = uid
-        self.context = context
-
-
-class InvestmentProvider(ErpWrapper):
-
-    def shareContracts(self, member=None, start=None, end=None):
-        """
-            List active investments between start and end, both included,
-            for the member of for any member if member is None.
-            If start is not specified, it lists activated before end.
-            If end is not specified, it list activated and not deactivated
-            before start.
-            If neither start or end are specified all investments are listed
-            active or not.
-        """
-        filters = []
-        if member: filters.append( ('member_id','=',member) )
-        if end: filters += [
-            ('activation_date','<=',end), # No activation also filtered
-            ]
-        if start: filters += [
-            '&', 
-            ('activation_date','!=',False),
-            '|', 
-            ('deactivation_date','>=',start),
-            ('deactivation_date','=',False),
-            ]
-
-        Investments = self.erp.pool.get('generationkwh.investments')
-        ids = Investments.search(self.cursor, self.uid, filters)
-        contracts = Investments.read(self.cursor, self.uid, ids)
-
-        return [
-            (
-                c['member_id'][0],
-                isodate(c['activation_date']),
-                isodate(c['deactivation_date']),
-                c['nshares'],
-            )
-            for c in sorted(contracts, key=lambda x: x['id'] )
-        ]
-
-class HolidaysProvider(ErpWrapper):
-    def get(self, start, stop):
-        Holidays = self.erp.pool.get('giscedata.dfestius')
-        ids = Holidays.search(self.cursor, self.uid, [
-            ('name', '>=', start),
-            ('name', '<=', stop),
-            ], 0,None,None,self.context)
-        return [
-            h['name']
-            for h in Holidays.read(self.cursor, self.uid, ids, ['name'], self.context)
-            ]
 
 class GenerationkWhDealer(osv.osv):
 
