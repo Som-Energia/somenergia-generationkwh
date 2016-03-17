@@ -81,7 +81,7 @@ class FarePeriodCurve_Test(unittest.TestCase):
             holidays
         )
 
-        mask =self.setupCurve('2015-12-01', '2015-12-31', '3.0A', 'P1',['2015-12-25'])
+        mask =self.setupCurve('2015-12-01', '2015-12-31', '3.0A', 'P1', ['2015-12-25'])
 
         self.assertArrayEqual(mask,
             + 4 * [ [0]*18 + [1]*4+ [0]*3 ]
@@ -103,7 +103,7 @@ class FarePeriodCurve_Test(unittest.TestCase):
             holidays,
         )
 
-        mask = p.mask('2015-12-7', '2015-12-31', '3.0A', 'P1')
+        mask = self.setupCurve('2015-12-7', '2015-12-31', '3.0A', 'P1', ['2015-12-25'])
 
         self.assertArrayEqual(mask,
             + 5 * [ [0]*18 + [1]*4+ [0]*3 ]
@@ -123,7 +123,7 @@ class FarePeriodCurve_Test(unittest.TestCase):
             holidays,
         )
 
-        mask = p.mask('2015-12-7', '2015-12-27', '3.0A', 'P1')
+        mask = self.setupCurve('2015-12-7', '2015-12-27', '3.0A', 'P1', ['2015-12-25'])
 
         self.assertArrayEqual(mask,
             + 5 * [ [0]*18 + [1]*4+ [0]*3 ]
@@ -145,7 +145,7 @@ class FarePeriodCurve_Test(unittest.TestCase):
            holidays 
         )
 
-        mask = p.mask('2015-12-25', '2015-12-25', '3.0A', 'P1')
+        mask = self.setupCurve('2015-12-25', '2015-12-25', '3.0A', 'P1', ['2015-12-25'])
 
         self.assertArrayEqual(mask,
             + 1 * [ [0]*25 ]
@@ -159,7 +159,7 @@ class FarePeriodCurve_Test(unittest.TestCase):
             holidays
         )
 
-        mask = p.mask('2015-11-25', '2015-12-25', '3.0A', 'P1')
+        mask = self.setupCurve('2015-11-25', '2015-12-25', '3.0A', 'P1', ['2015-12-25'])
 
         self.assertArrayEqual(mask,
             + 3 * [ [0]*18 + [1]*4+ [0]*3 ]
