@@ -8,7 +8,7 @@ class HolidaysProvidersMockup(object):
         return self.holidays
 
     def set(self, holidays):
-        self.holidays=holidays
+        self.holidays= [isodate(holiday) for holiday in holidays]
 
     def __init__(self, holidays=[]):
         self.set(holidays)
@@ -75,13 +75,13 @@ class FarePeriodCurve_Test(unittest.TestCase):
 
     def test_30A_P1_singleMonth_withHolidays(self):
         holidays = HolidaysProvidersMockup([
-            isodate('2015-12-25'),
+            '2015-12-25',
         ])
         p = FarePeriodCurve(holidays=
             holidays
         )
 
-        mask = p.mask('2015-12-01', '2015-12-31', '3.0A', 'P1')
+        mask =self.setupCurve('2015-12-01', '2015-12-31', '3.0A', 'P1',['2015-12-25'])
 
         self.assertArrayEqual(mask,
             + 4 * [ [0]*18 + [1]*4+ [0]*3 ]
@@ -97,7 +97,7 @@ class FarePeriodCurve_Test(unittest.TestCase):
 
     def test_30A_P1_startedMonth(self):
         holidays = HolidaysProvidersMockup([
-            isodate('2015-12-25'),
+            '2015-12-25',
         ])
         p = FarePeriodCurve(holidays=
             holidays,
@@ -117,7 +117,7 @@ class FarePeriodCurve_Test(unittest.TestCase):
 
     def test_30A_P1_partialMonth(self):
         holidays = HolidaysProvidersMockup([
-            isodate('2015-12-25'),
+            '2015-12-25',
         ])
         p = FarePeriodCurve(holidays=
             holidays,
@@ -137,7 +137,7 @@ class FarePeriodCurve_Test(unittest.TestCase):
     def test_30A_P1_singleDay(self):
         
         holidays = HolidaysProvidersMockup([
-            isodate('2015-12-25'),
+            '2015-12-25',
         ])
 
 
@@ -153,7 +153,7 @@ class FarePeriodCurve_Test(unittest.TestCase):
 
     def test_30A_P1_accrossMonths(self):
         holidays = HolidaysProvidersMockup([
-            isodate('2015-12-25'),
+            '2015-12-25',
         ])
         p = FarePeriodCurve(holidays=
             holidays
