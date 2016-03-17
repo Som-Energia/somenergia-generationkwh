@@ -3,28 +3,46 @@
 from fareperiodcurve import FarePeriodCurve, libfacturacioatr, isodate
 import unittest
 
+class HolidaysProvidersMockup(object):
+    def get(self, start, stop):
+        return self.holidays
+
+    def set(self, holidays):
+        self.holidays=holidays
+
+    def __init__(self, holidays=[]):
+        self.set(holidays)
+
 @unittest.skipIf(libfacturacioatr is None,
     'non-free libfacturacioatr module is not installed' )
 
 class FarePeriodCurve_Test(unittest.TestCase):
+    def setupCurve(self,start_date,end_date,fare,period,holidays=[]):
+        
+        p = FarePeriodCurve(
+            holidays=HolidaysProvidersMockup(holidays)
+            )
 
+        return p.mask(start_date, end_date, fare, period)
+
+        
     def assertArrayEqual(self, result, expected):
         # TODO: Change this as we turn it into a numpy array
         return self.assertEqual(list(result), expected)
 
     def test_20A_singleMonth(self):
-        p = FarePeriodCurve()
+        p = FarePeriodCurve(holidays=HolidaysProvidersMockup())
 
-        mask = p.mask('2015-12-01', '2015-12-31', '2.0A', 'P1')
+        mask = self.setupCurve('2015-12-01', '2015-12-31', '2.0A', 'P1')
 
         self.assertArrayEqual(mask, 
             + 31 * [ [1]*24+[0] ]
             )
 
     def test_30A_P1_singleMonth(self):
-        p = FarePeriodCurve()
+        p = FarePeriodCurve(holidays=HolidaysProvidersMockup())
 
-        mask = p.mask('2015-12-01', '2015-12-31', '3.0A', 'P1')
+        mask = self.setupCurve('2015-12-01', '2015-12-31', '3.0A', 'P1')
 
         self.assertArrayEqual(mask,
             + 4 * [ [0]*18 + [1]*4+ [0]*3 ]
@@ -39,9 +57,9 @@ class FarePeriodCurve_Test(unittest.TestCase):
             )
 
     def test_30A_P3_singleMonth(self):
-        p = FarePeriodCurve()
+        p = FarePeriodCurve(holidays=HolidaysProvidersMockup())
 
-        mask = p.mask('2015-12-01', '2015-12-31', '3.0A', 'P3')
+        mask = self.setupCurve('2015-12-01', '2015-12-31', '3.0A', 'P3')
 
         self.assertArrayEqual(mask,
             + 4 * [ [1]*8 + [0]*17 ]
@@ -56,9 +74,12 @@ class FarePeriodCurve_Test(unittest.TestCase):
             )
 
     def test_30A_P1_singleMonth_withHolidays(self):
-        p = FarePeriodCurve(holidays=[
+        holidays = HolidaysProvidersMockup([
             isodate('2015-12-25'),
         ])
+        p = FarePeriodCurve(holidays=
+            holidays
+        )
 
         mask = p.mask('2015-12-01', '2015-12-31', '3.0A', 'P1')
 
@@ -75,9 +96,12 @@ class FarePeriodCurve_Test(unittest.TestCase):
             )
 
     def test_30A_P1_startedMonth(self):
-        p = FarePeriodCurve(holidays=[
+        holidays = HolidaysProvidersMockup([
             isodate('2015-12-25'),
         ])
+        p = FarePeriodCurve(holidays=
+            holidays,
+        )
 
         mask = p.mask('2015-12-7', '2015-12-31', '3.0A', 'P1')
 
@@ -92,9 +116,12 @@ class FarePeriodCurve_Test(unittest.TestCase):
             )
 
     def test_30A_P1_partialMonth(self):
-        p = FarePeriodCurve(holidays=[
+        holidays = HolidaysProvidersMockup([
             isodate('2015-12-25'),
         ])
+        p = FarePeriodCurve(holidays=
+            holidays,
+        )
 
         mask = p.mask('2015-12-7', '2015-12-27', '3.0A', 'P1')
 
@@ -108,9 +135,15 @@ class FarePeriodCurve_Test(unittest.TestCase):
             )
 
     def test_30A_P1_singleDay(self):
-        p = FarePeriodCurve(holidays=[
+        
+        holidays = HolidaysProvidersMockup([
             isodate('2015-12-25'),
         ])
+
+
+        p = FarePeriodCurve(holidays=
+           holidays 
+        )
 
         mask = p.mask('2015-12-25', '2015-12-25', '3.0A', 'P1')
 
@@ -119,9 +152,12 @@ class FarePeriodCurve_Test(unittest.TestCase):
             )
 
     def test_30A_P1_accrossMonths(self):
-        p = FarePeriodCurve(holidays=[
+        holidays = HolidaysProvidersMockup([
             isodate('2015-12-25'),
         ])
+        p = FarePeriodCurve(holidays=
+            holidays
+        )
 
         mask = p.mask('2015-11-25', '2015-12-25', '3.0A', 'P1')
 

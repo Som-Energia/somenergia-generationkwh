@@ -19,6 +19,7 @@ setup(
 	install_requires=[
 		'yamlns',
         'b2btest',
+        'numpy==1.8.2', # Avoid new unstable versions
 #		'libfacturacioatr',
 	],
 	include_package_data = True,

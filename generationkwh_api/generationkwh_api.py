@@ -71,7 +71,7 @@ class HolidaysProvider(ErpWrapper):
             ('name', '<=', stop),
             ], 0,None,None,self.context)
         return [
-            h['name']
+            isodate(h['name'])
             for h in Holidays.read(self.cursor, self.uid, ids, ['name'], self.context)
             ]
 

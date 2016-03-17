@@ -20,7 +20,7 @@ def isodate(string):
     return datetime.datetime.strptime(string, '%Y-%m-%d').date()
 
 class FarePeriodCurve(object):
-    def __init__(self, holidays=[]):
+    def __init__(self, holidays):
         self.holidays = holidays
 
     def mask(self, begin_date, end_date, fare, period):
@@ -43,7 +43,7 @@ class FarePeriodCurve(object):
             t.get_period_component(
                 datetime.date(month//12, month%12+1, 1),
                 period,
-                holidays=self.holidays
+                holidays=self.holidays.get(begin_date,end_date)
                 ).matrix
             for month in xrange(startMonth, endMonth+1)], [])
         return allDays[begin.day-1:] [:(end-begin).days+1]

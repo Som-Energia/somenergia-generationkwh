@@ -27,6 +27,12 @@ This package holds the business logic to handle the use rights
 coming from the production plants related to this campaing and
 transfer them to user invoices.
 
+## Dependencies
 
+In Debian/Ubuntu
+
+```bash
+$ sudo apt-get build-dep python-numpy
+```
 
 
