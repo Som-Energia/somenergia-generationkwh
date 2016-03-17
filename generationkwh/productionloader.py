@@ -35,4 +35,20 @@ class ProductionLoader(object):
         return intervalStart+datetime.timedelta(days=len(curve)//25)
  
 
+
+    def doit(self):
+        firstMeasurement = self.productionAggregator.getFirstMeasurementDate()
+        remainders = self.remainderProvider.get()
+        recomputeStart = self.startPoint(firstMeasurement, remainders)
+        aggregatedProduction = self.productionAggregator.getWh(recomputeStart)
+        recomputeStop = self.endPoint(recomputeStart, aggregatedProduction)
+        activePlantShareCurve = self.activePlantShareCurver.get(recomputeStart, recomputeStop)
+        userRightsProvider = UserRightsPerShare()
+        for n, date, remainder in remainders:
+            userRights, newRemainder = userRightsProvider.computeRights(
+                aggregatedProduction, activePlantShareCurve, n, remainder)
+            self.remainderProvider.set(n, recomputeStop, newRemainder)
+            userRightsProvider.write(n, recomputeStart, userRights)
+        
+
 # vim: ts=4 sw=4 et
