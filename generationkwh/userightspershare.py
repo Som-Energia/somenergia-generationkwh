@@ -11,10 +11,6 @@ class UserRightsPerShare(object):
         Provides the hourly curve of kWh available for a member
         with a given number of shares.
     """
-    def __init__(self, production=None, activeShares=None, cache=None):
-        self._production = production
-        self._activeShares = activeShares
-        self._cache = cache
 
     def computeRights(self, production, activeShares, nshares=1, remainder=0):
 
