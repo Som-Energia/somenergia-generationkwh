@@ -177,6 +177,45 @@ class MongoTimeCurve_Test(unittest.TestCase):
             list(curve),
             +24*[0]+[10])
 
+    @unittest.skip("Not implemented yet")
+    def test_get_dayligthIntoSummer(self):
+        mtc = self.setupPoints([
+            ('2015-03-29 00:00:00', 'miplanta', 1),
+            ('2015-03-29 01:00:00', 'miplanta', 2),
+#            ('2015-03-29 02:00:00', 'miplanta', 2), # should fail (other test?)
+            ('2015-03-29 03:00:00', 'miplanta', 3),
+            ('2015-03-29 23:00:00', 'miplanta', 4),
+            ])
+
+        curve = mtc.get(
+            start=isodate('2015-03-29'),
+            stop=isodate('2015-03-29'),
+            filter='miplanta',
+            field='ae',
+            )
+        self.assertEqual(
+            list(curve),
+            [0,1,2,3]+19*[0]+[4,0])
+
+    @unittest.skip("Not implemented yet")
+    def test_get_dayligthIntoWinter(self):
+        mtc = self.setupPoints([
+            ('2015-10-25 00:00:00', 'miplanta', 1),
+            ('2015-10-25 02:00:00', 'miplanta', 2), # how to mark it??
+            ('2015-10-25 02:00:00', 'miplanta', 3), # how to mark it??
+            ('2015-10-25 23:00:00', 'miplanta', 4),
+            ])
+
+        curve = mtc.get(
+            start=isodate('2015-10-25'),
+            stop=isodate('2015-10-25'),
+            filter='miplanta',
+            field='ae',
+            )
+        self.assertEqual(
+            list(curve),
+            [1,0,2,3]+20*[0]+[4])
+
     def test_fillPoint_complaintsMissingDatetime(self):
         mtc = MongoTimeCurve(self.db, self.collection)
         with self.assertRaises(Exception) as ass:
