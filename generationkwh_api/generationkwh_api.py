@@ -70,7 +70,7 @@ class HolidaysProvider(ErpWrapper):
         ids = Holidays.search(self.cursor, self.uid, [
             ('name', '>=', start),
             ('name', '<=', stop),
-            ], 0,'name desc',None,self.context)
+            ], 0,None,'name desc',self.context)
         return [
             isodate(h['name'])
             for h in Holidays.read(self.cursor, self.uid,
