@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 import unittest
 import datetime
-import dbconfig
-import erppeek
+dbconfig = None
+try:
+    import dbconfig
+    import erppeek
+except ImportError:
+    pass
 
 def isodate(date):
     return datetime.datetime.strptime(date, '%Y-%m-%d').date()
 
-#@unittest.skip("depends on ERP")
+@unittest.skipIf(dbconfig, "depends on ERP")
 class Remainder_Test(unittest.TestCase):
 
     def setupProvider(self,remainders=[]):
