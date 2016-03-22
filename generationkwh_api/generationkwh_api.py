@@ -77,7 +77,6 @@ class HolidaysProvider(ErpWrapper):
                 ids, ['name'], self.context)
             ]
 
-
 class GenerationkWhRemainders(osv.osv):
     """
     Remainders, in Wh, after dividing the aggregated
