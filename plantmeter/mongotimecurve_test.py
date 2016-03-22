@@ -12,6 +12,7 @@ def isodatetime(string):
 def isodate(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d")
 
+
 class MongoTimeCurve_Test(unittest.TestCase):
 
     def setUp(self):
@@ -261,9 +262,5 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
         lastdate = mtc.lastFullDate('miplanta')
         self.assertEqual(lastdate,isodate('2015-01-01'))
- 
-
-
-
 
 # vim: et ts=4 sw=4

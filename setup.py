@@ -5,7 +5,7 @@ readme = open("README.md").read()
 
 setup(
 	name = "plantmeter",
-	version = "0.5",
+	version = "0.6",
 	description =
 		"OpenERP module and library to manage multisite energy generation",
 	author = "Som Energia SCCL",
@@ -18,7 +18,6 @@ setup(
 		],
 	install_requires=[
         'pymongo<3.0',
-        'marshmallow==2.0.0b2',
         'numpy',
         'xlrd',
         'yamlns',

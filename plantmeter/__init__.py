@@ -22,4 +22,4 @@ def get_data(path):
     return os.path.join(_ROOT, 'data', path)
 
 from . import mongotimecurve
-
+from . import resource 
