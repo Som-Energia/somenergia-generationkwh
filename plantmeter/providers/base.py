@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 
 
-class BaseScheme(object):
-    """Base scheme interface
+class BaseProvider(object):
+    """Base provider interface
 
-    :param uri: URI to get the properties for the scheme 
+    :param uri: URI to get the properties for the provider 
     """
     def __init__(self, uri):
         pass
@@ -23,3 +23,11 @@ class BaseScheme(object):
 
     def disconnect(self):
         raise NotImplementedError()
+
+class BaseProviderConnectionError(Exception):
+	pass
+
+class BaseProviderDownloadError(Exception):
+	pass
+
+# vim: et ts=4 sw=4

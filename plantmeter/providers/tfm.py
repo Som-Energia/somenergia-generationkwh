@@ -1,10 +1,10 @@
-from plantmeter.schemes import BaseScheme, register, urlparse
+from plantmeter.providers import BaseProvider, register, urlparse
 from plantmeter.utils import daterange
 import datetime
 import xlrd
 
-class TFMScheme(BaseScheme):
-    """TFM Scheme 
+class TFMProvider(BaseProvider):
+    """TFM Provider 
     """
     date_fmt = '&dia={date.day:02d}&mes={date.month:02d}&any={date.year:04d}'
     sheet_names = [u'Dades Instantaneas', u'Corba de carrega', u'Sondes', u'Dades Resumides']
@@ -13,7 +13,7 @@ class TFMScheme(BaseScheme):
     def __init__(self, uri=None):
         if uri is None:
             uri = 'tfm://user:password@localhost:port/path'
-        super(TFMScheme, self).__init__(uri)
+        super(TFMProvider, self).__init__(uri)
         self.uri = uri
         self.res = urlparse(self.uri)
 
@@ -49,4 +49,4 @@ class TFMScheme(BaseScheme):
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-register("tfm", TFMScheme)
+register("tfm", TFMProvider)
