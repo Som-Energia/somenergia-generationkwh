@@ -7,49 +7,40 @@ import erppeek
 def isodate(date):
     return datetime.datetime.strptime(date, '%Y-%m-%d').date()
 
-class RemainderProviderErpTest(object):
-
-    def __init__(self):
-        self.c = erppeek.Client(**dbconfig.erppeek)
-
-    def clean(self):
-        Remainders = self.c.GenerationkwhRemainders
-        Remainders.unlink(Remainders.search())
-
-class RemainderProviderMockup(object):
-
-    def __init__(self, remainders=[]):
-        if remainders:
-            self.set(*remainders)
-        else:
-            self.remainders=[]
-
-    def get(self):
-        if not self.remainders:
-            return []
-        max_nshares=max(self.remainders,key=lambda x:x[0])[0]
-        remainders=[]
-        for i in range(1,max_nshares+1):
-            remainders.append(sorted([
-            remainder for remainder in self.remainders 
-                        if remainder[0]==i],reverse=True,key=lambda x:isodate(x[1])
-                            )[0])
-        return remainders
-
-    def set(self, n, pointsDate, remainder_wh):
-        self.remainders.append((n,pointsDate,remainder_wh))
-
+#@unittest.skip("depends on ERP")
 class Remainder_Test(unittest.TestCase):
 
     def setupProvider(self,remainders=[]):
-        self.provider=provider=RemainderProviderMockup()
-        for remainder in remainders:
-            provider.set(*remainder)
-        return provider
+        Remainders = self.c.GenerationkwhRemainders
+        for n,pointsDate,remainder in remainders:
+            Remainders.create(dict(
+                n_shares=n,
+                last_day_computed=pointsDate,
+                remainder_wh=remainder
+                ))
 
     def assertRemaindersEqual(self, expectation):
-        result = self.provider.get()
+        Remainders = self.c.GenerationkwhRemainders
+        ids = Remainders.search([])
+        result = [
+            (
+                r['n_shares'],
+                r['last_day_computed'],
+                r['remainder_wh']
+            ) for r in Remainders.read(ids,
+                ['n_shares','last_day_computed','remainder_wh'])
+        ]
         self.assertEqual(result, expectation)
+
+    def setUp(self):
+        self.c = erppeek.Client(**dbconfig.erppeek)
+        Remainders = self.c.GenerationkwhRemainders
+        Remainders.unlink(Remainders.search())
+
+    def tearDown(self):
+        Remainders = self.c.GenerationkwhRemainders
+        Remainders.unlink(Remainders.search())
+
 
     def test_no_remainders(self):
         remainders=self.setupProvider()
@@ -86,36 +77,6 @@ class Remainder_Test(unittest.TestCase):
         ])
     
 
-#@unittest.skip("depends on ERP")
-class Remainder_ERP_Test(Remainder_Test):
-
-    def tearDown(self):
-        Remainders = self.provider.c.GenerationkwhRemainders
-        Remainders.unlink(Remainders.search())
-
-    def setupProvider(self,remainders=[]):
-        self.provider=provider=RemainderProviderErpTest()
-        Remainders = self.provider.c.GenerationkwhRemainders
-        for n,pointsDate,remainder in remainders:
-            Remainders.create(dict(
-                n_shares=n,
-                last_day_computed=pointsDate,
-                remainder_wh=remainder
-                ))
-        return provider
-
-    def assertRemaindersEqual(self, expectation):
-        Remainders = self.provider.c.GenerationkwhRemainders
-        ids = Remainders.search([])
-        result = [
-            (
-                r['n_shares'],
-                r['last_day_computed'],
-                r['remainder_wh']
-            ) for r in Remainders.read(ids,
-                ['n_shares','last_day_computed','remainder_wh'])
-        ]
-        self.assertEqual(result, expectation)
 
 
 if __name__ == '__main__':
