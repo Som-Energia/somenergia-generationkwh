@@ -12,18 +12,6 @@ class RemainderProviderErpTest(object):
     def __init__(self):
         self.c = erppeek.Client(**dbconfig.erppeek)
 
-    def get(self):
-        Remainders = self.c.GenerationkwhRemainders
-        ids = Remainders.search([])
-        return [
-            (
-                r['n_shares'],
-                r['last_day_computed'],
-                r['remainder_wh']
-            ) for r in Remainders.read(ids,
-                ['n_shares','last_day_computed','remainder_wh'])
-        ]
-
     def clean(self):
         Remainders = self.c.GenerationkwhRemainders
         Remainders.unlink(Remainders.search())
@@ -115,6 +103,19 @@ class Remainder_ERP_Test(Remainder_Test):
                 remainder_wh=remainder
                 ))
         return provider
+
+    def assertRemaindersEqual(self, expectation):
+        Remainders = self.provider.c.GenerationkwhRemainders
+        ids = Remainders.search([])
+        result = [
+            (
+                r['n_shares'],
+                r['last_day_computed'],
+                r['remainder_wh']
+            ) for r in Remainders.read(ids,
+                ['n_shares','last_day_computed','remainder_wh'])
+        ]
+        self.assertEqual(result, expectation)
 
 
 if __name__ == '__main__':
