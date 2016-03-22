@@ -90,11 +90,11 @@ class Remainder_Test(unittest.TestCase):
 class Remainder_ERP_Test(Remainder_Test):
 
     def tearDown(self):
-        self.provider.clean()
+        Remainders = self.provider.c.GenerationkwhRemainders
+        Remainders.unlink(Remainders.search())
 
     def setupProvider(self,remainders=[]):
         self.provider=provider=RemainderProviderErpTest()
-        provider.clean()
         Remainders = self.provider.c.GenerationkwhRemainders
         for n,pointsDate,remainder in remainders:
             Remainders.create(dict(
