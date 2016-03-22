@@ -94,7 +94,7 @@ def parseArgumments():
     return parser.parse_args(namespace=ns())
 
 def isodatetime(string):
-    return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
+    return datetime.datetime.strptime(string, "%Y-%m-%d")
 
 def isodate(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d").date()
@@ -145,6 +145,8 @@ def create_fromPaymentLines(start=None, stop=None,
     c.GenerationkwhInvestments.create_investments_from_paymentlines(
         start, stop, waitingDays, expirationYears)
 
+# TODO: Tests
+# TODO: Move implementation to the ERP side
 def activate(
         waitingDays,
         start=None, stop=None,
@@ -189,11 +191,22 @@ class Holidays_Test(unittest.TestCase):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
 
+    def assertEqualDates(self, result, expected):
+        self.assertEqual([ isodatetime(date) for date in expected], result)
+
     def test_holidays(self):
-        self.assertEqual(
-            c.GenerationkwhInvestments.holidays("2015-12-25", "2015-12-25"),
+        self.assertEqualDates(
+            c.GenerationkwhTesthelper.holidays("2015-12-25", "2015-12-25"),
             [
                 '2015-12-25',
+            ])
+
+    def test_holidays_severalDays(self):
+        self.assertEqualDates(
+            c.GenerationkwhTesthelper.holidays("2015-12-25", "2016-01-01"),
+            [
+                '2015-12-25',
+                '2016-01-01',
             ])
 
     
@@ -375,7 +388,7 @@ def runtest(accept=False, verbose=False):
 c = erppeek.Client(**dbconfig.erppeek)
 
 def main():
-    # Calls the function homonimous to the subcommand
+    # Calls the function homonymous to the subcommand
     # with the options as paramteres
     args = parseArgumments()
     print args.dump()
