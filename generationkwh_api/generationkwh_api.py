@@ -64,21 +64,6 @@ class InvestmentProvider(ErpWrapper):
         ]
 # Models
 
-class RemainderProvider(ErpWrapper):
-    def get(self):
-        Remainders = self.erp.pool.get('generationkwh.remainders')
-        ids = Remainders.search(self.cursor, self.uid, [], context=self.context)
-        return [
-            [
-                r['n_shares'],
-                r['last_day_computed'],
-                r['remainder_wh']
-            ] for r in Remainders.read(self.cursor, self.uid, ids, ['n_shares','last_day_computed','remainder_wh'], self.context)
-        ]
-    def set(self, n, pointsDate, remainder):
-        Remainders = self.erp.pool.get('generationkwh.remainders')
-        Remainders.create(self.cursor,self.uid,{'n_shares': n,'last_day_computed': pointsDate, 'remainder_wh':remainder})
-        
 class HolidaysProvider(ErpWrapper):
     def get(self, start, stop):
         Holidays = self.erp.pool.get('giscedata.dfestius')
@@ -88,11 +73,19 @@ class HolidaysProvider(ErpWrapper):
             ], 0,None,None,self.context)
         return [
             isodate(h['name'])
-            for h in Holidays.read(self.cursor, self.uid, ids, ['name'], self.context)
+            for h in Holidays.read(self.cursor, self.uid,
+                ids, ['name'], self.context)
             ]
 
 
 class GenerationkWhRemainders(osv.osv):
+    """
+    Remainders, in Wh, after dividing the aggregated
+    production of the plants into a hourly curve of
+    available kWh for a member with a given number of
+    shares.
+    """
+
     _name = "generationkwh.remainders"
     _columns = dict(
         n_shares=fields.integer(
@@ -179,7 +172,11 @@ class GenerationkWhInvestments(osv.osv):
         if stop: criteria.append(('date_created', '<=', str(stop)))
         if start: criteria.append(('date_created', '>=', str(start)))
 
-        movelinesids = MoveLine.search(cursor, uid, criteria, order='date_created asc, id asc', context=context)
+        movelinesids = MoveLine.search(
+            cursor, uid, criteria,
+            order='date_created asc, id asc',
+            context=context
+            )
         for line in MoveLine.browse(cursor, uid, movelinesids, context):
             partnerid = line.partner_id.id
             if not partnerid:
@@ -211,13 +208,14 @@ class GenerationkWhInvestments(osv.osv):
     def create_investments_from_paymentlines(self, cursor, uid,
             start, stop, waitingDays, expirationYears,
             context=None):
+        tail = 0,None,None,context
 
         criteria = [('name','like','GKWH')]
         if stop: criteria.append(('create_date', '<=', str(stop)))
         if start: criteria.append(('create_date', '>=', str(start)))
 
         PaymentLine = self.pool.get('payment.line')
-        paymentlineids = PaymentLine.search(cursor, uid, criteria, 0,None,None,context)
+        paymentlineids = PaymentLine.search(cursor, uid, criteria,*tail)
         for payment in PaymentLine.browse(cursor, uid, paymentlineids, context):
             activation = None
             deactivation = None

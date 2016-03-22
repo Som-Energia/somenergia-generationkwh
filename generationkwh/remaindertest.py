@@ -6,9 +6,12 @@ import config
 
 def isodate(date):
     return datetime.datetime.strptime(date, '%Y-%m-%d').date()
+
 class RemainderProviderErpTest(object):
+
     def __init__(self):
         self.erp=ooop.OOOP(**config.ooop)
+
     def get(self):
         Remainders = self.erp.GenerationkwhRemainders
         ids = Remainders.search([])
@@ -17,22 +20,29 @@ class RemainderProviderErpTest(object):
                 r['n_shares'],
                 r['last_day_computed'],
                 r['remainder_wh']
-            ) for r in Remainders.read(ids, ['n_shares','last_day_computed','remainder_wh'])
+            ) for r in Remainders.read(ids,
+                ['n_shares','last_day_computed','remainder_wh'])
         ]
     def set(self, n, pointsDate, remainder):
         Remainders = self.erp.GenerationkwhRemainders
-        Remainders.create({'n_shares': n,'last_day_computed': pointsDate, 'remainder_wh':remainder})
+        Remainders.create(dict(
+            n_shares=n,
+            last_day_computed=pointsDate,
+            remainder_wh=remainder
+            ))
 
     def clean(self):
         Remainders = self.erp.GenerationkwhRemainders
         Remainders.all().delete()
 
 class RemainderProviderMockup(object):
+
     def __init__(self, remainders=[]):
         if remainders:
             self.set(*remainders)
         else:
             self.remainders=[]
+
     def get(self):
         if not self.remainders:
             return []
@@ -44,6 +54,7 @@ class RemainderProviderMockup(object):
                         if remainder[0]==i],reverse=True,key=lambda x:isodate(x[1])
                             )[0])
         return remainders
+
     def set(self, n, pointsDate, remainder_wh):
         self.remainders.append((n,pointsDate,remainder_wh))
 
