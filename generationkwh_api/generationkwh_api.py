@@ -62,7 +62,23 @@ class InvestmentProvider(ErpWrapper):
             )
             for c in sorted(contracts, key=lambda x: x['id'] )
         ]
+# Models
 
+class RemainderProvider(ErpWrapper):
+    def get(self):
+        Remainders = self.erp.pool.get('generationkwh.remainders')
+        ids = Remainders.search(self.cursor, self.uid, [], context=self.context)
+        return [
+            [
+                r['n_shares'],
+                r['last_day_computed'],
+                r['remainder_wh']
+            ] for r in Remainders.read(self.cursor, self.uid, ids, ['n_shares','last_day_computed','remainder_wh'], self.context)
+        ]
+    def set(self, n, pointsDate, remainder):
+        Remainders = self.erp.pool.get('generationkwh.remainders')
+        Remainders.create(self.cursor,self.uid,{'n_shares': n,'last_day_computed': pointsDate, 'remainder_wh':remainder})
+        
 class HolidaysProvider(ErpWrapper):
     def get(self, start, stop):
         Holidays = self.erp.pool.get('giscedata.dfestius')
@@ -75,7 +91,24 @@ class HolidaysProvider(ErpWrapper):
             for h in Holidays.read(self.cursor, self.uid, ids, ['name'], self.context)
             ]
 
-# Models
+
+class GenerationkWhRemainders(osv.osv):
+    _name = "generationkwh.remainders"
+    _columns = dict(
+        n_shares=fields.integer(
+            required=True,
+            help="Number of shares"
+        ),
+        last_day_computed=fields.date(
+            required=True,
+            help="Last day computed"
+        ),
+        remainder_wh=fields.integer(
+            required=True,
+            help="Remainder in Wh"
+        )
+    )
+GenerationkWhRemainders()
 
 class GenerationkWhInvestments(osv.osv):
 

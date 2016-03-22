@@ -2,3 +2,4 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 "access_generationkwh_investments_r","generationkwh.investments","model_generationkwh_investments","base.group_user",1,0,0,0
 "access_generationkwh_investments_u","generationkwh.investments","model_generationkwh_investments","base.group_user",1,1,1,1
 "access_generationkwh_investments_w","generationkwh.investments","model_generationkwh_investments","base.group_user",1,1,1,0
+"access_generationkwh_remainders_u","generationkwh.remainders","model_generationkwh_remainders","base.group_user",1,1,1,1
