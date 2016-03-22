@@ -62,20 +62,39 @@ class InvestmentProvider(ErpWrapper):
             )
             for c in sorted(contracts, key=lambda x: x['id'] )
         ]
-# Models
 
 class HolidaysProvider(ErpWrapper):
+
     def get(self, start, stop):
         Holidays = self.erp.pool.get('giscedata.dfestius')
         ids = Holidays.search(self.cursor, self.uid, [
             ('name', '>=', start),
             ('name', '<=', stop),
-            ], 0,None,None,self.context)
+            ], 0,'name desc',None,self.context)
         return [
             isodate(h['name'])
             for h in Holidays.read(self.cursor, self.uid,
                 ids, ['name'], self.context)
             ]
+
+# Models
+
+class GenerationkWhTestHelper(osv.osv):
+    """
+        Helper model that enables accessing data providers 
+        from tests written with erppeek.
+    """
+
+    _name = 'generationkwh.testhelper'
+    _auto = False
+
+    def holidays(self, cursor, uid,
+            start, stop,
+            context=None):
+        holidaysProvider = HolidaysProvider(self, cursor, uid, context)
+        return holidaysProvider.get(start, stop)
+
+GenerationkWhTestHelper()
 
 class GenerationkWhRemainders(osv.osv):
     """
@@ -100,7 +119,36 @@ class GenerationkWhRemainders(osv.osv):
             help="Remainder in Wh"
         )
     )
+
 GenerationkWhRemainders()
+
+"""
+class GenerationkWhRightsPerShare(osv.osv):
+    _name = 'generationkwh.rightspershare'
+
+    _columns = dict(
+        nshares=fields.integer(
+            "Number of shares",
+            required=True,
+            help="Number of shares purchased",
+            ),
+        date=fields.date(
+            "Production Date",
+            required=True,
+            help="Date at which rights were generated",
+            ),
+        )
+    _columns.update((
+        ('kwh_{:02d}'.format(i), fields.integer(
+            "Consolidated rigths hour {:02d}",
+            required=True,
+            help="Consolidated rights for hour {}/25".format(i+1),
+        ))
+        for i in xrange(25)
+        ))
+
+GenerationkWhRightsPerShare()
+"""
 
 class GenerationkWhInvestments(osv.osv):
 
@@ -131,13 +179,6 @@ class GenerationkWhInvestments(osv.osv):
             help="When the shares stop to provide electricity use rights",
             ),
         )
-
-    # TODO: Move it elsewhere
-    def holidays(self, cursor, uid,
-            start, stop,
-            context=None):
-        holidaysProvider = HolidaysProvider(self, cursor, uid, context)
-        return holidaysProvider.get(start, stop)
 
     def active_investments(self, cursor, uid,
             member, start, end,
