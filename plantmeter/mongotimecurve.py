@@ -95,9 +95,9 @@ class MongoTimeCurve(object):
                 .sort('datetime', order)
                 .limit(1)
                 ):
-            return datetime.datetime.combine(
+            return toLocal(datetime.datetime.combine(
                 ns(point).datetime.date(),
-                datetime.time(0,0,0))
+                datetime.time(0,0,0)))
 
         return None
 

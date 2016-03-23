@@ -3,6 +3,7 @@
 from .mongotimecurve import MongoTimeCurve
 import pymongo
 import datetime
+import pytz
 
 import unittest
 
@@ -10,7 +11,8 @@ def isodatetime(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
 
 def isodate(string):
-    return datetime.datetime.strptime(string, "%Y-%m-%d")
+    tz = pytz.timezone('Europe/Berlin')
+    return tz.localize(datetime.datetime.strptime(string, "%Y-%m-%d"))
 
 
 def localTime(string):
