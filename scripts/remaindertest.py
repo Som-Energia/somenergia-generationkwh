@@ -11,40 +11,22 @@ except ImportError:
 def isodate(date):
     return datetime.datetime.strptime(date, '%Y-%m-%d').date()
 
-@unittest.skipIf(dbconfig, "depends on ERP")
+@unittest.skipIf(not dbconfig, "depends on ERP")
 class Remainder_Test(unittest.TestCase):
 
     def setupProvider(self,remainders=[]):
-        Remainders = self.c.GenerationkwhRemainders
-        for n,pointsDate,remainder in remainders:
-            Remainders.create(dict(
-                n_shares=n,
-                last_day_computed=pointsDate,
-                remainder_wh=remainder
-                ))
+        self.Remainders.add(remainders)
 
     def assertRemaindersEqual(self, expectation):
-        Remainders = self.c.GenerationkwhRemainders
-        ids = Remainders.search([])
-        result = [
-            (
-                r['n_shares'],
-                r['last_day_computed'],
-                r['remainder_wh']
-            ) for r in Remainders.read(ids,
-                ['n_shares','last_day_computed','remainder_wh'])
-        ]
+        result = self.Remainders.last()
         self.assertEqual(result, expectation)
 
     def setUp(self):
-        self.c = erppeek.Client(**dbconfig.erppeek)
-        Remainders = self.c.GenerationkwhRemainders
-        Remainders.unlink(Remainders.search())
+        self.Remainders = erppeek.Client(**dbconfig.erppeek).GenerationkwhRemainders
+        self.Remainders.clean()
 
     def tearDown(self):
-        Remainders = self.c.GenerationkwhRemainders
-        Remainders.unlink(Remainders.search())
-
+        self.Remainders.clean()
 
     def test_no_remainders(self):
         remainders=self.setupProvider()
@@ -52,23 +34,23 @@ class Remainder_Test(unittest.TestCase):
 
     def test_one_remainder(self):
         remainders=self.setupProvider([
-                (1,'2016-02-25',3)
+                [1,'2016-02-25',3]
                 ])
         self.assertRemaindersEqual([
-            (1,'2016-02-25',3)
+            [1,'2016-02-25',3]
             ])
 
     def test_two_remainder(self):
         remainders=self.setupProvider([
-                (1,'2016-02-25',3),
-                (2,'2016-02-25',1)
+                [1,'2016-02-25',3],
+                [2,'2016-02-25',1]
                 ])
         self.assertRemaindersEqual([
-            (1,'2016-02-25',3),
-            (2,'2016-02-25',1)
+            [1,'2016-02-25',3],
+            [2,'2016-02-25',1]
             ])
     
-    def _test_dup_dates_remainder(self):
+    def test_dup_dates_remainder(self):
         remainders=self.setupProvider([
                 (1,'2016-02-25',3),
                 (2,'2016-02-25',1),
@@ -76,8 +58,8 @@ class Remainder_Test(unittest.TestCase):
                 (2,'2016-02-27',4),
                 ])
         self.assertRemaindersEqual([
-                (1,'2016-02-25',3),
-                (2,'2016-02-27',4),
+                [1,'2016-02-25',3],
+                [2,'2016-02-27',4],
         ])
     
 

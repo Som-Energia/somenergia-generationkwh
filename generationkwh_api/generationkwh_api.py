@@ -120,6 +120,32 @@ class GenerationkWhRemainders(osv.osv):
         )
     )
 
+    def last(self, cr, uid, context=None):
+        cr.execute("""SELECT o.n_shares,o.last_day_computed,o.remainder_wh 
+                      FROM generationkwh_remainders o
+                        LEFT JOIN generationkwh_remainders b
+                            ON o.n_shares=b.n_shares AND o.last_day_computed < b.last_day_computed
+                      WHERE b.last_day_computed IS NULL
+                      """)
+        result = [
+            (
+                r[0],
+                r[1],
+                r[2]
+            ) for r in cr.fetchall()
+        ]
+        return result
+
+    def add(self, cr, uid, remainders, context=None):
+        for n,pointsDate,remainder in remainders:
+            cr.execute("""INSERT INTO generationkwh_remainders 
+                          (n_shares,last_day_computed,remainder_wh)
+                          VALUES (%d,'%s',%d)""" % (n,pointsDate,remainder))
+            
+    def clean(self,cr,uid,context=None):
+        ids=self.search(cr,uid, [], context=context)
+        self.unlink(cr,uid,ids)
+        
 GenerationkWhRemainders()
 
 """
