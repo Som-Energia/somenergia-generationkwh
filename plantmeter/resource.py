@@ -31,12 +31,18 @@ class VirtualPlant(Resource):
         super(VirtualPlant, self).__init__(*args, **kwargs)
 
     def getWh(self, start, end):
-        return np.sum([plant.getWh(start, end)
-                          for plant in self.plants if plant.enabled], axis=0)
+        return np.sum([
+            plant.getWh(start, end)
+            for plant in self.plants
+            if plant.enabled
+            ], axis=0)
 
     def lastMeasurementDate(self):
-        return min([plant.lastMeasurementDate()
-                          for plant in self.plants if plant.enabled])
+        return min([
+            plant.lastMeasurementDate()
+            for plant in self.plants
+            if plant.enabled
+            ])
 
 class Plant(Resource):
     def __init__(self, *args, **kwargs):
@@ -44,12 +50,18 @@ class Plant(Resource):
         super(Plant, self).__init__(*args, **kwargs)
 
     def getWh(self, start, end):
-        return np.sum([meter.getWh(start, end)
-                          for meter in self.meters if meter.enabled], axis=0)
+        return np.sum([
+            meter.getWh(start, end)
+            for meter in self.meters
+            if meter.enabled
+            ], axis=0)
 
     def lastMeasurementDate(self):
-        return min([meter.lastMeasurementDate()
-                          for meter in self.meters if meter.enabled])
+        return min([
+            meter.lastMeasurementDate()
+            for meter in self.meters
+            if meter.enabled
+            ])
 
 class Meter(Resource):
     def __init__(self, *args, **kwargs):
