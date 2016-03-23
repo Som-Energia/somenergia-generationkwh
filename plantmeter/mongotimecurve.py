@@ -21,12 +21,20 @@ import pytz
 """
 
 def tzisodatetime(string):
-    tz = pytz.timezone('CET')
+    tz = pytz.timezone('Europe/Berlin')
+    if string.endswith('CEST'):
+        string=string[:-4]+'S'
+    if string.endswith('CET'):
+        string=string[:-3]
+
+    isSummer = string.endswith("S")
+    if isSummer:
+        string = string[:-1]
     naive = datetime.datetime.strptime(string,
-        "%Y-%m-%d %H:%M:%S%Z")
+        "%Y-%m-%d %H:%M:%S")
     localized = tz.localize(naive)
     if localized.dst(): return localized
-    if not string.endswith('CEST'): return localized
+    if not isSummer: return localized
 
     utcversion = localized.astimezone(pytz.utc)
     onehour = datetime.timedelta(hours=1)
@@ -65,6 +73,7 @@ class MongoTimeCurve(object):
                 ):
             point = ns(x)
             monthAndDay = point.datetime.month, point.datetime.day
+            summerOffset = 1 if point.datetime.dst() else 0
             summerOffset = 1 if (3,26) < monthAndDay < (10,26) else 0
             timeindex = (
                 +summerOffset

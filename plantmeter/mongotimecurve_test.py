@@ -3,7 +3,6 @@
 from .mongotimecurve import MongoTimeCurve, dloffset, tzisodatetime
 import pymongo
 import datetime
-import pytz
 
 import unittest
 
@@ -15,45 +14,58 @@ def isodate(string):
 
 class DaylightOffset_Test(unittest.TestCase):
 
-    def test_localTime_winter(self):
+    def test_localTime_fullySummer(self):
         self.assertEqual(
-            str(tzisodatetime("2016-01-01 02:00:00CET")),
+            str(tzisodatetime("2016-08-15 02:00:00")),
+            "2016-08-15 02:00:00+02:00")
+
+    def test_localTime_fullyWinter(self):
+        self.assertEqual(
+            str(tzisodatetime("2016-01-01 02:00:00")),
             "2016-01-01 02:00:00+01:00")
 
-    def test_localTime_badTz(self):
+    def test_localTime_badTz_ignored(self):
         self.assertEqual(
-            str(tzisodatetime("2016-01-01 02:00:00CEST")),
+            str(tzisodatetime("2016-01-01 02:00:00S")),
             "2016-01-01 01:00:00+01:00")
+
+    def test_localTime_badSummerTz_ignored(self):
+        self.assertEqual(
+            str(tzisodatetime("2016-08-15 02:00:00")),
+            "2016-08-15 02:00:00+02:00")
 
     def test_localTime_beforeOctoberChange(self):
         self.assertEqual(
-            str(tzisodatetime("2016-10-30 02:00:00CEST")),
+            str(tzisodatetime("2016-10-30 02:00:00S")),
             "2016-10-30 02:00:00+02:00")
 
     def test_localTime_afterOctoberChange(self):
         self.assertEqual(
-            str(tzisodatetime("2016-10-30 02:00:00CET")),
+            str(tzisodatetime("2016-10-30 02:00:00")),
             "2016-10-30 02:00:00+01:00")
 
-    def test_dloffset_midnightNewYear(self):
+    def test_dloffset_fullySummer_atMidnight(self):
         self.assertEqual(
-            1, dloffset("2016-01-01 00:00:00CET"))
+            0, dloffset("2016-08-15 00:00:00"))
 
-    def test_dloffset_oneAfterMidnight(self):
+    def test_dloffset_fullyWinter_atMidnight(self):
         self.assertEqual(
-            2, dloffset("2016-01-01 01:00:00CET"))
+            1, dloffset("2016-01-01 00:00:00"))
 
-    def test_dloffset_virginDay(self):
+    def test_dloffset_fullyWinter_afterMidnight(self):
         self.assertEqual(
-            0, dloffset("2016-08-18 00:00:00CEST"))
+            2, dloffset("2016-01-01 01:00:00"))
 
     def test_dloffset_justBeforeCETStarts(self):
         self.assertEqual(
-            2, dloffset("2016-10-30 02:00:00CEST"))
+            2, dloffset("2016-10-30 02:00:00S"))
 
     def test_dloffset_justAfterCETStarts(self):
         self.assertEqual(
-            3, dloffset("2016-10-30 02:00:00CET"))
+            3, dloffset("2016-10-30 02:00:00"))
+
+def localTime(string, isSummer):
+    return tzisodatetime(string)
 
 
 class MongoTimeCurve_Test(unittest.TestCase):
@@ -73,7 +85,6 @@ class MongoTimeCurve_Test(unittest.TestCase):
     def setupPoints(self, points):
         mtc = MongoTimeCurve(self.db, self.collection)
         for datetime, plant, value in points:
-            isExtraDLHour = datetime.endswith('S')
             mtc.fillPoint(
                 datetime=isodatetime(datetime),
                 name=plant,
@@ -208,6 +219,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
     def test_get_summerPointsPadsLeft(self):
         mtc = self.setupPoints([
+            ('2015-08-01 0:00:00', 'miplanta', 20),
             ('2015-08-01 23:00:00', 'miplanta', 10),
             ])
 
@@ -219,7 +231,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             )
         self.assertEqual(
             list(curve),
-            +24*[0]+[10])
+            [0,20]+22*[0]+[10])
 
     @unittest.skip("Not implemented yet")
     def test_get_dayligthIntoSummer(self):
