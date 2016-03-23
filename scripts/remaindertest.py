@@ -14,16 +14,17 @@ def isodate(date):
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Remainder_Test(unittest.TestCase):
 
+    def setUp(self):
+        erp = erppeek.Client(**dbconfig.erppeek)
+        self.Remainders = erp.GenerationkwhRemainders
+        self.Remainders.clean()
+
     def setupProvider(self,remainders=[]):
         self.Remainders.add(remainders)
 
     def assertRemaindersEqual(self, expectation):
         result = self.Remainders.last()
-        self.assertEqual(result, expectation)
-
-    def setUp(self):
-        self.Remainders = erppeek.Client(**dbconfig.erppeek).GenerationkwhRemainders
-        self.Remainders.clean()
+        self.assertEqual(result, [list(a) for a in expectation])
 
     def tearDown(self):
         self.Remainders.clean()
@@ -34,17 +35,17 @@ class Remainder_Test(unittest.TestCase):
 
     def test_one_remainder(self):
         remainders=self.setupProvider([
-                [1,'2016-02-25',3]
-                ])
+            [1,'2016-02-25',3]
+            ])
         self.assertRemaindersEqual([
             [1,'2016-02-25',3]
             ])
 
     def test_two_remainder(self):
         remainders=self.setupProvider([
-                [1,'2016-02-25',3],
-                [2,'2016-02-25',1]
-                ])
+            [1,'2016-02-25',3],
+            [2,'2016-02-25',1]
+            ])
         self.assertRemaindersEqual([
             [1,'2016-02-25',3],
             [2,'2016-02-25',1]
@@ -52,14 +53,14 @@ class Remainder_Test(unittest.TestCase):
     
     def test_dup_dates_remainder(self):
         remainders=self.setupProvider([
-                (1,'2016-02-25',3),
-                (2,'2016-02-25',1),
-                (1,'2016-01-24',2),
-                (2,'2016-02-27',4),
-                ])
+            [1,'2016-02-25',3],
+            [2,'2016-02-25',1],
+            [1,'2016-01-24',2],
+            [2,'2016-02-27',4],
+            ])
         self.assertRemaindersEqual([
-                [1,'2016-02-25',3],
-                [2,'2016-02-27',4],
+            [1,'2016-02-25',3],
+            [2,'2016-02-27',4],
         ])
     
 

@@ -121,18 +121,20 @@ class GenerationkWhRemainders(osv.osv):
     )
 
     def last(self, cr, uid, context=None):
-        cr.execute("""SELECT o.n_shares,o.last_day_computed,o.remainder_wh 
-                      FROM generationkwh_remainders o
-                        LEFT JOIN generationkwh_remainders b
-                            ON o.n_shares=b.n_shares AND o.last_day_computed < b.last_day_computed
-                      WHERE b.last_day_computed IS NULL
-                      """)
+        cr.execute("""
+            SELECT o.n_shares,o.last_day_computed,o.remainder_wh
+                FROM generationkwh_remainders AS o
+                LEFT JOIN generationkwh_remainders AS b
+                    ON o.n_shares=b.n_shares
+                    AND o.last_day_computed < b.last_day_computed
+                WHERE b.last_day_computed IS NULL
+            """)
         result = [
             (
-                r[0],
-                r[1],
-                r[2]
-            ) for r in cr.fetchall()
+                n_shares,
+                last_day_computed,
+                remainder_wh,
+            ) for n_shares, last_day_computed, remainder_wh in cr.fetchall()
         ]
         return result
 
