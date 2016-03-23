@@ -19,7 +19,8 @@ class CSVProvider(BaseProvider):
             items = line.split(';')
             return {
 		'datetime': datetime.datetime.strptime(items[0], '%Y-%m-%d %H:%M'),
-		'ae': items[1]
+		'daylight': items[1],
+		'ae': items[2]
 		} 
 
         with open(self.res, 'rb') as csvfile:

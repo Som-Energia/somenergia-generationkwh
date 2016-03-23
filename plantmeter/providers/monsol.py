@@ -24,7 +24,6 @@ class MonsolProvider(BaseProvider):
             return {
                     'datetime': datetime.datetime.strptime(items[0], '%Y-%m-%d %H:%M'),
                     'daylight': items[1],
-                    'total': int(items[2]),
                     'ae': int(items[3])
                     }
 
@@ -109,7 +108,6 @@ class MonsolProvide_Test(unittest.TestCase):
                 measurements[0][0],
                 {
                     'daylight': 'S', 
-                    'total': 2000, 
                     'ae': 0, 
                     'datetime': datetime.datetime(2015, 9, 4, 0, 0)
                     })
@@ -117,7 +115,6 @@ class MonsolProvide_Test(unittest.TestCase):
                 measurements[0][-1],
                 {
                     'daylight': 'S',
-                    'total': 2110,
                     'ae': 0,
                     'datetime': datetime.datetime(2015, 9, 4, 23, 0)
                     })

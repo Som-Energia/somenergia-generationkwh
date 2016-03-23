@@ -68,6 +68,7 @@ class Meter(Resource):
                     self.curveProvider.fillPoint(
                             name = self.name,
                             datetime = measurement['datetime'],
+                            daylight = measurement['daylight'],
                             ae = measurement['ae']
                             )
     def lastMeasurementDate(self):
