@@ -30,12 +30,12 @@ class VirtualPlant(Resource):
         self.plants = kwargs.pop('plants') if 'plants' in kwargs else []
         super(VirtualPlant, self).__init__(*args, **kwargs)
 
-    def get_kwh(self, start, end):
-        return np.sum([plant.get_kwh(start, end)
+    def getWh(self, start, end):
+        return np.sum([plant.getWh(start, end)
                           for plant in self.plants if plant.enabled], axis=0)
 
-    def last_date(self):
-        return min([plant.last_date()
+    def lastMeasurementDate(self):
+        return min([plant.lastMeasurementDate()
                           for plant in self.plants if plant.enabled])
 
 class Plant(Resource):
@@ -43,12 +43,12 @@ class Plant(Resource):
         self.meters = kwargs.pop('meters') if 'meters' in kwargs else []
         super(Plant, self).__init__(*args, **kwargs)
 
-    def get_kwh(self, start, end):
-        return np.sum([meter.get_kwh(start, end)
+    def getWh(self, start, end):
+        return np.sum([meter.getWh(start, end)
                           for meter in self.meters if meter.enabled], axis=0)
 
-    def last_date(self):
-        return min([meter.last_date()
+    def lastMeasurementDate(self):
+        return min([meter.lastMeasurementDate()
                           for meter in self.meters if meter.enabled])
 
 class Meter(Resource):
@@ -57,10 +57,10 @@ class Meter(Resource):
         self.curveProvider = kwargs.pop('curveProvider') if 'curveProvider' in kwargs else None
         super(Meter, self).__init__(*args, **kwargs)
 
-    def get_kwh(self, start, end):
+    def getWh(self, start, end):
         return self.curveProvider.get(start, end, self.name, 'ae')
 
-    def update_kwh(self, start, end=None):
+    def updateWh(self, start, end=None):
         provider = get_provider(self.uri)
         with provider(self.uri) as remote:
             for day in remote.get(start, end):
@@ -70,7 +70,7 @@ class Meter(Resource):
                             datetime = measurement['datetime'],
                             ae = measurement['ae']
                             )
-    def last_date(self):
+    def lastMeasurementDate(self):
         return self.curveProvider.lastFullDate(self.name)
 
 

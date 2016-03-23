@@ -38,7 +38,7 @@ class Resource_Test(unittest.TestCase):
         vp.plants.append(p)
 
         self.assertEqual(
-            list(vp.get_kwh(
+            list(vp.getWh(
                 datetime(2015,9,4,0,0,0),
                 datetime(2015,9,5,0,0,0))),
                 2*25*[0] 
@@ -58,10 +58,10 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m)
         vp = VirtualPlant('vplantName','vplantDescription',True)
         vp.plants.append(p)
-        m.update_kwh(datetime(2015,9,4,0,0,0),datetime(2015,9,5,0,0,0))
+        m.updateWh(datetime(2015,9,4,0,0,0),datetime(2015,9,5,0,0,0))
 
         self.assertEqual(
-            list(vp.get_kwh(
+            list(vp.getWh(
                 datetime(2015,9,4,0,0,0),
                 datetime(2015,9,5,0,0,0))),
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 5, 4, 8, 17, 34, 12, 12, 5, 3, 1, 0, 0, 0, 0,
@@ -90,11 +90,11 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m2)
         vp = VirtualPlant('vplantName','vplantDescription',True)
         vp.plants.append(p)
-        m1.update_kwh(datetime(2015,9,4,0,0,0),datetime(2015,9,5,0,0,0))
-        m2.update_kwh(datetime(2015,9,4,0,0,0),datetime(2015,9,5,0,0,0))
+        m1.updateWh(datetime(2015,9,4,0,0,0),datetime(2015,9,5,0,0,0))
+        m2.updateWh(datetime(2015,9,4,0,0,0),datetime(2015,9,5,0,0,0))
 
         self.assertEqual(
-            list(vp.get_kwh(
+            list(vp.getWh(
                 datetime(2015,9,4,0,0,0),
                 datetime(2015,9,5,0,0,0))),
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 12, 10, 8, 16, 34, 68, 24, 24, 10, 6, 2, 0, 0, 0, 0,
@@ -117,10 +117,10 @@ class Resource_Test(unittest.TestCase):
         vp = VirtualPlant('vplantName','vplantDescription',True)
         vp.plants.append(p1)
         vp.plants.append(p2)
-        m1.update_kwh(datetime(2015,9,4,0,0,0),datetime(2015,9,5,0,0,0))
+        m1.updateWh(datetime(2015,9,4,0,0,0),datetime(2015,9,5,0,0,0))
 
         self.assertEqual(
-            list(vp.get_kwh(
+            list(vp.getWh(
                 datetime(2015,9,4,0,0,0),
                 datetime(2015,9,5,0,0,0))),
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 5, 4, 8, 17, 34, 12, 12, 5, 3, 1, 0, 0, 0, 0,
@@ -151,11 +151,11 @@ class Resource_Test(unittest.TestCase):
         vp = VirtualPlant('vplantName','vplantDescription',True)
         vp.plants.append(p1)
         vp.plants.append(p2)
-        m1.update_kwh(datetime(2015,9,4,0,0,0),datetime(2015,9,5,0,0,0))
-        m2.update_kwh(datetime(2015,9,4,0,0,0),datetime(2015,9,5,0,0,0))
+        m1.updateWh(datetime(2015,9,4,0,0,0),datetime(2015,9,5,0,0,0))
+        m2.updateWh(datetime(2015,9,4,0,0,0),datetime(2015,9,5,0,0,0))
 
         self.assertEqual(
-            list(vp.get_kwh(
+            list(vp.getWh(
                 datetime(2015,9,4,0,0,0),
                 datetime(2015,9,5,0,0,0))),
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 12, 10, 8, 16, 34, 68, 24, 24, 10, 6, 2, 0, 0, 0, 0,
@@ -176,7 +176,7 @@ class Resource_Test(unittest.TestCase):
         vp = VirtualPlant('vplantName','vplantDescription',True)
         vp.plants.append(p)
 
-        self.assertEqual(vp.last_date(), None)
+        self.assertEqual(vp.lastMeasurementDate(), None)
 
     def test_lastDate_onePlantOneMeter(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -190,9 +190,9 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m)
         vp = VirtualPlant('vplantName','vplantDescription',True)
         vp.plants.append(p)
-        m.update_kwh(datetime(2015,9,4,0,0,0), datetime(2015,9,5,0,0,0))
+        m.updateWh(datetime(2015,9,4,0,0,0), datetime(2015,9,5,0,0,0))
 
-        self.assertEqual(vp.last_date(), datetime(2015,9,5,0,0,))
+        self.assertEqual(vp.lastMeasurementDate(), datetime(2015,9,5,0,0,))
 
     def test_lastDate_onePlantTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -215,10 +215,10 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m2)
         vp = VirtualPlant('vplantName','vplantDescription',True)
         vp.plants.append(p)
-        m1.update_kwh(datetime(2015,9,4,0,0,0), datetime(2015,9,5,0,0,0))
-        m2.update_kwh(datetime(2015,8,4,0,0,0), datetime(2015,8,5,0,0,0))
+        m1.updateWh(datetime(2015,9,4,0,0,0), datetime(2015,9,5,0,0,0))
+        m2.updateWh(datetime(2015,8,4,0,0,0), datetime(2015,8,5,0,0,0))
 
-        self.assertEqual(vp.last_date(), datetime(2015,8,5,0,0,))
+        self.assertEqual(vp.lastMeasurementDate(), datetime(2015,8,5,0,0,))
 
 
     def test_lastDate_twoPlantsTwoMeters(self):
@@ -244,10 +244,10 @@ class Resource_Test(unittest.TestCase):
         vp = VirtualPlant('vplantName','vplantDescription',True)
         vp.plants.append(p1)
         vp.plants.append(p2)
-        m1.update_kwh(datetime(2015,9,4,0,0,0), datetime(2015,9,5,0,0,0))
-        m2.update_kwh(datetime(2015,8,4,0,0,0), datetime(2015,8,5,0,0,0))
+        m1.updateWh(datetime(2015,9,4,0,0,0), datetime(2015,9,5,0,0,0))
+        m2.updateWh(datetime(2015,8,4,0,0,0), datetime(2015,8,5,0,0,0))
 
-        self.assertEqual(vp.last_date(), datetime(2015,8,5,0,0,))
+        self.assertEqual(vp.lastMeasurementDate(), datetime(2015,8,5,0,0,))
 
 
 class Meter_Test(unittest.TestCase):
@@ -273,7 +273,7 @@ class Meter_Test(unittest.TestCase):
             curveProvider = self.curveProvider)
 
         self.assertEqual(
-            list(m.get_kwh(
+            list(m.getWh(
                 datetime(2015,9,4,0,0,0),
                 datetime(2015,9,5,0,0,0))),
             2*25*[0]
@@ -286,10 +286,10 @@ class Meter_Test(unittest.TestCase):
             True,
             uri = self.uri,
             curveProvider = self.curveProvider)
-        m.update_kwh(datetime(2015,9,4,0,0,0), datetime(2015,9,5,0,0,0))
+        m.updateWh(datetime(2015,9,4,0,0,0), datetime(2015,9,5,0,0,0))
 
         self.assertEqual(
-            list(m.get_kwh(
+            list(m.getWh(
                 datetime(2015,9,4,0,0,0),
                 datetime(2015,9,5,0,0,0))),
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 5, 4, 8, 17, 34, 12, 12, 5, 3, 1, 0, 0, 0, 0,
@@ -303,7 +303,7 @@ class Meter_Test(unittest.TestCase):
             True,
             uri = self.uri,
             curveProvider = self.curveProvider)
-        self.assertEqual(m.last_date(), None)
+        self.assertEqual(m.lastMeasurementDate(), None)
 
     def test_lastDate_filled(self):
         m = Meter(
@@ -312,9 +312,9 @@ class Meter_Test(unittest.TestCase):
             True,
             uri = self.uri,
             curveProvider = self.curveProvider)
-        m.update_kwh(datetime(2015,9,4,0,0,0), datetime(2015,9,5,0,0,0))
+        m.updateWh(datetime(2015,9,4,0,0,0), datetime(2015,9,5,0,0,0))
 
-        self.assertEqual(m.last_date(), datetime(2015,9,5,0,0,))
+        self.assertEqual(m.lastMeasurementDate(), datetime(2015,9,5,0,0,))
 
 
 unittest.TestCase.__str__ = unittest.TestCase.id

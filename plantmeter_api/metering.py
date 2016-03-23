@@ -18,7 +18,7 @@ class GenerationVirtualPlant(osv.osv):
 
     _name = 'generation.virtual.plant'
 
-    def get_kwh(self, cursor, uid, pid, start, end, context=None):
+    def getWh(self, cursor, uid, pid, start, end, context=None):
         '''Get generation from virtual plant'''
    
         if not context:
@@ -40,7 +40,7 @@ class GenerationVirtualPlant(osv.osv):
             for plant in vplant.plants if plant.enabled]}))
         
         backend = 'mongodb://{user}:{password}@{hostname}/{dbname}' # TO BE FIXED 
-        return _vplant.get_kwh(start, end, dict(context, backend=backend))
+        return _vplant.getWh(start, end, dict(context, backend=backend))
 
     _columns = {
         'name': fields.char('Name', size=50),
