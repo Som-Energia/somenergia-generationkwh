@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from .mongotimecurve import MongoTimeCurve, dloffset, tzisodatetime
+from .mongotimecurve import MongoTimeCurve
 import pymongo
 import datetime
 
@@ -12,60 +12,64 @@ def isodatetime(string):
 def isodate(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d")
 
-class DaylightOffset_Test(unittest.TestCase):
+
+def localTime(string):
+    import pytz
+    isSummer = string.endswith("S")
+    if isSummer:
+        string = string[:-1]
+    naive = datetime.datetime.strptime(string,
+        "%Y-%m-%d %H:%M:%S")
+    tz = pytz.timezone('Europe/Berlin')
+    localized = tz.localize(naive)
+    if not isSummer: return localized
+    if localized.dst(): return localized
+    onehour = datetime.timedelta(hours=1)
+    lesser = tz.normalize(localized-onehour)
+    return lesser if lesser.dst() else localized
+
+class LocalTime_Test(unittest.TestCase):
 
     def test_localTime_fullySummer(self):
         self.assertEqual(
-            str(tzisodatetime("2016-08-15 02:00:00")),
+            str(localTime("2016-08-15 02:00:00")),
             "2016-08-15 02:00:00+02:00")
 
     def test_localTime_fullyWinter(self):
         self.assertEqual(
-            str(tzisodatetime("2016-01-01 02:00:00")),
+            str(localTime("2016-01-01 02:00:00")),
             "2016-01-01 02:00:00+01:00")
 
     def test_localTime_badTz_ignored(self):
         self.assertEqual(
-            str(tzisodatetime("2016-01-01 02:00:00S")),
-            "2016-01-01 01:00:00+01:00")
+            str(localTime("2016-01-01 02:00:00S")),
+            "2016-01-01 02:00:00+01:00")
 
     def test_localTime_badSummerTz_ignored(self):
         self.assertEqual(
-            str(tzisodatetime("2016-08-15 02:00:00")),
+            str(localTime("2016-08-15 02:00:00")),
             "2016-08-15 02:00:00+02:00")
 
     def test_localTime_beforeOctoberChange(self):
         self.assertEqual(
-            str(tzisodatetime("2016-10-30 02:00:00S")),
+            str(localTime("2016-10-30 02:00:00S")),
             "2016-10-30 02:00:00+02:00")
 
     def test_localTime_afterOctoberChange(self):
         self.assertEqual(
-            str(tzisodatetime("2016-10-30 02:00:00")),
+            str(localTime("2016-10-30 02:00:00")),
             "2016-10-30 02:00:00+01:00")
 
-    def test_dloffset_fullySummer_atMidnight(self):
+    def test_localTime_SIgnored(self):
         self.assertEqual(
-            0, dloffset("2016-08-15 00:00:00"))
+            str(localTime("2016-10-30 03:00:00S")),
+            "2016-10-30 03:00:00+01:00")
 
-    def test_dloffset_fullyWinter_atMidnight(self):
+    def test_localTime_unexistingHour(self):
+        # TOREVIEW: should it fail
         self.assertEqual(
-            1, dloffset("2016-01-01 00:00:00"))
-
-    def test_dloffset_fullyWinter_afterMidnight(self):
-        self.assertEqual(
-            2, dloffset("2016-01-01 01:00:00"))
-
-    def test_dloffset_justBeforeCETStarts(self):
-        self.assertEqual(
-            2, dloffset("2016-10-30 02:00:00S"))
-
-    def test_dloffset_justAfterCETStarts(self):
-        self.assertEqual(
-            3, dloffset("2016-10-30 02:00:00"))
-
-def localTime(string, isSummer):
-    return tzisodatetime(string)
+            str(localTime("2016-03-27 02:00:00")),
+            "2016-03-27 02:00:00+01:00")
 
 
 class MongoTimeCurve_Test(unittest.TestCase):
@@ -86,7 +90,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
         mtc = MongoTimeCurve(self.db, self.collection)
         for datetime, plant, value in points:
             mtc.fillPoint(
-                datetime=isodatetime(datetime),
+                datetime=localTime(datetime),
                 name=plant,
                 ae=value,
             )
@@ -286,7 +290,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
         mtc = MongoTimeCurve(self.db, self.collection)
         with self.assertRaises(Exception) as ass:
             mtc.fillPoint(
-                datetime=isodatetime('2015-08-01 23:00:00'),
+                datetime=localTime('2015-08-01 23:00:00'),
                 ae=10,
                 )
         self.assertEqual(ass.exception.args[0],
@@ -357,5 +361,6 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
         lastdate = mtc.lastFullDate('miplanta')
         self.assertEqual(lastdate,isodate('2015-01-01'))
+
 
 # vim: et ts=4 sw=4

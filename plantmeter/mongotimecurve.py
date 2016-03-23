@@ -20,31 +20,17 @@ import pytz
 
 """
 
-def tzisodatetime(string):
+def asUtc(date):
+    if date.tzinfo is None:
+        return pytz.utc.localize(date)
+    return date.astimezone(pytz.utc)
+
+def toLocal(date):
     tz = pytz.timezone('Europe/Berlin')
-    if string.endswith('CEST'):
-        string=string[:-4]+'S'
-    if string.endswith('CET'):
-        string=string[:-3]
-
-    isSummer = string.endswith("S")
-    if isSummer:
-        string = string[:-1]
-    naive = datetime.datetime.strptime(string,
-        "%Y-%m-%d %H:%M:%S")
-    localized = tz.localize(naive)
-    if localized.dst(): return localized
-    if not isSummer: return localized
-
-    utcversion = localized.astimezone(pytz.utc)
-    onehour = datetime.timedelta(hours=1)
-
-    return (utcversion - onehour).astimezone(tz)
-
-def dloffset(datestring):
-    date = tzisodatetime(datestring)
-    dstOffset = 0 if date.tzname()=='CEST' else 1
-    return dstOffset+date.hour
+    if date.tzinfo is None:
+        return tz.localize(date)
+    return date.astimezone(tz)
+    
 
 
 class MongoTimeCurve(object):
@@ -57,6 +43,8 @@ class MongoTimeCurve(object):
         self.collection = self.db[collection]
 
     def get(self, start, stop, filter, field):
+        start = toLocal(start)
+        stop = toLocal(stop)
         ndays = (stop-start).days+1
         data = numpy.zeros(ndays*25, numpy.int)
         filters = dict(
@@ -72,13 +60,12 @@ class MongoTimeCurve(object):
                 .sort('create_at',pymongo.ASCENDING)
                 ):
             point = ns(x)
-            monthAndDay = point.datetime.month, point.datetime.day
-            summerOffset = 1 if point.datetime.dst() else 0
-            summerOffset = 1 if (3,26) < monthAndDay < (10,26) else 0
+            localTime = toLocal(asUtc(point.datetime))
+            summerOffset = 1 if localTime.dst() else 0
             timeindex = (
                 +summerOffset
-                +25*(point.datetime.date()-start.date()).days
-                +point.datetime.hour
+                +25*(localTime.date()-start.date()).days
+                +localTime.hour
                 )
             data[timeindex]=point.get(field)
         return data
@@ -87,6 +74,9 @@ class MongoTimeCurve(object):
         for requiredField in ('name', 'datetime'):
             if requiredField not in data:
                 raise Exception("Missing '{}'".format(requiredField))
+
+        # TOBEREMOVED: handle naive dates, NO DST SAFE!!
+        data['datetime'] = toLocal(data['datetime'])
 
         counter = self.db['counters'].find_and_modify(
             {'_id': self.collectionName},
