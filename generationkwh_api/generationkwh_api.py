@@ -137,12 +137,20 @@ class GenerationkWhRemainders(osv.osv):
             ) for n_shares, last_day_computed, remainder_wh in cr.fetchall()
         ]
         return result
-
+    _sql_constraints = [('unique_n_shares_last_day', 'unique(n_shares,last_day_computed)', 'Only one remainder of last date computed and number of shares is allowed')]
     def add(self, cr, uid, remainders, context=None):
         for n,pointsDate,remainder in remainders:
-            cr.execute("""INSERT INTO generationkwh_remainders 
-                          (n_shares,last_day_computed,remainder_wh)
-                          VALUES (%d,'%s',%d)""" % (n,pointsDate,remainder))
+            same_date_n_id=self.search(cr, uid, [
+                ('n_shares','=',n),
+                ('last_day_computed','=', pointsDate),
+            ], context=context)
+            if same_date_n_id:
+                self.unlink(cr,uid,same_date_n_id)
+            self.create(cr,uid,{
+                'n_shares': n, 
+                'last_day_computed': pointsDate,
+                'remainder_wh': remainder
+            }, context=context)
             
     def clean(self,cr,uid,context=None):
         ids=self.search(cr,uid, [], context=context)
