@@ -52,8 +52,9 @@ class MonsolProvider(BaseProvider):
                 client.retrbinary('RETR ' + filename, callback=sio.write)
             except Exception as e:
                 raise BaseProviderDownloadError()
+            finally:
+                client.quit()
 
-            client.quit()
             sio.seek(0)
             return sio.readlines()
 
