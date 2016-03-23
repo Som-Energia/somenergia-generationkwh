@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-from .mongotimecurve import MongoTimeCurve
+from .mongotimecurve import MongoTimeCurve, dloffset, tzisodatetime
 import pymongo
 import datetime
+import pytz
 
 import unittest
 
@@ -11,6 +12,48 @@ def isodatetime(string):
 
 def isodate(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d")
+
+class DaylightOffset_Test(unittest.TestCase):
+
+    def test_localTime_winter(self):
+        self.assertEqual(
+            str(tzisodatetime("2016-01-01 02:00:00CET")),
+            "2016-01-01 02:00:00+01:00")
+
+    def test_localTime_badTz(self):
+        self.assertEqual(
+            str(tzisodatetime("2016-01-01 02:00:00CEST")),
+            "2016-01-01 01:00:00+01:00")
+
+    def test_localTime_beforeOctoberChange(self):
+        self.assertEqual(
+            str(tzisodatetime("2016-10-30 02:00:00CEST")),
+            "2016-10-30 02:00:00+02:00")
+
+    def test_localTime_afterOctoberChange(self):
+        self.assertEqual(
+            str(tzisodatetime("2016-10-30 02:00:00CET")),
+            "2016-10-30 02:00:00+01:00")
+
+    def test_dloffset_midnightNewYear(self):
+        self.assertEqual(
+            1, dloffset("2016-01-01 00:00:00CET"))
+
+    def test_dloffset_oneAfterMidnight(self):
+        self.assertEqual(
+            2, dloffset("2016-01-01 01:00:00CET"))
+
+    def test_dloffset_virginDay(self):
+        self.assertEqual(
+            0, dloffset("2016-08-18 00:00:00CEST"))
+
+    def test_dloffset_justBeforeCETStarts(self):
+        self.assertEqual(
+            2, dloffset("2016-10-30 02:00:00CEST"))
+
+    def test_dloffset_justAfterCETStarts(self):
+        self.assertEqual(
+            3, dloffset("2016-10-30 02:00:00CET"))
 
 
 class MongoTimeCurve_Test(unittest.TestCase):
@@ -30,6 +73,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
     def setupPoints(self, points):
         mtc = MongoTimeCurve(self.db, self.collection)
         for datetime, plant, value in points:
+            isExtraDLHour = datetime.endswith('S')
             mtc.fillPoint(
                 datetime=isodatetime(datetime),
                 name=plant,
@@ -201,7 +245,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
     def test_get_dayligthIntoWinter(self):
         mtc = self.setupPoints([
             ('2015-10-25 00:00:00', 'miplanta', 1),
-            ('2015-10-25 02:00:00', 'miplanta', 2), # how to mark it??
+            ('2015-10-25 02:00:00S', 'miplanta', 2), # how to mark it??
             ('2015-10-25 02:00:00', 'miplanta', 3), # how to mark it??
             ('2015-10-25 23:00:00', 'miplanta', 4),
             ])

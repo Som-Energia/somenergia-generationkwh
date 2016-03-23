@@ -4,6 +4,7 @@ import pymongo
 from yamlns import namespace as ns
 import numpy
 import datetime
+import pytz
 
 """
 + More than one meassure
@@ -18,6 +19,25 @@ import datetime
 - lastFullDate: proper implementation
 
 """
+
+def tzisodatetime(string):
+    tz = pytz.timezone('CET')
+    naive = datetime.datetime.strptime(string,
+        "%Y-%m-%d %H:%M:%S%Z")
+    localized = tz.localize(naive)
+    if localized.dst(): return localized
+    if not string.endswith('CEST'): return localized
+
+    utcversion = localized.astimezone(pytz.utc)
+    onehour = datetime.timedelta(hours=1)
+
+    return (utcversion - onehour).astimezone(tz)
+
+def dloffset(datestring):
+    date = tzisodatetime(datestring)
+    dstOffset = 0 if date.tzname()=='CEST' else 1
+    return dstOffset+date.hour
+
 
 class MongoTimeCurve(object):
     """Consolidates curve data in a mongo database"""
