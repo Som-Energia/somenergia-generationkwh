@@ -33,9 +33,12 @@ def toLocal(date):
 
 
 def dateToCurveIndex(start, localTime):
-    return localTime.hour
+    ndays = (localTime.date()-start.date()).days
+    winterOffset = 0 if localTime.dst() else 1
+    return localTime.hour + 25*ndays + winterOffset
 
-
+def curveIndexToDate(start, index):
+    return start
    
 
 

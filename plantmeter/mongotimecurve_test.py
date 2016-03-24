@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from .mongotimecurve import MongoTimeCurve, dateToCurveIndex
+from .mongotimecurve import MongoTimeCurve, dateToCurveIndex, curveIndexToDate
 import pymongo
 import datetime
 import pytz
@@ -62,6 +62,52 @@ class CurveDatetimeMapper_Test(unittest.TestCase):
                 localTime("2016-08-15 01:00:00")
                 ), 1)
 
+    def test_dateToCurveIndex_inSummer_nextDay(self):
+       self.assertEquals(
+            dateToCurveIndex(
+                isodate("2016-08-15"),
+                localTime("2016-08-16 00:00:00")
+                ), 25)
+
+    def test_dateToCurveIndex_inWinter(self):
+       self.assertEquals(
+            dateToCurveIndex(
+                isodate("2016-12-25"),
+                localTime("2016-12-25 00:00:00")
+                ), 1)
+
+    def test_dateToCurveIndex_beforeSummerToWinterChange(self):
+       self.assertEquals(
+            dateToCurveIndex(
+                isodate("2016-10-30"),
+                localTime("2016-10-30 02:00:00S")
+                ), 2)
+
+    def test_dateToCurveIndex_afterSummerToWinterChange(self):
+       self.assertEquals(
+            dateToCurveIndex(
+                isodate("2016-10-30"),
+                localTime("2016-10-30 02:00:00")
+                ), 3)
+
+    def test_dateToCurveIndex_beforeWinterToSummerChange(self):
+       self.assertEquals(
+            dateToCurveIndex(
+                isodate("2016-03-27"),
+                localTime("2016-03-27 01:00:00")
+                ), 2)
+
+    def test_dateToCurveIndex_afterWinterToSummerChange(self):
+       self.assertEquals(
+            dateToCurveIndex(
+                isodate("2016-03-27"),
+                localTime("2016-03-27 03:00:00")
+                ), 3)
+
+    def test_curveIndexToDate_summer(self):
+       self.assertEquals(
+            curveIndexToDate(isodate("2016-08-15"), 0),
+            localTime("2016-08-15 00:00:00"))
 
 
 
