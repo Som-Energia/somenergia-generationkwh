@@ -105,11 +105,7 @@ class MongoTimeCurve(object):
             point = ns(x)
             localTime = toLocal(asUtc(point.datetime))
             summerOffset = 1 if localTime.dst() else 0
-            timeindex = (
-                +summerOffset
-                +25*(localTime.date()-start.date()).days
-                +localTime.hour
-                )
+            timeindex = dateToCurveIndex (start, localTime)
             data[timeindex]=point.get(field)
         return data
 

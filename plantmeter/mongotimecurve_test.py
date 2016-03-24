@@ -269,7 +269,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             )
         self.assertEqual(
             list(curve),
-            [0]*23+[10,0])
+            [0]*24+[10])
 
     def test_get_twoDays(self):
         mtc = self.setupPoints([
@@ -285,7 +285,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
         self.assertEqual(
             list(curve),
             +25*[0]
-            +23*[0]+[10,0]
+            +24*[0]+[10]
             )
 
     def test_get_differentTime(self):
@@ -301,7 +301,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             )
         self.assertEqual(
             str(list(curve)),
-            str(+22*[0]+[10,0,0])
+            str(+23*[0]+[10,0])
             )
 
     def test_get_withOutsideData(self):
@@ -333,7 +333,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             )
         self.assertEqual(
             list(curve),
-            [0,10]+21*[0]+[10,0])
+            [0,0,10]+21*[0]+[10])
 
     def test_get_differentNameIgnored(self):
         mtc = self.setupPoints([
@@ -365,7 +365,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             )
         self.assertEqual(
             list(curve),
-            +23*[0]+[30,0])
+            +24*[0]+[30])
 
     def test_get_summerPointsPadsLeft(self):
         mtc = self.setupPoints([
@@ -381,9 +381,8 @@ class MongoTimeCurve_Test(unittest.TestCase):
             )
         self.assertEqual(
             list(curve),
-            [0,20]+22*[0]+[10])
+            [20]+22*[0]+[10,0])
 
-    @unittest.skip("Not implemented yet")
     def test_get_dayligthIntoSummer(self):
         mtc = self.setupPoints([
             ('2015-03-29 00:00:00', 'miplanta', 1),
@@ -403,7 +402,6 @@ class MongoTimeCurve_Test(unittest.TestCase):
             list(curve),
             [0,1,2,3]+19*[0]+[4,0])
 
-    @unittest.skip("Not implemented yet")
     def test_get_dayligthIntoWinter(self):
         mtc = self.setupPoints([
             ('2015-10-25 00:00:00', 'miplanta', 1),
@@ -500,7 +498,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             )
         self.assertEqual(
             list(curve),
-            list(range(1,25))+[0])
+            list([0]+range(1,25)))
 
     def test_lastFullDate_withNoPoints(self):
         mtc = self.setupDatePoints('2015-01-01', 'miplanta', [1]*24)
