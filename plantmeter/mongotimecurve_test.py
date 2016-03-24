@@ -30,6 +30,22 @@ def localTime(string):
     lesser = tz.normalize(localized-onehour)
     return lesser if lesser.dst() else localized
 
+"""
+- Spain daylight:
+    - UTC offset
+        - +1h in winter
+        - +2h in summer
+    - Hourly curves have
+        - an padding to the left in winter: _ X X X ... X X
+        - an padding to the right in summer: X X X ... X _
+    - Summer to winter is last sunday of october
+        - that day has no padding in neither side
+        - It has two 2:00h, a summer and a winter one
+    - Winter to summer is last sunday of march
+        - that day has paddings on both sides
+        - It has no 2:00h, next to winter 1:00h is summer 3:00h
+"""
+
 class CurveDatetimeMapper_Test(unittest.TestCase):
 
     def test_dateToCurveIndex_inSummer(self):
@@ -38,6 +54,13 @@ class CurveDatetimeMapper_Test(unittest.TestCase):
                 isodate("2016-08-15"),
                 localTime("2016-08-15 00:00:00")
                 ), 0)
+
+    def test_dateToCurveIndex_inSummer_secondHour(self):
+       self.assertEquals(
+            dateToCurveIndex(
+                isodate("2016-08-15"),
+                localTime("2016-08-15 01:00:00")
+                ), 1)
 
 
 
