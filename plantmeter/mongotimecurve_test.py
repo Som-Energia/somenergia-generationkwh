@@ -504,5 +504,59 @@ class MongoTimeCurve_Test(unittest.TestCase):
         lastdate = mtc.lastFullDate('miplanta')
         self.assertEqual(lastdate,isodate('2015-01-01'))
 
+    def test_filled_whenEmpty(self):
+        mtc = self.setupPoints([])
+
+        _, curve = mtc.get(
+            start=isodate('2015-08-15'),
+            stop=isodate('2015-08-15'),
+            filter='miplanta',
+            field='ae',
+            filling=True,
+            )
+        self.assertEqual(
+            list(curve),
+            +25*[False]
+            )
+
+    def test_filled_withAPoint_inSummer(self):
+        mtc = self.setupPoints([
+            ('2015-08-15 00:00:00', 'miplanta', 30),
+            ])
+
+        _,curve = mtc.get(
+            start=isodate('2015-08-15'),
+            stop=isodate('2015-08-15'),
+            filter='miplanta',
+            field='ae',
+            filling=True,
+            )
+        self.assertEqual(
+            list(curve),
+            [True]+24*[False]
+            )
+
+    def _test_update_singleBin(self):
+        mtc = self.setupPoints([])
+
+        curve = mtc.update(
+            start=isodate('2015-08-15'),
+            filter='miplanta',
+            field='ae',
+            data=[1]+24*[0]
+            )
+        curve = mtc.get(
+            start=isodate('2015-08-15'),
+            stop=isodate('2015-08-15'),
+            filter='miplanta',
+            field='ae',
+            )
+        self.assertEqual(
+            list(curve),
+            [1]+24*[0]
+            )
+
+        
+
 
 # vim: et ts=4 sw=4
