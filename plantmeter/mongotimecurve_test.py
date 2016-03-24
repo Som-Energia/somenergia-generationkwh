@@ -613,7 +613,32 @@ class MongoTimeCurve_Test(unittest.TestCase):
             [True]+24*[False]
             )
 
-        
+    def test_update_fullDay(self):
+        mtc = self.setupPoints([])
+
+        curve = mtc.update(
+            start=isodate('2015-08-15'),
+            filter='miplanta',
+            field='ae',
+            data=+25*[1]
+            )
+        curve, filling = mtc.get(
+            start=isodate('2015-08-15'),
+            stop=isodate('2015-08-15'),
+            filter='miplanta',
+            field='ae',
+            filling=True,
+            )
+        self.assertEqual(
+            list(curve),
+            +24*[1]+[0]
+            )
+        self.assertEqual(
+            list(filling),
+            +24*[True]+[False]
+            )
+
+
 
 
 # vim: et ts=4 sw=4
