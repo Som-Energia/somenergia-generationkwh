@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from .mongotimecurve import MongoTimeCurve, dateToCurveIndex, curveIndexToDate, toLocal
+from .mongotimecurve import MongoTimeCurve, dateToCurveIndex, curveIndexToDate, toLocal, tz
 import pymongo
 import datetime
 import pytz
@@ -11,7 +11,6 @@ def isodatetime(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
 
 def isodate(string):
-    tz = pytz.timezone('Europe/Berlin')
     return tz.localize(datetime.datetime.strptime(string, "%Y-%m-%d"))
 
 
@@ -22,7 +21,6 @@ def localTime(string):
         string = string[:-1]
     naive = datetime.datetime.strptime(string,
         "%Y-%m-%d %H:%M:%S")
-    tz = pytz.timezone('Europe/Berlin')
     localized = tz.localize(naive)
     if not isSummer: return localized
     if localized.dst(): return localized

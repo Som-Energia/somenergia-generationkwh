@@ -20,13 +20,14 @@ import pytz
 
 """
 
+tz = pytz.timezone('Europe/Madrid')
+
 def asUtc(date):
     if date.tzinfo is None:
         return pytz.utc.localize(date)
     return date.astimezone(pytz.utc)
 
 def toLocal(date):
-    tz = pytz.timezone('Europe/Berlin')
     if date.tzinfo is None:
         return tz.localize(date)
     return date.astimezone(tz)
@@ -60,7 +61,6 @@ def addDays(date, ndays):
 
 
 def curveIndexToDate(start, index):
-    tz = pytz.timezone('Europe/Berlin')
     days = index//25
     localday = addDays(start, days)
 
@@ -104,7 +104,6 @@ class MongoTimeCurve(object):
                 ):
             point = ns(x)
             localTime = toLocal(asUtc(point.datetime))
-            summerOffset = 1 if localTime.dst() else 0
             timeindex = dateToCurveIndex (start, localTime)
             data[timeindex]=point.get(field)
         return data
