@@ -13,7 +13,6 @@ def localDate(y,m,d):
     tz = pytz.timezone('Europe/Berlin')
     return tz.localize(datetime(y,m,d))
 
-@unittest.skip("while fixing paddings")
 class Resource_Test(unittest.TestCase):
 
     def setUp(self):
@@ -72,9 +71,10 @@ class Resource_Test(unittest.TestCase):
             list(vp.getWh(
                 localDate(2015,9,4),
                 localDate(2015,9,5))),
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 5, 4, 8, 17, 34, 12, 12, 5, 3, 1, 0, 0, 0, 0,
-                 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 6, 5, 9, 18, 35, 13, 13, 6, 4, 2, 0, 0, 0, 0]
-                )
+            [
+                0,0,0,0,0,0,0,0,3,6,5,4,8,17,34,12,12,5,3,1,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,4,7,6,5,9,18,35,13,13,6,4,2,0,0,0,0,0,
+            ])
 
     def test_update_onePlantTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -105,9 +105,10 @@ class Resource_Test(unittest.TestCase):
             list(vp.getWh(
                 localDate(2015,9,4),
                 localDate(2015,9,5))),
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 12, 10, 8, 16, 34, 68, 24, 24, 10, 6, 2, 0, 0, 0, 0,
-                 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 14, 12, 10, 18, 36, 70, 26, 26, 12, 8, 4, 0, 0, 0, 0]
-                )
+            [
+                0,0,0,0,0,0,0,0,6,12,10, 8,16,34,68,24,24,10,6,2,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,8,14,12,10,18,36,70,26,26,12,8,4,0,0,0,0,0,
+            ])
 
     def test_update_twoPlantsOneMeter(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -131,9 +132,10 @@ class Resource_Test(unittest.TestCase):
             list(vp.getWh(
                 localDate(2015,9,4),
                 localDate(2015,9,5))),
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 5, 4, 8, 17, 34, 12, 12, 5, 3, 1, 0, 0, 0, 0,
-                 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 6, 5, 9, 18, 35, 13, 13, 6, 4, 2, 0, 0, 0, 0]
-                )
+            [
+                0,0,0,0,0,0,0,0,3,6,5,4,8,17,34,12,12,5,3,1,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,4,7,6,5,9,18,35,13,13,6,4,2,0,0,0,0,0,
+            ])
 
     def test_update_twoPlantsTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -166,9 +168,10 @@ class Resource_Test(unittest.TestCase):
             list(vp.getWh(
                 localDate(2015,9,4),
                 localDate(2015,9,5))),
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 12, 10, 8, 16, 34, 68, 24, 24, 10, 6, 2, 0, 0, 0, 0,
-                 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 14, 12, 10, 18, 36, 70, 26, 26, 12, 8, 4, 0, 0, 0, 0]
-                )
+            [
+                0,0,0,0,0,0,0,0,6,12,10, 8,16,34,68,24,24,10,6,2,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,8,14,12,10,18,36,70,26,26,12,8,4,0,0,0,0,0,
+            ])
 
 
     def test_lastDate_empty(self):
@@ -258,7 +261,6 @@ class Resource_Test(unittest.TestCase):
         self.assertEqual(vp.lastMeasurementDate(), localDate(2015,8,5))
 
 
-@unittest.skip("while fixing paddings")
 class Meter_Test(unittest.TestCase):
     def setUp(self):
         self.databasename = 'generationkwh_test'
@@ -301,9 +303,10 @@ class Meter_Test(unittest.TestCase):
             list(m.getWh(
                 localDate(2015,9,4),
                 localDate(2015,9,5))),
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 5, 4, 8, 17, 34, 12, 12, 5, 3, 1, 0, 0, 0, 0,
-             0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 6, 5, 9, 18, 35, 13, 13, 6, 4, 2, 0, 0, 0, 0]
-            )
+            [
+                0,0,0,0,0,0,0,0,3,6,5,4,8,17,34,12,12,5,3,1,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,4,7,6,5,9,18,35,13,13,6,4,2,0,0,0,0,0,
+            ])
 
     def test_lastDate_empty(self):
         m = Meter(
