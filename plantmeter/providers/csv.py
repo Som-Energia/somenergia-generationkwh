@@ -2,6 +2,7 @@ from plantmeter.providers import BaseProvider, register, urlparse
 from plantmeter.utils import daterange
 import datetime
 import csv
+from ..mongotimecurve import parseLocalTime
 
 class CSVProvider(BaseProvider):
     """CSV provider
@@ -18,21 +19,21 @@ class CSVProvider(BaseProvider):
         def extract(line):
             items = line.split(';')
             return {
-		'datetime': datetime.datetime.strptime(items[0], '%Y-%m-%d %H:%M'),
-		'daylight': items[1],
-		'ae': items[2]
-		} 
+                'datetime': parseLocalTime(items[0]+':00', items[1]=='S'),
+                'ae': items[2]
+                } 
 
         with open(self.res, 'rb') as csvfile:
             content = csvfile.readlines()
-            return [[measure
-		   for date in daterange(start, end + datetime.timedelta(days=1)) 
-	           for measure in (
-			extract(line)
-			for line in content[1:]
-			)
-                   if measure['datetime'].date() == date.date()
-		]]
+            return [[
+                measure
+                for date in daterange(start, end + datetime.timedelta(days=1)) 
+                for measure in (
+                    extract(line)
+                    for line in content[1:]
+                    )
+                if measure['datetime'].date() == date.date()
+                ]]
 
     def disconnect(self):
         pass

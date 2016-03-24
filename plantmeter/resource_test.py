@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from .mongotimecurve import MongoTimeCurve
+from .mongotimecurve import MongoTimeCurve, tz
 from plantmeter.resource import *
 
 import pymongo
@@ -9,8 +9,6 @@ from datetime import datetime
 import unittest
 
 def localDate(y,m,d):
-    import pytz
-    tz = pytz.timezone('Europe/Berlin')
     return tz.localize(datetime(y,m,d))
 
 class Resource_Test(unittest.TestCase):

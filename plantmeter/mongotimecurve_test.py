@@ -1,32 +1,24 @@
 #!/usr/bin/env python
 
-from .mongotimecurve import MongoTimeCurve, dateToCurveIndex, curveIndexToDate, toLocal, tz
+from .mongotimecurve import (
+    MongoTimeCurve,
+    dateToCurveIndex,
+    curveIndexToDate,
+    parseLocalTime,
+    tz,
+    )
 import pymongo
 import datetime
-import pytz
 
 import unittest
-
-def isodatetime(string):
-    return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
 
 def isodate(string):
     return tz.localize(datetime.datetime.strptime(string, "%Y-%m-%d"))
 
-
 def localTime(string):
-    import pytz
     isSummer = string.endswith("S")
-    if isSummer:
-        string = string[:-1]
-    naive = datetime.datetime.strptime(string,
-        "%Y-%m-%d %H:%M:%S")
-    localized = tz.localize(naive)
-    if not isSummer: return localized
-    if localized.dst(): return localized
-    onehour = datetime.timedelta(hours=1)
-    lesser = tz.normalize(localized-onehour)
-    return lesser if lesser.dst() else localized
+    if isSummer: string=string[:-1]
+    return parseLocalTime(string, isSummer)
 
 class LocalTime_Test(unittest.TestCase):
 
@@ -549,7 +541,6 @@ class MongoTimeCurve_Test(unittest.TestCase):
         self.assertEqual(ctx.exception.args[0],
             "MongoTimeCurve.update called with naive (no timezone) start date")
 
-    @unittest.skip("To be activated when 'resource' uses aware dates")
     def test_fillPoint_withNaiveDatetime(self):
         mtc = self.setupPoints([])
 
@@ -560,7 +551,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
                 ae=10,
                 )
         self.assertEqual(ctx.exception.args[0],
-            "MongoTimeCurve.fillPoint called with naive (no timezone) datetime")
+            "MongoTimeCurve.fillPoint with naive (no timezone) datetime")
 
     def test_get_withNaiveStartDate(self):
         mtc = self.setupPoints([])

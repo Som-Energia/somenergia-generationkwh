@@ -32,6 +32,16 @@ def toLocal(date):
         return tz.localize(date)
     return date.astimezone(tz)
 
+def parseLocalTime(string, isSummer=False):
+    naive = datetime.datetime.strptime(string,
+        "%Y-%m-%d %H:%M:%S")
+    localized = tz.localize(naive)
+    if not isSummer: return localized
+    if localized.dst(): return localized
+    onehour = datetime.timedelta(hours=1)
+    lesser = tz.normalize(localized-onehour)
+    return lesser if lesser.dst() else localized
+
 """
 - Spain daylight:
     - UTC offset
@@ -126,7 +136,7 @@ class MongoTimeCurve(object):
                 raise Exception("Missing '{}'".format(requiredField))
 
         # TOBEREMOVED: handle naive dates, NO DST SAFE!!
-        data['datetime'] = toLocal(data['datetime'])
+#        data['datetime'] = toLocal(data['datetime'])
 
         assert data['datetime'].tzinfo is not None, (
             "MongoTimeCurve.fillPoint with naive (no timezone) datetime")
