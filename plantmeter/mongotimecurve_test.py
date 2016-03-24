@@ -30,22 +30,6 @@ def localTime(string):
     lesser = tz.normalize(localized-onehour)
     return lesser if lesser.dst() else localized
 
-"""
-- Spain daylight:
-    - UTC offset
-        - +1h in winter
-        - +2h in summer
-    - Hourly curves have
-        - an padding to the left in winter: _ X X X ... X X
-        - an padding to the right in summer: X X X ... X _
-    - Summer to winter is last sunday of october
-        - that day has no padding in neither side
-        - It has two 2:00h, a summer and a winter one
-    - Winter to summer is last sunday of march
-        - that day has paddings on both sides
-        - It has no 2:00h, next to winter 1:00h is summer 3:00h
-"""
-
 class CurveDatetimeMapper_Test(unittest.TestCase):
 
     def test_dateToCurveIndex_inSummer(self):
@@ -108,6 +92,57 @@ class CurveDatetimeMapper_Test(unittest.TestCase):
        self.assertEquals(
             curveIndexToDate(isodate("2016-08-15"), 0),
             localTime("2016-08-15 00:00:00"))
+
+    def test_curveIndexToDate_summer_secondHour(self):
+       self.assertEquals(
+            curveIndexToDate(isodate("2016-08-15"), 1),
+            localTime("2016-08-15 01:00:00"))
+
+    def test_curveIndexToDate_summer_nextDay(self):
+       self.assertEquals(
+            curveIndexToDate(isodate("2016-08-15"), 25),
+            localTime("2016-08-16 00:00:00"))
+
+    def test_curveIndexToDate_summer_paddingReturnsNone(self):
+       self.assertEquals(
+            curveIndexToDate(isodate("2016-08-15"), 24),
+            None)
+
+    def test_curveIndexToDate_winter(self):
+       self.assertEquals(
+            curveIndexToDate(isodate("2016-12-25"), 1),
+            localTime("2016-12-25 00:00:00"))
+
+    def test_curveIndexToDate_winter_paddingReturnsNone(self):
+       self.assertEquals(
+            curveIndexToDate(isodate("2016-12-25"), 0),
+            None)
+
+    def test_curveIndexToDate_winter_nextDay(self):
+       self.assertEquals(
+            curveIndexToDate(isodate("2016-12-25"), 26),
+            localTime("2016-12-26 00:00:00"))
+
+    
+    def test_curveIndexToDate_beforeChanginToWinter(self):
+       self.assertEquals(
+            curveIndexToDate(isodate("2016-10-30"), 2),
+            localTime("2016-10-30 02:00:00S"))
+
+    def test_curveIndexToDate_afterChanginToWinter(self):
+       self.assertEquals(
+            curveIndexToDate(isodate("2016-10-30"), 3),
+            localTime("2016-10-30 02:00:00"))
+
+    def test_curveIndexToDate_afterChanginToWinter(self):
+       self.assertEquals(
+            curveIndexToDate(isodate("2016-10-30"), 3),
+            localTime("2016-10-30 02:00:00"))
+
+    def test_curveIndexToDate_summerButStartIsWinter(self):
+       self.assertEquals(
+            curveIndexToDate(isodate("2016-10-29"), 51),
+            localTime("2016-10-30 00:00:00"))
 
 
 

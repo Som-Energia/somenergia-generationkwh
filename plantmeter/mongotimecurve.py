@@ -31,6 +31,22 @@ def toLocal(date):
         return tz.localize(date)
     return date.astimezone(tz)
 
+"""
+- Spain daylight:
+    - UTC offset
+        - +1h in winter
+        - +2h in summer
+    - Hourly curves have
+        - an padding to the left in winter: _ X X X ... X X
+        - an padding to the right in summer: X X X ... X _
+    - Summer to winter is last sunday of october
+        - that day has no padding in neither side
+        - It has two 2:00h, a summer and a winter one
+    - Winter to summer is last sunday of march
+        - that day has paddings on both sides
+        - It has no 2:00h, next to winter 1:00h is summer 3:00h
+"""
+
 
 def dateToCurveIndex(start, localTime):
     ndays = (localTime.date()-start.date()).days
@@ -38,7 +54,11 @@ def dateToCurveIndex(start, localTime):
     return localTime.hour + 25*ndays + winterOffset
 
 def curveIndexToDate(start, index):
-    return start
+    if not start.dst(): index-=1
+    days = index//25
+    hours = index%25
+    if hours == 24: return None
+    return start+datetime.timedelta(days=days, hours=hours)
    
 
 
