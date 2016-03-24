@@ -113,30 +113,6 @@ class MongoTimeCurve(object):
         if filling: return data, filldata
         return data
 
-    def filled(self, start, stop, filter, field):
-        start = toLocal(start)
-        stop = toLocal(stop)
-        ndays = (stop-start).days+1
-        data = numpy.zeros(ndays*25, numpy.bool)
-
-        filters = dict(
-            name = filter,
-            datetime = {
-                '$gte': start,
-                '$lte': stop+datetime.timedelta(days=1)
-            }
-        )
-
-        for x in (self.collection
-                .find(filters, [field,'datetime'])
-                .sort('create_at',pymongo.ASCENDING)
-                ):
-            point = ns(x)
-            localTime = toLocal(asUtc(point.datetime))
-            timeindex = dateToCurveIndex (start, localTime)
-            data[timeindex]=True
-        return data
-
     def fillPoint(self, **data):
         for requiredField in ('name', 'datetime'):
             if requiredField not in data:
