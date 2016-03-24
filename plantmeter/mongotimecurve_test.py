@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from .mongotimecurve import MongoTimeCurve, dateToCurveIndex, curveIndexToDate
+from .mongotimecurve import MongoTimeCurve, dateToCurveIndex, curveIndexToDate, toLocal
 import pymongo
 import datetime
 import pytz
@@ -148,8 +148,32 @@ class CurveDatetimeMapper_Test(unittest.TestCase):
             curveIndexToDate(isodate("2016-10-29"), 51),
             localTime("2016-10-31 00:00:00"))
 
+    def test_curveIndexToDate_winterButStartIsSummer(self):
+        self.assertDateEqual(
+            curveIndexToDate(isodate("2016-3-26"), 50),
+            localTime("2016-3-28 00:00:00"))
 
+    def test_curveIndexToDate_noPaddingBeforeSummerToWinter(self):
+        self.assertDateEqual(
+            curveIndexToDate(isodate("2016-10-30"), 0),
+            localTime("2016-10-30 00:00:00"))
 
+    def test_curveIndexToDate_noPaddingAfterSummerToWinter(self):
+        self.assertDateEqual(
+            curveIndexToDate(isodate("2016-10-30"), 24),
+            localTime("2016-10-30 23:00:00"))
+
+    def test_curveIndexToDate_paddingBeforeWinterToSummer(self):
+        self.assertDateEqual(
+            curveIndexToDate(isodate("2016-03-27"), 0),
+            None)
+
+    def test_curveIndexToDate_paddingAfterWinterToSummer(self):
+        self.assertDateEqual(
+            curveIndexToDate(isodate("2016-03-27"), 24),
+            None)
+
+    
 class LocalTime_Test(unittest.TestCase):
 
     def test_localTime_fullySummer(self):
