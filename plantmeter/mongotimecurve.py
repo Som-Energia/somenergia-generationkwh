@@ -135,9 +135,6 @@ class MongoTimeCurve(object):
             if requiredField not in data:
                 raise Exception("Missing '{}'".format(requiredField))
 
-        # TOBEREMOVED: handle naive dates, NO DST SAFE!!
-#        data['datetime'] = toLocal(data['datetime'])
-
         assert data['datetime'].tzinfo is not None, (
             "MongoTimeCurve.fillPoint with naive (no timezone) datetime")
 
