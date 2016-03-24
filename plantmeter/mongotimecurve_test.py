@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from .mongotimecurve import MongoTimeCurve
+from .mongotimecurve import MongoTimeCurve, dateToCurveIndex
 import pymongo
 import datetime
 import pytz
@@ -29,6 +29,18 @@ def localTime(string):
     onehour = datetime.timedelta(hours=1)
     lesser = tz.normalize(localized-onehour)
     return lesser if lesser.dst() else localized
+
+class CurveDatetimeMapper_Test(unittest.TestCase):
+
+    def test_dateToCurveIndex_inSummer(self):
+       self.assertEquals(
+            dateToCurveIndex(
+                isodate("2016-08-15"),
+                localTime("2016-08-15 00:00:00")
+                ), 0)
+
+
+
 
 class LocalTime_Test(unittest.TestCase):
 
