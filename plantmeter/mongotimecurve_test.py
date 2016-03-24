@@ -536,7 +536,59 @@ class MongoTimeCurve_Test(unittest.TestCase):
             [True]+24*[False]
             )
 
-    def _test_update_singleBin(self):
+    def test_update_withNaiveDate(self):
+        mtc = self.setupPoints([])
+
+        with self.assertRaises(AssertionError) as ctx:
+            mtc.update(
+                start=datetime.datetime(2015,8,15),
+                filter='miplanta',
+                field='ae',
+                data=[],
+                )
+        self.assertEqual(ctx.exception.args[0],
+            "MongoTimeCurve.update called with naive (no timezone) start date")
+
+    @unittest.skip("To be activated when 'resource' uses aware dates")
+    def test_fillPoint_withNaiveDatetime(self):
+        mtc = self.setupPoints([])
+
+        with self.assertRaises(AssertionError) as ctx:
+            mtc.fillPoint(
+                datetime=datetime.datetime(2015,8,15),
+                name='miplanta',
+                ae=10,
+                )
+        self.assertEqual(ctx.exception.args[0],
+            "MongoTimeCurve.fillPoint called with naive (no timezone) datetime")
+
+    def test_get_withNaiveStartDate(self):
+        mtc = self.setupPoints([])
+
+        with self.assertRaises(AssertionError) as ctx:
+            mtc.get(
+                start=datetime.datetime(2015,8,15),
+                stop=isodate("2015-08-15"),
+                filter='miplanta',
+                field='ae',
+                )
+        self.assertEqual(ctx.exception.args[0],
+            "MongoTimeCurve.get called with naive (no timezone) start date")
+
+    def test_get_withNaiveStopDate(self):
+        mtc = self.setupPoints([])
+
+        with self.assertRaises(AssertionError) as ctx:
+            mtc.get(
+                start=isodate("2015-08-15"),
+                stop=datetime.datetime(2015,8,15),
+                filter='miplanta',
+                field='ae',
+                )
+        self.assertEqual(ctx.exception.args[0],
+            "MongoTimeCurve.get called with naive (no timezone) stop date")
+
+    def test_update_singleBin(self):
         mtc = self.setupPoints([])
 
         curve = mtc.update(
@@ -545,15 +597,20 @@ class MongoTimeCurve_Test(unittest.TestCase):
             field='ae',
             data=[1]+24*[0]
             )
-        curve = mtc.get(
+        curve, filling = mtc.get(
             start=isodate('2015-08-15'),
             stop=isodate('2015-08-15'),
             filter='miplanta',
             field='ae',
+            filling=True,
             )
         self.assertEqual(
             list(curve),
             [1]+24*[0]
+            )
+        self.assertEqual(
+            list(filling),
+            [True]+24*[False]
             )
 
         

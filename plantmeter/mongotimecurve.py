@@ -86,6 +86,13 @@ class MongoTimeCurve(object):
         self.collection = self.db[collection]
 
     def get(self, start, stop, filter, field, filling=None):
+
+        assert start.tzinfo is not None, (
+            "MongoTimeCurve.get called with naive (no timezone) start date")
+
+        assert stop.tzinfo is not None, (
+            "MongoTimeCurve.get called with naive (no timezone) stop date")
+
         start = toLocal(start)
         stop = toLocal(stop)
         ndays = (stop-start).days+1
@@ -120,6 +127,9 @@ class MongoTimeCurve(object):
 
         # TOBEREMOVED: handle naive dates, NO DST SAFE!!
         data['datetime'] = toLocal(data['datetime'])
+
+        assert data['datetime'].tzinfo is not None, (
+            "MongoTimeCurve.fillPoint with naive (no timezone) datetime")
 
         counter = self.db['counters'].find_and_modify(
             {'_id': self.collectionName},
@@ -156,7 +166,23 @@ class MongoTimeCurve(object):
         # TODO: dumb implementation, if there is a single point consider it filled
         return self.lastDate(name)
 
+    def update(self, start, filter, field, data):
+        """Updates the curve with new data"""
 
+        assert start.tzinfo is not None, (
+            "MongoTimeCurve.update called with naive (no timezone) start date")
+
+        stop = start + datetime.timedelta(days=len(data)//25+1)
+        oldData, filling = self.get(start, stop, filter, field, filling=True)
+        for i,(bin,old,f) in enumerate(zip(data,oldData,filling)):
+            curveDate = curveIndexToDate(start, i)
+            if curveDate is None: continue
+            if bin == old: continue
+            self.fillPoint(
+                datetime=curveDate,
+                name=filter,
+                **dict([(field, bin)])
+                )
 
 
 
