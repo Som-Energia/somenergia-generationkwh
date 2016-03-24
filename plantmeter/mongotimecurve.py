@@ -53,19 +53,25 @@ def dateToCurveIndex(start, localTime):
     winterOffset = 0 if localTime.dst() else 1
     return localTime.hour + 25*ndays + winterOffset
 
+def addDays(date, ndays):
+    resultday = date.date() + datetime.timedelta(days=ndays)
+    naiveday = datetime.datetime.combine(resultday, datetime.time(0,0,0))
+    return toLocal(naiveday)
+
+
 def curveIndexToDate(start, index):
     tz = pytz.timezone('Europe/Berlin')
     days = index//25
-    resultday = start.date() + datetime.timedelta(days=days)
-    naiveday = datetime.datetime.combine(resultday, datetime.time(0,0,0))
-    localday = toLocal(naiveday)
+    localday = addDays(start, days)
+
     nextDay = tz.normalize(localday + datetime.timedelta(days=1))
+    toWinterDls = localday.dst() and not nextDay.dst()
+    toSummerDls = not localday.dst() and nextDay.dst()
+
     if not localday.dst(): index-=1
     hours = index%25
-    toWinterDls = localday.dst() and not nextDay.dst()
     if hours == 24 and not toWinterDls: return None
-    toSummerDls = not localday.dst() and nextDay.dst()
-    if toSummerDls and hours == 23: return None
+    if hours == 23 and toSummerDls: return None
     return tz.normalize(localday+datetime.timedelta(hours=hours))
    
 
