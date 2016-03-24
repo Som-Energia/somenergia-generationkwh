@@ -28,6 +28,49 @@ def localTime(string):
     lesser = tz.normalize(localized-onehour)
     return lesser if lesser.dst() else localized
 
+class LocalTime_Test(unittest.TestCase):
+
+    def test_localTime_fullySummer(self):
+        self.assertEqual(
+            str(localTime("2016-08-15 02:00:00")),
+            "2016-08-15 02:00:00+02:00")
+
+    def test_localTime_fullyWinter(self):
+        self.assertEqual(
+            str(localTime("2016-01-01 02:00:00")),
+            "2016-01-01 02:00:00+01:00")
+
+    def test_localTime_badTz_ignored(self):
+        self.assertEqual(
+            str(localTime("2016-01-01 02:00:00S")),
+            "2016-01-01 02:00:00+01:00")
+
+    def test_localTime_badSummerTz_ignored(self):
+        self.assertEqual(
+            str(localTime("2016-08-15 02:00:00")),
+            "2016-08-15 02:00:00+02:00")
+
+    def test_localTime_beforeOctoberChange(self):
+        self.assertEqual(
+            str(localTime("2016-10-30 02:00:00S")),
+            "2016-10-30 02:00:00+02:00")
+
+    def test_localTime_afterOctoberChange(self):
+        self.assertEqual(
+            str(localTime("2016-10-30 02:00:00")),
+            "2016-10-30 02:00:00+01:00")
+
+    def test_localTime_SIgnored(self):
+        self.assertEqual(
+            str(localTime("2016-10-30 03:00:00S")),
+            "2016-10-30 03:00:00+01:00")
+
+    def test_localTime_unexistingHour(self):
+        # TOREVIEW: should it fail
+        self.assertEqual(
+            str(localTime("2016-03-27 02:00:00")),
+            "2016-03-27 02:00:00+01:00")
+
 class CurveDatetimeMapper_Test(unittest.TestCase):
 
     def assertDateEqual(self, result, expected):
@@ -172,49 +215,6 @@ class CurveDatetimeMapper_Test(unittest.TestCase):
             None)
 
     
-class LocalTime_Test(unittest.TestCase):
-
-    def test_localTime_fullySummer(self):
-        self.assertEqual(
-            str(localTime("2016-08-15 02:00:00")),
-            "2016-08-15 02:00:00+02:00")
-
-    def test_localTime_fullyWinter(self):
-        self.assertEqual(
-            str(localTime("2016-01-01 02:00:00")),
-            "2016-01-01 02:00:00+01:00")
-
-    def test_localTime_badTz_ignored(self):
-        self.assertEqual(
-            str(localTime("2016-01-01 02:00:00S")),
-            "2016-01-01 02:00:00+01:00")
-
-    def test_localTime_badSummerTz_ignored(self):
-        self.assertEqual(
-            str(localTime("2016-08-15 02:00:00")),
-            "2016-08-15 02:00:00+02:00")
-
-    def test_localTime_beforeOctoberChange(self):
-        self.assertEqual(
-            str(localTime("2016-10-30 02:00:00S")),
-            "2016-10-30 02:00:00+02:00")
-
-    def test_localTime_afterOctoberChange(self):
-        self.assertEqual(
-            str(localTime("2016-10-30 02:00:00")),
-            "2016-10-30 02:00:00+01:00")
-
-    def test_localTime_SIgnored(self):
-        self.assertEqual(
-            str(localTime("2016-10-30 03:00:00S")),
-            "2016-10-30 03:00:00+01:00")
-
-    def test_localTime_unexistingHour(self):
-        # TOREVIEW: should it fail
-        self.assertEqual(
-            str(localTime("2016-03-27 02:00:00")),
-            "2016-03-27 02:00:00+01:00")
-
 
 class MongoTimeCurve_Test(unittest.TestCase):
 
