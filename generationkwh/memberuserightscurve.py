@@ -31,27 +31,34 @@ class MemberUseRightsCurve(object):
     """
     def __init__(self, activeShares, rightsPerShare, eager=False):
         self._activeShares = activeShares
-        self._rightsPerAction = rightsPerShare
+        self._rightsPerShare = rightsPerShare
         self._eager = eager
 
-    def get(self, member, start, end):
-        if not self._eager:
+    def _get_naive(self, member, start, end):
             nshares=1
             return (
-                numpy.array(self._rightsPerAction.rightsPerShare(
+                numpy.array(self._rightsPerShare.rightsPerShare(
                     nshares, start, end)) *
                 numpy.array(self._activeShares.hourly(member, start, end))
                 )
 
+    def _get_eager(self, member, start, end):
         shares = self._activeShares.hourly(member, start, end)
         choiceset = list(sorted(set(shares)))
         choices = [
-            self._rightsPerAction.rightsPerShare(nshares, start, end)
+            self._rightsPerShare.rightsPerShare(nshares, start, end)
             if nshares in choiceset
             else None
             for nshares in xrange(max(choiceset)+1)
             ]
         return numpy.choose(shares, choices)
+
+    def get(self, member, start, end):
+        if self._eager:
+            return self._get_eager(member, start, end)
+
+        return self._get_naive(member, start, end)
+
  
 
 
