@@ -60,6 +60,15 @@ def parseLocalTime(string, isSummer=False):
 
 
 def dateToCurveIndex(start, localTime):
+    """
+        Maps a timezoned datetime to a hourly curve index starting
+        at 'start' date. Time part of 'start' is ignored.
+        Both times' timezone should match curve's timezone.
+
+        A day in houry curve has 25 positions. Padding is added
+        to keep same solar time in the same position across summer
+        daylight saving shift.
+    """
     ndays = (localTime.date()-start.date()).days
     winterOffset = 0 if localTime.dst() else 1
     return localTime.hour + 25*ndays + winterOffset
@@ -71,6 +80,14 @@ def addDays(date, ndays):
 
 
 def curveIndexToDate(start, index):
+    """
+        Maps an index withing an hourly curve starting at 'start' date
+        into a local date.
+
+        A day in houry curve has 25 positions. Padding is added
+        to keep same solar time in the same position across summer
+        daylight saving shift.
+    """
     days = index//25
     localday = addDays(start, days)
 
@@ -103,8 +120,6 @@ class MongoTimeCurve(object):
         assert stop.tzinfo is not None, (
             "MongoTimeCurve.get called with naive (no timezone) stop date")
 
-        start = toLocal(start)
-        stop = toLocal(stop)
         ndays = (stop-start).days+1
         data = numpy.zeros(ndays*25, numpy.int)
         if filling :
