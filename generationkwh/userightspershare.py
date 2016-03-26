@@ -14,9 +14,9 @@ class UserRightsPerShare(object):
 
     def computeRights(self, production, activeShares, nshares=1, remainder=0):
 
-        assert production.dtype == 'int64', (
+        assert numpy.issubdtype(production.dtype, int), (
             "Production base type is not integer")
-        assert activeShares.dtype == 'int64', (
+        assert numpy.issubdtype(activeShares.dtype,int), (
             "ActiveShares base type is not integer")
 
         with numpy.errstate(divide='ignore'):
