@@ -45,4 +45,7 @@ class UsageTracker(object):
 
         return deallocated
 
+    def usage(self, *args, **kwds):
+        return self._curves.usage(*args, **kwds)
+
 # vim: ts=4 sw=4 et
