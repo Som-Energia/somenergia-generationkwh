@@ -10,13 +10,17 @@ class CurveProvider_MockUp(object):
         self._data = data
 
     def usage(self, member, start, end):
-        return self._data
+        return self._data[:]
+
+    def updateUsage(self, member, start, data):
+        self._data[:] = data
 
     def production(self, member, start, end):
         return self._data
 
     def periodMask(self, fare, period, start, end):
         return self._data
+
 
 
 # Readable verbose testcase listing

@@ -31,6 +31,7 @@ class UsageTracker(object):
             usage[i] += used
             allocated += used
 
+        self._usage.updateUsage(member, start, usage)
         return allocated
 
     def refund_kwh(self, member, start, end, fare, period, kwh):
@@ -45,6 +46,7 @@ class UsageTracker(object):
             usage[i] -= unused
             deallocated += unused
 
+        self._usage.updateUsage(member, start, usage)
         return deallocated
 
     def usage(self, *args, **kwds):
