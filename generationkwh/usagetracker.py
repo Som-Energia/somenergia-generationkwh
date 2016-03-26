@@ -4,13 +4,15 @@ class UsageTracker(object):
     """UsageTracker manages the available use rights for a given partner.
     """
 
-    def __init__(self, curveProvider):
-        self._curves = curveProvider
+    def __init__(self, production, usage, periodMask):
+        self._production = production
+        self._usage = usage
+        self._periodMask = periodMask
 
     def available_kwh(self, member, start, end, fare, period):
-        production = self._curves.production(member, start, end)
-        periodMask = self._curves.periodMask(fare, period, start, end)
-        usage = self._curves.usage(member, start, end)
+        production = self._production.production(member, start, end)
+        periodMask = self._periodMask.periodMask(fare, period, start, end)
+        usage = self._usage.usage(member, start, end)
         return sum(
             p-u if m else 0
             for p,u,m
@@ -18,9 +20,9 @@ class UsageTracker(object):
             )
 
     def use_kwh(self, member, start, end, fare, period, kwh):
-        production = self._curves.production(member, start, end)
-        periodMask = self._curves.periodMask(fare, period, start, end)
-        usage = self._curves.usage(member, start, end)
+        production = self._production.production(member, start, end)
+        periodMask = self._periodMask.periodMask(fare, period, start, end)
+        usage = self._usage.usage(member, start, end)
 
         allocated = 0
         for i, (p, u, m) in enumerate(zip(production, usage, periodMask)):
@@ -32,9 +34,9 @@ class UsageTracker(object):
         return allocated
 
     def refund_kwh(self, member, start, end, fare, period, kwh):
-        production = self._curves.production(member, start, end)
-        periodMask = self._curves.periodMask(fare, period, start, end)
-        usage = self._curves.usage(member, start, end)
+        production = self._production.production(member, start, end)
+        periodMask = self._periodMask.periodMask(fare, period, start, end)
+        usage = self._usage.usage(member, start, end)
 
         deallocated = 0
         for i, (u, m) in reversed(list(enumerate(zip(usage, periodMask)))):
@@ -46,6 +48,6 @@ class UsageTracker(object):
         return deallocated
 
     def usage(self, *args, **kwds):
-        return self._curves.usage(*args, **kwds)
+        return self._usage.usage(*args, **kwds)
 
 # vim: ts=4 sw=4 et

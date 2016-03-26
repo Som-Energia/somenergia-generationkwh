@@ -6,19 +6,17 @@ import unittest
 
 class CurveProvider_MockUp(object):
 
-    def __init__(self, production, usage, periodMask):
-        self._production = production
-        self._usage = usage
-        self._periodMask = periodMask
+    def __init__(self, data):
+        self._data = data
 
     def usage(self, member, start, end):
-        return self._usage
+        return self._data
 
     def production(self, member, start, end):
-        return self._production
+        return self._data
 
     def periodMask(self, fare, period, start, end):
-        return self._periodMask
+        return self._data
 
 
 # Readable verbose testcase listing
@@ -28,12 +26,11 @@ unittest.TestCase.__str__ = unittest.TestCase.id
 class UsageTracker_Test(unittest.TestCase):
 
     def setupUsageTracker(self, production, usage, periodMask):
-        curves=CurveProvider_MockUp(
-            production=production,
-            usage=usage,
-            periodMask=periodMask,
+        return UsageTracker(
+            production=CurveProvider_MockUp(production),
+            usage=CurveProvider_MockUp(usage),
+            periodMask=CurveProvider_MockUp(periodMask),
             )
-        return UsageTracker(curves)
 
     def test_available_noProduction(self):
         t = self.setupUsageTracker(
