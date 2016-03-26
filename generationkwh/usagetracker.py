@@ -49,7 +49,7 @@ class UsageTracker(object):
         self._usage.updateUsage(member, start, usage)
         return deallocated
 
-    def usage(self, *args, **kwds):
-        return self._usage.usage(*args, **kwds)
+    def usage(self, member, start, end):
+        return self._usage.usage(member, start, end)
 
 # vim: ts=4 sw=4 et
