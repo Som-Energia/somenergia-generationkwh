@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 from osv import osv, fields
+from mongodb_backend.mongodb2 import mdbpool
 
 from generationkwh.dealer import Dealer
 
@@ -137,7 +138,11 @@ class GenerationkWhRemainders(osv.osv):
             ) for n_shares, last_day_computed, remainder_wh in cr.fetchall()
         ]
         return result
-    _sql_constraints = [('unique_n_shares_last_day', 'unique(n_shares,last_day_computed)', 'Only one remainder of last date computed and number of shares is allowed')]
+    _sql_constraints = [(
+        'unique_n_shares_last_day', 'unique(n_shares,last_day_computed)',
+            'Only one remainder of last date computed and number of shares '
+            'is allowed'
+        )]
     def add(self, cr, uid, remainders, context=None):
         for n,pointsDate,remainder in remainders:
             same_date_n_id=self.search(cr, uid, [
@@ -337,11 +342,26 @@ class GenerationkWhDealer(osv.osv):
             contract_id, start_date, end_date, fare, period, kwh)
 
     def _createDealer(self, cursor, uid, context):
-        # TODO: Feed the dealer with data sources
+
         investments = InvestmentProvider(self, cursor, uid, context)
+        memberActiveShares = MemberSharesCurve(investments)
+        rightsPerShare = RightsPerShare(mdbpool.get_db())
+
+        generatedRights = MemberRightsCurve(
+            activeShares=memberActiveShares,
+            rightsPerShare=rightsPerShare,
+            eager=True,
+            )
+
+        rightsUsage = MemberRightsUsage(mdbpool.get_db())
+
         holidays = HolidaysProvider(self, cursor, uid, context)
-        rightsUsage = MemberRightsUsage(db)
-        return Dealer()
+        farePeriod = FarePeriodCurver(holidays)
+  
+        usageTracker = UsageTracker(generatedRights, rightsUsage, farePeriod)
+
+        # TODO: Feed the dealer with data sources
+        return Dealer(usageTracker)
 
 
 GenerationkWhDealer()
@@ -400,4 +420,5 @@ class GenerationkWhInvoiceLineOwner(osv.osv):
     }
 
 GenerationkWhInvoiceLineOwner()
+
 # vim: ts=4 sw=4 et

@@ -4,6 +4,9 @@ class Dealer(object):
     """ It deals investors Generation kWh use rights to contracts according its
         availability and investors criteria.
     """
+
+    def __init__(self, usageTracker):
+        self._usageTracker = usageTracker
     
     def is_active(self,
             contract_id, start_date, end_date):
