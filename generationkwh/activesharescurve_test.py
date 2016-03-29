@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from activesharescurve import ActiveSharesCurve, UnconfiguredDataProvider, ActiveSharesCurveExtend
+from sharescurve import UnconfiguredDataProvider, MemberSharesCurve
 
 import unittest
 from yamlns import namespace as ns
@@ -27,14 +27,14 @@ class InvestmentProvider_MockUp(object):
 class ActiveSharesCurve_Test(unittest.TestCase):
 
     def test_atDay(self):
-        curve = ActiveSharesCurveExtend()
+        curve = MemberSharesCurve()
         with self.assertRaises(UnconfiguredDataProvider) as assertion:
             curve.atDay('member', isodate('2015-02-21'))
         self.assertEqual(assertion.exception.args[0], "InvestmentProvider")
 
     def assert_atDay_equal(self, member, day, investments, expectation):
         investmentsProvider = InvestmentProvider_MockUp(investments)
-        curve = ActiveSharesCurveExtend(investments = investmentsProvider)
+        curve = MemberSharesCurve(investments = investmentsProvider)
         self.assertEqual(expectation, curve.atDay(member, isodate(day)))
 
     def test_atDay_noShares(self):
@@ -104,14 +104,14 @@ class ActiveSharesCurve_Test(unittest.TestCase):
             )
 
     def test_hourly_whenNoShareProvider(self):
-        curve = ActiveSharesCurveExtend()
+        curve = MemberSharesCurve()
         with self.assertRaises(UnconfiguredDataProvider) as assertion:
             curve.hourly('member', isodate('2015-02-21'), isodate('2015-02-21'))
         self.assertEqual(assertion.exception.args[0], "InvestmentProvider")
 
     def assertActiveSharesEqual(self, member, start, end, investments, expected):
         provider = InvestmentProvider_MockUp(investments)
-        curve = ActiveSharesCurveExtend(investments = provider)
+        curve = MemberSharesCurve(investments = provider)
         result = curve.hourly(member, isodate(start), isodate(end))
         self.assertEqual(list(result), expected)
 

@@ -7,7 +7,7 @@ import numpy
 class UnconfiguredDataProvider(Exception):
     pass
 
-class ActiveSharesCurve(object):
+class SharesCurve(object):
     """ Provides the shares that are active at a give
         day, or either daily or hourly in a date span.
         You need to feed this object with an investment
@@ -19,7 +19,7 @@ class ActiveSharesCurve(object):
 
     def atDay(self, member, day, method):
         if self._investmentProvider is None:
-            raise UnconfiguredDataProvider("InvestmentProvider")
+            raise UnconfiguredDataProvider("GeneralProvider")
         return sum(
             investment.shares
             for investment in method()
@@ -41,12 +41,12 @@ class ActiveSharesCurve(object):
             result[i*hoursADay:(i+1)*hoursADay] = self.atDay(member, day)
         return result
 
-class ActiveSharesCurveExtend(ActiveSharesCurve):
+class MemberSharesCurve(SharesCurve):
     def __init__(self,investments=None):
-        super(ActiveSharesCurveExtend,self).__init__(investments, key='member')
+        super(MemberSharesCurve,self).__init__(investments, key='member')
     
     def atDay(self, member, day):
         if self._investmentProvider is None:
             raise UnconfiguredDataProvider("InvestmentProvider")
-        return super(ActiveSharesCurveExtend, self).atDay(member,day,self._investmentProvider.shareContracts)
+        return super(MemberSharesCurve, self).atDay(member,day,self._investmentProvider.shareContracts)
 # vim: ts=4 sw=4 et
