@@ -50,7 +50,7 @@ class Remainder_Test(unittest.TestCase):
             [1,'2016-02-25',3],
             [2,'2016-02-25',1]
             ])
-    
+
     def test_dup_dates_remainder(self):
         remainders=self.setupProvider([
             [1,'2016-02-25',3],
@@ -62,6 +62,7 @@ class Remainder_Test(unittest.TestCase):
             [1,'2016-02-25',3],
             [2,'2016-02-27',4],
         ])
+
     def test_return_last_dup_dates_remainder(self):
         remainders=self.setupProvider([
             [1,'2016-02-25',1],
@@ -74,6 +75,7 @@ class Remainder_Test(unittest.TestCase):
         self.assertRemaindersEqual([
             [1,'2016-02-25',6]
         ])
+
     def test_uniq_creation(self):
         remainders=self.Remainders.create({
             'n_shares': 1,
