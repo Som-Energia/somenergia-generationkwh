@@ -175,7 +175,7 @@ class GenerationkWhRightsPerShare(osv.osv):
             ),
         )
     _columns.update((
-        ('kwh_{:02d}'.format(i), fields.integer(
+        ('usage_rights_kwh_{:02d}'.format(i), fields.integer(
             "Consolidated rigths hour {:02d}",
             required=True,
             help="Consolidated rights for hour {}/25".format(i+1),
