@@ -2,7 +2,7 @@
 
 import numpy
 
-class MemberUseRightsCurve(object):
+class MemberRightsCurve(object):
     """
         Provides the hourly curve of kWh available for a given
         member in a given time interval.

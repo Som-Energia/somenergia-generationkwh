@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from memberuserightscurve import MemberUseRightsCurve
+from memberrightscurve import MemberRightsCurve
 import unittest
 import datetime
 
@@ -15,11 +15,11 @@ class CurveProvider_MockUp(object):
     def hourly(self, *args, **kwd):
         return self._value
 
-class MemberUseRightsCurve_Test(unittest.TestCase):
-    def asserUseRightsEqual(self, member, start, end,
+class MemberRightsCurve_Test(unittest.TestCase):
+    def assertRightsEqual(self, member, start, end,
             activeShares, rightsPerShare, expected, eager=False
             ):
-        curve = MemberUseRightsCurve(
+        curve = MemberRightsCurve(
             activeShares=CurveProvider_MockUp(activeShares),
             rightsPerShare=CurveProvider_MockUp(rightsPerShare),
             eager = eager,
@@ -31,7 +31,7 @@ class MemberUseRightsCurve_Test(unittest.TestCase):
         self.assertEqual(list(result), expected)
 
     def test_singleShare(self):
-        self.asserUseRightsEqual(
+        self.assertRightsEqual(
             member='member',
             start='2015-01-21',
             end='2015-01-21',
@@ -41,7 +41,7 @@ class MemberUseRightsCurve_Test(unittest.TestCase):
             )
 
     def test_severalShares(self):
-        self.asserUseRightsEqual(
+        self.assertRightsEqual(
             member='member',
             start='2015-01-21',
             end='2015-01-21',
@@ -51,7 +51,7 @@ class MemberUseRightsCurve_Test(unittest.TestCase):
             )
 
     def test_mixedShares(self):
-        self.asserUseRightsEqual(
+        self.assertRightsEqual(
             member='member',
             start='2015-01-21',
             end='2015-01-22',
@@ -61,7 +61,7 @@ class MemberUseRightsCurve_Test(unittest.TestCase):
             )
 
     def test_eager_uniformShares(self):
-        self.asserUseRightsEqual(
+        self.assertRightsEqual(
             member='member',
             start='2015-01-21',
             end='2015-01-22',
@@ -74,7 +74,7 @@ class MemberUseRightsCurve_Test(unittest.TestCase):
             )
 
     def test_eager_mixedShares(self):
-        self.asserUseRightsEqual(
+        self.assertRightsEqual(
             member='member',
             start='2015-01-21',
             end='2015-01-22',
