@@ -18,8 +18,6 @@ class SharesCurve(object):
         self._key = key
 
     def atDay(self, member, day, method):
-        if self._investmentProvider is None:
-            raise UnconfiguredDataProvider("GeneralProvider")
         return sum(
             investment.shares
             for investment in method()
@@ -49,4 +47,6 @@ class MemberSharesCurve(SharesCurve):
         if self._investmentProvider is None:
             raise UnconfiguredDataProvider("InvestmentProvider")
         return super(MemberSharesCurve, self).atDay(member,day,self._investmentProvider.shareContracts)
+class PlantSharesCurve(SharesCurve):
+    pass
 # vim: ts=4 sw=4 et
