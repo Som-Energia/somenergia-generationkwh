@@ -111,7 +111,7 @@ class ActiveSharesCurve_Test(unittest.TestCase):
 
     def assertActiveSharesEqual(self, member, start, end, investments, expected):
         provider = InvestmentProvider_MockUp(investments)
-        curve = ActiveSharesCurve(investments = provider)
+        curve = ActiveSharesCurveExtend(investments = provider)
         result = curve.hourly(member, isodate(start), isodate(end))
         self.assertEqual(list(result), expected)
 
