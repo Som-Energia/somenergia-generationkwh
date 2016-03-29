@@ -13,8 +13,9 @@ class ActiveSharesCurve(object):
         You need to feed this object with an investment
         provider.
     """
-    def __init__(self, investments=None):
+    def __init__(self,investments=None):
         self._investmentProvider = investments
+        self._key = 'member'
 
     def atDay(self, member, day):
         if self._investmentProvider is None:
@@ -23,7 +24,7 @@ class ActiveSharesCurve(object):
         return sum(
             investment.shares
             for investment in self._investmentProvider.shareContracts()
-            if (member is None or investment.member == member)
+            if (member is None or investment[self._key] == member)
             and investment.activationEnd >= day
             and investment.activationStart <= day
         )
