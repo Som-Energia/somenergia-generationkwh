@@ -13,17 +13,18 @@ class ActiveSharesCurve(object):
         You need to feed this object with an investment
         provider.
     """
-    def __init__(self,investments=None):
+    def __init__(self,investments=None, key='member'):
         self._investmentProvider = investments
-        self._key = 'member'
+        self._key = key
 
-    def atDay(self, member, day):
+    def atDay(self, member, day, method=None):
         if self._investmentProvider is None:
             raise UnconfiguredDataProvider("InvestmentProvider")
-
+        if method is None:
+            method = self._investmentProvider.shareContracts
         return sum(
             investment.shares
-            for investment in self._investmentProvider.shareContracts()
+            for investment in method()
             if (member is None or investment[self._key] == member)
             and investment.activationEnd >= day
             and investment.activationStart <= day
@@ -41,5 +42,13 @@ class ActiveSharesCurve(object):
             day=start+datetime.timedelta(days=i)
             result[i*hoursADay:(i+1)*hoursADay] = self.atDay(member, day)
         return result
-
+class ActiveSharesCurveExtend(ActiveSharesCurve):
+    def __init__(self,investments=None):
+        self._investmentProvider = investments
+        self._key = 'member'
+    
+    def atDay(self, member, day):
+        if self._investmentProvider is None:
+            raise UnconfiguredDataProvider("InvestmentProvider")
+        return super(ActiveSharesCurveExtend, self).atDay(member,day,self._investmentProvider.shareContracts)
 # vim: ts=4 sw=4 et
