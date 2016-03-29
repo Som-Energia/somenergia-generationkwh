@@ -158,33 +158,6 @@ class GenerationkWhRemainders(osv.osv):
         
 GenerationkWhRemainders()
 
-"""
-class GenerationkWhRightsPerShare(osv.osv):
-    _name = 'generationkwh.rightspershare'
-
-    _columns = dict(
-        nshares=fields.integer(
-            "Number of shares",
-            required=True,
-            help="Number of shares purchased",
-            ),
-        date=fields.date(
-            "Production Date",
-            required=True,
-            help="Date at which rights were generated",
-            ),
-        )
-    _columns.update((
-        ('usage_rights_kwh_{:02d}'.format(i), fields.integer(
-            "Consolidated rigths hour {:02d}",
-            required=True,
-            help="Consolidated rights for hour {}/25".format(i+1),
-        ))
-        for i in xrange(25)
-        ))
-
-GenerationkWhRightsPerShare()
-"""
 
 class GenerationkWhInvestments(osv.osv):
 
@@ -367,6 +340,7 @@ class GenerationkWhDealer(osv.osv):
         # TODO: Feed the dealer with data sources
         investments = InvestmentProvider(self, cursor, uid, context)
         holidays = HolidaysProvider(self, cursor, uid, context)
+        rightsUsage = MemberRightsUsage(db)
         return Dealer()
 
 
