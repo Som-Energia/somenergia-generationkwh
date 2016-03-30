@@ -20,6 +20,7 @@ setup(
 		'yamlns',
         'b2btest',
         'numpy',
+        'plantmeter',
 #		'libfacturacioatr',
 	],
 	include_package_data = True,
