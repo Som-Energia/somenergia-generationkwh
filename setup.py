@@ -12,15 +12,15 @@ setup(
 	author_email = "info@somenergia.coop",
 	url = 'https://github.com/Som-Energia/somenergia-generationkwh',
 	long_description = readme,
-	license = 'GNU General Public License v3 or later (GPLv3+)',
+	license = 'GNU Affero General Public License v3 or later (AGPLv3+)',
 	packages=find_packages(exclude=['*[tT]est*']),
 	scripts=[
 		],
 	install_requires=[
 		'yamlns',
-        'b2btest',
-        'numpy',
-        'plantmeter',
+		'b2btest',
+		'numpy',
+		'plantmeter',
 #		'libfacturacioatr',
 	],
 	include_package_data = True,
@@ -32,7 +32,7 @@ setup(
 		'Topic :: Software Development :: Libraries :: Python Modules',
 		'Intended Audience :: Developers',
 		'Development Status :: 2 - Pre-Alpha',
-		'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+		'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
 		'Operating System :: OS Independent',
 	],
 )
