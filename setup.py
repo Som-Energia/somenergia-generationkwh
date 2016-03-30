@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
 
-readme = open("README.md").read()
+readme = open("README.rst").read()
 
 setup(
 	name = "plantmeter",
-	version = "0.7",
+	version = "0.8",
 	description =
 		"OpenERP module and library to manage multisite energy generation",
 	author = "Som Energia SCCL",
