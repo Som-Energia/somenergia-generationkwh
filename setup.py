@@ -5,7 +5,7 @@ readme = open("README.md").read()
 
 setup(
 	name = "plantmeter",
-	version = "0.6",
+	version = "0.7",
 	description =
 		"OpenERP module and library to manage multisite energy generation",
 	author = "Som Energia SCCL",

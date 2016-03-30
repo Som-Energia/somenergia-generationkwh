@@ -119,7 +119,7 @@ class GenerationMeasurement(osv_mongodb.osv_mongodb):
         'name': fields.integer('Plant identifier'), # NOTE: workaround due mongodb backend
         'create_at': fields.datetime('Create datetime'),
         'datetime': fields.datetime('Exported datetime'),
-        'daylight': fields.char('Exported datetime daylight',size=,size=1),
+        'daylight': fields.char('Exported datetime daylight',size=1),
         'ae': fields.float('Exported energy (kWh)')
     }
 GenerationMeasurement()
