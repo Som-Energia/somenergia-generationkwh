@@ -26,12 +26,6 @@ class InvestmentProvider_MockUp(object):
 
 class MemberSharesCurve_Test(unittest.TestCase):
 
-    def test_atDay(self):
-        curve = MemberSharesCurve()
-        with self.assertRaises(UnconfiguredDataProvider) as assertion:
-            curve.atDay('member', isodate('2015-02-21'))
-        self.assertEqual(assertion.exception.args[0], "InvestmentProvider")
-
     def assert_atDay_equal(self, member, day, investments, expectation):
         investmentsProvider = InvestmentProvider_MockUp(investments)
         curve = MemberSharesCurve(investments = investmentsProvider)
@@ -103,11 +97,6 @@ class MemberSharesCurve_Test(unittest.TestCase):
             3
             )
 
-    def test_hourly_whenNoShareProvider(self):
-        curve = MemberSharesCurve()
-        with self.assertRaises(UnconfiguredDataProvider) as assertion:
-            curve.hourly('member', isodate('2015-02-21'), isodate('2015-02-21'))
-        self.assertEqual(assertion.exception.args[0], "InvestmentProvider")
 
     def assertActiveSharesEqual(self, member, start, end, investments, expected):
         provider = InvestmentProvider_MockUp(investments)

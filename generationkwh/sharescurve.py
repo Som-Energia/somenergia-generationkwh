@@ -40,13 +40,12 @@ class SharesCurve(object):
         return result
 
 class MemberSharesCurve(SharesCurve):
-    def __init__(self,investments=None):
+    def __init__(self,investments):
         super(MemberSharesCurve,self).__init__(investments, key='member')
+        self._datagetter = investments.shareContracts
     
     def atDay(self, member, day):
-        if self._provider is None:
-            raise UnconfiguredDataProvider("InvestmentProvider")
-        return super(MemberSharesCurve, self).atDay(member,day,self._provider.shareContracts)
+        return super(MemberSharesCurve, self).atDay(member,day,self._datagetter)
 
 class PlantSharesCurve(SharesCurve):
 
