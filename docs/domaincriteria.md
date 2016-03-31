@@ -31,6 +31,34 @@ Production and shares
 - [Deprecated] The purchase date is the date the member orders, not the payment day [Gijsbert-Marc-Eduard]
 - The purchase date is the date of the accounting movement [Marc-Eduard-Carles-Agusti-David pending of confirmation from Gijsbert]
 
+Dealing
+-------
+
+- Dealing rights to contracts, method for the first iteration
+    - All from a meeting with [Marc-Nuri-Pere-Eduard-Aleix-Agusti-David]
+    - Investor members have a priority list of contracts
+    - Rights are not taken if they were produced:
+        - after the invoicing period end, or
+        - after the last invoiced date of the other contracts in the list with higher priority
+        - before a years before of the invoicing periods start
+    - The contract list will be initialized with:
+        - the biggest contract having the investor as payer
+        - if none is found, the biggest contract having the investor as owner
+        - left unassigned if no contracts have the investor as payer or owner
+    - A mail will be sent
+        - At start of generation or whenever a new investment is created
+        - Telling the assignation if any by default and why
+        - Telling the means to change it (by now mail + ERP operator)
+    - ERP client IF will manage this list for a given member
+    - ERP client IF will display the list of investment
+        - Set the activation date relative to the purchase date of many at once
+
+- Next iterations, will address:
+    - more complex deal policies (or not)
+    - configuration from oficina virtual
+    - a erpclient view from contract to access assigned gkwh investors
+
+
 Doubts
 ------
 
