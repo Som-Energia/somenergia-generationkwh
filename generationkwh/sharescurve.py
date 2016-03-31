@@ -4,20 +4,20 @@ import datetime
 import numpy
 
 
-class SharesCurve(object):
+class MemberSharesCurve(object):
     """ Provides the shares that are active at a give
         day, or either daily or hourly in a date span.
         You need to feed this object with an investment
         provider.
     """
-    def __init__(self, provider):
-        self._provider = provider
+    def __init__(self, investments):
+        self._provider = investments
 
     def atDay(self, member, day):
         return sum(
             investment.shares
-            for investment in self._datagetter()
-            if (member is None or investment[self._key] == member)
+            for investment in self._provider.shareContracts()
+            if (member is None or investment['member'] == member)
             and investment.activationEnd >= day
             and investment.activationStart <= day
         )
@@ -35,13 +35,7 @@ class SharesCurve(object):
             result[i*hoursADay:(i+1)*hoursADay] = self.atDay(member, day)
         return result
 
-class MemberSharesCurve(SharesCurve):
-    def __init__(self,investments):
-        super(MemberSharesCurve,self).__init__(investments)
-        self._datagetter = investments.shareContracts
-        self._key = "member"
-    
-class PlantSharesCurve(SharesCurve):
+class PlantSharesCurve(MemberSharesCurve):
     def __init__(self,shares):
         self.shares = shares
 
