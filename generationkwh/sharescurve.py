@@ -4,9 +4,6 @@ import datetime
 import numpy
 
 
-class UnconfiguredDataProvider(Exception):
-    pass
-
 class SharesCurve(object):
     """ Provides the shares that are active at a give
         day, or either daily or hourly in a date span.
@@ -44,11 +41,12 @@ class MemberSharesCurve(SharesCurve):
         self._datagetter = investments.shareContracts
         self._key = "member"
     
-class PlantSharesCurve(object):
+class PlantSharesCurve(SharesCurve):
     def __init__(self,shares):
         self.shares = shares
+
     def atDay(self, plant, day):
         return self.shares
-    def hourly(self, member, start, end):
-        return 25*[5000]
+
+
 # vim: ts=4 sw=4 et

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sharescurve import UnconfiguredDataProvider, MemberSharesCurve, PlantSharesCurve
+from sharescurve import MemberSharesCurve, PlantSharesCurve
 
 import unittest
 from yamlns import namespace as ns
