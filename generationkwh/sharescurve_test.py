@@ -237,25 +237,12 @@ class MemberSharesCurve_Test(unittest.TestCase):
             +25*[11] # 24
             +25*381*[0] # 25 and so
             )
-class PlantProvider_MockUp(object):
-    def __init__(self, sharePlants):
-        self._plants = [
-            ns(
-                plant=plant,
-                activationStart=isodate(start),
-                activationEnd=isodate(end),
-                shares=shares,
-                )
-            for plant, start, end, shares in sharePlants
-            ]
-
-    def sharePlants(self):
-        return self._plants
 class PlantSharesCurve_Test(unittest.TestCase):
     def test_atDay(self):
-        curve = PlantSharesCurve()
-        with self.assertRaises(UnconfiguredDataProvider) as assertion:
-            curve.atDay('member', isodate('2015-02-21'))
-        self.assertEqual(assertion.exception.args[0], "PlantProvider")
-
+        curve = PlantSharesCurve(5000)
+        self.assertEqual(5000, curve.atDay("myPlant", isodate('2016-05-01')))
+    
+    def test_hourly(self):
+        curve = PlantSharesCurve(5000)
+        self.assertEqual(25*[5000], list(curve.hourly("myPlant", isodate('2016-05-01'), isodate('2016-05-01'))))
 # vim: ts=4 sw=4 et

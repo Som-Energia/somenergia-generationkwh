@@ -13,14 +13,13 @@ class SharesCurve(object):
         You need to feed this object with an investment
         provider.
     """
-    def __init__(self, provider=None, key=None):
+    def __init__(self, provider):
         self._provider = provider
-        self._key = key
 
-    def atDay(self, member, day, method):
+    def atDay(self, member, day):
         return sum(
             investment.shares
-            for investment in method()
+            for investment in self._datagetter()
             if (member is None or investment[self._key] == member)
             and investment.activationEnd >= day
             and investment.activationStart <= day
@@ -41,20 +40,15 @@ class SharesCurve(object):
 
 class MemberSharesCurve(SharesCurve):
     def __init__(self,investments):
-        super(MemberSharesCurve,self).__init__(investments, key='member')
+        super(MemberSharesCurve,self).__init__(investments)
         self._datagetter = investments.shareContracts
+        self._key = "member"
     
-    def atDay(self, member, day):
-        return super(MemberSharesCurve, self).atDay(member,day,self._datagetter)
-
-class PlantSharesCurve(SharesCurve):
-
-    def __init__(self,plants=None):
-        super(PlantSharesCurve,self).__init__(plants, key='plant')
-
+class PlantSharesCurve(object):
+    def __init__(self,shares):
+        self.shares = shares
     def atDay(self, plant, day):
-        if self._provider is None:
-            raise UnconfiguredDataProvider("PlantProvider");
-        return super(PlantSharesCurve, self).atDay(plant, day, self._provider.sharePlants)
-
+        return self.shares
+    def hourly(self, member, start, end):
+        return 25*[5000]
 # vim: ts=4 sw=4 et
