@@ -30,4 +30,7 @@ class BaseProviderConnectionError(Exception):
 class BaseProviderDownloadError(Exception):
 	pass
 
+class BaseProviderSyntaxError(Exception):
+	pass
+
 # vim: et ts=4 sw=4

@@ -1,11 +1,23 @@
 import datetime
 import ftplib
+import pytz
+
 from plantmeter.providers import BaseProvider, BaseProviderConnectionError, \
-        BaseProviderDownloadError, register, urlparse
+        BaseProviderDownloadError, BaseProviderSyntaxError, register, urlparse
 from plantmeter.utils import daterange
 
-import unittest
-from mock import patch
+
+tz = pytz.timezone('Europe/Madrid')
+def parseLocalTime(string, isSummer=False):
+    naive = datetime.datetime.strptime(string,
+        "%Y%m%d%H%M%S")
+    localized = tz.localize(naive)
+    if not isSummer: return localized
+    if localized.dst(): return localized
+    onehour = datetime.timedelta(hours=1)
+    lesser = tz.normalize(localized-onehour)
+    return lesser if lesser.dst() else localized
+
 
 class MonsolProvider(BaseProvider):
     """Monsol Provider
@@ -16,24 +28,37 @@ class MonsolProvider(BaseProvider):
             uri = "monsol://path"
         super(MonsolProvider, self).__init__(uri)
         self.uri = uri
-        self.res = urlparse(self.uri) 
+        self.res = urlparse(self.uri)
 
     def extract(self, content, start, end=None):
+        def valid(line):
+            items = line.split(';')
+
+            n_items = 4
+            return (items[0].isdigit() and
+                items[1].isdigit() and
+                items[2].isdigit() and
+                items[3] in ['S', 'W']) if (len(items)==n_items and '' not in items) else False
+
         def parse(line):
+            if not valid(line):
+                raise BaseProviderSyntaxError('Data not valid: %s' % line)
+
             items = line.split(';')
             return {
-                    'datetime': datetime.datetime.strptime(items[0], '%Y-%m-%d %H:%M'),
-                    'daylight': items[1],
-                    'ae': int(items[3])
+                    'datetime': parseLocalTime(items[0], items[3]=='S'),
+                    'ae': int(items[1])
                     }
 
         if not end:
             end = start
-        return [[measure
+
+        header_offset = 1
+        return [measure
             for date in daterange(start, end + datetime.timedelta(days=1))
-                for measure in (parse(line) for line in content)
+                for measure in (parse(line) for idx,line in enumerate(content) if idx>header_offset)
                     if measure['datetime'].date() == date
-            ]]
+            ]
 
     def download(self, filename):
         client = None
@@ -55,7 +80,7 @@ class MonsolProvider(BaseProvider):
                 client.quit()
 
             sio.seek(0)
-            return sio.readlines()
+            return sio.read().splitlines()
 
     def get(self, start, end=None):
         return [self.extract(date, self.download(date)) for date in daterange(start, end)]
@@ -65,62 +90,5 @@ class MonsolProvider(BaseProvider):
 
 register("monsol", MonsolProvider)
 
-
-class MonsolProvide_Test(unittest.TestCase):
-    def setUp(self):
-        ""
-
-    def tearDown(self):
-        ""
-
-    def load_file(self, path):
-        with open(path, 'r') as f:
-            output = f.readlines()
-        return output
-
-    def test_failHostname(self):
-        m = MonsolProvider('monsol://user:password@hostname/path')
-        self.assertRaises(BaseProviderConnectionError, m.download, 'tes.csv')
-
-    def test_failConnection(self):
-        from socket import error
-        m = MonsolProvider('monsol://user:password@www.somenergia.coop/path')
-        self.assertRaises(BaseProviderConnectionError, m.download, 'tes.csv')
-
-    @patch('ftplib.FTP', autospec=True)
-    def test_download(self, ftp_constructor):
-        mock_ftp = ftp_constructor.return_value
-        m = MonsolProvider('monsol://user:password@hostname/path')
-        m.download('test.csv')
-    
-        # TODO: Implement callback mockup
-        mock_ftp.login.assert_called_once_with('user', 'password')
-        mock_ftp.cwd.assert_called_once_with('path')
-        self.assertEqual(mock_ftp.retrbinary.call_args[0], ('RETR test.csv',))
-
-    def test_extract(self):
-        import os
-        m = MonsolProvider('monsol://user:password@hostname/path')
-        path = os.path.dirname(os.path.realpath(__file__)) + '/../data/monsol_20150904.csv'
-        content = self.load_file(path)
-        measurements = m.extract(content, datetime.date(2015,9,4))
-        self.assertDictEqual(
-                measurements[0][0],
-                {
-                    'daylight': 'S', 
-                    'ae': 0, 
-                    'datetime': datetime.datetime(2015, 9, 4, 0, 0)
-                    })
-        self.assertDictEqual(
-                measurements[0][-1],
-                {
-                    'daylight': 'S',
-                    'ae': 0,
-                    'datetime': datetime.datetime(2015, 9, 4, 23, 0)
-                    })
-
-    @unittest.skip("tobe implemented!")
-    def test_get(self):
-        ""
 
 # vim: et ts=4 sw=4

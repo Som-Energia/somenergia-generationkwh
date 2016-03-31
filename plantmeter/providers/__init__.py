@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from urlparse import urlparse as std_urlparse
 from plantmeter.providers.base import BaseProvider, \
-        BaseProviderConnectionError, BaseProviderDownloadError
+        BaseProviderConnectionError, BaseProviderDownloadError, BaseProviderSyntaxError
 
 _AVAILABLE_PROVIDERS = {}
 
