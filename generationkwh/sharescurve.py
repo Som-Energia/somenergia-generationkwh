@@ -13,8 +13,8 @@ class SharesCurve(object):
         You need to feed this object with an investment
         provider.
     """
-    def __init__(self,investments=None, key=None):
-        self._investmentProvider = investments
+    def __init__(self, provider=None, key=None):
+        self._provider = provider
         self._key = key
 
     def atDay(self, member, day, method):
@@ -44,9 +44,9 @@ class MemberSharesCurve(SharesCurve):
         super(MemberSharesCurve,self).__init__(investments, key='member')
     
     def atDay(self, member, day):
-        if self._investmentProvider is None:
+        if self._provider is None:
             raise UnconfiguredDataProvider("InvestmentProvider")
-        return super(MemberSharesCurve, self).atDay(member,day,self._investmentProvider.shareContracts)
+        return super(MemberSharesCurve, self).atDay(member,day,self._provider.shareContracts)
 class PlantSharesCurve(SharesCurve):
     pass
 # vim: ts=4 sw=4 et
