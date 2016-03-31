@@ -87,5 +87,18 @@ class MemberRightsCurve_Test(unittest.TestCase):
             eager = True
             )
 
+    @unittest.skip("No implemented yet (DGG: My current test)")
+    def test_eager_noRightsPerShare(self):
+        self.assertRightsEqual(
+            member='member',
+            start='2015-01-21',
+            end='2015-01-22',
+            activeShares = 25*[2] + 25*[3],
+            rightsPerShare = {
+                },
+            expected = 25*[20] + 25*[70],
+            eager = True
+            )
+
 
 # vim: ts=4 sw=4 et

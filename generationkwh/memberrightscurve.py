@@ -58,6 +58,7 @@ class MemberRightsCurve(object):
             return self._get_eager(member, start, end)
 
         return self._get_naive(member, start, end)
+
  
 
 

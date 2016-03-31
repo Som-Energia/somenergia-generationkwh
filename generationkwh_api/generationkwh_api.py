@@ -6,6 +6,12 @@ from osv import osv, fields
 from mongodb_backend.mongodb2 import mdbpool
 
 from generationkwh.dealer import Dealer
+from generationkwh.sharescurve import MemberSharesCurve
+from generationkwh.rightspershare import RightsPerShare
+from generationkwh.memberrightscurve import MemberRightsCurve
+from generationkwh.memberrightsusage import MemberRightsUsage
+from generationkwh.fareperiodcurve import FarePeriodCurve
+from generationkwh.usagetracker import UsageTracker
 
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -94,6 +100,29 @@ class GenerationkWhTestHelper(osv.osv):
             context=None):
         holidaysProvider = HolidaysProvider(self, cursor, uid, context)
         return holidaysProvider.get(start, stop)
+
+    def usagetracker_available_kwh(self, cursor, uid,
+            member, start, stop, fare, period,
+            context=None):
+
+        investments = InvestmentProvider(self, cursor, uid, context)
+        memberActiveShares = MemberSharesCurve(investments)
+        rightsPerShare = RightsPerShare(mdbpool.get_db())
+
+        generatedRights = MemberRightsCurve(
+            activeShares=memberActiveShares,
+            rightsPerShare=rightsPerShare,
+            eager=True,
+            )
+
+        rightsUsage = MemberRightsUsage(mdbpool.get_db())
+
+        holidays = HolidaysProvider(self, cursor, uid, context)
+        farePeriod = FarePeriodCurve(holidays)
+  
+        usageTracker = UsageTracker(generatedRights, rightsUsage, farePeriod)
+        return usageTracker.available_kwh(member, start, stop, fare, period)
+
 
 GenerationkWhTestHelper()
 
