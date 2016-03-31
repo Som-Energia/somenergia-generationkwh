@@ -47,6 +47,15 @@ class MemberSharesCurve(SharesCurve):
         if self._provider is None:
             raise UnconfiguredDataProvider("InvestmentProvider")
         return super(MemberSharesCurve, self).atDay(member,day,self._provider.shareContracts)
+
 class PlantSharesCurve(SharesCurve):
-    pass
+
+    def __init__(self,plants=None):
+        super(PlantSharesCurve,self).__init__(plants, key='plant')
+
+    def atDay(self, plant, day):
+        if self._provider is None:
+            raise UnconfiguredDataProvider("PlantProvider");
+        return super(PlantSharesCurve, self).atDay(plant, day, self._provider.sharePlants)
+
 # vim: ts=4 sw=4 et
