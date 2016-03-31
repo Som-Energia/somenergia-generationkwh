@@ -53,12 +53,11 @@ class MemberRightsCurve(object):
             ]
         return numpy.choose(shares, choices)
 
-    def get(self, member, start, end):
+    def rights_kwh(self, member, start, end):
         if self._eager:
             return self._get_eager(member, start, end)
 
         return self._get_naive(member, start, end)
-
  
 
 

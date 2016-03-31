@@ -24,7 +24,7 @@ class MemberRightsCurve_Test(unittest.TestCase):
             rightsPerShare=CurveProvider_MockUp(rightsPerShare),
             eager = eager,
             )
-        result = curve.get(member,
+        result = curve.rights_kwh(member,
             start=isodate(start),
             end=isodate(end),
             )
