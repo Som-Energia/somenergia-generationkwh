@@ -15,7 +15,7 @@ class CurveProvider_MockUp(object):
     def updateUsage(self, member, start, data):
         self._data[:] = data
 
-    def production(self, member, start, end):
+    def rights_kwh(self, member, start, end):
         return self._data
 
     def periodMask(self, fare, period, start, end):
@@ -29,16 +29,16 @@ unittest.TestCase.__str__ = unittest.TestCase.id
 
 class UsageTracker_Test(unittest.TestCase):
 
-    def setupUsageTracker(self, production, usage, periodMask):
+    def setupUsageTracker(self, rights, usage, periodMask):
         return UsageTracker(
-            production=CurveProvider_MockUp(production),
+            rights=CurveProvider_MockUp(rights),
             usage=CurveProvider_MockUp(usage),
             periodMask=CurveProvider_MockUp(periodMask),
             )
 
     def test_available_noProduction(self):
         t = self.setupUsageTracker(
-            production=[0,0],
+            rights=[0,0],
             usage=[0,0],
             periodMask=[1,1],
             )
@@ -47,7 +47,7 @@ class UsageTracker_Test(unittest.TestCase):
 
     def test_available_singleBinProduction(self):
         t = self.setupUsageTracker(
-            production=[2,0],
+            rights=[2,0],
             usage=[0,0],
             periodMask=[1,1],
             )
@@ -57,7 +57,7 @@ class UsageTracker_Test(unittest.TestCase):
 
     def test_available_manyBinsProduction_getAdded(self):
         t = self.setupUsageTracker(
-            production=[2,3],
+            rights=[2,3],
             usage=[0,0],
             periodMask=[1,1],
             )
@@ -68,7 +68,7 @@ class UsageTracker_Test(unittest.TestCase):
 
     def test_available_masked(self):
         t = self.setupUsageTracker(
-            production=[2,3],
+            rights=[2,3],
             usage=[0,0],
             periodMask=[0,1],
             )
@@ -78,7 +78,7 @@ class UsageTracker_Test(unittest.TestCase):
 
     def test_available_manyBinsProduction_used(self):
         t = self.setupUsageTracker(
-            production=[2,3],
+            rights=[2,3],
             usage=[1,0],
             periodMask=[1,1],
             )
@@ -88,7 +88,7 @@ class UsageTracker_Test(unittest.TestCase):
 
     def test_available_manyBinsProduction_usedMasked(self):
         t = self.setupUsageTracker(
-            production=[5,3],
+            rights=[5,3],
             usage=[2,1],
             periodMask=[0,1],
             )
@@ -98,7 +98,7 @@ class UsageTracker_Test(unittest.TestCase):
 
     def test_use_halfBin(self):
         t = self.setupUsageTracker(
-            production=[5,3],
+            rights=[5,3],
             usage=[0,0],
             periodMask=[1,1],
             )
@@ -109,7 +109,7 @@ class UsageTracker_Test(unittest.TestCase):
 
     def test_use_fullBin(self):
         t = self.setupUsageTracker(
-            production=[5,3],
+            rights=[5,3],
             usage=[0,0],
             periodMask=[1,1],
             )
@@ -121,7 +121,7 @@ class UsageTracker_Test(unittest.TestCase):
 
     def test_use_pastBin(self):
         t = self.setupUsageTracker(
-            production=[5,3],
+            rights=[5,3],
             usage=[0,0],
             periodMask=[1,1],
             )
@@ -133,7 +133,7 @@ class UsageTracker_Test(unittest.TestCase):
 
     def test_use_beyondAvailable(self):
         t = self.setupUsageTracker(
-            production=[5,3],
+            rights=[5,3],
             usage=[0,0],
             periodMask=[1,1],
             )
@@ -145,7 +145,7 @@ class UsageTracker_Test(unittest.TestCase):
 
     def test_use_previouslyUsed(self):
         t = self.setupUsageTracker(
-            production=[5,3],
+            rights=[5,3],
             usage=[1,0],
             periodMask=[1,1],
             )
@@ -157,7 +157,7 @@ class UsageTracker_Test(unittest.TestCase):
 
     def test_use_previouslyUsed(self):
         t = self.setupUsageTracker(
-            production=[5,3],
+            rights=[5,3],
             usage=[1,0],
             periodMask=[0,1],
             )
@@ -169,7 +169,7 @@ class UsageTracker_Test(unittest.TestCase):
 
     def test_refund_singleBin(self):
         t = self.setupUsageTracker(
-            production=[5,3],
+            rights=[5,3],
             usage=[3,0],
             periodMask=[1,1],
             )
@@ -181,7 +181,7 @@ class UsageTracker_Test(unittest.TestCase):
 
     def test_refund_severalBins_refundsBackward(self):
         t = self.setupUsageTracker(
-            production=[3,5],
+            rights=[3,5],
             usage=[2,2],
             periodMask=[1,1],
             )
@@ -193,7 +193,7 @@ class UsageTracker_Test(unittest.TestCase):
 
     def test_refund_beyondUsed(self):
         t = self.setupUsageTracker(
-            production=[5,3],
+            rights=[5,3],
             usage=[2,2],
             periodMask=[1,1],
             )
@@ -205,7 +205,7 @@ class UsageTracker_Test(unittest.TestCase):
 
     def test_refund_masked(self):
         t = self.setupUsageTracker(
-            production=[5,3],
+            rights=[5,3],
             usage=[2,2],
             periodMask=[0,1],
             )
