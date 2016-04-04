@@ -39,11 +39,11 @@ class MemberRightsCurve(object):
             return (
                 numpy.array(self._rightsPerShare.rightsPerShare(
                     nshares, start, end)) *
-                numpy.array(self._activeShares.hourly(member, start, end))
+                numpy.array(self._activeShares.hourly(start, end, member))
                 )
 
     def _get_eager(self, member, start, end):
-        shares = self._activeShares.hourly(member, start, end)
+        shares = self._activeShares.hourly(start, end, member)
         choiceset = list(sorted(set(shares)))
         choices = [
             self._rightsPerShare.rightsPerShare(nshares, start, end)
