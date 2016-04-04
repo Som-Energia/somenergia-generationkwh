@@ -21,8 +21,9 @@ def isodate(string):
     return datetime.datetime.strptime(string, '%Y-%m-%d').date()
 
 class ProductionLoader(object):
-    def __init__(self, productionAggregator=None):
+    def __init__(self, productionAggregator=None, activePlantShareCurver=None):
         self.productionAggregator = productionAggregator
+        self.activePlantShareCurver = activePlantShareCurver
 
     def startPoint(self, startDateOfProduction, remainders):
         if not remainders:

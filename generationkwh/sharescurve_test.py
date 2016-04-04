@@ -29,7 +29,7 @@ class MemberSharesCurve_Test(unittest.TestCase):
     def assert_atDay_equal(self, member, day, investments, expectation):
         investmentsProvider = InvestmentProvider_MockUp(investments)
         curve = MemberSharesCurve(investments = investmentsProvider)
-        self.assertEqual(expectation, curve.atDay(member, isodate(day)))
+        self.assertEqual(expectation, curve.atDay(isodate(day),member))
 
     def test_atDay_noShares(self):
         self.assert_atDay_equal(
@@ -101,7 +101,7 @@ class MemberSharesCurve_Test(unittest.TestCase):
     def assertActiveSharesEqual(self, member, start, end, investments, expected):
         provider = InvestmentProvider_MockUp(investments)
         curve = MemberSharesCurve(investments = provider)
-        result = curve.hourly(member, isodate(start), isodate(end))
+        result = curve.hourly(isodate(start), isodate(end),member)
         self.assertEqual(list(result), expected)
 
     def test_hourly_singleDay_noShares(self):
@@ -240,9 +240,9 @@ class MemberSharesCurve_Test(unittest.TestCase):
 class PlantSharesCurve_Test(unittest.TestCase):
     def test_atDay(self):
         curve = PlantSharesCurve(5000)
-        self.assertEqual(5000, curve.atDay("myPlant", isodate('2016-05-01')))
+        self.assertEqual(5000, curve.atDay(isodate('2016-05-01')))
     
     def test_hourly(self):
         curve = PlantSharesCurve(5000)
-        self.assertEqual(25*[5000], list(curve.hourly("myPlant", isodate('2016-05-01'), isodate('2016-05-01'))))
+        self.assertEqual(25*[5000], list(curve.hourly(isodate('2016-05-01'), isodate('2016-05-01'))))
 # vim: ts=4 sw=4 et
