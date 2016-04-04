@@ -27,10 +27,10 @@ class ProductionLoader(object):
     def startPoint(self, startDateOfProduction, remainders):
         if not remainders:
             return startDateOfProduction
-        return min((
+        return min(
             date
             for shares, date, remainderwh in remainders
-            ))
+            )
     def endPoint(self, intervalStart, curve):
         return intervalStart+datetime.timedelta(days=len(curve)//25)
  
