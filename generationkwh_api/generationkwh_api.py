@@ -31,6 +31,14 @@ class ErpWrapper(object):
         self.uid = uid
         self.context = context
 
+class RemainderProvider(ErpWrapper):
+    def get(self):
+        remainders=self.erp.pool('generationkwh.remainders')
+        return remainders.last()
+    def set(self,remainders)
+        remainders=self.erp.pool('generationkwh.remainders')
+        remainders.add(remainders)
+
 class InvestmentProvider(ErpWrapper):
 
     def shareContracts(self, member=None, start=None, end=None):
