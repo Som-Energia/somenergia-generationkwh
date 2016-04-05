@@ -36,6 +36,13 @@ class VirtualPlant(Resource):
             for plant in self.plants
             if plant.enabled
             ], axis=0)
+    
+    def firstMeasurementDate(self):
+        return min([
+            plant.firstMeasurementDate()
+            for plant in self.plants
+            if plant.enabled
+            ])
 
     def lastMeasurementDate(self):
         return min([
@@ -63,6 +70,13 @@ class Plant(Resource):
             if meter.enabled
             ])
 
+    def firstMeasurementDate(self):
+        return min([
+            meter.firstMeasurementDate()
+            for meter in self.meters
+            if meter.enabled
+            ])
+
 class Meter(Resource):
     def __init__(self, *args, **kwargs):
         self.uri = kwargs.pop('uri') if 'uri' in kwargs else None 
@@ -84,6 +98,8 @@ class Meter(Resource):
                             )
     def lastMeasurementDate(self):
         return self.curveProvider.lastFullDate(self.name)
-
+    
+    def firstMeasurementDate(self):
+        return self.curveProvider.firstFullDate(self.name)
 
 # vim: et ts=4 sw=4

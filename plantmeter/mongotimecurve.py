@@ -187,7 +187,10 @@ class MongoTimeCurve(object):
     def lastFullDate(self,name):
         # TODO: dumb implementation, if there is a single point consider it filled
         return self.lastDate(name)
-
+    def firstFullDate(self,name):
+        # TODO: dumb implementation, if there is a single point consider it filled
+        return self.firstDate(name)
+    
     def update(self, start, filter, field, data):
         """Updates the curve with new data"""
 
