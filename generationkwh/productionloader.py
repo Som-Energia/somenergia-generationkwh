@@ -21,9 +21,9 @@ def isodate(string):
     return datetime.datetime.strptime(string, '%Y-%m-%d').date()
 
 class ProductionLoader(object):
-    def __init__(self, productionAggregator=None, activePlantShareCurver=None):
+    def __init__(self, productionAggregator=None, plantShareCurver=None):
         self.productionAggregator = productionAggregator
-        self.activePlantShareCurver = activePlantShareCurver
+        self.plantShareCurver = plantShareCurver
 
     def startPoint(self, startDateOfProduction, remainders):
         if not remainders:
@@ -41,15 +41,18 @@ class ProductionLoader(object):
         firstMeasurement = self.productionAggregator.getFirstMeasurementDate()
         remainders = self.remainderProvider.get()
         recomputeStart = self.startPoint(firstMeasurement, remainders)
-        aggregatedProduction = self.productionAggregator.getWh(recomputeStart)
-        recomputeStop = self.endPoint(recomputeStart, aggregatedProduction)
-        activePlantShareCurve = self.activePlantShareCurver.get(recomputeStart, recomputeStop)
+        lastMeasurement = self.productionAggregator.getLastMeasurementDate()
+        aggregatedProduction = self.productionAggregator.getWh(recomputeStart, lastMeasurement)
+        #recomputeStop = self.endPoint(recomputeStart, aggregatedProduction)
+        recomputeStop = lastMeasurement
+        plantShareCurve = self.plantShareCurver.hourly(recomputeStart, recomputeStop)
         userRightsProvider = UserRightsPerShare()
+        rightsPerShareProvider = RightsPerShare()
         for n, date, remainder in remainders:
             userRights, newRemainder = userRightsProvider.computeRights(
-                aggregatedProduction, activePlantShareCurve, n, remainder)
+                aggregatedProduction, plantShareCurve, n, remainder)
             self.remainderProvider.set(n, recomputeStop, newRemainder)
-            userRightsProvider.write(n, recomputeStart, userRights)
+            rightsPerShareProvider.updateRightsPerShare(n, recomputeStart, userRights)
         
 
 # vim: ts=4 sw=4 et
