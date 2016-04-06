@@ -2,6 +2,7 @@
 
 import datetime
 import numpy
+from plantmeter.mongotimecurve import curveIndexToDate, dateToCurveIndex, toLocal
 
 class MemberSharesCurve(object):
     """ Provides the shares that are active at a give
@@ -16,7 +17,7 @@ class MemberSharesCurve(object):
         return sum(
             investment.shares
             for investment in self._provider.shareContracts()
-            if (member is None or investment['member'] == member)
+            if (member is None or investment.member == member)
             and investment.activationEnd >= day
             and investment.activationStart <= day
         )
@@ -24,14 +25,27 @@ class MemberSharesCurve(object):
     def hourly(self, start, end, member=None):
         if end<start:
             return numpy.array([], dtype=int)
-
         hoursADay=25
         nDays=(end-start).days+1
         result = numpy.zeros(nDays*hoursADay, dtype=numpy.int)
-        for i in xrange(nDays):
-            day=start+datetime.timedelta(days=i)
-            result[i*hoursADay:(i+1)*hoursADay] = self.atDay(day, member=member)
+
+        for investment in self._provider.shareContracts():
+            if member is not None:
+                if investment.member != member:
+                    continue
+            if investment.activationEnd < start: continue
+            if investment.activationStart > end: continue
+
+            firstIndex = max(
+                25*(investment.activationStart-start).days,
+                0)
+            lastIndex = min(
+                25*(investment.activationEnd-start).days+25,
+                nDays*hoursADay)
+
+            result[firstIndex:lastIndex]+=investment.shares
         return result
+
 
 class PlantSharesCurve(MemberSharesCurve):
     def __init__(self,shares):
@@ -40,7 +54,17 @@ class PlantSharesCurve(MemberSharesCurve):
     def atDay(self, day, member=None):
         return self.shares
 
+    def _hourly(self, start, end, member=None):
+        if end<start:
+            return numpy.array([], dtype=int)
+
+        hoursADay=25
+        nDays=(end-start).days+1
+        result = numpy.zeros(nDays*hoursADay, dtype=numpy.int)
+        result[:]=self.shares
+        return result
+
     def hourly(self, start, end):
-        return super(PlantSharesCurve, self).hourly(start,end,None)
+        return self._hourly(start,end,None)
 
 # vim: ts=4 sw=4 et
