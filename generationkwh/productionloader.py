@@ -36,14 +36,16 @@ class ProductionLoader(object):
     def endPoint(self, intervalStart, curve):
         return intervalStart+datetime.timedelta(days=len(curve)//25)
  
-
-
-    def doit(self):
+    def getRecomputeStart(self):
         firstMeasurement = self.productionAggregator.getFirstMeasurementDate()
         remainders = self.remainderProvider.get()
-        recomputeStart = self.startPoint(firstMeasurement, remainders)
+        return self.startPoint(firstMeasurement, remainders)
+        
+           
+
+    def doit(self):
         lastMeasurement = self.productionAggregator.getLastMeasurementDate()
-        aggregatedProduction = self.productionAggregator.getWh(recomputeStart, lastMeasurement)
+        aggregatedProduction = self.productionAggregator.getWh(self.getRecomputeStart(), lastMeasurement)
         #recomputeStop = self.endPoint(recomputeStart, aggregatedProduction)
         recomputeStop = lastMeasurement
         plantShareCurve = self.plantShareCurver.hourly(recomputeStart, recomputeStop)

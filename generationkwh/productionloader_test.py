@@ -9,23 +9,48 @@ def isodate(string):
 
 class ProductionAggregatorMockUp(object):
 
-    def __init__(self, data, date):
+    def __init__(self, data, startDate, endDate):
         self.data = data
-        self.date = date
-
-    def getWh(self, firstDate):
+        self.start_date = startDate
+        self.end_date = endDate
+    def getWh(self, *args):
         return self.data
 
     def getFirstMeasurement(self):
-        return self.date
+        return self.startDate
+
+    def getLastMeasurementDate(self):
+        return self.endDate
 
 class RemainderProviderMockup(object):
     
     def get(self):
         return self.remainders
     def set(self, nshares, date, rem):
-        self.remaniders=[[nshares, date, rem]if x[0]==nshares else x for x in self.remainders]
+        self.remaniders=[(nshares, date, rem) if x[0]==nshares else x for x in self.remainders]
         
+class PlantShareCurverMockup(object):
+
+    def __init__(self, data):
+        self.data = data
+
+    def hourly(start, end):
+        return data
+
+class userRightsProviderMockup(object):
+    def __init__(self, userRights, newRemainder):
+        self.userRights=userRights
+        self.newRemainder=newRemainder
+
+    def computeRights(*args):
+        return userRights, newRemainder
+
+class rightsPerShareProviderMockup(object):
+    def updateRightsPerShare(self, n, start, stop):
+        self.data.append([n,start,stop])
+
+    def getRightsPerShare():
+        return self.data
 
 class ProductionLoaderTest(unittest.TestCase):
 
@@ -67,7 +92,9 @@ class ProductionLoaderTest(unittest.TestCase):
         l = ProductionLoader()
         date = l.endPoint(isodate('2000-01-01'), 27*[0])
         self.assertEqual('2000-01-02', str(date))
-
+    
+    def test_doit(self):
+        pass
 
 
 
