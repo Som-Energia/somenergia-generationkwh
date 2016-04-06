@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from fareperiodcurve import FarePeriodCurve, libfacturacioatr, isodate
+from fareperiodcurve import FarePeriodCurve, libfacturacioatr
 import unittest
+import datetime
+
+def isodate(string):
+    return datetime.datetime.strptime(string, '%Y-%m-%d').date()
 
 class HolidaysProvidersMockup(object):
     def get(self, start, stop):
@@ -23,7 +27,8 @@ class FarePeriodCurve_Test(unittest.TestCase):
             holidays=HolidaysProvidersMockup(holidays)
             )
 
-        return p.mask(start_date, end_date, fare, period)
+
+        return p.mask(isodate(start_date), isodate(end_date), fare, period)
 
         
     def assertArrayEqual(self, result, expected):

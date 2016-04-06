@@ -16,17 +16,14 @@ except ImportError:
     libfacturacioatr = None
 
 
-def isodate(string):
-    return datetime.datetime.strptime(string, '%Y-%m-%d').date()
-
 class FarePeriodCurve(object):
     def __init__(self, holidays):
         self.holidays = holidays
 
     def mask(self, begin_date, end_date, fare, period):
         import libfacturacioatr
-        begin = isodate(begin_date)
-        end = isodate(end_date)
+        begin = begin_date
+        end = end_date
         fares = {
             '2.0A': libfacturacioatr.tarifes.Tarifa20A,
             '3.0A': libfacturacioatr.tarifes.Tarifa30A,
@@ -47,6 +44,9 @@ class FarePeriodCurve(object):
                 ).matrix
             for month in xrange(startMonth, endMonth+1)], [])
         return allDays[begin.day-1:] [:(end-begin).days+1]
+
+    def periodMask(self, fare, period, begin_date, end_date):
+        return self.mask(begin_date, end_date, fare, period)
 
 
 # vim: ts=4 sw=4 et
