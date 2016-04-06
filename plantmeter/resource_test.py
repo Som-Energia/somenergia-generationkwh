@@ -326,6 +326,25 @@ class Meter_Test(unittest.TestCase):
 
         self.assertEqual(m.lastMeasurementDate(), localDate(2015,9,5))
 
+    def test_firstDate_empty(self):
+        m = Meter(
+            'meterName',
+            'meterDescription',
+            True,
+            uri = self.uri,
+            curveProvider = self.curveProvider)
+        self.assertEqual(m.firstMeasurementDate(), None)
+
+    def test_firstDate_filled(self):
+        m = Meter(
+            'meterName',
+            'meterDescription',
+            True,
+            uri = self.uri,
+            curveProvider = self.curveProvider)
+        m.updateWh(localDate(2015,9,3), localDate(2015,9,5))
+        self.assertEqual(m.firstMeasurementDate(), localDate(2015,9,3))
+
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 

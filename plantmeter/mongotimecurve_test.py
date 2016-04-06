@@ -462,6 +462,29 @@ class MongoTimeCurve_Test(unittest.TestCase):
         lastdate = mtc.lastDate('miplanta')
         self.assertEqual(lastdate,isodate('2015-01-02'))
 
+    def test_firstDate_whenNoPoint_returnsNone(self):
+        mtc = self.setupPoints([
+            ])
+
+        lastdate = mtc.firstDate('miplanta')
+        self.assertEqual(lastdate,None)
+
+    def test_firstDate_withOnePoint_takesIt(self):
+        mtc = self.setupPoints([
+            ('2015-01-01 23:00:00', 'miplanta', 30),
+            ])
+
+        lastdate = mtc.firstDate('miplanta')
+        self.assertEqual(lastdate,isodate('2015-01-01'))
+
+    def test_firstDate_withForeignPoint_ignored(self):
+        mtc = self.setupPoints([
+            ('2015-01-01 23:00:00', 'otraplanta', 30)
+            ])
+
+        lastdate = mtc.firstDate('miplanta')
+        self.assertEqual(lastdate,None)
+
     def test_firstDate_withSeveralPoints_takesFirst(self):
         mtc = self.setupPoints([
             ('2015-01-01 23:00:00', 'miplanta', 30),
@@ -495,6 +518,12 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
         lastdate = mtc.lastFullDate('miplanta')
         self.assertEqual(lastdate,isodate('2015-01-01'))
+
+    def test_firstFullDate_withNoPoints(self):
+        mtc = self.setupDatePoints('2015-01-01', 'miplanta', [1]*24)
+
+        firstdate = mtc.lastFullDate('miplanta')
+        self.assertEqual(firstdate,isodate('2015-01-01'))
 
     def test_filled_whenEmpty(self):
         mtc = self.setupPoints([])
