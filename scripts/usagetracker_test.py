@@ -26,11 +26,16 @@ class UsageTracker_Test(unittest.TestCase):
     def test_available_kwh_rightsAndInvestments(self):
         clear()
         create(stop="2015-06-30", waitingDays=0)
+        self.c.GenerationkwhTesthelper.setup_rights_per_share(
+            25, '2015-08-01', [3]*50)
+
+#        self.c.GenerationkwhTesthelper.trace_rigths_compilation(
+#            2, '2015-08-01', '2015-09-01', '2.0A', 'P1')
     
         self.assertEqual(
             self.c.GenerationkwhTesthelper.usagetracker_available_kwh(
-                '4', '2015-08-01', '2015-09-01', '2.0A', 'P1'),
-            0)
+                2, '2015-08-01', '2015-09-01', '2.0A', 'P1'),
+            2*3*24)
 
 
  

@@ -22,6 +22,8 @@ def isodatetime(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
 def isodate(date):
     return date and datetime.datetime.strptime(date, '%Y-%m-%d')
+def localisodate(date):
+    return date and toLocal(datetime.datetime.strptime(date, '%Y-%m-%d'))
 
 # Data providers
 
@@ -73,8 +75,8 @@ class InvestmentProvider(ErpWrapper):
         return [
             (
                 c['member_id'][0],
-                isodate(c['activation_date']),
-                isodate(c['deactivation_date']),
+                localisodate(c['activation_date']),
+                localisodate(c['deactivation_date']),
                 c['nshares'],
             )
             for c in sorted(contracts, key=lambda x: x['id'] )
@@ -123,12 +125,61 @@ class GenerationkWhTestHelper(osv.osv):
         holidaysProvider = HolidaysProvider(self, cursor, uid, context)
         return holidaysProvider.get(start, stop)
 
-    def helper_add_rights(self, cursor, uid,
+    def setup_rights_per_share(self, cursor, uid,
             nshares, startDate, data,
             context=None):
-        
         rightsPerShare = RightsPerShare(mdbpool.get_db())
-        rightsPerShare.updateRightsPerShare(1, startDate, data)
+        rightsPerShare.updateRightsPerShare(nshares, localisodate(startDate), data)
+
+
+    def trace_rigths_compilation(self, cursor, uid,
+            member, start, stop, fare, period,
+            context=None):
+        """
+            Helper function to show data related to computation of available
+            rights.
+        """
+        print "Dropping results for", member, start, stop, fare, period
+    
+        investments = InvestmentProvider(self, cursor, uid, context)
+        memberActiveShares = MemberSharesCurve(investments)
+        rightsPerShare = RightsPerShare(mdbpool.get_db())
+
+        generatedRights = MemberRightsCurve(
+            activeShares=memberActiveShares,
+            rightsPerShare=rightsPerShare,
+            eager=True,
+            )
+        rightsUsage = MemberRightsUsage(mdbpool.get_db())
+        holidays = HolidaysProvider(self, cursor, uid, context)
+        farePeriod = FarePeriodCurve(holidays)
+
+        print 'investments', investments.shareContracts(
+            start=localisodate(start),
+            end=localisodate(stop),
+            member=2)
+        print 'active', memberActiveShares.hourly(
+            localisodate(start),
+            localisodate(stop),
+            member)
+        for nshares in set(memberActiveShares.hourly(
+            localisodate(start),
+            localisodate(stop),
+            member)):
+            print 'rightsPerShare', nshares, rightsPerShare.rightsPerShare(nshares,
+                localisodate(start),
+                localisodate(stop),
+                )
+        print 'rights', generatedRights.rights_kwh(member,
+            localisodate(start),
+            localisodate(stop),
+            )
+
+        print 'periodmask', farePeriod.periodMask(
+            fare, period,
+            localisodate(start),
+            localisodate(stop),
+            )
 
     def usagetracker_available_kwh(self, cursor, uid,
             member, start, stop, fare, period,
@@ -138,12 +189,11 @@ class GenerationkWhTestHelper(osv.osv):
         usageTracker = GenerationkWhDealer._createTracker(cursor, uid, context)
         result = usageTracker.available_kwh(
             member,
-            toLocal(isodate(start)),
-            toLocal(isodate(stop)),
+            localisodate(start),
+            localisodate(stop),
             fare,
             period
             )
-        print result
         return result
 
 
