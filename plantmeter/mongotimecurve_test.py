@@ -633,6 +633,26 @@ class MongoTimeCurve_Test(unittest.TestCase):
             [True]+24*[False]
             )
 
+    def test_get_withFilledGap(self):
+        mtc = self.setupPoints([])
+
+        curve = mtc.update(
+            start=isodate('2015-08-01'),
+            filter='miplanta',
+            field='ae',
+            data=+25*[1]+[1]+24*[1]
+            )
+        curve = mtc.get(
+            start=isodate('2015-08-01'),
+            stop=isodate('2015-08-01'),
+            filter='miplanta',
+            field='ae',
+            )
+        self.assertEqual(
+            list(curve),
+            +24*[1]+[0]
+            )
+
     def test_update_fullDay(self):
         mtc = self.setupPoints([])
 

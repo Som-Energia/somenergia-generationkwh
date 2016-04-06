@@ -21,6 +21,7 @@ import pytz
 """
 
 tz = pytz.timezone('Europe/Madrid')
+hoursPerDay=25
 
 def asUtc(date):
     if date.tzinfo is None:
@@ -71,7 +72,7 @@ def dateToCurveIndex(start, localTime):
     """
     ndays = (localTime.date()-start.date()).days
     winterOffset = 0 if localTime.dst() else 1
-    return localTime.hour + 25*ndays + winterOffset
+    return localTime.hour + hoursPerDay*ndays + winterOffset
 
 def addDays(date, ndays):
     resultday = date.date() + datetime.timedelta(days=ndays)
@@ -88,7 +89,7 @@ def curveIndexToDate(start, index):
         to keep same solar time in the same position across summer
         daylight saving shift.
     """
-    days = index//25
+    days = index//hoursPerDay
     localday = addDays(start, days)
 
     nextDay = tz.normalize(localday + datetime.timedelta(days=1))
@@ -96,7 +97,7 @@ def curveIndexToDate(start, index):
     toSummerDls = not localday.dst() and nextDay.dst()
 
     if not localday.dst(): index-=1
-    hours = index%25
+    hours = index%hoursPerDay
     if hours == 24 and not toWinterDls: return None
     if hours == 23 and toSummerDls: return None
     return tz.normalize(localday+datetime.timedelta(hours=hours))
@@ -121,14 +122,14 @@ class MongoTimeCurve(object):
             "MongoTimeCurve.get called with naive (no timezone) stop date")
 
         ndays = (stop-start).days+1
-        data = numpy.zeros(ndays*25, numpy.int)
+        data = numpy.zeros(ndays*hoursPerDay, numpy.int)
         if filling :
-            filldata = numpy.zeros(ndays*25, numpy.bool)
+            filldata = numpy.zeros(ndays*hoursPerDay, numpy.bool)
         filters = dict(
             name = filter,
             datetime = {
                 '$gte': start,
-                '$lte': stop+datetime.timedelta(days=1)
+                '$lt': addDays(stop,1)
             }
         )
 
@@ -197,7 +198,7 @@ class MongoTimeCurve(object):
         assert start.tzinfo is not None, (
             "MongoTimeCurve.update called with naive (no timezone) start date")
 
-        stop = start + datetime.timedelta(days=len(data)//25+1)
+        stop = start + datetime.timedelta(days=len(data)//hoursPerDay+1)
         oldData, filling = self.get(start, stop, filter, field, filling=True)
         for i,(bin,old,f) in enumerate(zip(data,oldData,filling)):
             curveDate = curveIndexToDate(start, i)
