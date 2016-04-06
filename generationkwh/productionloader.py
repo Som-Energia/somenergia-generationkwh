@@ -21,10 +21,11 @@ def isodate(string):
     return datetime.datetime.strptime(string, '%Y-%m-%d').date()
 
 class ProductionLoader(object):
-    def __init__(self, productionAggregator=None, plantShareCurver=None):
+    def __init__(self, productionAggregator=None, plantShareCurver=None, rightsPerShareProvider=None, userRightsProvider=None):
         self.productionAggregator = productionAggregator
         self.plantShareCurver = plantShareCurver
-
+        self.rightsPerShareProvider = rightsPerShareProvider
+        self.userRightsProvider = userRightsProvider
     def startPoint(self, startDateOfProduction, remainders):
         if not remainders:
             return startDateOfProduction
@@ -46,13 +47,11 @@ class ProductionLoader(object):
         #recomputeStop = self.endPoint(recomputeStart, aggregatedProduction)
         recomputeStop = lastMeasurement
         plantShareCurve = self.plantShareCurver.hourly(recomputeStart, recomputeStop)
-        userRightsProvider = UserRightsPerShare()
-        rightsPerShareProvider = RightsPerShare()
         for n, date, remainder in remainders:
-            userRights, newRemainder = userRightsProvider.computeRights(
+            userRights, newRemainder = self.userRightsProvider.computeRights(
                 aggregatedProduction, plantShareCurve, n, remainder)
             self.remainderProvider.set(n, recomputeStop, newRemainder)
-            rightsPerShareProvider.updateRightsPerShare(n, recomputeStart, userRights)
+            self.rightsPerShareProvider.updateRightsPerShare(n, recomputeStart, userRights)
         
 
 # vim: ts=4 sw=4 et

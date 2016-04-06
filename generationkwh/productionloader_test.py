@@ -9,12 +9,23 @@ def isodate(string):
 
 class ProductionAggregatorMockUp(object):
 
-    def __init__(self, data):
+    def __init__(self, data, date):
         self.data = data
+        self.date = date
 
     def getWh(self, firstDate):
         return self.data
 
+    def getFirstMeasurement(self)
+        return self.date
+
+class RemainderProviderMockup(object):
+    
+    def get(self):
+        return self.remainders
+    def set(self, nshares, date, rem)
+        self.remaniders=[[nshares, date, rem]if x[0]=nshares else x for x in self.remainders]
+        
 
 class ProductionLoaderTest(unittest.TestCase):
 
