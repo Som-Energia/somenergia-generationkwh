@@ -186,6 +186,21 @@ class Resource_Test(unittest.TestCase):
         vp.plants.append(p)
 
         self.assertEqual(vp.lastMeasurementDate(), None)
+    
+    def test_firstDate_empty(self):
+        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
+        m = Meter(
+            'meterName',
+            'meterDescription',
+            True,
+            uri = uri,
+            curveProvider = self.curveProvider)
+        p = Plant('plantName','plantDescription',True)
+        p.meters.append(m)
+        vp = VirtualPlant('vplantName','vplantDescription',True)
+        vp.plants.append(p)
+
+        self.assertEqual(vp.firstMeasurementDate(), None)
 
     def test_lastDate_onePlantOneMeter(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -202,6 +217,22 @@ class Resource_Test(unittest.TestCase):
         m.updateWh(localDate(2015,9,4), localDate(2015,9,5))
 
         self.assertEqual(vp.lastMeasurementDate(), localDate(2015,9,5))
+
+    def test_firstDate_onePlantOneMeter(self):
+        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
+        m = Meter(
+            'meterName',
+            'meterDescription',
+            True,
+            uri = uri,
+            curveProvider = self.curveProvider)
+        p = Plant('plantName','plantDescription',True)
+        p.meters.append(m)
+        vp = VirtualPlant('vplantName','vplantDescription',True)
+        vp.plants.append(p)
+        m.updateWh(localDate(2015,9,3), localDate(2015,9,5))
+
+        self.assertEqual(vp.firstMeasurementDate(), localDate(2015,9,3))
 
     def test_lastDate_onePlantTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -229,6 +260,31 @@ class Resource_Test(unittest.TestCase):
 
         self.assertEqual(vp.lastMeasurementDate(), localDate(2015,8,5))
 
+    def test_firstDate_onePlantTwoMeters(self):
+        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
+        m1 = Meter(
+            'meterName1',
+            'meterDescription1',
+            True,
+            uri = uri,
+            curveProvider = self.curveProvider)
+        uri = 'csv:/' + local_file('data/manlleu_20150804.csv')
+        m2 = Meter(
+            'meterName2',
+            'meterDescription2',
+            True,
+            uri = uri,
+            curveProvider = self.curveProvider)
+
+        p = Plant('plantName','plantDescription',True)
+        p.meters.append(m1)
+        p.meters.append(m2)
+        vp = VirtualPlant('vplantName','vplantDescription',True)
+        vp.plants.append(p)
+        m1.updateWh(localDate(2015,9,3), localDate(2015,9,5))
+        m2.updateWh(localDate(2015,8,3), localDate(2015,8,5))
+
+        self.assertEqual(vp.firstMeasurementDate(), localDate(2015,8,3))
 
     def test_lastDate_twoPlantsTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -258,6 +314,33 @@ class Resource_Test(unittest.TestCase):
 
         self.assertEqual(vp.lastMeasurementDate(), localDate(2015,8,5))
 
+    def test_firstDate_twoPlantsTwoMeters(self):
+        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
+        m1 = Meter(
+            'meterName1',
+            'meterDescription1',
+            True,
+            uri = uri,
+            curveProvider = self.curveProvider)
+        uri = 'csv:/' + local_file('data/manlleu_20150804.csv')
+        m2 = Meter(
+            'meterName2',
+            'meterDescription2',
+            True,
+            uri = uri,
+            curveProvider = self.curveProvider)
+
+        p1 = Plant('plantName1','plantDescription1',True)
+        p2 = Plant('plantName2','plantDescription2',True)
+        p1.meters.append(m1)
+        p2.meters.append(m2)
+        vp = VirtualPlant('vplantName','vplantDescription',True)
+        vp.plants.append(p1)
+        vp.plants.append(p2)
+        m1.updateWh(localDate(2015,9,3), localDate(2015,9,5))
+        m2.updateWh(localDate(2015,8,3), localDate(2015,8,5))
+
+        self.assertEqual(vp.firstMeasurementDate(), localDate(2015,8,3))
 
 class Meter_Test(unittest.TestCase):
     def setUp(self):
