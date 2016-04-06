@@ -16,15 +16,15 @@ class ProductionAggregatorMockUp(object):
     def getWh(self, firstDate):
         return self.data
 
-    def getFirstMeasurement(self)
+    def getFirstMeasurement(self):
         return self.date
 
 class RemainderProviderMockup(object):
     
     def get(self):
         return self.remainders
-    def set(self, nshares, date, rem)
-        self.remaniders=[[nshares, date, rem]if x[0]=nshares else x for x in self.remainders]
+    def set(self, nshares, date, rem):
+        self.remaniders=[[nshares, date, rem]if x[0]==nshares else x for x in self.remainders]
         
 
 class ProductionLoaderTest(unittest.TestCase):
