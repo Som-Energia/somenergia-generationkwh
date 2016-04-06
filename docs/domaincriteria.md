@@ -28,7 +28,7 @@ Production and shares
 - Delay can be different for share batches. Batches can be set either
 	- by selecting by purchase date (between two dates) or
 	- by purchasing order (till the nth action). [Nuria-David]
-- [Deprecated] The purchase date is the date the member orders, not the payment day [Gijsbert-Marc-Eduard]
+- [Discarded] The purchase date is the date the member orders, not the payment day [Gijsbert-Marc-Eduard]
 - The purchase date is the date of the accounting movement [Marc-Eduard-Carles-Agusti-David pending of confirmation from Gijsbert]
 
 Dealing
@@ -38,9 +38,23 @@ Dealing
     - All from a meeting with [Marc-Nuri-Pere-Eduard-Aleix-Agusti-David]
     - Investor members have a priority list of contracts
     - Rights are not taken if they were produced:
-        - after the invoicing period end, or
+        - after the invoicing period end,
+            - **Exemple:**
+                si el dia 25 de Març fem una factura que arriba fins al 3 de Març,
+                no s’utilitzarà la producció feta a partir del 4 de Març que potser
+                ja tenim carregada.
         - after the last invoiced date of the other contracts in the list with higher priority
-        - before a years before of the invoicing periods start
+            - **Exemple:**
+                Un dels inversors d’on podem treure drets
+                té dos contractes mes prioritaris
+                ja facturats fins els dies 2015-02-03, i 2015-02-15.
+                Això implica que un contracte menys prioritari només pot fer servirs
+                drets generats el 2015-02-02 o abans.
+        - before a years before of the invoicing period start
+            - **Exemple:**
+                Una factura del periode de 3 de Juny de 2017 a 2 de Juliol,
+                no pot utilitzar drets generats abans del 3 de Juny de 2016,
+                aquests ja han caducat.
     - The contract list will be initialized with:
         - the biggest contract having the investor as payer
         - if none is found, the biggest contract having the investor as owner
@@ -48,7 +62,9 @@ Dealing
     - A mail will be sent
         - At start of generation or whenever a new investment is created
         - Telling the assignation if any by default and why
-        - Telling the means to change it (by now mail + ERP operator)
+        - Telling the means to change it.
+            By now mail to generationkwh@somenergia.coop + ERP operator.
+            Eventually using the virtual office.
     - ERP client IF will manage this list for a given member
     - ERP client IF will display the list of investment
         - Set the activation date relative to the purchase date of many at once
@@ -57,6 +73,20 @@ Dealing
     - more complex deal policies (or not)
     - configuration from oficina virtual
     - a erpclient view from contract to access assigned gkwh investors
+
+Invoice live cycle
+------------------
+
+- What to do if a refunded invoice still in draft is deleted and the 
+    rights used in the original invoice are not available anymore
+    or they come from different sources?
+    [Carles, Eduard, David, Agusti]
+    - Just try to reallocate them, if the reallocation missmatches
+        in number or source, just go on with it, but generate a
+        log/report about the missmatch.
+        During the first months, we will check the cases and if
+        the drift is too large we could reconsider
+        doing something about it.
 
 
 Doubts
