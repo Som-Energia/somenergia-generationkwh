@@ -10,6 +10,7 @@ TODO:
 """
 
 import datetime
+import numpy
 try:
     import libfacturacioatr
 except ImportError:
@@ -46,7 +47,7 @@ class FarePeriodCurve(object):
         return allDays[begin.day-1:] [:(end-begin).days+1]
 
     def periodMask(self, fare, period, begin_date, end_date):
-        return self.mask(begin_date, end_date, fare, period)
+        return numpy.array(sum(self.mask(begin_date, end_date, fare, period),[]))
 
 
 # vim: ts=4 sw=4 et
