@@ -12,6 +12,8 @@ from generationkwh.memberrightscurve import MemberRightsCurve
 from generationkwh.memberrightsusage import MemberRightsUsage
 from generationkwh.fareperiodcurve import FarePeriodCurve
 from generationkwh.usagetracker import UsageTracker
+from plantmeter.mongotimecurve import toLocal
+from yamlns import namespace as ns
 
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -35,13 +37,13 @@ class RemainderProvider(ErpWrapper):
     def get(self):
         remainders=self.erp.pool('generationkwh.remainders')
         return remainders.last(self.cursor,self.uid, context=self.context)
-    def set(self,remainders)
+    def set(self,remainders):
         remainders=self.erp.pool('generationkwh.remainders')
         remainders.add(self.cursor,self.uid,remainders, context=self.context)
 
 class InvestmentProvider(ErpWrapper):
 
-    def shareContracts(self, member=None, start=None, end=None):
+    def shareContractsTuple(self, member=None, start=None, end=None):
         """
             List active investments between start and end, both included,
             for the member of for any member if member is None.
@@ -78,6 +80,18 @@ class InvestmentProvider(ErpWrapper):
             for c in sorted(contracts, key=lambda x: x['id'] )
         ]
 
+    def shareContracts(self, member=None, start=None, end=None):
+        return [
+            ns(
+                member=member,
+                activationStart=start,
+                activationEnd=end,
+                shares=shares,
+            )
+            for member, start, end, shares
+            in self.shareContractsTuple(member, start, end)
+        ]
+
 class HolidaysProvider(ErpWrapper):
 
     def get(self, start, stop):
@@ -109,27 +123,28 @@ class GenerationkWhTestHelper(osv.osv):
         holidaysProvider = HolidaysProvider(self, cursor, uid, context)
         return holidaysProvider.get(start, stop)
 
+    def helper_add_rights(self, cursor, uid,
+            nshares, startDate, data,
+            context=None):
+        
+        rightsPerShare = RightsPerShare(mdbpool.get_db())
+        rightsPerShare.updateRightsPerShare(1, startDate, data)
+
     def usagetracker_available_kwh(self, cursor, uid,
             member, start, stop, fare, period,
             context=None):
 
-        investments = InvestmentProvider(self, cursor, uid, context)
-        memberActiveShares = MemberSharesCurve(investments)
-        rightsPerShare = RightsPerShare(mdbpool.get_db())
-
-        generatedRights = MemberRightsCurve(
-            activeShares=memberActiveShares,
-            rightsPerShare=rightsPerShare,
-            eager=True,
+        GenerationkWhDealer = self.pool.get('generationkwh.dealer')
+        usageTracker = GenerationkWhDealer._createTracker(cursor, uid, context)
+        result = usageTracker.available_kwh(
+            member,
+            toLocal(isodate(start)),
+            toLocal(isodate(stop)),
+            fare,
+            period
             )
-
-        rightsUsage = MemberRightsUsage(mdbpool.get_db())
-
-        holidays = HolidaysProvider(self, cursor, uid, context)
-        farePeriod = FarePeriodCurve(holidays)
-  
-        usageTracker = UsageTracker(generatedRights, rightsUsage, farePeriod)
-        return usageTracker.available_kwh(member, start, stop, fare, period)
+        print result
+        return result
 
 
 GenerationkWhTestHelper()
@@ -158,6 +173,12 @@ class GenerationkWhRemainders(osv.osv):
         )
     )
 
+    _sql_constraints = [(
+        'unique_n_shares_last_day', 'unique(n_shares,last_day_computed)',
+            'Only one remainder of last date computed and number of shares '
+            'is allowed'
+        )]
+
     def last(self, cr, uid, context=None):
         cr.execute("""
             SELECT o.n_shares,o.last_day_computed,o.remainder_wh
@@ -175,11 +196,7 @@ class GenerationkWhRemainders(osv.osv):
             ) for n_shares, last_day_computed, remainder_wh in cr.fetchall()
         ]
         return result
-    _sql_constraints = [(
-        'unique_n_shares_last_day', 'unique(n_shares,last_day_computed)',
-            'Only one remainder of last date computed and number of shares '
-            'is allowed'
-        )]
+
     def add(self, cr, uid, remainders, context=None):
         for n,pointsDate,remainder in remainders:
             same_date_n_id=self.search(cr, uid, [
@@ -236,7 +253,7 @@ class GenerationkWhInvestments(osv.osv):
             context=None):
 
         provider = InvestmentProvider(self, cursor, uid, context)
-        return provider.shareContracts(member, start, end)
+        return provider.shareContractsTuple(member, start, end)
 
 
     def create_investments_from_accounting(self, cursor, uid,
@@ -378,7 +395,7 @@ class GenerationkWhDealer(osv.osv):
         return dealer.refund_kwh(
             contract_id, start_date, end_date, fare, period, kwh)
 
-    def _createDealer(self, cursor, uid, context):
+    def _createTracker(self, cursor, uid, context):
 
         investments = InvestmentProvider(self, cursor, uid, context)
         memberActiveShares = MemberSharesCurve(investments)
@@ -393,10 +410,13 @@ class GenerationkWhDealer(osv.osv):
         rightsUsage = MemberRightsUsage(mdbpool.get_db())
 
         holidays = HolidaysProvider(self, cursor, uid, context)
-        farePeriod = FarePeriodCurver(holidays)
+        farePeriod = FarePeriodCurve(holidays)
   
-        usageTracker = UsageTracker(generatedRights, rightsUsage, farePeriod)
+        return UsageTracker(generatedRights, rightsUsage, farePeriod)
 
+    def _createDealer(self, cursor, uid, context):
+
+        usageTracker = self._createTracker(cursor, uid, context)
         # TODO: Feed the dealer with data sources
         return Dealer(usageTracker)
 
