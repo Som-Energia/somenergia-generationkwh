@@ -38,6 +38,7 @@ class MemberSharesCurve(object):
 
             if not investment.activationStart:
                 continue
+
             if investment.activationStart > end: continue
 
             firstIndex = hoursADay*max(
