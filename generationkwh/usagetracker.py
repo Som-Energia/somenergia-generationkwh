@@ -13,11 +13,11 @@ class UsageTracker(object):
         rights = self._rights.rights_kwh(member, start, end)
         periodMask = self._periodMask.periodMask(fare, period, start, end)
         usage = self._usage.usage(member, start, end)
-        return sum(
+        return int(sum(
             p-u if m else 0
             for p,u,m
             in zip(rights, usage, periodMask)
-            )
+            ))
 
     def use_kwh(self, member, start, end, fare, period, kwh):
         rights = self._rights.rights_kwh(member, start, end)
