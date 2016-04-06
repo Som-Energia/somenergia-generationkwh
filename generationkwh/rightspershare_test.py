@@ -39,7 +39,7 @@ class RightsPerShare_Test(unittest.TestCase):
 
     def test_usage_withUsage(self):
         provider = RightsPerShare(self.db)
-        rightsPerShare = provider.updateRightsPerShare(
+        provider.updateRightsPerShare(
             nshares='1',
             start=isodate('2015-08-15'),
             data=range(1,25)+[0],
