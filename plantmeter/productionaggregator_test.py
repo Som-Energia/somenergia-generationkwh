@@ -18,4 +18,4 @@ class ProductionAggregator_Test(unittest.TestCase):
     def tearDown(self):
         self.connection.drop_database('generationkwh_test')
 
-
+    """ There are no new funcionality, test cases are covered n resource_test"""
