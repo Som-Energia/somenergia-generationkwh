@@ -7,7 +7,7 @@ from yamlns import namespace as ns
 import datetime
 
 def isodate(date):
-    return datetime.datetime.strptime(date, '%Y-%m-%d').date()
+    return date and datetime.datetime.strptime(date, '%Y-%m-%d').date()
 
 class InvestmentProvider_MockUp(object):
     def __init__(self, shareContracts):
@@ -160,7 +160,7 @@ class MemberSharesCurve_Test(unittest.TestCase):
             +25*[3]
             )
  
-    def test_hourly_unactivatedActions(self):
+    def test_hourly_notYetActivatedActions(self):
         self.assertActiveSharesEqual(
             'member', '2015-02-21', '2015-02-21',
             [
@@ -168,6 +168,26 @@ class MemberSharesCurve_Test(unittest.TestCase):
                 ('member', '2015-02-22', '2016-02-20', 5),
             ],
             +25*[3]
+            )
+
+    def test_hourly_unactivatedActions(self):
+        self.assertActiveSharesEqual(
+            'member', '2015-02-21', '2015-02-21',
+            [
+                ('member', False, False, 3),
+                ('member', '2015-02-21', '2016-02-20', 5),
+            ],
+            +25*[5]
+            )
+
+    def test_hourly_undeactivatedActions(self):
+        self.assertActiveSharesEqual(
+            'member', '2015-02-21', '2015-02-21',
+            [
+                ('member', '2015-02-21', False, 3),
+                ('member', '2015-02-21', '2016-02-20', 5),
+            ],
+            +25*[8]
             )
 
     def test_hourly_twoDays(self):
@@ -237,7 +257,10 @@ class MemberSharesCurve_Test(unittest.TestCase):
             +25*[11] # 24
             +25*381*[0] # 25 and so
             )
+
+
 class PlantSharesCurve_Test(unittest.TestCase):
+
     def test_atDay(self):
         curve = PlantSharesCurve(5000)
         self.assertEqual(5000, curve.atDay(isodate('2016-05-01')))
@@ -245,4 +268,5 @@ class PlantSharesCurve_Test(unittest.TestCase):
     def test_hourly(self):
         curve = PlantSharesCurve(5000)
         self.assertEqual(25*[5000], list(curve.hourly(isodate('2016-05-01'), isodate('2016-05-01'))))
+
 # vim: ts=4 sw=4 et

@@ -33,15 +33,20 @@ class MemberSharesCurve(object):
             if member is not None:
                 if investment.member != member:
                     continue
-            if investment.activationEnd < start: continue
+            if investment.activationEnd:
+                if investment.activationEnd < start: continue
+
+            if not investment.activationStart:
+                continue
             if investment.activationStart > end: continue
 
-            firstIndex = max(
-                25*(investment.activationStart-start).days,
+            firstIndex = hoursADay*max(
+                (investment.activationStart-start).days,
                 0)
-            lastIndex = min(
-                25*(investment.activationEnd-start).days+25,
-                nDays*hoursADay)
+            lastIndex = hoursADay*(min(
+                (investment.activationEnd-start).days+1,
+                nDays) if investment.activationEnd else 
+                nDays)
 
             result[firstIndex:lastIndex]+=investment.shares
         return result
