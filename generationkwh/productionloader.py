@@ -15,6 +15,7 @@ TODO:
 
 - Calcular la produccio aggregada en un interval (mockup)
 """
+from plantmeter.mongotimecurve import addDays
 
 import datetime
 def isodate(string):
@@ -44,7 +45,9 @@ class ProductionLoader(object):
         remainders = self.remainderProvider.get()
         return (self.startPoint(firstMeasurement, remainders), remainders)
         
-           
+    def appendRightsPerShare(self, nshares, lastComputedDate, lastRemainder, production, plantshares):
+        self.rightsPerShareProvider.updateRightsPerShare(
+            nshares, addDays(lastComputedDate,1), production)
 
     def doit(self):
         recomputeStop = self.productionAggregator.getLastMeasurementDate()
@@ -56,6 +59,6 @@ class ProductionLoader(object):
                 aggregatedProduction, plantShareCurve, n, remainder)
             self.remainderProvider.set(n, recomputeStop, newRemainder)
             self.rightsPerShareProvider.updateRightsPerShare(n, recomputeStart, userRights)
-        
+    
 
 # vim: ts=4 sw=4 et

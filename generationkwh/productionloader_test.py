@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from productionloader import ProductionLoader
+from .productionloader import ProductionLoader
 import unittest
 import datetime
+import pymongo
+from .rightspershare import RightsPerShare
+from plantmeter.mongotimecurve import toLocal
 
 def isodate(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d").date()
+
+def localisodate(string):
+    return toLocal(datetime.datetime.strptime(string, "%Y-%m-%d"))
 
 class ProductionAggregatorMockUp(object):
 
@@ -117,5 +123,31 @@ class ProductionLoaderTest(unittest.TestCase):
         l = ProductionLoader(productionAggregator=p, remainderProvider=r)
         recomputeStart, remainders = l.getRecomputeStart()
         self.assertEqual(('2001-01-01',[(1,'2002-01-01', 45),(2,'2001-01-01',45)]), (str(recomputeStart),remainders))
+
+    def setUp(self):
+        self.databasename = 'generationkwh_test'
+        
+        c = pymongo.Connection()
+        c.drop_database(self.databasename)
+        self.db = c[self.databasename]
+        
+    def tearDown(self):
+        c = pymongo.Connection()
+        c.drop_database('generationkwh_test')
+
+
+    def test_appendRightsPerShare(self):
+        rights = RightsPerShare(self.db)
+        l = ProductionLoader(rightsPerShareProvider=rights, remainderProvider=None)
+        l.appendRightsPerShare(
+            nshares=1,
+            lastComputedDate=localisodate('2015-08-15'),
+            lastRemainder=0,
+            production=+10*[0]+[1]+14*[0],
+            plantshares=25*[1],
+            )
+        result = rights.rightsPerShare(1, localisodate('2015-08-16'), localisodate('2015-08-16'))
+        self.assertEqual(list(result),
+            +10*[0]+[1]+14*[0])
 
 # vim: ts=4 sw=4 et
