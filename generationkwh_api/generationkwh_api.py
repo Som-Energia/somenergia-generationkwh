@@ -131,6 +131,11 @@ class GenerationkWhTestHelper(osv.osv):
         rightsPerShare = RightsPerShare(mdbpool.get_db())
         rightsPerShare.updateRightsPerShare(nshares, localisodate(startDate), data)
 
+    def clear_mongo_collections(self, cursor, uid, collections, context=None):
+        for collection in collections:
+            mdbpool.get_db().drop_collection(collection)
+
+
 
     def trace_rigths_compilation(self, cursor, uid,
             member, start, stop, fare, period,
