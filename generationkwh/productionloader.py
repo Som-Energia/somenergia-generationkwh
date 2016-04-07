@@ -51,8 +51,7 @@ class ProductionLoader(object):
         import numpy
         userRights, newRemainder = self.userRightsProvider.computeRights(
             production, plantshares, nshares, lastRemainder)
-        recomputeStop = addDays(lastComputedDate, len(production)//25)
-        self.remainderProvider.set(nshares, recomputeStop, newRemainder)
+        self.remainderProvider.set(nshares, lastProductionDate, newRemainder)
         self.rightsPerShareProvider.updateRightsPerShare(
             nshares, addDays(lastComputedDate,1), userRights)
 
