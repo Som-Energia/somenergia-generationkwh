@@ -48,9 +48,12 @@ class ProductionLoader(object):
         
     def appendRightsPerShare(self,
             nshares, lastComputedDate, lastRemainder, production, plantshares, lastProductionDate):
+        assert isinstance(lastProductionDate, datetime.date)
+        assert isinstance(lastComputedDate, datetime.date)
         import numpy
+        startIndex=-25*(lastProductionDate-lastComputedDate).days
         userRights, newRemainder = self.userRightsProvider.computeRights(
-            production, plantshares, nshares, lastRemainder)
+                production[startIndex:], plantshares[startIndex:], nshares, lastRemainder)
         self.remainderProvider.set(nshares, lastProductionDate, newRemainder)
         self.rightsPerShareProvider.updateRightsPerShare(
             nshares, addDays(lastComputedDate,1), userRights)
@@ -67,15 +70,10 @@ class ProductionLoader(object):
                 nshares=n,
                 lastComputedDate = date,
                 lastRemainder = remainder,
-                production = aggregatedProduction[:],
-                plantshares = plantShareCurve[:],
+                production = aggregatedProduction,
+                plantshares = plantShareCurve,
                 lastProductionDate = recomputeStop,
                 )
 
-            userRights, newRemainder = self.userRightsProvider.computeRights(
-                aggregatedProduction, plantShareCurve, n, remainder)
-            self.remainderProvider.set(n, recomputeStop, newRemainder)
-            self.rightsPerShareProvider.updateRightsPerShare(n, recomputeStart, userRights)
-    
 
 # vim: ts=4 sw=4 et

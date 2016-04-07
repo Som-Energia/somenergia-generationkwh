@@ -156,7 +156,7 @@ class ProductionLoaderTest(unittest.TestCase):
             (1, localisodate('2015-08-16'), 0),
             ])
 
-    def _test_appendRightsPerShare_withAdvancedRemainder(self):
+    def test_appendRightsPerShare_withAdvancedRemainder(self):
         import numpy
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([])
