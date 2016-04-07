@@ -15,7 +15,7 @@ TODO:
 
 - Calcular la produccio aggregada en un interval (mockup)
 """
-from plantmeter.mongotimecurve import addDays
+from plantmeter.mongotimecurve import addDays, assertLocalDateTime
 from .productiontorightspershare import ProductionToRightsPerShare
 
 import datetime
@@ -23,11 +23,11 @@ def isodate(string):
     return datetime.datetime.strptime(string, '%Y-%m-%d').date()
 
 class ProductionLoader(object):
-    def __init__(self, productionAggregator=None, plantShareCurver=None, rightsPerShareProvider=None, remainderProvider=None):
+    def __init__(self, productionAggregator=None, plantShareCurver=None, rightsPerShare=None, remainders=None):
         self.productionAggregator = productionAggregator
         self.plantShareCurver = plantShareCurver
-        self.rightsPerShareProvider = rightsPerShareProvider
-        self.remainderProvider = remainderProvider
+        self.rightsPerShare = rightsPerShare
+        self.remainders = remainders
 
     def startPoint(self, startDateOfProduction, remainders):
         if not remainders:
@@ -39,29 +39,39 @@ class ProductionLoader(object):
     
     def endPoint(self, intervalStart, curve):
         return intervalStart+datetime.timedelta(days=len(curve)//25)
- 
-    def getRecomputeStart(self):
+
+    def recomputationInterval(self, remainders):
+        """
+            Returns the first and last day of production required to
+            recompute rights given the remainders which have information
+            of the last computed rights date for each given number of shares.
+        """
         firstMeasurement = self.productionAggregator.getFirstMeasurementDate()
-        remainders = self.remainderProvider.get()
-        return (self.startPoint(firstMeasurement, remainders), remainders)
-        
+        return (
+            self.startPoint(firstMeasurement, remainders), 
+            self.productionAggregator.getLastMeasurementDate()
+            )
+
+
     def appendRightsPerShare(self,
-            nshares, lastComputedDate, lastRemainder, production, plantshares, lastProductionDate):
-        assert isinstance(lastProductionDate, datetime.date)
-        assert isinstance(lastComputedDate, datetime.date)
-        import numpy
-        startIndex=-25*(lastProductionDate-lastComputedDate).days
+            nshares, lastComputedDate, lastRemainder,
+            production, plantshares, lastProductionDate):
+
+        assertLocalDateTime("lastProductionDate", lastProductionDate)
+        assertLocalDateTime("lastComputedDate", lastComputedDate)
+
+        startIndex=-25*(lastProductionDate.date()-lastComputedDate.date()).days
         userRights, newRemainder = ProductionToRightsPerShare().computeRights(
                 production[startIndex:], plantshares[startIndex:], nshares, lastRemainder)
-        self.remainderProvider.set(nshares, lastProductionDate, newRemainder)
-        self.rightsPerShareProvider.updateRightsPerShare(
+        self.remainders.set(nshares, lastProductionDate, newRemainder)
+        self.rightsPerShare.updateRightsPerShare(
             nshares, addDays(lastComputedDate,1), userRights)
 
 
 
     def doit(self):
-        recomputeStop = self.productionAggregator.getLastMeasurementDate()
-        recomputeStart, remainders = self.getRecomputeStart()
+        remainders = self.remainders.get()
+        recomputeStart, recomputeStop = self.recomputationInterval(remainders)
         aggregatedProduction = self.productionAggregator.getWh(recomputeStart, recomputeStop)
         plantShareCurve = self.plantShareCurver.hourly(recomputeStart, recomputeStop)
         for n, date, remainder in remainders:
