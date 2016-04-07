@@ -15,17 +15,9 @@ TODO:
 - Calcular la produccio aggregada en un interval (mockup)
 - Protecting against weird cases
     + _appendRightsPerShare receives not a local datetime
-    - _appendRightsPerShare with crossed lastProductionDate and lastComputedDate
+    - _appendRightsPerShare with crossed lastProductionDate and firstDateToCompute
     - _appendRightsPerShare with not enough production for the required days
     - _appendRightsPerShare with not plantshares production for the required days
-- IMPORTANT: Review: set semantics for the date in remainders (either last computed or
-    next to be computed) and ensure all the code is consequent.
-    My bet (DGG) is that "next to be computed" is more convenient.
-    - Starting a new line for nshares by setting a 0 reminder at a given date
-    - Finding the start date to retrieve production on order to recompute
-    - Finding the production slice to consider on the recompute for a given nshare
-    - Setting the new reminder date
-    - lastComputedDate is not consistent semantics
 
 """
 
@@ -68,18 +60,25 @@ class ProductionLoader(object):
 
 
     def _appendRightsPerShare(self,
-            nshares, lastComputedDate, lastRemainder,
+            nshares, firstDateToCompute, lastRemainder,
             production, plantshares, lastProductionDate):
 
+        assertLocalDateTime("firstDateToCompute", firstDateToCompute)
         assertLocalDateTime("lastProductionDate", lastProductionDate)
-        assertLocalDateTime("lastComputedDate", lastComputedDate)
 
-        startIndex=-25*(lastProductionDate.date()-lastComputedDate.date()).days
+        nDays = (lastProductionDate.date()-firstDateToCompute.date()).days+1
+
+        assert 25*nDays<=len(production), (
+            "Not enough production data to compute such date interval")
+
+        startIndex=-25*nDays
+
         userRights, newRemainder = ProductionToRightsPerShare().computeRights(
                 production[startIndex:], plantshares[startIndex:], nshares, lastRemainder)
-        self.remainders.set(nshares, lastProductionDate, newRemainder)
+        self.remainders.set(
+                nshares, addDays(lastProductionDate,1), newRemainder)
         self.rightsPerShare.updateRightsPerShare(
-            nshares, addDays(lastComputedDate,1), userRights)
+                nshares, lastProductionDate, userRights)
 
 
 
@@ -91,7 +90,7 @@ class ProductionLoader(object):
         for n, date, remainder in remainders:
             self._appendRightsPerShare(
                 nshares=n,
-                lastComputedDate = date,
+                firstDateToCompute = date,
                 lastRemainder = remainder,
                 production = aggregatedProduction,
                 plantshares = plantShareCurve,

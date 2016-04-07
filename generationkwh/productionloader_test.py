@@ -171,13 +171,13 @@ class ProductionLoaderTest(unittest.TestCase):
         c.drop_database('generationkwh_test')
 
 
-    def test_appendRightsPerShare(self):
+    def test_appendRightsPerShare_singleDay(self):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([])
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
         l._appendRightsPerShare(
             nshares=1,
-            lastComputedDate=localisodate('2015-08-15'),
+            firstDateToCompute=localisodate('2015-08-16'),
             lastRemainder=0,
             production=numpy.array(+10*[0]+[1000]+14*[0]),
             plantshares=numpy.array(25*[1]),
@@ -189,7 +189,7 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(list(result),
             +10*[0]+[1]+14*[0])
         self.assertEqual(remainders.get(), [
-            (1, localisodate('2015-08-16'), 0),
+            (1, localisodate('2015-08-17'), 0),
             ])
 
     def test_appendRightsPerShare_withManyPlantShares_divides(self):
@@ -198,7 +198,7 @@ class ProductionLoaderTest(unittest.TestCase):
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
         l._appendRightsPerShare(
             nshares=1,
-            lastComputedDate=localisodate('2015-08-15'),
+            firstDateToCompute=localisodate('2015-08-16'),
             lastRemainder=0,
             production=numpy.array(+10*[0]+[20000]+14*[0]),
             plantshares=numpy.array(25*[4]), # here
@@ -210,7 +210,7 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(list(result),
             +10*[0]+[5]+14*[0])
         self.assertEqual(remainders.get(), [
-            (1, localisodate('2015-08-16'), 0),
+            (1, localisodate('2015-08-17'), 0),
             ])
 
     def test_appendRightsPerShare_withNShares_multiplies(self):
@@ -219,7 +219,7 @@ class ProductionLoaderTest(unittest.TestCase):
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
         l._appendRightsPerShare(
             nshares=2, # here
-            lastComputedDate=localisodate('2015-08-15'),
+            firstDateToCompute=localisodate('2015-08-16'),
             lastRemainder=0,
             production=numpy.array(+10*[0]+[1000]+14*[0]),
             plantshares=numpy.array(25*[1]),
@@ -231,7 +231,7 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(list(result),
             +10*[0]+[2]+14*[0])
         self.assertEqual(remainders.get(), [
-            (2, localisodate('2015-08-16'), 0),
+            (2, localisodate('2015-08-17'), 0),
             ])
 
     def test_appendRightsPerShare_withAdvancedRemainder(self):
@@ -240,7 +240,7 @@ class ProductionLoaderTest(unittest.TestCase):
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
         l._appendRightsPerShare(
             nshares=1,
-            lastComputedDate=localisodate('2015-08-15'),
+            firstDateToCompute=localisodate('2015-08-16'),
             lastRemainder=0,
             production=numpy.array(100*[0]+10*[0]+[1000]+14*[0]),
             plantshares=numpy.array(100*[0]+25*[1]),
@@ -252,15 +252,15 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(list(result),
             +10*[0]+[1]+14*[0])
         self.assertEqual(remainders.get(), [
-            (1, localisodate('2015-08-16'), 0),
+            (1, localisodate('2015-08-17'), 0),
             ])
 
-    def test_appendRightsPerShare_lastDateComputed_isProtected(self):
+    def test_appendRightsPerShare_firstDateToCompute_isProtected(self):
         l = ProductionLoader()
         with self.assertRaises(AssertionError) as ctx:
             l._appendRightsPerShare(
                 nshares=1,
-                lastComputedDate=localisodate('2015-08-15').date(),
+                firstDateToCompute=localisodate('2015-08-16').date(),
                 lastRemainder=0,
                 production=numpy.array(25*[1]),
                 plantshares=numpy.array(25*[1]),
@@ -268,14 +268,14 @@ class ProductionLoaderTest(unittest.TestCase):
                 )
         # also non CEST/CET, and naive, using assertLocalDateTime
         self.assertEqual(ctx.exception.args[0],
-            "lastComputedDate should be a datetime")
+            "firstDateToCompute should be a datetime")
 
     def test_appendRightsPerShare_lastProductionDate_isProtected(self):
         l = ProductionLoader()
         with self.assertRaises(AssertionError) as ctx:
             l._appendRightsPerShare(
                 nshares=1,
-                lastComputedDate=localisodate('2015-08-15'),
+                firstDateToCompute=localisodate('2015-08-16'),
                 lastRemainder=0,
                 production=numpy.array(25*[1]),
                 plantshares=numpy.array(25*[1]),
@@ -285,27 +285,21 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(ctx.exception.args[0],
             "lastProductionDate should be a datetime")
 
-    @unittest.skip("Not failing as it should!")
     def test_appendRightsPerShare_tooSmallArrays(self):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([])
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
-        l._appendRightsPerShare(
-            nshares=1,
-            lastComputedDate=localisodate('2015-08-16'),
-            lastRemainder=0,
-            production=numpy.array(25*[1]),
-            plantshares=numpy.array(25*[1]),
-            lastProductionDate=localisodate('2015-08-20'),
-            )
-        result = rights.rightsPerShare(1,
-            localisodate('2015-08-16'),
-            localisodate('2015-08-20'))
-        self.assertEqual(list(result),
-            +125*[0])
-        self.assertEqual(remainders.get(), [
-            (1, localisodate('2015-08-20'), 25),
-            ])
+        with self.assertRaises(AssertionError) as ctx:
+            l._appendRightsPerShare(
+                nshares=1,
+                firstDateToCompute=localisodate('2015-08-16'),
+                lastRemainder=0,
+                production=numpy.array(49*[1]),
+                plantshares=numpy.array(49*[1]),
+                lastProductionDate=localisodate('2015-08-17'),
+                )
+        self.assertEqual(ctx.exception.args[0],
+            "Not enough production data to compute such date interval")
 
 
 

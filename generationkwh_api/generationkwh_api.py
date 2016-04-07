@@ -220,7 +220,7 @@ class GenerationkWhRemainders(osv.osv):
         ),
         last_day_computed=fields.date(
             required=True,
-            help="Last day computed"
+            help="Day after the last day computed. The one to carry the remainder on."
         ),
         remainder_wh=fields.integer(
             required=True,
