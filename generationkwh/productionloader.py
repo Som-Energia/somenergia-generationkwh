@@ -16,6 +16,7 @@ TODO:
 - Calcular la produccio aggregada en un interval (mockup)
 """
 from plantmeter.mongotimecurve import addDays
+from .userightspershare import UserRightsPerShare
 
 import datetime
 def isodate(string):
@@ -26,7 +27,7 @@ class ProductionLoader(object):
         self.productionAggregator = productionAggregator
         self.plantShareCurver = plantShareCurver
         self.rightsPerShareProvider = rightsPerShareProvider
-        self.userRightsProvider = userRightsProvider
+        self.userRightsProvider = UserRightsPerShare()
         self.remainderProvider = remainderProvider
 
     def startPoint(self, startDateOfProduction, remainders):
@@ -45,9 +46,17 @@ class ProductionLoader(object):
         remainders = self.remainderProvider.get()
         return (self.startPoint(firstMeasurement, remainders), remainders)
         
-    def appendRightsPerShare(self, nshares, lastComputedDate, lastRemainder, production, plantshares):
+    def appendRightsPerShare(self,
+            nshares, lastComputedDate, lastRemainder, production, plantshares, lastProductionDate):
+        import numpy
+        userRights, newRemainder = self.userRightsProvider.computeRights(
+            production, plantshares, nshares, lastRemainder)
+        recomputeStop = addDays(lastComputedDate, len(production)//25)
+        self.remainderProvider.set(nshares, recomputeStop, newRemainder)
         self.rightsPerShareProvider.updateRightsPerShare(
-            nshares, addDays(lastComputedDate,1), production)
+            nshares, addDays(lastComputedDate,1), userRights)
+
+
 
     def doit(self):
         recomputeStop = self.productionAggregator.getLastMeasurementDate()
@@ -55,6 +64,15 @@ class ProductionLoader(object):
         aggregatedProduction = self.productionAggregator.getWh(recomputeStart, recomputeStop)
         plantShareCurve = self.plantShareCurver.hourly(recomputeStart, recomputeStop)
         for n, date, remainder in remainders:
+            self.appendRightsPerShare(
+                nshares=n,
+                lastComputedDate = date,
+                lastRemainder = remainder,
+                production = aggregatedProduction[:],
+                plantshares = plantShareCurve[:],
+                lastProductionDate = recomputeStop,
+                )
+
             userRights, newRemainder = self.userRightsProvider.computeRights(
                 aggregatedProduction, plantShareCurve, n, remainder)
             self.remainderProvider.set(n, recomputeStop, newRemainder)

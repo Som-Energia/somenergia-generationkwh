@@ -37,8 +37,8 @@ class RemainderProviderMockup(object):
         return self.remainders
     
     def set(self, nshares, date, rem):
-        self.remaniders=[(nshares, date, rem) if x[0]==nshares else x for x in self.remainders]
-        
+        self.remainders.append((nshares, date, rem))
+ 
 class PlantShareCurverMockup(object):
 
     def __init__(self, data):
@@ -137,17 +137,43 @@ class ProductionLoaderTest(unittest.TestCase):
 
 
     def test_appendRightsPerShare(self):
+        import numpy
         rights = RightsPerShare(self.db)
-        l = ProductionLoader(rightsPerShareProvider=rights, remainderProvider=None)
+        remainders = RemainderProviderMockup([])
+        l = ProductionLoader(rightsPerShareProvider=rights, remainderProvider=remainders)
         l.appendRightsPerShare(
             nshares=1,
             lastComputedDate=localisodate('2015-08-15'),
             lastRemainder=0,
-            production=+10*[0]+[1]+14*[0],
-            plantshares=25*[1],
+            production=numpy.array(+10*[0]+[1000]+14*[0]),
+            plantshares=numpy.array(25*[1]),
+            lastProductionDate=localisodate('2015-08-16'),
             )
         result = rights.rightsPerShare(1, localisodate('2015-08-16'), localisodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[1]+14*[0])
+        self.assertEqual(remainders.get(), [
+            (1, localisodate('2015-08-16'), 0),
+            ])
+
+    def _test_appendRightsPerShare_withAdvancedRemainder(self):
+        import numpy
+        rights = RightsPerShare(self.db)
+        remainders = RemainderProviderMockup([])
+        l = ProductionLoader(rightsPerShareProvider=rights, remainderProvider=remainders)
+        l.appendRightsPerShare(
+            nshares=1,
+            lastComputedDate=localisodate('2015-08-15'),
+            lastRemainder=0,
+            production=numpy.array(100*[0]+10*[0]+[1000]+14*[0]),
+            plantshares=numpy.array(100*[0]+25*[1]),
+            lastProductionDate=localisodate('2015-08-16'),
+            )
+        result = rights.rightsPerShare(1, localisodate('2015-08-16'), localisodate('2015-08-16'))
+        self.assertEqual(list(result),
+            +10*[0]+[1]+14*[0])
+        self.assertEqual(remainders.get(), [
+            (1, localisodate('2015-08-16'), 0),
+            ])
 
 # vim: ts=4 sw=4 et
