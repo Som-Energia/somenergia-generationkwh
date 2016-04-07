@@ -79,13 +79,13 @@ class Remainder_Test(unittest.TestCase):
     def test_uniq_creation(self):
         remainders=self.Remainders.create({
             'n_shares': 1,
-            'last_day_computed': '2016-02-25',
+            'target_day': '2016-02-25',
             'remainder_wh': 1
         })
         with self.assertRaises(Exception):
             self.Remainders.create({
                 'n_shares': 1,
-                'last_day_computed': '2016-02-25',
+                'target_day': '2016-02-25',
                 'remainder_wh': 2
              })
 
