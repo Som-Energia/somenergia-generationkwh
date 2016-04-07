@@ -4,6 +4,14 @@ from genkwh_investments_from_accounting import *
 
 import unittest
 
+dbconfig = None
+try:
+    import dbconfig
+    import erppeek
+except ImportError:
+    pass
+
+@unittest.skipIf(not dbconfig, "depends on ERP")
 class InvestmentManagement_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None

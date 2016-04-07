@@ -42,8 +42,6 @@ def runtest(accept=False, verbose=False):
     unittest.TestCase.__str__ = unittest.TestCase.id
     unittest.main()
 
-c = erppeek.Client(**dbconfig.erppeek)
-
 def main():
     # Calls the function homonymous to the subcommand
     # with the options as paramteres
