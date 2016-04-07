@@ -8,9 +8,6 @@ try:
 except ImportError:
     pass
 
-def isodate(date):
-    return datetime.datetime.strptime(date, '%Y-%m-%d').date()
-
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Remainder_Test(unittest.TestCase):
 
