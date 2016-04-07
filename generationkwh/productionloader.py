@@ -27,6 +27,7 @@ class ProductionLoader(object):
         self.rightsPerShareProvider = rightsPerShareProvider
         self.userRightsProvider = userRightsProvider
         self.remainderProvider = remainderProvider
+
     def startPoint(self, startDateOfProduction, remainders):
         if not remainders:
             return startDateOfProduction
@@ -34,19 +35,21 @@ class ProductionLoader(object):
             date
             for shares, date, remainderwh in remainders
             )
+    
     def endPoint(self, intervalStart, curve):
         return intervalStart+datetime.timedelta(days=len(curve)//25)
  
     def getRecomputeStart(self):
         firstMeasurement = self.productionAggregator.getFirstMeasurementDate()
         remainders = self.remainderProvider.get()
-        return self.startPoint(firstMeasurement, remainders)
+        return (self.startPoint(firstMeasurement, remainders), remainders)
         
            
 
     def doit(self):
         recomputeStop = self.productionAggregator.getLastMeasurementDate()
-        aggregatedProduction = self.productionAggregator.getWh(self.getRecomputeStart(), lastMeasurement)
+        recomputeStart, remainders = self.getRecomputeStart()
+        aggregatedProduction = self.productionAggregator.getWh(recomputeStart, recomputeStop)
         plantShareCurve = self.plantShareCurver.hourly(recomputeStart, recomputeStop)
         for n, date, remainder in remainders:
             userRights, newRemainder = self.userRightsProvider.computeRights(

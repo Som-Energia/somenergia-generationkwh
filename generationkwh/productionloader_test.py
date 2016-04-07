@@ -101,11 +101,21 @@ class ProductionLoaderTest(unittest.TestCase):
         p = ProductionAggregatorMockUp(startDate=isodate('2000-01-01'))
         r = RemainderProviderMockup()
         l = ProductionLoader(productionAggregator=p, remainderProvider=r)
-        self.assertEqual('2000-01-01', str(l.getRecomputeStart()))
+        recomputeStart, remainders = l.getRecomputeStart()
+        self.assertEqual(('2000-01-01',[]), (str(recomputeStart),remainders))
     
     def test_getRecomputeStart_withSingleRemainders(self):
         p = ProductionAggregatorMockUp(startDate=isodate('2000-01-01'))
         r = RemainderProviderMockup([(1,'2001-01-01', 45)])
         l = ProductionLoader(productionAggregator=p, remainderProvider=r)
-        self.assertEqual('2001-01-01', str(l.getRecomputeStart()))
+        recomputeStart, remainders = l.getRecomputeStart()
+        self.assertEqual(('2001-01-01',[(1,'2001-01-01', 45)]), (str(recomputeStart),remainders))
+
+    def test_getRecomputeStart_withManyRemainders(self):
+        p = ProductionAggregatorMockUp(startDate=isodate('2000-01-01'))
+        r = RemainderProviderMockup([(1,'2002-01-01', 45),(2,'2001-01-01',45)])
+        l = ProductionLoader(productionAggregator=p, remainderProvider=r)
+        recomputeStart, remainders = l.getRecomputeStart()
+        self.assertEqual(('2001-01-01',[(1,'2002-01-01', 45),(2,'2001-01-01',45)]), (str(recomputeStart),remainders))
+
 # vim: ts=4 sw=4 et
