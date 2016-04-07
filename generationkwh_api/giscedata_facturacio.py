@@ -19,17 +19,64 @@ class GiscedataFacturacioFactura(osv.osv):
         """Return gkwh rights to owner when gkwh invoice is droped"""
         line_obj = self.pool.get('giscedata.facturacio.factura.linia')
         gkwh_lineowner_obj = self.pool.get('generationkwh.invoice.line.owner')
+        gkwh_dealer_obj = self.pool.get('generationkwh.dealer')
 
-        fields_to_read = ['gkwh_linia_ids']
-        for inv_vals in self.read(cursor, uid, ids, fields_to_read, context):
-            if inv_vals['gkwh_linia_ids']:
-                glo_vals = gkwh_lineowner_obj.read(
-                    cursor, uid, inv_vals['gkwh_linia_ids'], ['factura_line_id']
-                )
-                line_ids = [l['factura_line_id'][0] for l in glo_vals]
+        invoice_fields = [
+            'type', 'polissa_id', 'tarifa_acces_id', 'linies_energia'
+        ]
+
+        line_fields = [
+            'data_desde', 'data_fins', 'product_id', 'quantity'
+        ]
+
+        has_gkwh_rights = False
+        for invoice_id in ids:
+            rights_dict = self.get_gkwh_shares_dict(
+                cursor, uid, invoice_id, context=context
+            )
+            gkwh_line_ids = self.get_gkwh_lines(
+                cursor, uid, invoice_id, context=context
+            )
+            if gkwh_line_ids:
+                has_gkwh_rights = True
                 line_obj.unlink(
-                    cursor, uid, line_ids, context=context
+                    cursor, uid, gkwh_line_ids, context=context
                 )
+            if has_gkwh_rights:
+                invoice_vals = self.read(
+                    cursor, uid, invoice_id, invoice_fields, context=context
+                )
+                if invoice_vals['type'] == 'out_refund':
+                    # Re-use rights through dealer when refund invoice
+                    # WARNING: The real use may not be the original one
+
+                    contract_id = invoice_vals['polissa_id'][0]
+                    fare_id = invoice_vals['tarifa_acces_id'][0]
+                    for line_id in invoice_vals['linies_energia']:
+                        line_vals = False
+                        line_vals = line_obj.read(
+                            cursor, uid, line_id, line_fields, context=context
+                        )
+                        line_product_id = line_vals['product_id'][0]
+                        from_date = line_vals['data_desde']
+                        to_date = line_vals['data_fins']
+                        quantity = line_vals['quantity']
+
+                        period_id = self.get_fare_period(
+                            cursor, uid, line_product_id, context=context
+                        )
+
+                        gkwh_dealer_obj.use_kwh(
+                            cursor,
+                            uid,
+                            contract_id,
+                            from_date,
+                            to_date,
+                            fare_id,
+                            period_id,
+                            quantity,
+                            context=context
+                        )
 
         return super(GiscedataFacturacioFactura, self).unlink(
             cursor, uid, ids, context
@@ -40,11 +87,14 @@ class GiscedataFacturacioFactura(osv.osv):
         gkwh_lineowner_obj = self.pool.get('generationkwh.invoice.line.owner')
         gkwh_dealer_obj = self.pool.get('generationkwh.dealer')
         fact_obj = self.pool.get('giscedata.facturacio.factura')
+        fact_line_obj = self.pool.get('giscedata.facturacio.factura.linia')
 
         fields_to_read = ['is_gkwh', 'gkwh_linia_ids', 'type', 'polissa_id',
                           'tarifa_acces_id']
+        refund_ids = []
         for inv_vals in self.read(cursor, uid, ids, fields_to_read, context):
             if inv_vals['is_gkwh']:
+                inv_id = inv_vals['id']
                 # refund gkwh rights
                 for glo_id in inv_vals['gkwh_linia_ids']:
                     gkwh_lineowner = gkwh_lineowner_obj.browse(
@@ -54,7 +104,7 @@ class GiscedataFacturacioFactura(osv.osv):
                     contract_id = inv_vals['polissa_id'][0]
                     fare_id = inv_vals['tarifa_acces_id'][0]
                     line = gkwh_lineowner.factura_line_id
-                    period_id = fact_obj.get_fare_period(
+                    period_id = self.get_fare_period(
                         cursor, uid, line.product_id.id, context=context
                     )
                     # returns rights through dealer
@@ -70,10 +120,85 @@ class GiscedataFacturacioFactura(osv.osv):
                         owner_id,
                         context=context
                     )
+            # refund invoice creation
+            refund_id = super(GiscedataFacturacioFactura, self).anullar(
+                cursor, uid, [inv_id], tipus, context=context
+            )[0]
+            refund_ids.append(refund_id)
+            # drops invoice lines
+            refund_invoice_lines = self.get_gkwh_lines(
+                cursor, uid, refund_id, context=context
+            )
+            ctx = context.copy()
+            ctx.update({'gkwh_manage_rights': False})
+            fact_line_obj.unlink(
+                cursor, uid, refund_invoice_lines, context=ctx
+            )
+            # drop incorrect owner lines
+            bad_owner_ids = gkwh_lineowner_obj.search(
+                    cursor, uid, [('factura_id', '=', refund_id)],
+                    context=context
+            )
+            gkwh_lineowner_obj.unlink(
+                cursor, uid, bad_owner_ids, context=context
+            )
 
-        return super(GiscedataFacturacioFactura, self).anullar(
-            cursor, uid, ids, tipus, context=context
-        )
+            # recreates lines with original invoice rights
+            original_invoice_lines_ids = self.get_gkwh_lines(
+                cursor, uid, inv_id, context=context
+            )
+
+            line_fields = [
+                'data_desde', 'data_fins', 'product_id', 'quantity',
+                'multi', 'tipus', 'name', 'price_unit_multi', 'tipus',
+                'uos_id', 'account_id', 'invoice_line_tax_id',
+                'uom_multi_id'
+            ]
+
+            for original_line_id in original_invoice_lines_ids:
+                line_vals = False
+                line_vals = fact_line_obj.read(
+                    cursor, uid, original_line_id, line_fields, context=context
+                )
+                if 'id' in line_vals:
+                    del line_vals['id']
+
+                invoice_line_tax_id = [
+                    (6, 0, line_vals['invoice_line_tax_id'])
+                ]
+                line_vals.update({
+                    'factura_id': refund_id,
+                    'account_id': line_vals['account_id'][0],
+                    'invoice_line_tax_id': invoice_line_tax_id,
+                    'product_id': line_vals['product_id'][0],
+                    'uos_id': line_vals['uos_id'][0],
+                })
+                refund_line_id = fact_line_obj.create(
+                    cursor, uid, line_vals, context
+                )
+
+                # creates new owner_line
+                original_owner_id = gkwh_lineowner_obj.search(
+                    cursor, uid,
+                    [('factura_line_id', '=', original_line_id),
+                     ('factura_id', '=', inv_id)],
+                    context=context
+                )[0]
+                original_owner_vals = gkwh_lineowner_obj.read(
+                    cursor, uid, original_owner_id, ['owner_id'],
+                    context=context
+                )
+
+                refund_owner_vals = {
+                    'owner_id': original_owner_vals['owner_id'][0],
+                    'factura_id': refund_id,
+                    'factura_line_id': refund_line_id,
+                }
+                gkwh_lineowner_obj.create(
+                    cursor, uid, refund_owner_vals, context=context
+                )
+
+        return refund_ids
 
     def get_gkwh_period(self, cursor, uid, product_id, context=None):
         """" Get's linked Generation kWh period
@@ -115,6 +240,46 @@ class GiscedataFacturacioFactura(osv.osv):
 
         return res
 
+    def get_gkwh_shares_dict(self, cursor, uid, ids, context=None):
+        """Returns a dict in the same format returned by dealer use function
+        with invoice gkwh rights"""
+        if context is None:
+            context = {}
+
+        if isinstance(ids, (tuple, list)):
+            ids = ids[0]
+
+        sql = (u"SELECT "
+               u"    il.product_id AS product_id, "
+               u"    lo.owner_id AS owner_id, "
+               u"    SUM(il.quantity) AS quantity "
+               u"FROM generationkwh_invoice_line_owner AS lo "
+               u"LEFT JOIN giscedata_facturacio_factura_linia AS fl "
+               u"    ON lo.factura_id = fl.id "
+               u"LEFT JOIN account_invoice_line il "
+               u"    ON il.id = fl.invoice_line_id "
+               u"WHERE lo.factura_id = %(invoice_id)s "
+               u"GROUP BY il.product_id, lo.owner_id"
+               )
+
+        cursor.execute(sql, {'invoice_id': ids})
+        vals = cursor.fetchall()
+
+        periods = [(v[0], {'member_id': v[1], 'kwh': v[2]}) for v in vals]
+
+        uniq_product_ids = set([p[0] for p in periods])
+        product_res = {}.fromkeys(uniq_product_ids, [])
+
+        for p in periods:
+            product_res[p[0]].append(p[1])
+
+        res = dict([
+            (self.get_fare_period(cursor, uid, k), v)
+            for k, v in product_res.items()
+        ])
+
+        return res
+
     def apply_gkwh(self, cursor, uid, ids, context=None):
         """Apply gkwh transform"""
         if context is None:
@@ -123,7 +288,6 @@ class GiscedataFacturacioFactura(osv.osv):
         if not isinstance(ids, (tuple, list)):
             ids = [ids]
 
-        inv_obj = self.pool.get('giscedata.facturacio.factura')
         invlines_obj = self.pool.get('giscedata.facturacio.factura.linia')
         pricelist_obj = self.pool.get('product.pricelist')
         partner_obj = self.pool.get('res.partner')
@@ -134,9 +298,8 @@ class GiscedataFacturacioFactura(osv.osv):
                       'tarifa_acces_id', 'linies_energia']
 
         line_fields = ['data_desde', 'data_fins', 'product_id', 'quantity',
-                       'multi', 'tipus', 'name', 'price_unit_multi', 'tipus',
-                       'uos_id', 'account_id', 'invoice_line_tax_id',
-                       'uom_multi_id'
+                       'multi', 'tipus', 'name', 'price_unit_multi', 'uos_id',
+                       'account_id', 'invoice_line_tax_id', 'uom_multi_id'
                        ]
 
         for inv_id in ids:
@@ -248,19 +411,15 @@ class GiscedataFacturacioFactura(osv.osv):
         if isinstance(ids, (list, tuple)):
             ids = ids[0]
 
-        gkwh_lineowner_obj = self.pool.get('generationkwh.invoice.line.owner')
+        line_obj = self.pool.get('giscedata.facturacio.factura.linia')
 
         res = []
-        fields_to_read = ['gkwh_linia_ids']
+        fields_to_read = ['linies_energia']
         inv_vals = self.read(cursor, uid, ids, fields_to_read, context)
-        if inv_vals['gkwh_linia_ids']:
-            glo_vals = gkwh_lineowner_obj.read(
-                cursor, uid, inv_vals['gkwh_linia_ids'], ['factura_line_id']
-            )
-            return [l['factura_line_id'][0]
-                    for l in glo_vals['factura_line_id']
-                    ]
-
+        if inv_vals['linies_energia']:
+            is_gkwh = line_obj.is_gkwh(cursor, uid, inv_vals['linies_energia'])
+            line_ids = [l for l, v in is_gkwh.items() if v]
+            return line_ids
         return res
 
     def _ff_is_gkwh(self, cursor, uid, ids, field_name, arg, context=None):
@@ -353,29 +512,57 @@ class GiscedataFacturacioFacturaLinia(osv.osv):
                 glo_ids = gkwh_lineowner_obj.search(
                     cursor, uid, [('factura_line_id', '=', line_id)]
                 )
-                glo_vals = gkwh_lineowner_obj.read(
-                    cursor, uid, glo_ids, ['owner_id']
-                )[0]
-                owner_id = glo_vals['owner_id'][0]
-                gkwh_lineowner_obj.unlink(cursor, uid, glo_ids)
+                if not context.get('gkwh_manage_rights', True):
+                    # do not refund/use rights
+                    if glo_ids:
+                        gkwh_lineowner_obj.unlink(cursor, uid, glo_ids)
+                    continue
+                if not glo_ids:
+                    owner_id = 1
+                else:
+                    glo_vals = gkwh_lineowner_obj.read(
+                        cursor, uid, glo_ids, ['owner_id']
+                    )[0]
+                    owner_id = glo_vals['owner_id'][0]
+                invoice_type = line.factura_id.type
                 contract_id = line.factura_id.polissa_id.id
                 fare_id = line.factura_id.tarifa_acces_id.id
                 period_id = fact_obj.get_fare_period(
                     cursor, uid, line.product_id.id, context=context
                 )
-                # returns rights through dealer
-                gkwh_dealer_obj.refund_kwh(
-                    cursor,
-                    uid,
-                    contract_id,
-                    line.data_desde,
-                    line.data_fins,
-                    fare_id,
-                    period_id,
-                    line.quantity,
-                    owner_id,
-                    context=context
-                )
+                if invoice_type == 'out_invoice':
+                    # refunds rights through dealer
+                    if glo_ids:
+                        gkwh_lineowner_obj.unlink(cursor, uid, glo_ids)
+                    gkwh_dealer_obj.refund_kwh(
+                        cursor,
+                        uid,
+                        contract_id,
+                        line.data_desde,
+                        line.data_fins,
+                        fare_id,
+                        period_id,
+                        line.quantity,
+                        owner_id,
+                        context=context
+                    )
+                elif invoice_type == 'out_refund':
+                    # The rights re-use has to be done in invoice scope
+                    # Re-use rights through dealer when refund invoice
+                    # WARNING: The real use may not be the original one
+                    if glo_ids:
+                        gkwh_lineowner_obj.unlink(cursor, uid, glo_ids)
+                    # gkwh_dealer_obj.use_kwh(
+                    #     cursor,
+                    #     uid,
+                    #     contract_id,
+                    #     line.data_desde,
+                    #     line.data_fins,
+                    #     fare_id,
+                    #     period_id,
+                    #     line.quantity,
+                    #     context=context
+                    # )
 
         return super(GiscedataFacturacioFacturaLinia, self).unlink(
             cursor, uid, ids, context
