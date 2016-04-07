@@ -21,11 +21,12 @@ def isodate(string):
     return datetime.datetime.strptime(string, '%Y-%m-%d').date()
 
 class ProductionLoader(object):
-    def __init__(self, productionAggregator=None, plantShareCurver=None, rightsPerShareProvider=None, userRightsProvider=None):
+    def __init__(self, productionAggregator=None, plantShareCurver=None, rightsPerShareProvider=None, userRightsProvider=None, remainderProvider=None):
         self.productionAggregator = productionAggregator
         self.plantShareCurver = plantShareCurver
         self.rightsPerShareProvider = rightsPerShareProvider
         self.userRightsProvider = userRightsProvider
+        self.remainderProvider = remainderProvider
     def startPoint(self, startDateOfProduction, remainders):
         if not remainders:
             return startDateOfProduction
@@ -44,10 +45,8 @@ class ProductionLoader(object):
            
 
     def doit(self):
-        lastMeasurement = self.productionAggregator.getLastMeasurementDate()
+        recomputeStop = self.productionAggregator.getLastMeasurementDate()
         aggregatedProduction = self.productionAggregator.getWh(self.getRecomputeStart(), lastMeasurement)
-        #recomputeStop = self.endPoint(recomputeStart, aggregatedProduction)
-        recomputeStop = lastMeasurement
         plantShareCurve = self.plantShareCurver.hourly(recomputeStart, recomputeStop)
         for n, date, remainder in remainders:
             userRights, newRemainder = self.userRightsProvider.computeRights(

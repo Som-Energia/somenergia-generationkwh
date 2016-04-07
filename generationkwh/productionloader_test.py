@@ -9,23 +9,27 @@ def isodate(string):
 
 class ProductionAggregatorMockUp(object):
 
-    def __init__(self, data, startDate, endDate):
+    def __init__(self, data=None, startDate=None, endDate=None):
         self.data = data
         self.start_date = startDate
         self.end_date = endDate
     def getWh(self, *args):
         return self.data
 
-    def getFirstMeasurement(self):
-        return self.startDate
+    def getFirstMeasurementDate(self):
+        return self.start_date
 
     def getLastMeasurementDate(self):
-        return self.endDate
+        return self.end_date
 
 class RemainderProviderMockup(object):
     
+    def __init__(self,remainders=[]):
+        self.remainders = remainders
+
     def get(self):
         return self.remainders
+    
     def set(self, nshares, date, rem):
         self.remaniders=[(nshares, date, rem) if x[0]==nshares else x for x in self.remainders]
         
@@ -71,7 +75,7 @@ class ProductionLoaderTest(unittest.TestCase):
             (1, '2001-01-01', 45),
             ], '2001-01-01')
 
-    def test_startPoint_withSingleRemainder(self):
+    def test_startPoint_withManyRemainders(self):
         self.assertStartPointEqual('2000-01-01',[
             (1, '2002-01-01', 45),
             (2, '2001-01-01', 45),
@@ -93,12 +97,15 @@ class ProductionLoaderTest(unittest.TestCase):
         date = l.endPoint(isodate('2000-01-01'), 27*[0])
         self.assertEqual('2000-01-02', str(date))
     
-    def test_doit(self):
-        pass
-
-
-
-
-
-
+    def test_getRecomputeStart_withNoremainders(self):
+        p = ProductionAggregatorMockUp(startDate=isodate('2000-01-01'))
+        r = RemainderProviderMockup()
+        l = ProductionLoader(productionAggregator=p, remainderProvider=r)
+        self.assertEqual('2000-01-01', str(l.getRecomputeStart()))
+    
+    def test_getRecomputeStart_withSingleRemainders(self):
+        p = ProductionAggregatorMockUp(startDate=isodate('2000-01-01'))
+        r = RemainderProviderMockup([(1,'2001-01-01', 45)])
+        l = ProductionLoader(productionAggregator=p, remainderProvider=r)
+        self.assertEqual('2001-01-01', str(l.getRecomputeStart()))
 # vim: ts=4 sw=4 et
