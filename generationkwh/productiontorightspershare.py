@@ -6,7 +6,7 @@
 
 import numpy
 
-class UserRightsPerShare(object):
+class ProductionToRightsPerShare(object):
     """
         Provides the hourly curve of kWh available for a member
         with a given number of shares.
@@ -35,7 +35,7 @@ import datetime
 def isodate(date):
     return datetime.datetime.strptime(date, '%Y-%m-%d').date()
 
-class UserRightsPerShare_Test(unittest.TestCase):
+class ProductionToRightsPerShare_Test(unittest.TestCase):
 
     def assertComputeEquals(self,
         production,
@@ -46,7 +46,7 @@ class UserRightsPerShare_Test(unittest.TestCase):
         remainder = 0,
         ):
 
-        curve = UserRightsPerShare()
+        curve = ProductionToRightsPerShare()
         result, resultingRemainder = curve.computeRights(
             production=numpy.array(production),
             activeShares = numpy.array(activeShares),
@@ -124,7 +124,7 @@ class UserRightsPerShare_Test(unittest.TestCase):
             )
 
     def test_get_floatProductionFailsAssertion(self):
-        curve = UserRightsPerShare()
+        curve = ProductionToRightsPerShare()
         with self.assertRaises(AssertionError) as failure:
             curve.computeRights(
                 production = numpy.array([3.2]),
@@ -136,7 +136,7 @@ class UserRightsPerShare_Test(unittest.TestCase):
             "Production base type is not integer")
 
     def test_get_floatSharesFailsAssertion(self):
-        curve = UserRightsPerShare()
+        curve = ProductionToRightsPerShare()
         with self.assertRaises(AssertionError) as failure:
             curve.computeRights(
                 production = numpy.array([3]),

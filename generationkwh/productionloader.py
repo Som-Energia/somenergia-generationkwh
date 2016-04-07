@@ -16,18 +16,17 @@ TODO:
 - Calcular la produccio aggregada en un interval (mockup)
 """
 from plantmeter.mongotimecurve import addDays
-from .userightspershare import UserRightsPerShare
+from .productiontorightspershare import ProductionToRightsPerShare
 
 import datetime
 def isodate(string):
     return datetime.datetime.strptime(string, '%Y-%m-%d').date()
 
 class ProductionLoader(object):
-    def __init__(self, productionAggregator=None, plantShareCurver=None, rightsPerShareProvider=None, userRightsProvider=None, remainderProvider=None):
+    def __init__(self, productionAggregator=None, plantShareCurver=None, rightsPerShareProvider=None, remainderProvider=None):
         self.productionAggregator = productionAggregator
         self.plantShareCurver = plantShareCurver
         self.rightsPerShareProvider = rightsPerShareProvider
-        self.userRightsProvider = UserRightsPerShare()
         self.remainderProvider = remainderProvider
 
     def startPoint(self, startDateOfProduction, remainders):
@@ -52,7 +51,7 @@ class ProductionLoader(object):
         assert isinstance(lastComputedDate, datetime.date)
         import numpy
         startIndex=-25*(lastProductionDate-lastComputedDate).days
-        userRights, newRemainder = self.userRightsProvider.computeRights(
+        userRights, newRemainder = ProductionToRightsPerShare().computeRights(
                 production[startIndex:], plantshares[startIndex:], nshares, lastRemainder)
         self.remainderProvider.set(nshares, lastProductionDate, newRemainder)
         self.rightsPerShareProvider.updateRightsPerShare(
