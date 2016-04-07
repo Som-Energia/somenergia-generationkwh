@@ -43,6 +43,15 @@ def parseLocalTime(string, isSummer=False):
     lesser = tz.normalize(localized-onehour)
     return lesser if lesser.dst() else localized
 
+def assertLocalDateTime(name, value):
+    assert isinstance(value, datetime.datetime), (
+        "{} should be a datetime".format(name))
+    assert value.tzinfo, (
+        "{} should have timezone".format(name))
+    assert value.tzname() in ('CET','CEST'), (
+        "{} has {} timezone".format(name, value.tzname()))
+
+
 """
 - Spain daylight:
     - UTC offset

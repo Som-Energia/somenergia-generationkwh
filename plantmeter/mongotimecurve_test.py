@@ -6,6 +6,9 @@ from .mongotimecurve import (
     curveIndexToDate,
     parseLocalTime,
     tz,
+    assertLocalDateTime,
+    asUtc,
+    toLocal,
     )
 import pymongo
 import datetime
@@ -62,6 +65,29 @@ class LocalTime_Test(unittest.TestCase):
         self.assertEqual(
             str(localTime("2016-03-27 02:00:00")),
             "2016-03-27 02:00:00+01:00")
+
+    def test_assertLocalDateTime_withDate(self):
+        with self.assertRaises(AssertionError) as ctx:
+            assertLocalDateTime('myname', datetime.date(2016,01,01))
+        self.assertEqual(ctx.exception.args[0],
+            "myname should be a datetime")
+
+    def test_assertLocalDateTime_withNaive(self):
+        with self.assertRaises(AssertionError) as ctx:
+            assertLocalDateTime('myname', datetime.datetime(2016,01,01))
+        self.assertEqual(ctx.exception.args[0],
+            "myname should have timezone")
+
+    def test_assertLocalDateTime_withUTC(self):
+        with self.assertRaises(AssertionError) as ctx:
+            assertLocalDateTime('myname', asUtc(datetime.datetime(2016,01,01)))
+        self.assertEqual(ctx.exception.args[0],
+            "myname has UTC timezone")
+
+    def test_assertLocalDateTime_withLocal(self):
+        assertLocalDateTime('myname', toLocal(datetime.datetime(2016,01,01)))
+        # No assert
+
 
 class CurveDatetimeMapper_Test(unittest.TestCase):
 
