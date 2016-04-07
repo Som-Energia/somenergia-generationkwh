@@ -15,7 +15,7 @@ TODO:
 - Calcular la produccio aggregada en un interval (mockup)
 - Protecting against weird cases
     + _appendRightsPerShare receives not a local datetime
-    - _appendRightsPerShare with crossed lastProductionDate and firstDateToCompute
+    - _appendRightsPerShare with crossed lastDateToCompute and firstDateToCompute
     + _appendRightsPerShare with not enough production for the required days
     + _appendRightsPerShare with not enough plantshares for the required days
 
@@ -61,13 +61,16 @@ class ProductionLoader(object):
 
     def _appendRightsPerShare(self,
             nshares, firstDateToCompute, lastRemainder,
-            production, plantshares, lastProductionDate):
+            production, plantshares, lastDateToCompute):
 
         assertLocalDateTime("firstDateToCompute", firstDateToCompute)
-        assertLocalDateTime("lastProductionDate", lastProductionDate)
+        assertLocalDateTime("lastDateToCompute", lastDateToCompute)
 
-        nDays = (lastProductionDate.date()-firstDateToCompute.date()).days+1
+        nDays = (lastDateToCompute.date()-firstDateToCompute.date()).days+1
+        print nDays
 
+        assert nDays > 0, (
+            "Empty interval")
         assert 25*nDays<=len(production), (
             "Not enough production data to compute such date interval")
         assert 25*nDays<=len(plantshares), (
@@ -78,9 +81,9 @@ class ProductionLoader(object):
         userRights, newRemainder = ProductionToRightsPerShare().computeRights(
                 production[startIndex:], plantshares[startIndex:], nshares, lastRemainder)
         self.remainders.set(
-                nshares, addDays(lastProductionDate,1), newRemainder)
+                nshares, addDays(lastDateToCompute,1), newRemainder)
         self.rightsPerShare.updateRightsPerShare(
-                nshares, lastProductionDate, userRights)
+                nshares, lastDateToCompute, userRights)
 
 
 
@@ -96,7 +99,7 @@ class ProductionLoader(object):
                 lastRemainder = remainder,
                 production = aggregatedProduction,
                 plantshares = plantShareCurve,
-                lastProductionDate = recomputeStop,
+                lastDateToCompute = recomputeStop,
                 )
 
     def retrieveMeasuresFromPlants(self):
