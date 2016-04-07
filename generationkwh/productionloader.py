@@ -69,8 +69,7 @@ class ProductionLoader(object):
         nDays = (lastDateToCompute.date()-firstDateToCompute.date()).days+1
         print nDays
 
-        assert nDays > 0, (
-            "Empty interval")
+        assert nDays > 0, "Empty interval"
         assert 25*nDays<=len(production), (
             "Not enough production data to compute such date interval")
         assert 25*nDays<=len(plantshares), (
