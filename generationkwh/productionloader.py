@@ -12,9 +12,23 @@ TODO:
 - Calcular els rights per share
 - Actualitzar els remainders
 - Actualitzar els use rights per share
-
 - Calcular la produccio aggregada en un interval (mockup)
+- Protecting against weird cases
+    + _appendRightsPerShare receives not a local datetime
+    - _appendRightsPerShare with crossed lastProductionDate and lastComputedDate
+    - _appendRightsPerShare with not enough production for the required days
+    - _appendRightsPerShare with not plantshares production for the required days
+- IMPORTANT: Review: set semantics for the date in remainders (either last computed or
+    next to be computed) and ensure all the code is consequent.
+    My bet (DGG) is that "next to be computed" is more convenient.
+    - Starting a new line for nshares by setting a 0 reminder at a given date
+    - Finding the start date to retrieve production on order to recompute
+    - Finding the production slice to consider on the recompute for a given nshare
+    - Setting the new reminder date
+    - lastComputedDate is not consistent semantics
+
 """
+
 from plantmeter.mongotimecurve import addDays, assertLocalDateTime
 from .productiontorightspershare import ProductionToRightsPerShare
 
@@ -40,7 +54,7 @@ class ProductionLoader(object):
     def endPoint(self, intervalStart, curve):
         return intervalStart+datetime.timedelta(days=len(curve)//25)
 
-    def recomputationInterval(self, remainders):
+    def _recomputationInterval(self, remainders):
         """
             Returns the first and last day of production required to
             recompute rights given the remainders which have information
@@ -53,7 +67,7 @@ class ProductionLoader(object):
             )
 
 
-    def appendRightsPerShare(self,
+    def _appendRightsPerShare(self,
             nshares, lastComputedDate, lastRemainder,
             production, plantshares, lastProductionDate):
 
@@ -69,13 +83,13 @@ class ProductionLoader(object):
 
 
 
-    def doit(self):
+    def computeAvailableRights(self):
         remainders = self.remainders.get()
-        recomputeStart, recomputeStop = self.recomputationInterval(remainders)
+        recomputeStart, recomputeStop = self._recomputationInterval(remainders)
         aggregatedProduction = self.productionAggregator.getWh(recomputeStart, recomputeStop)
         plantShareCurve = self.plantShareCurver.hourly(recomputeStart, recomputeStop)
         for n, date, remainder in remainders:
-            self.appendRightsPerShare(
+            self._appendRightsPerShare(
                 nshares=n,
                 lastComputedDate = date,
                 lastRemainder = remainder,
@@ -83,6 +97,12 @@ class ProductionLoader(object):
                 plantshares = plantShareCurve,
                 lastProductionDate = recomputeStop,
                 )
+
+    def retrieveMeasuresFromPlants(self):
+        "TODO"
+
+
+
 
 
 # vim: ts=4 sw=4 et
