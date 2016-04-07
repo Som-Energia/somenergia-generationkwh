@@ -16,8 +16,8 @@ TODO:
 - Protecting against weird cases
     + _appendRightsPerShare receives not a local datetime
     - _appendRightsPerShare with crossed lastProductionDate and firstDateToCompute
-    - _appendRightsPerShare with not enough production for the required days
-    - _appendRightsPerShare with not plantshares production for the required days
+    + _appendRightsPerShare with not enough production for the required days
+    + _appendRightsPerShare with not enough plantshares for the required days
 
 """
 
@@ -70,6 +70,8 @@ class ProductionLoader(object):
 
         assert 25*nDays<=len(production), (
             "Not enough production data to compute such date interval")
+        assert 25*nDays<=len(plantshares), (
+            "Not enough plant share data to compute such date interval")
 
         startIndex=-25*nDays
 

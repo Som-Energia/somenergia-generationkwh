@@ -285,7 +285,7 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(ctx.exception.args[0],
             "lastProductionDate should be a datetime")
 
-    def test_appendRightsPerShare_tooSmallArrays(self):
+    def test_appendRightsPerShare_tooSmallProductionArray(self):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([])
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
@@ -295,11 +295,43 @@ class ProductionLoaderTest(unittest.TestCase):
                 firstDateToCompute=localisodate('2015-08-16'),
                 lastRemainder=0,
                 production=numpy.array(49*[1]),
-                plantshares=numpy.array(49*[1]),
+                plantshares=numpy.array(50*[1]),
                 lastProductionDate=localisodate('2015-08-17'),
                 )
         self.assertEqual(ctx.exception.args[0],
             "Not enough production data to compute such date interval")
+
+    def test_appendRightsPerShare_tooSmallShareArray(self):
+        rights = RightsPerShare(self.db)
+        remainders = RemainderProviderMockup([])
+        l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
+        with self.assertRaises(AssertionError) as ctx:
+            l._appendRightsPerShare(
+                nshares=1,
+                firstDateToCompute=localisodate('2015-08-16'),
+                lastRemainder=0,
+                production=numpy.array(50*[1]),
+                plantshares=numpy.array(49*[1]),
+                lastProductionDate=localisodate('2015-08-17'),
+                )
+        self.assertEqual(ctx.exception.args[0],
+            "Not enough plant share data to compute such date interval")
+
+    def test_appendRightsPerShare_crossedDates(self):
+        rights = RightsPerShare(self.db)
+        remainders = RemainderProviderMockup([])
+        l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
+        with self.assertRaises(AssertionError) as ctx:
+            l._appendRightsPerShare(
+                nshares=1,
+                firstDateToCompute=localisodate('2015-08-16'),
+                lastRemainder=0,
+                production=numpy.array(50*[1]),
+                plantshares=numpy.array(50*[1]),
+                lastProductionDate=localisodate('2015-08-15'),
+                )
+        self.assertEqual(ctx.exception.args[0],
+            "Not enough plant share data to compute such date interval")
 
 
 
