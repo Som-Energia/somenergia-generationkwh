@@ -8,7 +8,6 @@ from .rightspershare import RightsPerShare
 from plantmeter.mongotimecurve import toLocal, asUtc
 import numpy
 
-
 def isodate(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d").date()
 
@@ -34,21 +33,22 @@ class ProductionAggregatorMockUp(object):
 class RemainderProviderMockup(object):
     
     def __init__(self,remainders=[]):
-        self.remainders = remainders
+        self.remainders = dict((remainder[0], remainder) for remainder in remainders)
 
     def get(self):
-        return self.remainders
+        return [self.remainders[nshares] for nshares in self.remainders]
     
-    def set(self, nshares, date, rem):
-        self.remainders.append((nshares, date, rem))
+    def set(self, nshares, date, remainder):
+        #self.remainders.setdefault(nshares,(nshares, date, remainder))
+        self.remainders[nshares] = (nshares, date, remainder)
  
 class PlantShareCurverMockup(object):
 
     def __init__(self, data):
         self.data = data
 
-    def hourly(start, end):
-        return data
+    def hourly(self, start, end):
+        return self.data
 
 class userRightsProviderMockup(object):
     def __init__(self, userRights, newRemainder):
@@ -333,6 +333,105 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(ctx.exception.args[0],
             "Empty interval")
 
+    def test_computeAvailableRights_singleDay(self):
+        rights = RightsPerShare(self.db)
+        remainders = RemainderProviderMockup([
+            (1, localisodate('2015-08-16'), 0),
+            ])
+        production = ProductionAggregatorMockUp(
+                first=localisodate('2015-08-16'),
+                last=localisodate('2015-08-16'),
+                data=numpy.array(+10*[0]+[1000]+14*[0]))
+        plantShare = PlantShareCurverMockup(
+                data=numpy.array(25*[1]))
+        l = ProductionLoader(productionAggregator=production,
+                plantShareCurver=plantShare,
+                rightsPerShare=rights,
+                remainders=remainders)
+        l.computeAvailableRights()
+        result = rights.rightsPerShare(1,
+            localisodate('2015-08-16'),
+            localisodate('2015-08-16'))
+        self.assertEqual(list(result),
+            +10*[0]+[1]+14*[0])
+        self.assertEqual(remainders.get(), [
+            (1, localisodate('2015-08-17'), 0),
+            ])
 
+    def test_computeAvailableRights_withManyPlantShares_divides(self):
+        rights = RightsPerShare(self.db)
+        remainders = RemainderProviderMockup([
+            (1, localisodate('2015-08-16'), 0),
+            ])
+        production = ProductionAggregatorMockUp(
+                first=localisodate('2015-08-16'),
+                last=localisodate('2015-08-16'),
+                data=numpy.array(+10*[0]+[20000]+14*[0]))
+        plantShare = PlantShareCurverMockup(
+                data=numpy.array(25*[4]))
+        l = ProductionLoader(productionAggregator=production,
+                plantShareCurver=plantShare,
+                rightsPerShare=rights,
+                remainders=remainders)
+        l.computeAvailableRights()
+        result = rights.rightsPerShare(1,
+            localisodate('2015-08-16'),
+            localisodate('2015-08-16'))
+        self.assertEqual(list(result),
+            +10*[0]+[5]+14*[0])
+        self.assertEqual(remainders.get(), [
+            (1, localisodate('2015-08-17'), 0),
+            ])
 
+    def test_computeAvailableRights_withNShares_multiplies(self):
+        rights = RightsPerShare(self.db)
+        remainders = RemainderProviderMockup([
+            (1, localisodate('2015-08-16'), 0),
+            (2, localisodate('2015-08-16'), 0),
+            ])
+        production = ProductionAggregatorMockUp(
+                first=localisodate('2015-08-16'),
+                last=localisodate('2015-08-16'),
+                data=numpy.array(+10*[0]+[1000]+14*[0]))
+        plantShare = PlantShareCurverMockup(
+                data=numpy.array(25*[1]))
+        l = ProductionLoader(productionAggregator=production,
+                plantShareCurver=plantShare,
+                rightsPerShare=rights,
+                remainders=remainders)
+        l.computeAvailableRights()
+        result = rights.rightsPerShare(2,
+            localisodate('2015-08-16'),
+            localisodate('2015-08-16'))
+        self.assertEqual(list(result),
+            +10*[0]+[2]+14*[0])
+        self.assertEqual(remainders.get(), [
+            (1, localisodate('2015-08-17'), 0),
+            (2, localisodate('2015-08-17'), 0),
+            ])
+
+    def test_computeAvailableRights_withAdvancedRemainder(self):
+        rights = RightsPerShare(self.db)
+        remainders = RemainderProviderMockup([
+            (1, localisodate('2015-08-16'), 0),
+            ])
+        production = ProductionAggregatorMockUp(
+                first=localisodate('2015-08-16'),
+                last=localisodate('2015-08-16'),
+                data=numpy.array(100*[0]+10*[0]+[1000]+14*[0]))
+        plantShare = PlantShareCurverMockup(
+                data=numpy.array(100*[0]+25*[1]))
+        l = ProductionLoader(productionAggregator=production,
+                plantShareCurver=plantShare,
+                rightsPerShare=rights,
+                remainders=remainders)
+        l.computeAvailableRights()
+        result = rights.rightsPerShare(1,
+            localisodate('2015-08-16'),
+            localisodate('2015-08-16'))
+        self.assertEqual(list(result),
+            +10*[0]+[1]+14*[0])
+        self.assertEqual(remainders.get(), [
+            (1, localisodate('2015-08-17'), 0),
+            ])
 # vim: ts=4 sw=4 et

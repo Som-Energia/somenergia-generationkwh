@@ -67,7 +67,6 @@ class ProductionLoader(object):
         assertLocalDateTime("lastDateToCompute", lastDateToCompute)
 
         nDays = (lastDateToCompute.date()-firstDateToCompute.date()).days+1
-        print nDays
 
         assert nDays > 0, "Empty interval"
         assert 25*nDays<=len(production), (
