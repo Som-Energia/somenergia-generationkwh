@@ -1,7 +1,7 @@
 ﻿   SELECT
 		    pol.name,
                     cups.conany_kwh as consumo,
-                    case when pol.pagador=soci.id then 1 when pol.titular=soci.id then 2 end as PRIORIDAD
+                    case when pol.pagador=soci.id then 2 when pol.titular=soci.id then 1 end as PRIORIDAD
                 FROM res_partner AS soci
 
                 inner JOIN
@@ -15,9 +15,9 @@
 			cups.id = pol.cups AND
 			cups.active
                 WHERE
-                    soci.id=31712 AND
+                    soci.id=4364 AND
                     pol.state = 'activa' and
                     tRUE
                 ORDER BY
-		    PRIORIDAD,
-		    CONSUMO
+		    PRIORIDAD DESC,
+		    CONSUMO DESC;

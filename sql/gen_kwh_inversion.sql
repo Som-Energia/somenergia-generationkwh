@@ -36,44 +36,35 @@
                     soci.ref AS nsoci,
                     soci.vat AS nif,
                     soci.lang AS lang,
-                    COALESCE(SUM(cups_pag.conany_kwh),0)+COALESCE(SUM(cups_tit.conany_kwh),0) AS consumannual,
-                    COALESCE(MAX(cups_pag.conany_kwh),MAX(cups_tit.conany_kwh)) as consumprioritario,
-                    COUNT(CUPS_TIT.ID)+COUNT(CUPS_PAG.ID) AS ncontractes,
-                    COUNT(pol_tit.id) AS polizas_titular,
-                    COUNT(pol_pag.id) AS polizas_pagador,
+                    SUM(cups.conany_kwh) AS consumannual,
+                    COALESCE(	MAX(CASE when POL.PAGADOR=soci.id THEN cups.conany_kwh ELSE NULL END), 
+				MAX(CASE when POL.PAGADOR!=soci.id AND POL.TITULAR=soci.id THEN cups.conany_kwh ELSE NULL END)
+			    ) as consumprioritario,
+                    COUNT(CUPS.ID) AS ncontractes,
+                    SUM(CASE WHEN POL.PAGADOR!=soci.id and pol.titular=soci.id then 1 else 0 end) AS polizas_titular,
                     ARRAY_AGG(cat.category_id) as categories,
+                    SUM(CASE WHEN POL.PAGADOR=soci.id then 1 ELSE 0 end) AS polizas_pagador,
                     FALSE
                 FROM res_partner AS soci
                 LEFT JOIN
-                    giscedata_polissa AS pol_tit ON 
-                        pol_tit.titular = soci.id AND
-                        pol_tit.pagador != soci.id AND 
-                        pol_tit.active AND 
-                        pol_tit.state = 'activa'
-
-                LEFT JOIN
-		    giscedata_polissa AS pol_pag ON 
-			pol_pag.pagador = soci.id AND 
-			pol_pag.active AND 
-			pol_pag.state = 'activa'
-                LEFT JOIN 
-                    giscedata_cups_ps AS cups_tit ON 
-			cups_tit.id = pol_tit.cups AND
-			cups_tit.active 
+                    giscedata_polissa AS pol ON 
+                        pol.titular = soci.id OR
+                        pol.pagador = soci.id AND 
+                        pol.active AND 
+                        pol.state = 'activa'
 		LEFT JOIN
-		    giscedata_cups_ps AS cups_pag ON
-			cups_pag.id = pol_pag.cups AND
-			cups_pag.active
+		    giscedata_cups_ps AS cups ON
+			cups.id = pol.cups
                 LEFT JOIN
                     res_partner_category_rel AS cat ON
                     cat.partner_id = soci.id
                 WHERE
-                    soci.active AND (
-                    (pol_tit.state = 'activa' AND cups_tit.active ) OR
-                    (pol_pag.state = 'activa' AND cups_pag.active )) AND
+                    soci.active AND 
+                    pol.state = 'activa' AND 
+                    cups.active and
                     TRUE
-                GROUP BY
-                    soci.id
+                GROUP BY 
+		    SOCI.ID
                 ORDER BY
                     soci.id ASC
             ) AS sub
@@ -111,6 +102,6 @@
             GROUP BY partner_id
             ) AS investments ON already_invested = soci_id 
         WHERE
-            soci_id=31712
+            true
         ORDER BY
             name ASC
