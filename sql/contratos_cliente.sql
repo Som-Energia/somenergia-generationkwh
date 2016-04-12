@@ -8,8 +8,6 @@
 		    giscedata_polissa AS pol ON 
 			pol.pagador = soci.id 
 			or pol.titular = soci.id AND 
-			pol.active AND 
-			pol.state = 'activa'
                 inner JOIN 
                     giscedata_cups_ps AS cups ON 
 			cups.id = pol.cups AND
@@ -17,6 +15,7 @@
                 WHERE
                     soci.id=4364 AND
                     pol.state = 'activa' and
+                    pol.active
                     tRUE
                 ORDER BY
 		    PRIORIDAD DESC,
