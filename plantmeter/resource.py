@@ -25,10 +25,10 @@ class Resource(object):
         self.enabled = enabled
 
 
-class VirtualPlant(Resource):
+class ProductionAggregator(Resource):
     def __init__(self, *args, **kwargs):
         self.plants = kwargs.pop('plants') if 'plants' in kwargs else []
-        super(VirtualPlant, self).__init__(*args, **kwargs)
+        super(ProductionAggregator, self).__init__(*args, **kwargs)
 
     def getWh(self, start, end):
         return np.sum([
@@ -51,10 +51,10 @@ class VirtualPlant(Resource):
             if plant.enabled
             ])
 
-class Plant(Resource):
+class ProductionPlant(Resource):
     def __init__(self, *args, **kwargs):
         self.meters = kwargs.pop('meters') if 'meters' in kwargs else []
-        super(Plant, self).__init__(*args, **kwargs)
+        super(ProductionPlant, self).__init__(*args, **kwargs)
 
     def getWh(self, start, end):
         return np.sum([
@@ -77,11 +77,11 @@ class Plant(Resource):
             if meter.enabled
             ])
 
-class Meter(Resource):
+class ProductionMeter(Resource):
     def __init__(self, *args, **kwargs):
         self.uri = kwargs.pop('uri') if 'uri' in kwargs else None 
         self.curveProvider = kwargs.pop('curveProvider') if 'curveProvider' in kwargs else None
-        super(Meter, self).__init__(*args, **kwargs)
+        super(ProductionMeter, self).__init__(*args, **kwargs)
 
     def getWh(self, start, end):
         return self.curveProvider.get(start, end, self.name, 'ae')

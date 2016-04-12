@@ -28,20 +28,20 @@ class Resource_Test(unittest.TestCase):
     def test_getEmpty(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         curveProvider = self.curveProvider 
-        m = Meter(
+        m = ProductionMeter(
                 'meterName',
                 'meterDescription',
                 True,
                 uri=uri,
                 curveProvider = self.curveProvider)
 
-        p = Plant('plantName','plantDescription',True)
+        p = ProductionPlant('plantName','plantDescription',True)
         p.meters.append(m)
-        vp = VirtualPlant('vplantName','vplantDescription',True)
-        vp.plants.append(p)
+        aggr = ProductionAggregator('aggrName','eggrDescription',True)
+        aggr.plants.append(p)
 
         self.assertEqual(
-            list(vp.getWh(
+            list(aggr.getWh(
                 localDate(2015,9,4),
                 localDate(2015,9,5))),
                 2*25*[0] 
@@ -50,57 +50,57 @@ class Resource_Test(unittest.TestCase):
     def test_update_onePlantOneMeter(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         curveProvider = self.curveProvider 
-        m = Meter(
+        m = ProductionMeter(
                 'meterName',
                 'meterDescription',
                 True,
                 uri=uri,
                 curveProvider = self.curveProvider)
 
-        p = Plant('plantName','plantDescription',True)
+        p = ProductionPlant('plantName','plantDescription',True)
         p.meters.append(m)
-        vp = VirtualPlant('vplantName','vplantDescription',True)
-        vp.plants.append(p)
+        aggr = ProductionAggregator('aggrName','aggrDescription',True)
+        aggr.plants.append(p)
         m.updateWh(
             localDate(2015,9,4),
             localDate(2015,9,5))
 
         self.assertEqual(
-            list(vp.getWh(
+            list(aggr.getWh(
                 localDate(2015,9,4),
                 localDate(2015,9,5))),
             [
-                0,0,0,0,0,0,0,0,3,6,5,4,8,17,34,12,12,5,3,1,0,0,0,0,0,
+                Aggregator0,0,0,0,0,0,0,0,3,6,5,4,8,17,34,12,12,5,3,1,0,0,0,0,0,
                 0,0,0,0,0,0,0,0,4,7,6,5,9,18,35,13,13,6,4,2,0,0,0,0,0,
             ])
 
     def test_update_onePlantTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         curveProvider = self.curveProvider 
-        m1 = Meter(
+        m1 = ProductionMeter(
                 'meterName1',
                 'meterDescription1',
                 True,
                 uri=uri,
                 curveProvider = self.curveProvider)
 
-        m2 = Meter(
+        m2 = ProductionMeter(
                 'meterName2',
                 'meterDescription2',
                 True,
                 uri=uri,
                 curveProvider = self.curveProvider)
 
-        p = Plant('plantName','plantDescription',True)
+        p = ProductionPlant('plantName','plantDescription',True)
         p.meters.append(m1)
         p.meters.append(m2)
-        vp = VirtualPlant('vplantName','vplantDescription',True)
-        vp.plants.append(p)
+        aggr = ProductionAggregator('aggrName','aggrDescription',True)
+        aggr.plants.append(p)
         m1.updateWh(localDate(2015,9,4),localDate(2015,9,5))
         m2.updateWh(localDate(2015,9,4),localDate(2015,9,5))
 
         self.assertEqual(
-            list(vp.getWh(
+            list(aggr.getWh(
                 localDate(2015,9,4),
                 localDate(2015,9,5))),
             [
@@ -111,23 +111,23 @@ class Resource_Test(unittest.TestCase):
     def test_update_twoPlantsOneMeter(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         curveProvider = self.curveProvider 
-        m1 = Meter(
+        m1 = ProductionMeter(
                 'meterName1',
                 'meterDescription1',
                 True,
                 uri=uri,
                 curveProvider = self.curveProvider)
-        p1 = Plant('plantName1','plantDescription1',True)
+        p1 = ProductionPlant('plantName1','plantDescription1',True)
         p1.meters.append(m1)
-        p2 = Plant('plantName2','plantDescription2',True)
+        p2 = ProductionPlant('plantName2','plantDescription2',True)
 
-        vp = VirtualPlant('vplantName','vplantDescription',True)
-        vp.plants.append(p1)
-        vp.plants.append(p2)
+        aggr = ProductionAggregator('aggrName','aggrDescription',True)
+        aggr.plants.append(p1)
+        aggr.plants.append(p2)
         m1.updateWh(localDate(2015,9,4),localDate(2015,9,5))
 
         self.assertEqual(
-            list(vp.getWh(
+            list(aggr.getWh(
                 localDate(2015,9,4),
                 localDate(2015,9,5))),
             [
@@ -138,32 +138,32 @@ class Resource_Test(unittest.TestCase):
     def test_update_twoPlantsTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         curveProvider = self.curveProvider 
-        m1 = Meter(
+        m1 = ProductionMeter(
                 'meterName1',
                 'meterDescription1',
                 True,
                 uri=uri,
                 curveProvider = self.curveProvider)
-        p1 = Plant('plantName1','plantDescription1',True)
+        p1 = ProductionPlant('plantName1','plantDescription1',True)
         p1.meters.append(m1)
 
-        m2 = Meter(
+        m2 = ProductionMeter(
                 'meterName2',
                 'meterDescription2',
                 True,
                 uri=uri,
                 curveProvider = self.curveProvider)
-        p2 = Plant('plantName2','plantDescription2',True)
+        p2 = ProductionPlant('plantName2','plantDescription2',True)
         p2.meters.append(m2)
 
-        vp = VirtualPlant('vplantName','vplantDescription',True)
-        vp.plants.append(p1)
-        vp.plants.append(p2)
+        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr.plants.append(p1)
+        aggr.plants.append(p2)
         m1.updateWh(localDate(2015,9,4),localDate(2015,9,5))
         m2.updateWh(localDate(2015,9,4),localDate(2015,9,5))
 
         self.assertEqual(
-            list(vp.getWh(
+            list(aggr.getWh(
                 localDate(2015,9,4),
                 localDate(2015,9,5))),
             [
@@ -174,173 +174,173 @@ class Resource_Test(unittest.TestCase):
 
     def test_lastDate_empty(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m = Meter(
+        m = ProductionMeter(
             'meterName',
             'meterDescription',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
-        p = Plant('plantName','plantDescription',True)
+        p = ProductionPlant('plantName','plantDescription',True)
         p.meters.append(m)
-        vp = VirtualPlant('vplantName','vplantDescription',True)
-        vp.plants.append(p)
+        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr.plants.append(p)
 
-        self.assertEqual(vp.lastMeasurementDate(), None)
+        self.assertEqual(aggr.lastMeasurementDate(), None)
     
     def test_firstDate_empty(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m = Meter(
+        m = ProductionMeter(
             'meterName',
             'meterDescription',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
-        p = Plant('plantName','plantDescription',True)
+        p = ProductionPlant('plantName','plantDescription',True)
         p.meters.append(m)
-        vp = VirtualPlant('vplantName','vplantDescription',True)
-        vp.plants.append(p)
+        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr.plants.append(p)
 
-        self.assertEqual(vp.firstMeasurementDate(), None)
+        self.assertEqual(aggr.firstMeasurementDate(), None)
 
     def test_lastDate_onePlantOneMeter(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m = Meter(
+        m = ProductionMeter(
             'meterName',
             'meterDescription',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
-        p = Plant('plantName','plantDescription',True)
+        p = ProductionPlant('plantName','plantDescription',True)
         p.meters.append(m)
-        vp = VirtualPlant('vplantName','vplantDescription',True)
-        vp.plants.append(p)
+        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr.plants.append(p)
         m.updateWh(localDate(2015,9,4), localDate(2015,9,5))
 
-        self.assertEqual(vp.lastMeasurementDate(), localDate(2015,9,5))
+        self.assertEqual(aggr.lastMeasurementDate(), localDate(2015,9,5))
 
     def test_firstDate_onePlantOneMeter(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m = Meter(
+        m = ProductionMeter(
             'meterName',
             'meterDescription',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
-        p = Plant('plantName','plantDescription',True)
+        p = ProductionPlant('plantName','plantDescription',True)
         p.meters.append(m)
-        vp = VirtualPlant('vplantName','vplantDescription',True)
-        vp.plants.append(p)
+        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr.plants.append(p)
         m.updateWh(localDate(2015,9,3), localDate(2015,9,5))
 
-        self.assertEqual(vp.firstMeasurementDate(), localDate(2015,9,3))
+        self.assertEqual(aggr.firstMeasurementDate(), localDate(2015,9,3))
 
     def test_lastDate_onePlantTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m1 = Meter(
+        m1 = ProductionMeter(
             'meterName1',
             'meterDescription1',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
         uri = 'csv:/' + local_file('data/manlleu_20150804.csv')
-        m2 = Meter(
+        m2 = ProductionMeter(
             'meterName2',
             'meterDescription2',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
 
-        p = Plant('plantName','plantDescription',True)
+        p = ProductionPlant('plantName','plantDescription',True)
         p.meters.append(m1)
         p.meters.append(m2)
-        vp = VirtualPlant('vplantName','vplantDescription',True)
-        vp.plants.append(p)
+        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr.plants.append(p)
         m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
         m2.updateWh(localDate(2015,8,4), localDate(2015,8,5))
 
-        self.assertEqual(vp.lastMeasurementDate(), localDate(2015,8,5))
+        self.assertEqual(aggr.lastMeasurementDate(), localDate(2015,8,5))
 
     def test_firstDate_onePlantTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m1 = Meter(
+        m1 = ProductionMeter(
             'meterName1',
             'meterDescription1',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
         uri = 'csv:/' + local_file('data/manlleu_20150804.csv')
-        m2 = Meter(
+        m2 = ProductionMeter(
             'meterName2',
             'meterDescription2',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
 
-        p = Plant('plantName','plantDescription',True)
+        p = ProductionPlant('plantName','plantDescription',True)
         p.meters.append(m1)
         p.meters.append(m2)
-        vp = VirtualPlant('vplantName','vplantDescription',True)
-        vp.plants.append(p)
+        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr.plants.append(p)
         m1.updateWh(localDate(2015,9,3), localDate(2015,9,5))
         m2.updateWh(localDate(2015,8,3), localDate(2015,8,5))
 
-        self.assertEqual(vp.firstMeasurementDate(), localDate(2015,8,3))
+        self.assertEqual(aggr.firstMeasurementDate(), localDate(2015,8,3))
 
     def test_lastDate_twoPlantsTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m1 = Meter(
+        m1 = ProductionMeter(
             'meterName1',
             'meterDescription1',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
         uri = 'csv:/' + local_file('data/manlleu_20150804.csv')
-        m2 = Meter(
+        m2 = ProductionMeter(
             'meterName2',
             'meterDescription2',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
 
-        p1 = Plant('plantName1','plantDescription1',True)
-        p2 = Plant('plantName2','plantDescription2',True)
+        p1 = ProductionPlant('plantName1','plantDescription1',True)
+        p2 = ProductionPlant('plantName2','plantDescription2',True)
         p1.meters.append(m1)
         p2.meters.append(m2)
-        vp = VirtualPlant('vplantName','vplantDescription',True)
-        vp.plants.append(p1)
-        vp.plants.append(p2)
+        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr.plants.append(p1)
+        aggr.plants.append(p2)
         m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
         m2.updateWh(localDate(2015,8,4), localDate(2015,8,5))
 
-        self.assertEqual(vp.lastMeasurementDate(), localDate(2015,8,5))
+        self.assertEqual(aggr.lastMeasurementDate(), localDate(2015,8,5))
 
     def test_firstDate_twoPlantsTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m1 = Meter(
+        m1 = ProductionMeter(
             'meterName1',
             'meterDescription1',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
         uri = 'csv:/' + local_file('data/manlleu_20150804.csv')
-        m2 = Meter(
+        m2 = ProductionMeter(
             'meterName2',
             'meterDescription2',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
 
-        p1 = Plant('plantName1','plantDescription1',True)
-        p2 = Plant('plantName2','plantDescription2',True)
+        p1 = ProductionPlant('plantName1','plantDescription1',True)
+        p2 = ProductionPlant('plantName2','plantDescription2',True)
         p1.meters.append(m1)
         p2.meters.append(m2)
-        vp = VirtualPlant('vplantName','vplantDescription',True)
-        vp.plants.append(p1)
-        vp.plants.append(p2)
+        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr.plants.append(p1)
+        aggr.plants.append(p2)
         m1.updateWh(localDate(2015,9,3), localDate(2015,9,5))
         m2.updateWh(localDate(2015,8,3), localDate(2015,8,5))
 
-        self.assertEqual(vp.firstMeasurementDate(), localDate(2015,8,3))
+        self.assertEqual(aggr.firstMeasurementDate(), localDate(2015,8,3))
 
 class Meter_Test(unittest.TestCase):
     def setUp(self):
@@ -357,7 +357,7 @@ class Meter_Test(unittest.TestCase):
         self.connection.drop_database('generationkwh_test')
 
     def test_get_whenEmpty(self):
-        m = Meter(
+        m = ProductionMeter(
             'meterName',
             'meterDescription',
             True,
@@ -372,7 +372,7 @@ class Meter_Test(unittest.TestCase):
             )
 
     def test_get_afterUpdate(self):
-        m = Meter(
+        m = ProductionMeter(
             'meterName',
             'meterDescription',
             True,
@@ -390,7 +390,7 @@ class Meter_Test(unittest.TestCase):
             ])
 
     def test_lastDate_empty(self):
-        m = Meter(
+        m = ProductionMeter(
             'meterName',
             'meterDescription',
             True,
@@ -399,7 +399,7 @@ class Meter_Test(unittest.TestCase):
         self.assertEqual(m.lastMeasurementDate(), None)
 
     def test_lastDate_filled(self):
-        m = Meter(
+        m = ProductionMeter(
             'meterName',
             'meterDescription',
             True,
@@ -410,7 +410,7 @@ class Meter_Test(unittest.TestCase):
         self.assertEqual(m.lastMeasurementDate(), localDate(2015,9,5))
 
     def test_firstDate_empty(self):
-        m = Meter(
+        m = ProductionMeter(
             'meterName',
             'meterDescription',
             True,
@@ -419,7 +419,7 @@ class Meter_Test(unittest.TestCase):
         self.assertEqual(m.firstMeasurementDate(), None)
 
     def test_firstDate_filled(self):
-        m = Meter(
+        m = ProductionMeter(
             'meterName',
             'meterDescription',
             True,

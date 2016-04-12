@@ -10,86 +10,85 @@ from tools.translate import _
 from tools import config
 
 from datetime import datetime
-from plantmeter.resource import VirtualPlant, Plant, Meter 
+from plantmeter.resource import ProductionAggregator, ProductionPlant, ProductionMeter 
 
 
-class GenerationVirtualPlant(osv.osv):
-    '''Implements generation virtual plant'''
+class GenerationkwhProductionAggregator(osv.osv):
+    '''Implements generationkwh production aggregation '''
 
-    _name = 'generation.virtual.plant'
+    _name = 'generationkwh.production.aggregator'
 
     def getWh(self, cursor, uid, pid, start, end, context=None):
-        '''Get generation from virtual plant'''
+        '''Get production aggregation'''
    
         if not context:
             context = {}
         if isinstance(pid, list) or isinstance(pid, tuple):
             pid = pid[0]
-        vplant = self.browse(cursor, uid, pid, context)
 
         def obj_to_dict(obj, attrs):
             return {attr: getattr(obj, attr) for attr in attrs}
 
         args = ['name', 'description', 'enabled']
-        vplant = self.browse(cursor, uid, pid, context)
+        aggr = self.browse(cursor, uid, pid, context)
 
-        _vplant = VirtualPlant(**obj_to_dict(vplant, args).update(
-            {'plants': [Plant(**obj_to_dict(plant, args).update(
-                {'meters': [Meter(**obj_to_dict(meter, args + ['uri']))
+        _aggr = ProductionAggregator(**obj_to_dict(aggr, args).update(
+            {'plants': [ProductionPlant(**obj_to_dict(plant, args).update(
+                {'meters': [ProductionMeter(**obj_to_dict(meter, args + ['uri']))
                 for meter in plant.meters if meter.enabled]}))
-            for plant in vplant.plants if plant.enabled]}))
+            for plant in aggr.plants if plant.enabled]}))
         
-        return _vplant.getWh(start, end)
+        return _aggr.getWh(start, end)
 
     _columns = {
         'name': fields.char('Name', size=50),
         'description': fields.char('Description', size=150),
         'enabled': fields.boolean('Enabled'),
-        'plants': fields.one2many('generation.plant', 'vplant_id', 'Plants')
+        'plants': fields.one2many('generationkwh.plant', 'aggr_id', 'Plants')
     }
 
     _defaults = {
         'enabled': lambda *a: False
     }
-GenerationVirtualPlant()
+GenerationkwhProductionAggregator()
 
 
-class GenerationPlant(osv.osv):
+class GenerationkwhProductionPlant(osv.osv):
 
-    _name = 'generation.plant'
+    _name = 'generationkwh.production.plant'
     _columns = {
         'name': fields.char('Name', size=50),
         'description': fields.char('Description', size=150),
         'enabled': fields.boolean('Enabled'),
-        'vplant_id': fields.many2one('generation.virtual.plant', 'Virtual Plant',
+        'aggr_id': fields.many2one('generationkwh.production.plant', 'Production aggregator',
                                   required=True),
-        'meters': fields.one2many('generation.meter', 'plant_id', 'Meters')
+        'meters': fields.one2many('generationkwh.production.meter', 'plant_id', 'Meters')
     }
     _defaults = {
         'enabled': lambda *a: False,
     }
-GenerationPlant()
+GenerationkwhProductionPlant()
 
 
-class GenerationMeter(osv.osv):
+class GenerationkwhProductionMeter(osv.osv):
 
-    _name = 'generation.meter'
+    _name = 'generationkwh.production.meter'
     _columns = {
         'name': fields.char('Name', size=50),
         'description': fields.char('Description', size=150),
         'enabled': fields.boolean('Enabled'),
-        'plant_id': fields.many2one('generation.plant'),
+        'plant_id': fields.many2one('generatiokwh.production.plant'),
         'uri': fields.char('Host', size=150, required=True),
         }
     _defaults = {
         'enabled': lambda *a: False,
     }
-GenerationMeter()
+GenerationkwhProdctionMeter()
 
 
-class GenerationMeasurement(osv_mongodb.osv_mongodb):
+class GenerationkwhProductionMeasurement(osv_mongodb.osv_mongodb):
 
-    _name = 'generation.measurement'
+    _name = 'generationkwh.production.measurement'
     _order = 'timestamp desc'
 
     def search(self, cursor, uid, args, offset=0, limit=0, order=None,
@@ -109,7 +108,7 @@ class GenerationMeasurement(osv_mongodb.osv_mongodb):
             if field == 'name' and operator != '=':
                 operator = '='
             new_args.append((field, operator, value))
-        return super(GenerationMeasurement,
+        return super(GenerationkwhProductionMeasurement,
                      self).search(cursor, uid, new_args,
                                   offset=offset, limit=limit,
                                   order=order, context=context,
@@ -122,4 +121,6 @@ class GenerationMeasurement(osv_mongodb.osv_mongodb):
         'daylight': fields.char('Exported datetime daylight',size=1),
         'ae': fields.float('Exported energy (kWh)')
     }
-GenerationMeasurement()
+GenerationkwhProductionMeasurement()
+
+# vim: ts=4 sw=4 et
