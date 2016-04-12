@@ -21,6 +21,7 @@ setup(
 		'b2btest',
 		'numpy',
 		'plantmeter',
+        'python-dateutil',
 #		'libfacturacioatr',
 	],
 	include_package_data = True,
