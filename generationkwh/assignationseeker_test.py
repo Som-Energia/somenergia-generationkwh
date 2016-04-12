@@ -9,6 +9,13 @@ from yamlns import namespace as ns
 def localisodate(string):
     return toLocal(datetime.datetime.strptime(string, "%Y-%m-%d"))
 
+class AssignationsMockup(object):
+    def __init__(self, assignations):
+        self._assignations = assignations
+
+    def seek(self, contract_id):
+        return self._assignations
+
 
 class UsageTrackerMockup(object):
 
@@ -25,13 +32,6 @@ class UsageTrackerMockup(object):
             )
         return self._results.pop(0)
 
-
-class AssignationsMockup(object):
-    def __init__(self, assignations):
-        self._assignations = assignations
-
-    def seek(self, contract_id):
-        return self._assignations
 
 
 class AssignationSeeker_Test(unittest.TestCase):
@@ -138,8 +138,8 @@ class AssignationSeeker_Test(unittest.TestCase):
         self.assertEqual(result, 20)
         
         
-    def _test_assign_singleAssignation_prioritariesDoInterfere(self):
-        t = UsageTrackerMockup([20])
+    def test_assign_singleAssignation_prioritariesDoInterfere(self):
+        t = UsageTrackerMockup([10])
         a = AssignationsMockup([
             ns(
                 member_id='member1',
@@ -165,7 +165,32 @@ class AssignationSeeker_Test(unittest.TestCase):
                 '2.0A', 'P1', 100),
             ])
         
-        self.assertEqual(result, 20)
+        self.assertEqual(result, 10)
+        
+    def test_assign_singleAssignation_prioritariesHaveOldInvoicing(self):
+        t = UsageTrackerMockup([20])
+        a = AssignationsMockup([
+            ns(
+                member_id='member1',
+                position=2,
+                last_usable_date=localisodate('2013-10-01'),
+            ),
+            ])
+
+        s = AssignationSeeker(usagetracker=t, assinationProvider=a)
+        result = s.use_kwh(
+            contract_id = 1,
+            start_date = localisodate('2015-08-01'),
+            end_date = localisodate('2015-09-01'),
+            fare = '2.0A',
+            period = 'P1',
+            kwh = 100,
+            )
+
+        self.assertEqual(t.calls(),[
+            ])
+        
+        self.assertEqual(result, 0)
         
         
 
