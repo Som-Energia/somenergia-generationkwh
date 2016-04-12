@@ -1,4 +1,4 @@
-﻿select sub.name as soci, max(pol.name) as assigned_polissa from (
+﻿SELECT sub.name as soci, max(pol.name) as assigned_polissa from (
                SELECT
                     soci.id AS soci_id,
                     soci.name AS name,
