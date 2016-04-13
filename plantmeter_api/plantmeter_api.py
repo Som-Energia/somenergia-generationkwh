@@ -3,20 +3,17 @@
 import os
 from osv import osv, fields
 from mongodb_backend import osv_mongodb
-import netsvc
-import pooler
-import time
-from tools.translate import _
-from tools import config
+from mongodb_backend.mongodb2 import mdbpool
 
 from datetime import datetime
 from plantmeter.resource import ProductionAggregator, ProductionPlant, ProductionMeter 
-
+from plantmeter.mongotimecurve import MongoTimeCurve
 
 class GenerationkwhProductionAggregator(osv.osv):
     '''Implements generationkwh production aggregation '''
 
     _name = 'generationkwh.production.aggregator'
+
 
     def getWh(self, cursor, uid, pid, start, end, context=None):
         '''Get production aggregation'''
@@ -26,25 +23,69 @@ class GenerationkwhProductionAggregator(osv.osv):
         if isinstance(pid, list) or isinstance(pid, tuple):
             pid = pid[0]
 
-        def obj_to_dict(obj, attrs):
-            return {attr: getattr(obj, attr) for attr in attrs}
+        aggr = self.browse(cursor, uid, pid, context)
+        _aggr = self._createAggregator(aggr, ['name', 'description', 'enabled'])
+        return _aggr.getWh(start,end)
+
+    def updateWh(self, cursor, uid, pid, start, end, context=None):
+        '''Update Wh measurements'''
+
+        if not context:
+            context = {}
+        if isinstance(pid, list) or isinstance(pid, tuple):
+            pid = pid[0]
 
         args = ['name', 'description', 'enabled']
         aggr = self.browse(cursor, uid, pid, context)
+        _aggr = self._createAggregator(aggr, args)
+        return _aggr.updateWh(start, end)
 
-        _aggr = ProductionAggregator(**obj_to_dict(aggr, args).update(
-            {'plants': [ProductionPlant(**obj_to_dict(plant, args).update(
-                {'meters': [ProductionMeter(**obj_to_dict(meter, args + ['uri']))
-                for meter in plant.meters if meter.enabled]}))
-            for plant in aggr.plants if plant.enabled]}))
-        
-        return _aggr.getWh(start, end)
+    def firstMeasurementDate(self, cursor, uid, pid, context=None):
+        '''Get first measurement date'''
+
+        if not context:
+            context = {}
+        if isinstance(pid, list) or isinstance(pid, tuple):
+            pid = pid[0]
+
+        args = ['name', 'description', 'enabled']
+        aggr = self.browse(cursor, uid, pid, context)
+        _aggr = self._createAggregator(aggr, args)
+        return _aggr.firstMeasurementDate()
+
+    def lastMeasurementDate(self, cursor, uid, pid, context=None):
+        '''Get last measurement date'''
+
+        if not context:
+            context = {}
+        if isinstance(pid, list) or isinstance(pid, tuple):
+            pid = pid[0]
+
+        args = ['name', 'description', 'enabled']
+        aggr = self.browse(cursor, uid, pid, context)
+        _aggr = self._createAggregator(aggr, args)
+        return _aggr.lastMeasurementDate()
+
+    def _createAggregator(self, aggr, args):
+        def obj_to_dict(obj, attrs):
+            return {attr: getattr(obj, attr) for attr in attrs}
+
+        curveProvider = MongoTimeCurve(mdbpool.get_db(),
+                'generationkwh.production.measurement')
+
+        # TODO: Clean initialization method
+        return ProductionAggregator(**dict(obj_to_dict(aggr, args).items() + 
+            dict(plants=[ProductionPlant(**dict(obj_to_dict(plant, args).items() +
+                dict(meters=[ProductionMeter(**dict(obj_to_dict(meter, args + ['uri']).items() +
+                    dict(curveProvider=curveProvider).items()))
+                for meter in plant.meters if meter.enabled]).items()))
+            for plant in aggr.plants if plant.enabled]).items()))
 
     _columns = {
         'name': fields.char('Name', size=50),
         'description': fields.char('Description', size=150),
         'enabled': fields.boolean('Enabled'),
-        'plants': fields.one2many('generationkwh.plant', 'aggr_id', 'Plants')
+        'plants': fields.one2many('generationkwh.production.plant', 'aggr_id', 'Plants')
     }
 
     _defaults = {
@@ -60,7 +101,7 @@ class GenerationkwhProductionPlant(osv.osv):
         'name': fields.char('Name', size=50),
         'description': fields.char('Description', size=150),
         'enabled': fields.boolean('Enabled'),
-        'aggr_id': fields.many2one('generationkwh.production.plant', 'Production aggregator',
+        'aggr_id': fields.many2one('generationkwh.production.aggregator', 'Production aggregator',
                                   required=True),
         'meters': fields.one2many('generationkwh.production.meter', 'plant_id', 'Meters')
     }
@@ -77,13 +118,13 @@ class GenerationkwhProductionMeter(osv.osv):
         'name': fields.char('Name', size=50),
         'description': fields.char('Description', size=150),
         'enabled': fields.boolean('Enabled'),
-        'plant_id': fields.many2one('generatiokwh.production.plant'),
+        'plant_id': fields.many2one('generationkwh.production.plant'),
         'uri': fields.char('Host', size=150, required=True),
         }
     _defaults = {
         'enabled': lambda *a: False,
     }
-GenerationkwhProdctionMeter()
+GenerationkwhProductionMeter()
 
 
 class GenerationkwhProductionMeasurement(osv_mongodb.osv_mongodb):

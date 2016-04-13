@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 {
-  "name": "Generation db",
-  "description": """Support for SomEnergia's generation in GisceERP""",
-  "version": "0.0.2",
+  "name": "Generationkwh production manager",
+  "description": """Support for SomEnergia's plantmete in GisceERP""",
+  "version": "0.0.3",
   "author": "Som-Energia",
   "category": "Master",
   "depends": ['base'],
