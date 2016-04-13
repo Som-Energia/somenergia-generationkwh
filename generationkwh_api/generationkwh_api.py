@@ -292,7 +292,14 @@ class GenerationkWhAssignments(osv.osv):
             'Priority',
             )
         )
-    
+    def add(self, cr, uid, assignments, context=None):
+        for active,polissa_id,partner_id,priority in assignments:
+            self.create(cr, uid,{
+                'active': active,
+                'polissa_id': polissa_id,
+                'member_id': partner_id,
+                'priority': priority,
+            }, context=context)
 GenerationkWhAssignments()
 class GenerationkWhInvestments(osv.osv):
 
