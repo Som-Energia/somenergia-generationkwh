@@ -272,7 +272,28 @@ class GenerationkWhRemainders(osv.osv):
         
 GenerationkWhRemainders()
 
+class GenerationkWhAssignments(osv.osv):
 
+    _name = 'generationkwh.assignments'
+
+    _columns = dict(
+        active=fields.boolean(
+            "Active",
+            ),
+        polissa_id=fields.many2one(
+            'giscedata.polissa',
+            'Contract',
+            ),
+        member_id=fields.many2one(
+            'res.partner',
+            'Member',
+            ),
+        priority=fields.integer(
+            'Priority',
+            )
+        )
+    
+GenerationkWhAssignments()
 class GenerationkWhInvestments(osv.osv):
 
     _name = 'generationkwh.investments'
