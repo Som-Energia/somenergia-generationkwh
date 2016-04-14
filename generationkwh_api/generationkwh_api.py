@@ -17,6 +17,7 @@ from yamlns import namespace as ns
 
 import datetime
 from dateutil.relativedelta import relativedelta
+import netsvc
 
 def isodatetime(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
@@ -477,14 +478,36 @@ class GenerationkWhDealer(osv.osv):
             contract_id, start_date, end_date, fare, period)
 
     def use_kwh(self, cursor, uid,
-                contract_ia, start_date, end_date, fare, period, kwh,
+                contract_id, start_date, end_date, fare, period, kwh,
                 context=None):
         """Marks the indicated kwh as used, if available, for the contract,
            date interval, fare and period and returns the ones efectively used.
         """
+        logger = netsvc.Logger()
         dealer = self._createDealer(cursor, uid, context)
-        return dealer.use_kwh(
+
+        res = dealer.use_kwh(
             contract_id, start_date, end_date, fare, period, kwh)
+
+        txt_vals = dict(
+            contract=contract_id,
+            period=period,
+            start=start_date,
+            end=end_date,
+        )
+        txt =''
+        for line in res:
+            txt_vals.update(dict(
+                kwh=line['kwh'],
+                member=line['member_id'],
+            ))
+            txt = (u'{kwh} Generation kwh of member {member} to {contract} '
+                   u'for period {period} between {start} and {end}').format(
+                **txt_vals
+            )
+            logger.notifyChannel('gkwh_dealer USE', netsvc.LOG_INFO, txt)
+
+        return res
 
     def refund_kwh(self, cursor, uid,
                    contract_id, start_date, end_date, fare, period, kwh,
@@ -493,10 +516,25 @@ class GenerationkWhDealer(osv.osv):
            contract, date interval, fare and period and returns the ones
            efectively used.
         """
+        logger = netsvc.Logger()
         dealer = self._createDealer(cursor, uid, context)
 
-        return dealer.refund_kwh(
-            contract_id, start_date, end_date, fare, period, kwh)
+        txt_vals = dict(
+            contract=contract_id,
+            period=period,
+            start=start_date,
+            end=end_date,
+            member=partner_id,
+            kwh=kwh
+        )
+        txt = (u'{kwh} Generation kwh of member {member} to {contract} '
+               u'for period {period} between {start} and {end}').format(
+            **txt_vals
+        )
+        logger.notifyChannel('gkwh_dealer REFUND', netsvc.LOG_INFO, txt)
+        res = dealer.refund_kwh(
+            contract_id, start_date, end_date, fare, period, kwh, partner_id)
+        return res
 
     def _createTracker(self, cursor, uid, context):
 
@@ -522,7 +560,6 @@ class GenerationkWhDealer(osv.osv):
         usageTracker = self._createTracker(cursor, uid, context)
         # TODO: Feed the dealer with data sources
         return Dealer(usageTracker)
-
 
 GenerationkWhDealer()
 
