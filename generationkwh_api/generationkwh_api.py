@@ -304,6 +304,7 @@ class GenerationkWhAssignments(osv.osv):
             help="Date at which the rule is no longer active",
             ),
         )
+
     def add(self, cr, uid, assignments, context=None):
         for active, polissa_id, member_id, priority in assignments:
             same_polissa_member = self.search(cr, uid, [
@@ -319,12 +320,21 @@ class GenerationkWhAssignments(osv.osv):
                     ),
                     context=context,
                 )
-            self.create(cr, uid,{
+            self.create(cr, uid, {
                 'active': active,
                 'polissa_id': polissa_id,
                 'member_id': member_id,
                 'priority': priority,
             }, context=context)
+
+    def dropAll(self, cr, uid, context=None):
+        ids = self.search(cr, uid, [
+            '|',
+            ('active', '=', False),
+            ('active', '=', True),
+            ],context=context)
+        for a in self.browse(cr, uid, ids, context=context):
+            a.unlink()
 
 GenerationkWhAssignments()
 

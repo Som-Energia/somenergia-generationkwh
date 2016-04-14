@@ -6,47 +6,48 @@ try:
     import erppeek
 except ImportError:
     pass
+
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Assignment_Test(unittest.TestCase):
 
     def setUp(self):
         self.erp = erppeek.Client(**dbconfig.erppeek)
         self.Assignments = self.erp.GenerationkwhAssignments
-        self.tearDown()
-    
+        self.Assignments.dropAll()
+
     def setupProvider(self,assignments=[]):
         self.Assignments.add(assignments)
-    
+
     def assertAllAssignmentsEqual(self, expectation):
         result = self.Assignments.browse([
             '|',
             ('active', '=', False),
-            ('active', '=', True)
+            ('active', '=', True),
             ])
-        self.assertEqual([
-                            [r.active, 
-                            r.polissa_id.id, 
-                            r.member_id.id, 
-                            r.priority]
-                            for r in result], 
-                         expectation)
+        self.assertEqual( [
+                [
+                    r.active,
+                    r.polissa_id.id,
+                    r.member_id.id,
+                    r.priority,
+                ]
+                for r in result
+            ],expectation)
 
     def assertAssignmentsEqual(self, expectation):
         result = self.Assignments.browse([])
         self.assertEqual([
-                            [r.active, 
-                            r.polissa_id.id, 
-                            r.member_id.id, 
-                            r.priority]
-                            for r in result], 
-                         expectation)
+            [
+                r.active,
+                r.polissa_id.id,
+                r.member_id.id,
+                r.priority,
+            ] for r in result],
+            expectation)
+
     def tearDown(self):
-        for a in self.Assignments.browse([
-            '|',
-            ('active', '=', False),
-            ('active', '=', True),
-            ]):
-            a.unlink()
+        self.Assignments.dropAll()
+
     def test_no_assignments(self):
         self.setupProvider()
         self.assertAssignmentsEqual([])
@@ -123,4 +124,4 @@ class Assignment_Test(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-        
+
