@@ -69,9 +69,9 @@ class InvestmentProvider(ErpWrapper):
             ('deactivation_date','=',False),
             ]
 
-        Investments = self.erp.pool.get('generationkwh.investments')
-        ids = Investments.search(self.cursor, self.uid, filters)
-        contracts = Investments.read(self.cursor, self.uid, ids)
+        Investment = self.erp.pool.get('generationkwh.investment')
+        ids = Investment.search(self.cursor, self.uid, filters)
+        contracts = Investment.read(self.cursor, self.uid, ids)
 
         return [
             (
@@ -147,8 +147,8 @@ class GenerationkWhTestHelper(osv.osv):
         """
         print "Dropping results for", member, start, stop, fare, period
     
-        investments = InvestmentProvider(self, cursor, uid, context)
-        memberActiveShares = MemberSharesCurve(investments)
+        investment = InvestmentProvider(self, cursor, uid, context)
+        memberActiveShares = MemberSharesCurve(investment)
         rightsPerShare = RightsPerShare(mdbpool.get_db())
 
         generatedRights = MemberRightsCurve(
@@ -160,7 +160,7 @@ class GenerationkWhTestHelper(osv.osv):
         holidays = HolidaysProvider(self, cursor, uid, context)
         farePeriod = FarePeriodCurve(holidays)
 
-        print 'investments', investments.shareContracts(
+        print 'investment', investment.shareContracts(
             start=localisodate(start),
             end=localisodate(stop),
             member=2)
@@ -354,9 +354,9 @@ class GenerationkWhAssignments(osv.osv):
 GenerationkWhAssignments()
 
 
-class GenerationkWhInvestments(osv.osv):
+class GenerationkWhInvestment(osv.osv):
 
-    _name = 'generationkwh.investments'
+    _name = 'generationkwh.investment'
 
     _columns = dict(
         member_id=fields.many2one(
@@ -482,7 +482,7 @@ class GenerationkWhInvestments(osv.osv):
                 deactivation_date=deactivation,
                 ))
 
-GenerationkWhInvestments()
+GenerationkWhInvestment()
 
 
 class GenerationkWhDealer(osv.osv):

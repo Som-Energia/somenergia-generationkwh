@@ -85,8 +85,8 @@ def isodate(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d").date()
 
 def clear(**args):
-    allinvestments = c.search('generationkwh.investments')
-    c.unlink('generationkwh.investments', allinvestments)
+    allinvestments = c.search('generationkwh.investment')
+    c.unlink('generationkwh.investment', allinvestments)
 
 def listactive(member=None, start=None, stop=None, csv=False):
     """
@@ -105,7 +105,7 @@ def listactive(member=None, start=None, stop=None, csv=False):
                 ))+'\n'
             for line in data))
 
-    csvdata = buildcsv(c.GenerationkwhInvestments.active_investments(
+    csvdata = buildcsv(c.GenerationkwhInvestment.active_investments(
             member, start and str(start), stop and str(stop)))
     if csv: return csvdata
     print csvdata
@@ -117,7 +117,7 @@ def create(start=None, stop=None,
         **_):
     if force: clear()
 
-    c.GenerationkwhInvestments.create_investments_from_accounting(
+    c.GenerationkwhInvestment.create_investments_from_accounting(
         start, stop, waitingDays, expirationYears)
 
 def create_fromPaymentLines(start=None, stop=None,
@@ -127,7 +127,7 @@ def create_fromPaymentLines(start=None, stop=None,
         **_):
     if force: clear()
 
-    c.GenerationkwhInvestments.create_investments_from_paymentlines(
+    c.GenerationkwhInvestment.create_investments_from_paymentlines(
         start, stop, waitingDays, expirationYears)
 
 # TODO: Tests
@@ -143,7 +143,7 @@ def activate(
     if stop: criteria.append(('purchase_date', '<=', str(stop)))
     if start: criteria.append(('purchase_date', '>=', str(start)))
 
-    investments = c.read( 'generationkwh.investments', criteria)
+    investments = c.read( 'generationkwh.investment', criteria)
 
     for investment in investments:
         investment = ns(investment)
@@ -164,7 +164,7 @@ def activate(
                         )
                     ),
                 )
-        c.write('generationkwh.investments', investment.id, updateDict)
+        c.write('generationkwh.investment', investment.id, updateDict)
 
 c = erppeek.Client(**dbconfig.erppeek)
 

@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-        <record model="ir.ui.view" id="view_gkwh_investments_form">
-            <field name="name">generationkwh.investments.form</field>
-            <field name="model">generationkwh.investments</field>
+        <record model="ir.ui.view" id="view_gkwh_investment_form">
+            <field name="name">generationkwh.investment.form</field>
+            <field name="model">generationkwh.investment</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string="Inversions en Generation kWh">
@@ -15,9 +15,9 @@
                 </form>
             </field>
         </record>
-        <record model="ir.ui.view" id="view_gkwh_investments_tree">
-            <field name="name">generationkwh.investments.tree</field>
-            <field name="model">generationkwh.investments</field>
+        <record model="ir.ui.view" id="view_gkwh_investment_tree">
+            <field name="name">generationkwh.investment.tree</field>
+            <field name="model">generationkwh.investment</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree string="Inversions en Generation kWh">
@@ -29,15 +29,15 @@
                 </tree>
             </field>
         </record>
-        <record id="action_gkwh_investments_tree" model="ir.actions.act_window">
+        <record id="action_gkwh_investment_tree" model="ir.actions.act_window">
             <field name="name">Inversions en Generation kWh</field>
-            <field name="res_model">generationkwh.investments</field>
+            <field name="res_model">generationkwh.investment</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="view_id" ref="view_gkwh_investments_tree"/>
+            <field name="view_id" ref="view_gkwh_investment_tree"/>
         </record>
         <menuitem id="menu_gkwh_base" name="Generation kWh"/>
-        <menuitem action="action_gkwh_investments_tree"
-            id="menu_gkwh_investments_tree" parent="menu_gkwh_base"/>
+        <menuitem action="action_gkwh_investment_tree"
+            id="menu_gkwh_investment_tree" parent="menu_gkwh_base"/>
     </data>
 </openerp>

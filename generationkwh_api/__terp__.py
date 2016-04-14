@@ -13,7 +13,7 @@
     "generationkwh_api_data.xml",
     "giscedata_facturacio_view.xml",
     "generationkwh_api_view.xml",
-    "investments_view.xml",
+    "investment_view.xml",
     "security/ir.model.access.csv",
     ],
   "active": False,
