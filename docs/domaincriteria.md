@@ -99,3 +99,26 @@ Doubts
 - [David] When is a contract considered to be activated for GenkWh? If active during the invoicing period?
 
 
+
+Glossary
+--------
+
+- **Rigths:** A member's right to use a produced kWh from a GenerationkWh plant
+- **Usage:** How many rights have been used by a member
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

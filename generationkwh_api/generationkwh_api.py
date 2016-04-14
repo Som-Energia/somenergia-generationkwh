@@ -62,9 +62,9 @@ class InvestmentProvider(ErpWrapper):
             ('activation_date','<=',end), # No activation also filtered
             ]
         if start: filters += [
-            '&', 
+            '&',
             ('activation_date','!=',False),
-            '|', 
+            '|',
             ('deactivation_date','>=',start),
             ('deactivation_date','=',False),
             ]
@@ -113,7 +113,7 @@ class HolidaysProvider(ErpWrapper):
 
 class GenerationkWhTestHelper(osv.osv):
     """
-        Helper model that enables accessing data providers 
+        Helper model that enables accessing data providers
         from tests written with erppeek.
     """
 
@@ -265,16 +265,17 @@ class GenerationkWhRemainders(osv.osv):
                     same_date_n_id, context=context
                 )
             self.create(cr,uid,{
-                'n_shares': n, 
+                'n_shares': n,
                 'target_day': pointsDate,
                 'remainder_wh': remainder
             }, context=context)
-            
+
     def clean(self,cr,uid,context=None):
         ids=self.search(cr,uid, [], context=context)
         self.unlink(cr,uid,ids)
-        
+
 GenerationkWhRemainders()
+
 
 class GenerationkWhAssignments(osv.osv):
 
@@ -310,10 +311,13 @@ class GenerationkWhAssignments(osv.osv):
                 ('member_id', '=', member_id),
             ], context = context)
             if same_polissa_member:
-                self.write(cr,uid,same_polissa_member, {
-                    'active': False,
-                    'end_date': str(datetime.date.today())},    
-                    context=context
+                self.write(cr,uid,
+                    same_polissa_member,
+                    dict(
+                        active=False,
+                        end_date=str(datetime.date.today()),
+                    ),
+                    context=context,
                 )
             self.create(cr, uid,{
                 'active': active,
@@ -321,7 +325,10 @@ class GenerationkWhAssignments(osv.osv):
                 'member_id': member_id,
                 'priority': priority,
             }, context=context)
+
 GenerationkWhAssignments()
+
+
 class GenerationkWhInvestments(osv.osv):
 
     _name = 'generationkwh.investments'
@@ -552,7 +559,7 @@ class GenerationkWhDealer(osv.osv):
 
         holidays = HolidaysProvider(self, cursor, uid, context)
         farePeriod = FarePeriodCurve(holidays)
-  
+
         return UsageTracker(generatedRights, rightsUsage, farePeriod)
 
     def _createDealer(self, cursor, uid, context):
