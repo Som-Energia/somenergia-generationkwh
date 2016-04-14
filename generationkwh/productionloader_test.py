@@ -434,4 +434,5 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(remainders.get(), [
             (1, localisodate('2015-08-17'), 0),
             ])
+
 # vim: ts=4 sw=4 et

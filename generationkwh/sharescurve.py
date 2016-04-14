@@ -26,7 +26,7 @@ class MemberSharesCurve(object):
         if end<start:
             return numpy.array([], dtype=int)
         hoursADay=25
-        nDays=(end-start).days+1
+        nDays=(end-start).days+1 # To Review
         result = numpy.zeros(nDays*hoursADay, dtype=numpy.int)
 
         for investment in self._provider.shareContracts():
