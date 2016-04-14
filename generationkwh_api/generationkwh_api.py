@@ -361,25 +361,26 @@ class GenerationkWhInvestments(osv.osv):
     _columns = dict(
         member_id=fields.many2one(
             'res.partner',
-            'gkwh_investment',
+            "Inversor",
             required=True,
             help="Member who purchased the shares",
             ),
         nshares=fields.integer(
+            "Nombre d'accions",
             required=True,
             help="Number of shares purchased",
             ),
         purchase_date=fields.date(
-            "Purchase Date",
+            "Data de compra",
             required=True,
             help="When the shares where bought",
             ),
         activation_date=fields.date(
-            "Activation Date",
+            "Data d'activació",
             help="When the shares start to provide electricity use rigths",
             ),
         deactivation_date=fields.date(
-            "Deactivation Date",
+            "Data de desactivació",
             help="When the shares stop to provide electricity use rights",
             ),
         )
