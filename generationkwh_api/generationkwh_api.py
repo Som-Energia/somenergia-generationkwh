@@ -363,25 +363,25 @@ class GenerationkWhInvestments(osv.osv):
             'res.partner',
             "Inversor",
             required=True,
-            help="Member who purchased the shares",
+            help="Inversor que ha comprat les accions",
             ),
         nshares=fields.integer(
             "Nombre d'accions",
             required=True,
-            help="Number of shares purchased",
+            help="Nombre d'accions comprades",
             ),
         purchase_date=fields.date(
             "Data de compra",
             required=True,
-            help="When the shares where bought",
+            help="Quin dia es varen comprar les accions",
             ),
         activation_date=fields.date(
             "Data d'activació",
-            help="When the shares start to provide electricity use rigths",
+            help="Dia que les accions començaran a generar drets a kWh",
             ),
         deactivation_date=fields.date(
             "Data de desactivació",
-            help="When the shares stop to provide electricity use rights",
+            help="Dia que les accions deixaran de generar drets a kWh",
             ),
         )
 
