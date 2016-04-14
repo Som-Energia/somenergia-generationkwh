@@ -303,7 +303,10 @@ class GenerationkWhAssignments(osv.osv):
                 ('member_id', '=', member_id),
             ], context = context)
             if same_polissa_member:
-                self.unlink(cr,uid,same_polissa_member, context=context)
+                self.write(cr,uid,same_polissa_member, {
+                    'active': False},    
+                    context=context
+                )
             self.create(cr, uid,{
                 'active': active,
                 'polissa_id': polissa_id,
