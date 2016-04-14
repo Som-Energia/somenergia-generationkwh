@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_gkwh_investments_form">
+            <field name="name">generationkwh.investments.form</field>
+            <field name="model">generationkwh.investments</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Inversions en Generation kWh">
+                    <field name="member_id"/>
+                    <field name="nshares"/>
+                    <field name="purchase_date"/>
+                    <field name="activation_date"/>
+                    <field name="deactivation_date"/>
+                </form>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_gkwh_investments_tree">
+            <field name="name">generationkwh.investments.tree</field>
+            <field name="model">generationkwh.investments</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Inversions en Generation kWh">
+                    <field name="member_id" select="1"/>
+                    <field name="nshares" select="1"/>
+                    <field name="purchase_date" select="1"/>
+                    <field name="activation_date" select="1"/>
+                    <field name="deactivation_date" select="1"/>
+                </tree>
+            </field>
+        </record>
+        <record id="action_gkwh_investments_tree" model="ir.actions.act_window">
+            <field name="name">Inversions en Generation kWh</field>
+            <field name="res_model">generationkwh.investments</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_gkwh_investments_tree"/>
+        </record>
+        <menuitem id="menu_gkwh_base" name="Generation kWh"/>
+        <menuitem action="action_gkwh_investments_tree"
+            id="menu_gkwh_investments_tree" parent="menu_gkwh_base"/>
+    </data>
+</openerp>
