@@ -52,19 +52,14 @@ class GiscedataFacturacioFactura(osv.osv):
 
                     contract_id = invoice_vals['polissa_id'][0]
                     fare_id = invoice_vals['tarifa_acces_id'][0]
-                    for line_id in invoice_vals['linies_energia']:
-                        line_vals = False
-                        line_vals = line_obj.read(
-                            cursor, uid, line_id, line_fields, context=context
-                        )
-                        line_product_id = line_vals['product_id'][0]
-                        from_date = line_vals['data_desde']
-                        to_date = line_vals['data_fins']
-                        quantity = line_vals['quantity']
 
-                        period_id = self.get_fare_period(
-                            cursor, uid, line_product_id, context=context
-                        )
+                    for period_id in rights_dict.keys():
+                        quantity = sum([v['kwh'] for v in
+                                        rights_dict[period_id]])
+                        from_date = max([v['from'] for v in
+                                        rights_dict[period_id]])
+                        to_date = min([v['to'] for v in
+                                      rights_dict[period_id]])
 
                         gkwh_dealer_obj.use_kwh(
                             cursor,
@@ -86,7 +81,6 @@ class GiscedataFacturacioFactura(osv.osv):
         """ Returns gkwh rights on invoice refund """
         gkwh_lineowner_obj = self.pool.get('generationkwh.invoice.line.owner')
         gkwh_dealer_obj = self.pool.get('generationkwh.dealer')
-        fact_obj = self.pool.get('giscedata.facturacio.factura')
         fact_line_obj = self.pool.get('giscedata.facturacio.factura.linia')
 
         fields_to_read = ['is_gkwh', 'gkwh_linia_ids', 'type', 'polissa_id',
@@ -136,8 +130,7 @@ class GiscedataFacturacioFactura(osv.osv):
             )
             # drop incorrect owner lines
             bad_owner_ids = gkwh_lineowner_obj.search(
-                    cursor, uid, [('factura_id', '=', refund_id)],
-                    context=context
+                cursor, uid, [('factura_id', '=', refund_id)], context=context
             )
             gkwh_lineowner_obj.unlink(
                 cursor, uid, bad_owner_ids, context=context
@@ -242,7 +235,14 @@ class GiscedataFacturacioFactura(osv.osv):
 
     def get_gkwh_shares_dict(self, cursor, uid, ids, context=None):
         """Returns a dict in the same format returned by dealer use function
-        with invoice gkwh rights"""
+        with invoice gkwh rights plus from an to date. key dict is the period
+        [{'period_id': {'member_id': member_id
+                        'kwh': quantity
+                        'from': from date
+                        'to': to date
+                        }
+        }]
+        """
         if context is None:
             context = {}
 
@@ -252,10 +252,12 @@ class GiscedataFacturacioFactura(osv.osv):
         sql = (u"SELECT "
                u"    il.product_id AS product_id, "
                u"    lo.owner_id AS owner_id, "
-               u"    SUM(il.quantity) AS quantity "
+               u"    SUM(il.quantity) AS quantity ,"
+               u"    MIN(fl.data_desde) AS data_desde, "
+               u"    MAX(fl.data_fins) AS data_fins "
                u"FROM generationkwh_invoice_line_owner AS lo "
                u"LEFT JOIN giscedata_facturacio_factura_linia AS fl "
-               u"    ON lo.factura_id = fl.id "
+               u"    ON lo.factura_line_id = fl.id "
                u"LEFT JOIN account_invoice_line il "
                u"    ON il.id = fl.invoice_line_id "
                u"WHERE lo.factura_id = %(invoice_id)s "
@@ -265,7 +267,8 @@ class GiscedataFacturacioFactura(osv.osv):
         cursor.execute(sql, {'invoice_id': ids})
         vals = cursor.fetchall()
 
-        periods = [(v[0], {'member_id': v[1], 'kwh': v[2]}) for v in vals]
+        fields = ['member_id', 'kwh', 'from', 'to']
+        periods = [(v[0], dict(zip(fields, v[1:]))) for v in vals]
 
         uniq_product_ids = set([p[0] for p in periods])
         product_res = {}.fromkeys(uniq_product_ids, [])
@@ -278,6 +281,8 @@ class GiscedataFacturacioFactura(osv.osv):
             for k, v in product_res.items()
         ])
 
+        if context.get('xmlrpc', False):
+            res = [(str(k), v) for k, v in res.items()]
         return res
 
     def apply_gkwh(self, cursor, uid, ids, context=None):
