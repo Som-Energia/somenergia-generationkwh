@@ -2,7 +2,7 @@
 
 import datetime
 import pytz
-from plantmeter.mongotimecurve import MongoTimeCurve,toLocal,tz
+from plantmeter.mongotimecurve import MongoTimeCurve,parseLocalTime
 from yamlns import namespace as ns
 
 import unittest
@@ -10,8 +10,10 @@ import unittest
 def isodatetime(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d")
 
-def localisodate(string):
-        return toLocal(datetime.datetime.strptime(string, "%Y-%m-%d"))
+def localTime(string):
+    isSummer = string.endswith("S")
+    if isSummer: string=string[:-1]
+    return parseLocalTime(string, isSummer)
 
 class GenerationkwhProductionAggregator_Test(unittest.TestCase):
     def setUp(self):
@@ -20,7 +22,7 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
         import pymongo
 
         self.database = dbconfig.pymongo['database']
-        self.collection = 'generationkwh.production.plant'
+        self.collection = 'generationkwh.production.measurement'
 
         self.c = erppeek.Client(**dbconfig.erppeek)
         self.m = pymongo.Connection()
@@ -57,7 +59,7 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
         meter_obj = self.c.model('generationkwh.production.meter')
         return meter_obj.create(dict(
             plant_id=plant_id,
-            name='mymerter%d' % meter,
+            name='mymeter%d' % meter,
             description='mymeter%d' % meter,
             uri='uri/mymeter%d' % meter,
             enabled=True))
@@ -83,23 +85,35 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
                 currentDate += delta
 
         for meter, start, end, values in points:
-            daterange = datespan(isodatetime(start), isodatetime(end))
+            daterange = datespan(isodatetime(start), isodatetime(end)+datetime.timedelta(days=1))
             for date, value in zip(daterange, values):
                 self.curveProvider.fillPoint(
-                    datetime=tz.localize(date),
+                    datetime=localTime(str(date)),
                     name=meter,
                     ae=value)
 
-    def test_GenerationkwhProductionAggregator_getwhOnePlant(self):
+    def test_GenerationkwhProductionAggregator_getwhOnePlantSummer(self):
         aggr_id = self.setupAggregator(
                 nplants=1,
                 nmeters=1).read(['id'])['id']
 
-    	self.setupPoints([
-	    	('mymeter0', '2015-08-16', '2015-08-17', 24*[10])
+        self.setupPoints([
+            ('mymeter0', '2015-08-16', '2015-08-16', 24*[10])
             ])
         production = self.c.GenerationkwhProductionAggregator.getWh(
-                aggr_id,localisodate('2015-08-16'), localisodate('2015-08-17'))
-        self.assertEqual(production, 24*[10])
+                aggr_id, '2015-08-16', '2015-08-16')
+        self.assertEqual(production, 24*[10]+[0])
+
+    def test_GenerationkwhProductionAggregator_getwhOnePlantWinter(self):
+        aggr_id = self.setupAggregator(
+                nplants=1,
+                nmeters=1).read(['id'])['id']
+
+        self.setupPoints([
+            ('mymeter0', '2015-03-16', '2015-03-16', 24*[10])
+            ])
+        production = self.c.GenerationkwhProductionAggregator.getWh(
+                aggr_id, '2015-03-16', '2015-03-16')
+        self.assertEqual(production, [0]+24*[10])
 
 # vim: et ts=4 sw=4

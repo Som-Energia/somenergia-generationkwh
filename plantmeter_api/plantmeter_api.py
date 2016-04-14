@@ -7,7 +7,10 @@ from mongodb_backend.mongodb2 import mdbpool
 
 from datetime import datetime
 from plantmeter.resource import ProductionAggregator, ProductionPlant, ProductionMeter 
-from plantmeter.mongotimecurve import MongoTimeCurve
+from plantmeter.mongotimecurve import MongoTimeCurve,tz
+
+def isodate(string):
+    return tz.localize(datetime.strptime(string, "%Y-%m-%d"))
 
 class GenerationkwhProductionAggregator(osv.osv):
     '''Implements generationkwh production aggregation '''
@@ -25,7 +28,7 @@ class GenerationkwhProductionAggregator(osv.osv):
 
         aggr = self.browse(cursor, uid, pid, context)
         _aggr = self._createAggregator(aggr, ['name', 'description', 'enabled'])
-        return _aggr.getWh(start,end)
+        return _aggr.getWh(isodate(start), isodate(end)).tolist()
 
     def updateWh(self, cursor, uid, pid, start, end, context=None):
         '''Update Wh measurements'''
