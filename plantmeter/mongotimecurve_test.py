@@ -471,6 +471,14 @@ class MongoTimeCurve_Test(unittest.TestCase):
         lastdate = mtc.lastDate('miplanta')
         self.assertEqual(lastdate,isodate('2015-01-01'))
 
+    def _test_lastDate_withOnePoint_takesItSofDay(self):
+        mtc = self.setupPoints([
+            ('2015-01-01 00:00:00', 'miplanta', 30),
+            ])
+
+        lastdate = mtc.lastDate('miplanta')
+        self.assertEqual(lastdate,isodate('2015-01-01'))
+
     def test_lastDate_withForeignPoint_ignored(self):
         mtc = self.setupPoints([
             ('2015-01-01 23:00:00', 'otraplanta', 30)

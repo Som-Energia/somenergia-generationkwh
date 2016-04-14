@@ -12,6 +12,9 @@ from plantmeter.mongotimecurve import MongoTimeCurve,tz
 def isodate(string):
     return tz.localize(datetime.strptime(string, "%Y-%m-%d"))
 
+def toStr(tdatetime):
+    return tdatetime.strftime('%Y-%m-%d %H:%M:%S')
+
 class GenerationkwhProductionAggregator(osv.osv):
     '''Implements generationkwh production aggregation '''
 
@@ -33,6 +36,7 @@ class GenerationkwhProductionAggregator(osv.osv):
     def updateWh(self, cursor, uid, pid, start, end, context=None):
         '''Update Wh measurements'''
 
+        if isodate(start) > isodate(end): return
         if not context:
             context = {}
         if isinstance(pid, list) or isinstance(pid, tuple):
@@ -41,7 +45,7 @@ class GenerationkwhProductionAggregator(osv.osv):
         args = ['name', 'description', 'enabled']
         aggr = self.browse(cursor, uid, pid, context)
         _aggr = self._createAggregator(aggr, args)
-        return _aggr.updateWh(start, end)
+        return _aggr.updateWh(isodate(start), isodate(end))
 
     def firstMeasurementDate(self, cursor, uid, pid, context=None):
         '''Get first measurement date'''
@@ -54,7 +58,8 @@ class GenerationkwhProductionAggregator(osv.osv):
         args = ['name', 'description', 'enabled']
         aggr = self.browse(cursor, uid, pid, context)
         _aggr = self._createAggregator(aggr, args)
-        return _aggr.firstMeasurementDate()
+        date = _aggr.firstMeasurementDate()
+        return toStr(_aggr.firstMeasurementDate()) if date else ''
 
     def lastMeasurementDate(self, cursor, uid, pid, context=None):
         '''Get last measurement date'''

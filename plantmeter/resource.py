@@ -37,6 +37,9 @@ class ProductionAggregator(Resource):
             if plant.enabled
             ], axis=0)
     
+    def updateWh(self, start, end):
+        return [plant.updateWh(start, end) for plant in self.plants]
+
     def firstMeasurementDate(self):
         return min([
             plant.firstMeasurementDate()
@@ -62,6 +65,9 @@ class ProductionPlant(Resource):
             for meter in self.meters
             if meter.enabled
             ], axis=0)
+
+    def updateWh(self, start, end):
+        return [meter.updateWh(start, end) for meter in self.meters]
 
     def lastMeasurementDate(self):
         return min([
@@ -96,6 +102,8 @@ class ProductionMeter(Resource):
                             datetime = measurement['datetime'],
                             ae = measurement['ae']
                             )
+        return True
+
     def lastMeasurementDate(self):
         return self.curveProvider.lastFullDate(self.name)
     
