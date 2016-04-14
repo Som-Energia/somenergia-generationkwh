@@ -27,7 +27,7 @@ class Assignment_Test(unittest.TestCase):
         self.assertEqual( [
                 [
                     r.active,
-                    r.polissa_id.id,
+                    r.contract_id.id,
                     r.member_id.id,
                     r.priority,
                 ]
@@ -39,7 +39,7 @@ class Assignment_Test(unittest.TestCase):
         self.assertEqual([
             [
                 r.active,
-                r.polissa_id.id,
+                r.contract_id.id,
                 r.member_id.id,
                 r.priority,
             ] for r in result],
@@ -52,74 +52,136 @@ class Assignment_Test(unittest.TestCase):
         self.setupProvider()
         self.assertAssignmentsEqual([])
 
+    def test_default_values(self):
+        member=self.erp.ResPartner.browse([],limit=1)[0]
+        contract=self.erp.GiscedataPolissa.browse([], limit=1)[0]
+        self.Assignments.create(dict(
+            member_id = member,
+            contract_id = contract,
+            priority = 0,
+            ))
+        self.assertAllAssignmentsEqual([
+            [True, contract.id, member.id, 0]
+            ])
+
+    def test_create_priorityRequired(self):
+        member=self.erp.ResPartner.browse([],limit=1)[0]
+        contract=self.erp.GiscedataPolissa.browse([], limit=1)[0]
+
+        with self.assertRaises(Exception) as ctx:
+            self.Assignments.create(dict(
+                member_id = member,
+                contract_id = contract,
+                ))
+        self.assertIn(
+            'null value in column "priority" violates not-null constraint',
+            str(ctx.exception))
+
+    def test_create_contractRequired(self):
+        member=self.erp.ResPartner.browse([],limit=1)[0]
+
+        with self.assertRaises(Exception) as ctx:
+            self.Assignments.create(dict(
+                member_id = member,
+                priority = 0,
+                ))
+        self.assertIn(
+            'null value in column "contract_id" violates not-null constraint',
+            str(ctx.exception))
+
+    def test_create_memberRequired(self):
+        contract=self.erp.GiscedataPolissa.browse([], limit=1)[0]
+
+        with self.assertRaises(Exception) as ctx:
+            self.Assignments.create(dict(
+                contract_id = contract,
+                priority = 0,
+                ))
+        self.assertIn(
+            'null value in column "contract_id" violates not-null constraint',
+            str(ctx.exception))
+
+    def test_create_memberRequired(self):
+        member=self.erp.ResPartner.browse([],limit=1)[0]
+        contract=self.erp.GiscedataPolissa.browse([], limit=1)[0]
+
+        with self.assertRaises(Exception) as ctx:
+            self.Assignments.create(dict(
+                contract_id = contract,
+                priority = 0,
+                ))
+        self.assertIn(
+            'null value in column "member_id" violates not-null constraint',
+            str(ctx.exception))
+
     def test_one_assignment(self):
-        rp=self.erp.ResPartner.browse([],limit=1)[0]
-        gp=self.erp.GiscedataPolissa.browse([], limit=1)[0]
+        member=self.erp.ResPartner.browse([],limit=1)[0]
+        contract=self.erp.GiscedataPolissa.browse([], limit=1)[0]
         self.setupProvider([
-            [True,gp.id,rp.id,1],
+            [True,contract.id,member.id,1],
             ])
         self.assertAssignmentsEqual([
-            [True,gp.id,rp.id,1]
+            [True,contract.id,member.id,1]
             ])
 
     def test_no_duplication(self):
-        rp=self.erp.ResPartner.browse([], limit=1)[0]
-        gp=self.erp.GiscedataPolissa.browse([],limit=1)[0]
+        member=self.erp.ResPartner.browse([], limit=1)[0]
+        contract=self.erp.GiscedataPolissa.browse([],limit=1)[0]
         self.setupProvider([
-            [True, gp.id, rp.id, 1],
-            [True, gp.id, rp.id, 1],
+            [True, contract.id, member.id, 1],
+            [True, contract.id, member.id, 1],
             ])
         self.assertAllAssignmentsEqual([
-            [False, gp.id, rp.id, 1],
-            [True, gp.id, rp.id, 1],
+            [False, contract.id, member.id, 1],
+            [True, contract.id, member.id, 1],
             ])
     
     def test_change_priority(self):
-        rp=self.erp.ResPartner.browse([], limit=1)[0]
-        gp=self.erp.GiscedataPolissa.browse([],limit=1)[0]
+        member=self.erp.ResPartner.browse([], limit=1)[0]
+        contract=self.erp.GiscedataPolissa.browse([],limit=1)[0]
         self.setupProvider([
-            [True,gp.id,rp.id,1],
-            [True,gp.id,rp.id,2],
+            [True,contract.id,member.id,1],
+            [True,contract.id,member.id,2],
             ])
         self.assertAllAssignmentsEqual([
-            [False, gp.id, rp.id, 1],
-            [True,gp.id,rp.id,2]
+            [False, contract.id, member.id, 1],
+            [True,contract.id,member.id,2]
             ])
         
     def test_three_member_three_polissas(self):
-        rp=self.erp.ResPartner.browse([],limit=3)
-        gp=self.erp.GiscedataPolissa.browse([], limit=3)
+        members=self.erp.ResPartner.browse([],limit=3)
+        contracts=self.erp.GiscedataPolissa.browse([], limit=3)
         self.setupProvider([
-            [True,gp_iter.id,rp_iter.id,1]
-            for gp_iter,rp_iter in zip(gp,rp)
+            [True,contract.id,member.id,1]
+            for contract,member in zip(contracts,members)
             ])
         self.assertAssignmentsEqual([
-            [True,gp_iter.id,rp_iter.id,1]
-            for gp_iter,rp_iter in zip(gp,rp)
+            [True,contract.id,member.id,1]
+            for contract,member in zip(contracts,members)
             ])
 
     def test_three_member_one_polissa(self):
-        rp=self.erp.ResPartner.browse([],limit=3)
-        gp=self.erp.GiscedataPolissa.browse([], limit=1)[0]
+        members=self.erp.ResPartner.browse([],limit=3)
+        contract=self.erp.GiscedataPolissa.browse([], limit=1)[0]
         self.setupProvider([
-            [True,gp.id,rp_iter.id,1]
-            for rp_iter in rp
+            [True,contract.id,member.id,1]
+            for member in members
             ])
         self.assertAssignmentsEqual([
-            [True,gp.id,rp_iter.id,1]
-            for rp_iter in rp
+            [True,contract.id,member.id,1]
+            for member in members
             ])
 
     def test_one_member_three_polissas(self):
-        rp=self.erp.ResPartner.browse([],limit=1)[0]
-        gp=self.erp.GiscedataPolissa.browse([], limit=3)
+        member=self.erp.ResPartner.browse([],limit=1)[0]
+        contracts=self.erp.GiscedataPolissa.browse([], limit=3)
         self.setupProvider([
-            [True,gp_iter.id,rp.id,1]
-            for gp_iter in gp
+            [True,gp_iter.id,member.id,1]
+            for gp_iter in contracts
             ])
         self.assertAssignmentsEqual([
-            [True,gp_iter.id,rp.id,1]
-            for gp_iter in gp
+            [True,gp_iter.id,member.id,1]
+            for gp_iter in contracts
             ])
 
 if __name__ == '__main__':

@@ -284,31 +284,41 @@ class GenerationkWhAssignments(osv.osv):
     _columns = dict(
         active=fields.boolean(
             "Active",
+            default=True,
             ),
-        polissa_id=fields.many2one(
+        contract_id=fields.many2one(
             'giscedata.polissa',
             'Contract',
             required=True,
+            help="Contract which gets rights to use generated kWh",
             ),
         member_id=fields.many2one(
             'res.partner',
             'Member',
             required=True,
+            help="Member who bought Generation kWh shares and assigns them",
             ),
         priority=fields.integer(
             'Priority',
             required=True,
+            help="Assignation precedence. "
+                "This assignation won't use rights generated on dates that have not "
+                "been invoiced yet by assignments of the same member having higher priority "
+                "(lower the value, higher the priority).",
             ),
         end_date=fields.date(
             'Expiration date',
             help="Date at which the rule is no longer active",
             ),
         )
+    _defaults = dict(
+        active=lambda *a: 1,
+        )
 
     def add(self, cr, uid, assignments, context=None):
-        for active, polissa_id, member_id, priority in assignments:
+        for active, contract_id, member_id, priority in assignments:
             same_polissa_member = self.search(cr, uid, [
-                ('polissa_id', '=', polissa_id),
+                ('contract_id', '=', contract_id),
                 ('member_id', '=', member_id),
             ], context = context)
             if same_polissa_member:
@@ -322,12 +332,13 @@ class GenerationkWhAssignments(osv.osv):
                 )
             self.create(cr, uid, {
                 'active': active,
-                'polissa_id': polissa_id,
+                'contract_id': contract_id,
                 'member_id': member_id,
                 'priority': priority,
             }, context=context)
 
     def dropAll(self, cr, uid, context=None):
+        """Remove all records"""
         ids = self.search(cr, uid, [
             '|',
             ('active', '=', False),
@@ -335,6 +346,10 @@ class GenerationkWhAssignments(osv.osv):
             ],context=context)
         for a in self.browse(cr, uid, ids, context=context):
             a.unlink()
+
+    def expire(self, cr, ids, context=None):
+        ""
+
 
 GenerationkWhAssignments()
 
