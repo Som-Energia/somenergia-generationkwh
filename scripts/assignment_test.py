@@ -18,7 +18,11 @@ class Assignment_Test(unittest.TestCase):
         self.Assignments.add(assignments)
     
     def assertAllAssignmentsEqual(self, expectation):
-        result = self.Assignments.browse(['|', ('active', '=', False), ('active', '=', True)])
+        result = self.Assignments.browse([
+            '|',
+            ('active', '=', False),
+            ('active', '=', True)
+            ])
         self.assertEqual([
                             [r.active, 
                             r.polissa_id.id, 
