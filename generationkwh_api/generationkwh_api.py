@@ -259,7 +259,10 @@ class GenerationkWhRemainders(osv.osv):
                 ('target_day','=', pointsDate),
             ], context=context)
             if same_date_n_id:
-                self.unlink(cr,uid,same_date_n_id)
+                self.unlink(
+                    cr, uid,
+                    same_date_n_id, context=context
+                )
             self.create(cr,uid,{
                 'n_shares': n, 
                 'target_day': pointsDate,
@@ -293,11 +296,18 @@ class GenerationkWhAssignments(osv.osv):
             )
         )
     def add(self, cr, uid, assignments, context=None):
-        for active,polissa_id,partner_id,priority in assignments:
+        for active, polissa_id, member_id, priority in assignments:
+            same_polissa_member = self.search(cr, uid, [
+                ('active', '=', True),
+                ('polissa_id', '=', polissa_id),
+                ('member_id', '=', member_id),
+            ], context = context)
+            if same_polissa_member:
+                self.unlink(cr,uid,same_polissa_member, context=context)
             self.create(cr, uid,{
                 'active': active,
                 'polissa_id': polissa_id,
-                'member_id': partner_id,
+                'member_id': member_id,
                 'priority': priority,
             }, context=context)
 GenerationkWhAssignments()

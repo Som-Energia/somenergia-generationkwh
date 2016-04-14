@@ -39,11 +39,11 @@ class Assignment_Test(unittest.TestCase):
         self.setupProvider([[True,gp.id,rp.id,1]])
         self.assertAssignmentsEqual([[True,gp.id,rp.id,1]])
 
-    """def test_no_duplication(self):
+    def test_no_duplication(self):
         rp=self.erp.ResPartner.browse([], limit=1)[0]
         gp=self.erp.GiscedataPolissa.browse([],limit=1)[0]
-        self.setupProvider([[True,gp.id,rp.id,1]])
-        self.assertAssignmentsEqual([[True,gp.id,rp.id,1]])"""
+        self.setupProvider([[True,gp.id,rp.id,1],[True,gp.id,rp.id,1]])
+        self.assertAssignmentsEqual([[True,gp.id,rp.id,1]])
         
 if __name__ == '__main__':
     unittest.main()
