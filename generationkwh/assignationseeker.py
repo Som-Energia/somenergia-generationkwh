@@ -4,9 +4,9 @@ from dateutil.relativedelta import relativedelta
 
 
 class AssignationSeeker(object):
-    def __init__(self, usagetracker=None, assinationProvider=None):
+    def __init__(self, usagetracker=None, assignationProvider=None):
         self._usage = usagetracker
-        self._assignations = assinationProvider
+        self._assignations = assignationProvider
 
     def use_kwh(self, contract_id, start_date, end_date, fare, period, kwh):
         seek_start = start_date + relativedelta(years=-1)

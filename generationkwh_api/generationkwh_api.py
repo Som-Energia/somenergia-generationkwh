@@ -286,14 +286,21 @@ class GenerationkWhAssignments(osv.osv):
         polissa_id=fields.many2one(
             'giscedata.polissa',
             'Contract',
+            required=True,
             ),
         member_id=fields.many2one(
             'res.partner',
             'Member',
+            required=True,
             ),
         priority=fields.integer(
             'Priority',
-            )
+            required=True,
+            ),
+        end_date=fields.date(
+            'Expiration date',
+            help="Date at which the rule is no longer active",
+            ),
         )
     def add(self, cr, uid, assignments, context=None):
         for active, polissa_id, member_id, priority in assignments:
@@ -303,7 +310,8 @@ class GenerationkWhAssignments(osv.osv):
             ], context = context)
             if same_polissa_member:
                 self.write(cr,uid,same_polissa_member, {
-                    'active': False},    
+                    'active': False,
+                    'end_date': str(datetime.date.today())},    
                     context=context
                 )
             self.create(cr, uid,{
