@@ -54,6 +54,12 @@ class Assignment_Test(unittest.TestCase):
         gp=self.erp.GiscedataPolissa.browse([],limit=1)[0]
         self.setupProvider([[True,gp.id,rp.id,1],[True,gp.id,rp.id,1]])
         self.assertAllAssignmentsEqual([[False, gp.id, rp.id, 1], [True,gp.id,rp.id,1]])
+    
+    def test_change_priority(self):
+        rp=self.erp.ResPartner.browse([], limit=1)[0]
+        gp=self.erp.GiscedataPolissa.browse([],limit=1)[0]
+        self.setupProvider([[True,gp.id,rp.id,1],[True,gp.id,rp.id,2]])
+        self.assertAllAssignmentsEqual([[False, gp.id, rp.id, 1], [True,gp.id,rp.id,2]])
         
     def test_three_member_three_polissas(self):
         rp=self.erp.ResPartner.browse([],limit=3)

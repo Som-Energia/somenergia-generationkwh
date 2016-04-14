@@ -298,7 +298,6 @@ class GenerationkWhAssignments(osv.osv):
     def add(self, cr, uid, assignments, context=None):
         for active, polissa_id, member_id, priority in assignments:
             same_polissa_member = self.search(cr, uid, [
-                ('active', '=', True),
                 ('polissa_id', '=', polissa_id),
                 ('member_id', '=', member_id),
             ], context = context)
