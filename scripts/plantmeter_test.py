@@ -77,7 +77,7 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
                 self.setupMeter(plant_id, meter)
         return aggr
 
-    def setupPoints(self, points):
+    def setupPointsByDay(self, points):
         def datespan(startDate, endDate, delta=datetime.timedelta(hours=1)):
             currentDate = startDate
             while currentDate < endDate:
@@ -92,28 +92,78 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
                     name=meter,
                     ae=value)
 
-    def test_GenerationkwhProductionAggregator_getwhOnePlantSummer(self):
+    def setupPointsByHour(self, points):
+        for meter, date, value in points:
+            self.curveProvider.fillPoint(
+                datetime=localTime(date),
+                name=meter,
+                ae=value)
+
+    def test_GenerationkwhProductionAggregator_getwh_onePlant_withNoPoints(self):
         aggr_id = self.setupAggregator(
                 nplants=1,
                 nmeters=1).read(['id'])['id']
 
-        self.setupPoints([
+        self.setupPointsByDay([
+            ('mymeter0', '2015-08-16', '2015-08-16', 24*[10])
+            ])
+        production = self.c.GenerationkwhProductionAggregator.getWh(
+                aggr_id, '2015-08-17', '2015-08-17')
+        self.assertEqual(production, 25*[0])
+
+    def test_GenerationkwhProductionAggregator_getwh_onePlant_winter(self):
+        aggr_id = self.setupAggregator(
+                nplants=1,
+                nmeters=1).read(['id'])['id']
+
+        self.setupPointsByDay([
+            ('mymeter0', '2015-03-16', '2015-03-16', 24*[10])
+            ])
+        production = self.c.GenerationkwhProductionAggregator.getWh(
+                aggr_id, '2015-03-16', '2015-03-16')
+        self.assertEqual(production, [0]+24*[10])
+
+    def test_GenerationkwhProductionAggregator_getwh_onePlant_winterToSummer(self):
+        aggr_id = self.setupAggregator(
+                nplants=1,
+                nmeters=1).read(['id'])['id']
+
+        self.setupPointsByHour([
+            ('mymeter0', '2015-03-29 00:00:00', 1),
+            ('mymeter0', '2015-03-29 01:00:00', 2),
+            ('mymeter0', '2015-03-29 03:00:00', 3),
+            ('mymeter0', '2015-03-29 23:00:00', 4)
+            ])
+        production = self.c.GenerationkwhProductionAggregator.getWh(
+                aggr_id, '2015-03-29', '2015-03-29')
+        self.assertEqual(production, [0,1,2,3]+19*[0]+[4,0])
+
+    def test_GenerationkwhProductionAggregator_getwh_onePlant_summer(self):
+        aggr_id = self.setupAggregator(
+                nplants=1,
+                nmeters=1).read(['id'])['id']
+
+        self.setupPointsByDay([
             ('mymeter0', '2015-08-16', '2015-08-16', 24*[10])
             ])
         production = self.c.GenerationkwhProductionAggregator.getWh(
                 aggr_id, '2015-08-16', '2015-08-16')
         self.assertEqual(production, 24*[10]+[0])
 
-    def test_GenerationkwhProductionAggregator_getwhOnePlantWinter(self):
+    def test_GenerationkwhProductionAggregator_getwh_onePlant_summerToWinter(self):
         aggr_id = self.setupAggregator(
                 nplants=1,
                 nmeters=1).read(['id'])['id']
 
-        self.setupPoints([
-            ('mymeter0', '2015-03-16', '2015-03-16', 24*[10])
+        self.setupPointsByHour([
+            ('mymeter0','2015-10-25 00:00:00', 1),
+            ('mymeter0','2015-10-25 02:00:00S', 2),
+            ('mymeter0','2015-10-25 02:00:00', 3),
+            ('mymeter0','2015-10-25 23:00:00', 4)
             ])
         production = self.c.GenerationkwhProductionAggregator.getWh(
-                aggr_id, '2015-03-16', '2015-03-16')
-        self.assertEqual(production, [0]+24*[10])
+                aggr_id, '2015-10-25', '2015-10-25')
+        self.assertEqual(production, [1,0,2,3]+20*[0]+[4])
+
 
 # vim: et ts=4 sw=4
