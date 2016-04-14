@@ -8,7 +8,7 @@
   "depends": ['base', 'som_polissa_soci'],
   "init_xml": [],
   "demo_xml": [],
-  "update_xml": ["generationkwh_api_data.xml", "giscedata_facturacio_view.xml", "generationkwh_api_view.xml", "security/ir.model.access.csv"],
+  "update_xml": ["security/generationkwh_api_security.xml", "generationkwh_api_data.xml", "giscedata_facturacio_view.xml", "generationkwh_api_view.xml", "security/ir.model.access.csv"],
   "active": False,
   "installable": True
 }
