@@ -8,6 +8,7 @@ except ImportError:
     pass
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Assignment_Test(unittest.TestCase):
+
     def setUp(self):
         self.erp = erppeek.Client(**dbconfig.erppeek)
         self.Assignments = self.erp.GenerationkwhAssignments
@@ -33,10 +34,17 @@ class Assignment_Test(unittest.TestCase):
         self.assertAssignmentsEqual([])
 
     def test_one_assignment(self):
-        rp=self.erp.ResPartner.browse([])[0]
-        gp=self.erp.GiscedataPolissa.browse([])[0]
+        rp=self.erp.ResPartner.browse([],limit=1)[0]
+        gp=self.erp.GiscedataPolissa.browse([], limit=1)[0]
         self.setupProvider([[True,gp.id,rp.id,1]])
         self.assertAssignmentsEqual([[True,gp.id,rp.id,1]])
+
+    """def test_no_duplication(self):
+        rp=self.erp.ResPartner.browse([], limit=1)[0]
+        gp=self.erp.GiscedataPolissa.browse([],limit=1)[0]
+        self.setupProvider([[True,gp.id,rp.id,1]])
+        self.assertAssignmentsEqual([[True,gp.id,rp.id,1]])"""
+        
 if __name__ == '__main__':
     unittest.main()
         
