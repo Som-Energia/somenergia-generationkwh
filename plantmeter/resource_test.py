@@ -258,7 +258,7 @@ class Resource_Test(unittest.TestCase):
         m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
         m2.updateWh(localDate(2015,8,4), localDate(2015,8,5))
 
-        self.assertEqual(aggr.lastMeasurementDate(), localDate(2015,8,5))
+        self.assertEqual(aggr.lastMeasurementDate(), localDate(2015,9,5))
 
     def test_firstDate_onePlantTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -312,7 +312,7 @@ class Resource_Test(unittest.TestCase):
         m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
         m2.updateWh(localDate(2015,8,4), localDate(2015,8,5))
 
-        self.assertEqual(aggr.lastMeasurementDate(), localDate(2015,8,5))
+        self.assertEqual(aggr.lastMeasurementDate(), localDate(2015,9,5))
 
     def test_firstDate_twoPlantsTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')

@@ -48,7 +48,7 @@ class ProductionAggregator(Resource):
             ])
 
     def lastMeasurementDate(self):
-        return min([
+        return max([
             plant.lastMeasurementDate()
             for plant in self.plants
             if plant.enabled
@@ -70,7 +70,7 @@ class ProductionPlant(Resource):
         return [meter.updateWh(start, end) for meter in self.meters]
 
     def lastMeasurementDate(self):
-        return min([
+        return max([
             meter.lastMeasurementDate()
             for meter in self.meters
             if meter.enabled

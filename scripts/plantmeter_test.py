@@ -350,11 +350,59 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
                     nplants=1,
                     nmeters=1).read(['id'])['id']
             self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
-                ('2015-08-16', '2015-08-16', 'S', 10*[0]+14*[10])
+                ('2015-08-16', '2015-08-17', 'S', 10*[0]+14*[10]+10*[0]+14*[10])
                 ])
             self.c.GenerationkwhProductionAggregator.updateWh(
-                    aggr_id, '2015-08-16', '2015-08-16')
+                    aggr_id, '2015-08-16', '2015-08-17')
 
             date = self.c.GenerationkwhProductionAggregator.firstMeasurementDate(aggr_id)
             self.assertEqual(date, '2015-08-16 00:00:00')
+
+    def test_GenerationkwhProductionAggregator_firstMeasurementDate_twoPlant(self):
+            aggr_id = self.setupAggregator(
+                    nplants=2,
+                    nmeters=1).read(['id'])['id']
+            self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
+                ('2015-08-16', '2015-08-16', 'S', 10*[0]+14*[10])
+                ])
+            self.setupLocalMeter(os.path.join(self.tempdir,'mymeter10'),[
+                ('2015-08-17', '2015-08-17', 'S', 10*[0]+14*[20])
+                ])
+            self.c.GenerationkwhProductionAggregator.updateWh(
+                    aggr_id, '2015-08-16', '2015-08-17')
+
+            date = self.c.GenerationkwhProductionAggregator.firstMeasurementDate(aggr_id)
+            self.assertEqual(date, '2015-08-16 00:00:00')
+
+    def test_GenerationkwhProductionAggregator_lastMeasurementDate_onePlant(self):
+            aggr_id = self.setupAggregator(
+                    nplants=1,
+                    nmeters=1).read(['id'])['id']
+            self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
+                ('2015-08-16', '2015-08-17', 'S', 10*[0]+14*[10]+10*[0]+14*[10])
+                ])
+            self.c.GenerationkwhProductionAggregator.updateWh(
+                    aggr_id, '2015-08-16', '2015-08-17')
+
+            date = self.c.GenerationkwhProductionAggregator.lastMeasurementDate(aggr_id)
+            self.assertEqual(date, '2015-08-17 00:00:00')
+
+    def test_GenerationkwhProductionAggregator_lastMeasurementDate_twoPlant(self):
+            aggr_id = self.setupAggregator(
+                    nplants=2,
+                    nmeters=1).read(['id'])['id']
+            self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
+                ('2015-08-16', '2015-08-16', 'S', 10*[0]+14*[10])
+                ])
+            self.setupLocalMeter(os.path.join(self.tempdir,'mymeter10'),[
+                ('2015-08-17', '2015-08-17', 'S', 10*[0]+14*[20])
+                ])
+            self.c.GenerationkwhProductionAggregator.updateWh(
+                    aggr_id, '2015-08-16', '2015-08-17')
+
+            date = self.c.GenerationkwhProductionAggregator.lastMeasurementDate(aggr_id)
+            self.assertEqual(date, '2015-08-17 00:00:00')
+
+
+
 # vim: et ts=4 sw=4

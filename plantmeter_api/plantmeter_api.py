@@ -59,7 +59,7 @@ class GenerationkwhProductionAggregator(osv.osv):
         aggr = self.browse(cursor, uid, pid, context)
         _aggr = self._createAggregator(aggr, args)
         date = _aggr.firstMeasurementDate()
-        return toStr(_aggr.firstMeasurementDate()) if date else ''
+        return toStr(date) if date else ''
 
     def lastMeasurementDate(self, cursor, uid, pid, context=None):
         '''Get last measurement date'''
@@ -72,7 +72,8 @@ class GenerationkwhProductionAggregator(osv.osv):
         args = ['name', 'description', 'enabled']
         aggr = self.browse(cursor, uid, pid, context)
         _aggr = self._createAggregator(aggr, args)
-        return _aggr.lastMeasurementDate()
+        date = _aggr.lastMeasurementDate()
+        return toStr(date) if date else ''
 
     def _createAggregator(self, aggr, args):
         def obj_to_dict(obj, attrs):
