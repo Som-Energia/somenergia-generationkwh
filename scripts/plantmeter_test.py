@@ -345,7 +345,7 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
             date = self.c.GenerationkwhProductionAggregator.firstMeasurementDate(aggr_id)
             self.assertEqual(date, '')
 
-    def _test_GenerationkwhProductionAggregator_firstMeasurementDate_onePlant(self):
+    def test_GenerationkwhProductionAggregator_firstMeasurementDate_onePlant(self):
             aggr_id = self.setupAggregator(
                     nplants=1,
                     nmeters=1).read(['id'])['id']
@@ -356,5 +356,5 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
                     aggr_id, '2015-08-16', '2015-08-16')
 
             date = self.c.GenerationkwhProductionAggregator.firstMeasurementDate(aggr_id)
-            self.assertEqual(date, '2015-08-16')
+            self.assertEqual(date, '2015-08-16 00:00:00')
 # vim: et ts=4 sw=4

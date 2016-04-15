@@ -180,10 +180,8 @@ class MongoTimeCurve(object):
                 .sort('datetime', order)
                 .limit(1)
                 ):
-            return toLocal(datetime.datetime.combine(
-                ns(point).datetime.date(),
-                datetime.time(0,0,0)))
-
+            return toLocal(asUtc(ns(point).datetime)).replace(
+                    hour=0,minute=0,second=0)
         return None
 
     def firstDate(self, name):

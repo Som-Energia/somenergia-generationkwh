@@ -230,9 +230,9 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m)
         aggr = ProductionAggregator('aggrName','aggreDescription',True)
         aggr.plants.append(p)
-        m.updateWh(localDate(2015,9,3), localDate(2015,9,5))
+        m.updateWh(localDate(2015,9,4), localDate(2015,9,5))
 
-        self.assertEqual(aggr.firstMeasurementDate(), localDate(2015,9,3))
+        self.assertEqual(aggr.firstMeasurementDate(), localDate(2015,9,4))
 
     def test_lastDate_onePlantTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -281,10 +281,10 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m2)
         aggr = ProductionAggregator('aggrName','aggreDescription',True)
         aggr.plants.append(p)
-        m1.updateWh(localDate(2015,9,3), localDate(2015,9,5))
-        m2.updateWh(localDate(2015,8,3), localDate(2015,8,5))
+        m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
+        m2.updateWh(localDate(2015,8,4), localDate(2015,8,5))
 
-        self.assertEqual(aggr.firstMeasurementDate(), localDate(2015,8,3))
+        self.assertEqual(aggr.firstMeasurementDate(), localDate(2015,8,4))
 
     def test_lastDate_twoPlantsTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -337,10 +337,10 @@ class Resource_Test(unittest.TestCase):
         aggr = ProductionAggregator('aggrName','aggreDescription',True)
         aggr.plants.append(p1)
         aggr.plants.append(p2)
-        m1.updateWh(localDate(2015,9,3), localDate(2015,9,5))
-        m2.updateWh(localDate(2015,8,3), localDate(2015,8,5))
+        m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
+        m2.updateWh(localDate(2015,8,4), localDate(2015,8,5))
 
-        self.assertEqual(aggr.firstMeasurementDate(), localDate(2015,8,3))
+        self.assertEqual(aggr.firstMeasurementDate(), localDate(2015,8,4))
 
 class Meter_Test(unittest.TestCase):
     def setUp(self):
@@ -425,8 +425,8 @@ class Meter_Test(unittest.TestCase):
             True,
             uri = self.uri,
             curveProvider = self.curveProvider)
-        m.updateWh(localDate(2015,9,3), localDate(2015,9,5))
-        self.assertEqual(m.firstMeasurementDate(), localDate(2015,9,3))
+        m.updateWh(localDate(2015,9,4), localDate(2015,9,5))
+        self.assertEqual(m.firstMeasurementDate(), localDate(2015,9,4))
 
 
 unittest.TestCase.__str__ = unittest.TestCase.id
