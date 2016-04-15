@@ -66,6 +66,11 @@ class LocalTime_Test(unittest.TestCase):
             str(localTime("2016-03-27 02:00:00")),
             "2016-03-27 02:00:00+01:00")
 
+    def test_localTime_atWinterMidnight(self):
+        self.assertEqual(
+            str(localTime("2016-01-01 00:00:00")),
+            "2016-01-01 00:00:00+01:00")
+
     def test_assertLocalDateTime_withDate(self):
         with self.assertRaises(AssertionError) as ctx:
             assertLocalDateTime('myname', datetime.date(2016,01,01))
@@ -471,7 +476,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
         lastdate = mtc.lastDate('miplanta')
         self.assertEqual(lastdate,isodate('2015-01-01'))
 
-    def _test_lastDate_withOnePoint_takesItSofDay(self):
+    def test_lastDate_withOnePoint_atMidnight(self):
         mtc = self.setupPoints([
             ('2015-01-01 00:00:00', 'miplanta', 30),
             ])

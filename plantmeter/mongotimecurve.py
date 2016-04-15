@@ -117,7 +117,6 @@ class MongoTimeCurve(object):
     """Consolidates curve data in a mongo database"""
 
     def __init__(self, mongodb, collection):
-        ""
         self.db = mongodb
         self.collectionName = collection
         self.collection = self.db[collection]
