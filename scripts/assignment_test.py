@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
+import datetime
 dbconfig = None
 try:
     import dbconfig
@@ -30,6 +31,7 @@ class Assignment_Test(unittest.TestCase):
                     r.contract_id.id,
                     r.member_id.id,
                     r.priority,
+                    r.end_date,
                 ]
                 for r in result
             ],expectation)
@@ -61,7 +63,7 @@ class Assignment_Test(unittest.TestCase):
             priority = 0,
             ))
         self.assertAllAssignmentsEqual([
-            [True, contract.id, member.id, 0]
+            [True, contract.id, member.id, 0, False]
             ])
 
     def test_create_priorityRequired(self):
@@ -132,8 +134,8 @@ class Assignment_Test(unittest.TestCase):
             [True, contract.id, member.id, 1],
             ])
         self.assertAllAssignmentsEqual([
-            [False, contract.id, member.id, 1],
-            [True, contract.id, member.id, 1],
+            [True, contract.id, member.id, 1, str(datetime.date.today())],
+            [True, contract.id, member.id, 1, False],
             ])
     
     def test_change_priority(self):
@@ -144,8 +146,8 @@ class Assignment_Test(unittest.TestCase):
             [True,contract.id,member.id,2],
             ])
         self.assertAllAssignmentsEqual([
-            [False, contract.id, member.id, 1],
-            [True,contract.id,member.id,2]
+            [True, contract.id, member.id, 1, str(datetime.date.today())],
+            [True, contract.id,member.id,2, False]
             ])
         
     def test_three_member_three_polissas(self):

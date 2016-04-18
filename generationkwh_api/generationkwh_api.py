@@ -318,6 +318,8 @@ class GenerationkWhAssignments(osv.osv):
     def add(self, cr, uid, assignments, context=None):
         for active, contract_id, member_id, priority in assignments:
             same_polissa_member = self.search(cr, uid, [
+                '|', ('end_date', '<', str(datetime.date.today())),
+                    ('end_date','=',False),
                 ('contract_id', '=', contract_id),
                 ('member_id', '=', member_id),
             ], context = context)
@@ -325,13 +327,13 @@ class GenerationkWhAssignments(osv.osv):
                 self.write(cr,uid,
                     same_polissa_member,
                     dict(
-                        active=False,
+                        #active=False,
                         end_date=str(datetime.date.today()),
                     ),
                     context=context,
                 )
             self.create(cr, uid, {
-                'active': active,
+                #'active': active,
                 'contract_id': contract_id,
                 'member_id': member_id,
                 'priority': priority,
