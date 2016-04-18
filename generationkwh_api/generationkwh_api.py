@@ -282,10 +282,6 @@ class GenerationkWhAssignments(osv.osv):
     _name = 'generationkwh.assignments'
 
     _columns = dict(
-        active=fields.boolean(
-            "Active",
-            default=True,
-            ),
         contract_id=fields.many2one(
             'giscedata.polissa',
             'Contract',
@@ -311,12 +307,9 @@ class GenerationkWhAssignments(osv.osv):
             help="Date at which the rule is no longer active",
             ),
         )
-    _defaults = dict(
-        active=lambda *a: 1,
-        )
 
     def add(self, cr, uid, assignments, context=None):
-        for active, contract_id, member_id, priority in assignments:
+        for contract_id, member_id, priority in assignments:
             same_polissa_member = self.search(cr, uid, [
                 '|', ('end_date', '<', str(datetime.date.today())),
                     ('end_date','=',False),
@@ -327,13 +320,11 @@ class GenerationkWhAssignments(osv.osv):
                 self.write(cr,uid,
                     same_polissa_member,
                     dict(
-                        #active=False,
                         end_date=str(datetime.date.today()),
                     ),
                     context=context,
                 )
             self.create(cr, uid, {
-                #'active': active,
                 'contract_id': contract_id,
                 'member_id': member_id,
                 'priority': priority,
@@ -342,9 +333,6 @@ class GenerationkWhAssignments(osv.osv):
     def dropAll(self, cr, uid, context=None):
         """Remove all records"""
         ids = self.search(cr, uid, [
-            '|',
-            ('active', '=', False),
-            ('active', '=', True),
             ],context=context)
         for a in self.browse(cr, uid, ids, context=context):
             a.unlink()
