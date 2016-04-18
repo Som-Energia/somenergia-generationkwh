@@ -70,7 +70,8 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
             aggr_id=aggr_id,
             name='myplant%d' % plant,
             description='myplant%d' % plant,
-            enabled=True))
+            enabled=True,
+            nshares=1000*(plant+1)))
 
     def setupMeter(self, plant_id, plant, meter):
         meter_obj = self.c.model('generationkwh.production.meter')
@@ -403,6 +404,18 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
             date = self.c.GenerationkwhProductionAggregator.lastMeasurementDate(aggr_id)
             self.assertEqual(date, '2015-08-17 00:00:00')
 
+    def test_GenerationkwhProductionAggregator_getNshares_onePlant(self):
+            aggr_id = self.setupAggregator(
+                    nplants=1,
+                    nmeters=1).read(['id'])['id']
+            shares = self.c.GenerationkwhProductionAggregator.getNshares(aggr_id)
+            self.assertEqual(shares, 1000)
 
+    def test_GenerationkwhProductionAggregator_getNshares_twoPlant(self):
+            aggr_id = self.setupAggregator(
+                    nplants=2,
+                    nmeters=1).read(['id'])['id']
+            shares = self.c.GenerationkwhProductionAggregator.getNshares(aggr_id)
+            self.assertEqual(shares, 3000)
 
 # vim: et ts=4 sw=4

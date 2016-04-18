@@ -75,6 +75,17 @@ class GenerationkwhProductionAggregator(osv.osv):
         date = _aggr.lastMeasurementDate()
         return toStr(date) if date else ''
 
+    def getNshares(self, cursor, uid, pid, context=None):
+        '''Get number of shares'''
+
+        if not context:
+            context = {}
+        if isinstance(pid, list) or isinstance(pid, tuple):
+            pid = pid[0]
+
+        aggr = self.browse(cursor, uid, pid, context)
+        return sum([plant.nshares for plant in aggr.plants])
+
     def _createAggregator(self, aggr, args):
         def obj_to_dict(obj, attrs):
             return {attr: getattr(obj, attr) for attr in attrs}
@@ -110,6 +121,7 @@ class GenerationkwhProductionPlant(osv.osv):
         'name': fields.char('Name', size=50),
         'description': fields.char('Description', size=150),
         'enabled': fields.boolean('Enabled'),
+        'nshares': fields.integer('Number of shares'),
         'aggr_id': fields.many2one('generationkwh.production.aggregator', 'Production aggregator',
                                   required=True),
         'meters': fields.one2many('generationkwh.production.meter', 'plant_id', 'Meters')
