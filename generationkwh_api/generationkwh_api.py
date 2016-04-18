@@ -44,6 +44,16 @@ class RemainderProvider(ErpWrapper):
         remainders=self.erp.pool('generationkwh.remainders')
         remainders.add(self.cursor,self.uid,remainders, context=self.context)
 
+
+class AssignmentsProvider(ErpWrapper):
+    def seek(self, contract_id):
+        self.cursor.execute("""
+            select assignments.member_id
+            from generationkwh_assignments as assignments 
+            where assignments.contract_id = {} 
+        """.format(contract_id))
+        return [dict(member_id=assignment[0]) for assignment in self.cursor.fetchall()]
+
 class InvestmentProvider(ErpWrapper):
 
     def shareContractsTuple(self, member=None, start=None, end=None):
@@ -119,6 +129,12 @@ class GenerationkWhTestHelper(osv.osv):
 
     _name = 'generationkwh.testhelper'
     _auto = False
+
+    def assignments(self, cursor, uid, contract_id, context=None):
+        print "before provider init"
+        assignmentsProvider = AssignmentsProvider(self, cursor, uid, context)
+        print "after provider init"
+        return assignmentsProvider.seek(contract_id)
 
     def holidays(self, cursor, uid,
             start, stop,

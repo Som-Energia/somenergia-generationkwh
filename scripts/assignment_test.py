@@ -2,6 +2,7 @@
 import unittest
 import datetime
 dbconfig = None
+from yamlns import namespace as ns
 try:
     import dbconfig
     import erppeek
@@ -15,9 +16,16 @@ class Assignment_Test(unittest.TestCase):
         self.erp = erppeek.Client(**dbconfig.erppeek)
         self.Assignments = self.erp.GenerationkwhAssignments
         self.Assignments.dropAll()
+        self.Helper = self.erp.GenerationkwhTesthelper
 
     def setupProvider(self,assignments=[]):
         self.Assignments.add(assignments)
+    
+
+    def assertAssignmentsSeekEqual(self, contract_id, expectation):
+        result = self.Helper.assignments(contract_id)
+        expectation=[dict(expect_elem) for expect_elem in expectation]
+        self.assertEqual(result,expectation)
 
     def assertAllAssignmentsEqual(self, expectation):
         result = self.Assignments.browse([
@@ -181,6 +189,25 @@ class Assignment_Test(unittest.TestCase):
             for gp_iter in contracts
             ])
 
+    def test_seek_no_assignment(self):
+        self.setupProvider()
+        contract_id=self.erp.GiscedataPolissa.browse([], limit=1)[0].id
+        self.assertAssignmentsSeekEqual(contract_id, [])
+    
+    def test_seek_one_assignment(self):
+        contract_id=self.erp.GiscedataPolissa.browse([], limit=1)[0].id
+        member_id=self.erp.ResPartner.browse([], limit=1)[0].id
+        self.setupProvider([
+            [contract_id,member_id,1]
+        ])
+        self.assertAssignmentsSeekEqual(contract_id, [
+            ns(
+                member_id=member_id,
+            ),
+        ])
+
+
+            
 if __name__ == '__main__':
     unittest.main()
 
