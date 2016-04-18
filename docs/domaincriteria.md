@@ -61,7 +61,7 @@ Dealing
         - left unassigned if no contracts have the investor as payer or owner
     - A mail will be sent
         - At start of generation or whenever a new investment is created
-        - Telling the assignation if any by default and why
+        - Telling the assignment if any by default and why
         - Telling the means to change it.
             By now mail to generationkwh@somenergia.coop + ERP operator.
             Eventually using the virtual office.

@@ -3,16 +3,16 @@
 from dateutil.relativedelta import relativedelta
 
 
-class AssignationSeeker(object):
-    def __init__(self, usagetracker=None, assignationProvider=None):
+class AssignmentSeeker(object):
+    def __init__(self, usagetracker=None, assignmentProvider=None):
         self._usage = usagetracker
-        self._assignations = assignationProvider
+        self._assignments = assignmentProvider
 
     def use_kwh(self, contract_id, start_date, end_date, fare, period, kwh):
         seek_start = start_date + relativedelta(years=-1)
-        assignations = self._assignations.seek(contract_id)
+        assignments = self._assignments.seek(contract_id)
         used = 0
-        for asig in assignations:
+        for asig in assignments:
             seek_end = min(end_date,asig.last_usable_date)
             if seek_end<seek_start: continue
             used += self._usage.use_kwh(

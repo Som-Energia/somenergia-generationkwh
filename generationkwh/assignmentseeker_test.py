@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from .assignationseeker import AssignationSeeker
+from .assignmentseeker import AssignmentSeeker
 import datetime
 from plantmeter.mongotimecurve import toLocal
 from yamlns import namespace as ns
@@ -9,12 +9,12 @@ from yamlns import namespace as ns
 def localisodate(string):
     return toLocal(datetime.datetime.strptime(string, "%Y-%m-%d"))
 
-class AssignationsMockup(object):
-    def __init__(self, assignations):
-        self._assignations = assignations
+class AssignmentsMockup(object):
+    def __init__(self, assignments):
+        self._assignments = assignments
 
     def seek(self, contract_id):
-        return self._assignations
+        return self._assignments
 
 
 class UsageTrackerMockup(object):
@@ -34,7 +34,7 @@ class UsageTrackerMockup(object):
 
 
 
-class AssignationSeeker_Test(unittest.TestCase):
+class AssignmentSeeker_Test(unittest.TestCase):
 
     def test_trackerMockup_withNoCalls(self):
 
@@ -91,10 +91,10 @@ class AssignationSeeker_Test(unittest.TestCase):
         ])
 
 
-    def test_assign_withoutAssignations(self):
+    def test_assign_withoutAssignns(self):
         t = UsageTrackerMockup([])
-        a = AssignationsMockup([])
-        s = AssignationSeeker(usagetracker=t, assignationProvider=a)
+        a = AssignmentsMockup([])
+        s = AssignmentSeeker(usagetracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
@@ -108,16 +108,16 @@ class AssignationSeeker_Test(unittest.TestCase):
             ])
         self.assertEqual(result, 0)
         
-    def test_assign_singleAssignation_prioritariesDoNotInterfere(self):
+    def test_assign_singleAssignment_prioritariesDoNotInterfere(self):
         t = UsageTrackerMockup([20])
-        a = AssignationsMockup([
+        a = AssignmentsMockup([
             ns(
                 member_id='member1',
                 last_usable_date=localisodate('2015-10-01'),
             ),
             ])
 
-        s = AssignationSeeker(usagetracker=t, assignationProvider=a)
+        s = AssignmentSeeker(usagetracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
@@ -137,16 +137,16 @@ class AssignationSeeker_Test(unittest.TestCase):
         self.assertEqual(result, 20)
         
         
-    def test_assign_singleAssignation_prioritariesDoInterfere(self):
+    def test_assign_singleAssignment_prioritariesDoInterfere(self):
         t = UsageTrackerMockup([10])
-        a = AssignationsMockup([
+        a = AssignmentsMockup([
             ns(
                 member_id='member1',
                 last_usable_date=localisodate('2014-10-01'),
             ),
             ])
 
-        s = AssignationSeeker(usagetracker=t, assignationProvider=a)
+        s = AssignmentSeeker(usagetracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
@@ -165,16 +165,16 @@ class AssignationSeeker_Test(unittest.TestCase):
         
         self.assertEqual(result, 10)
         
-    def test_assign_singleAssignation_prioritariesHaveOldInvoicing(self):
+    def test_assign_singleAssignment_prioritariesHaveOldInvoicing(self):
         t = UsageTrackerMockup([20])
-        a = AssignationsMockup([
+        a = AssignmentsMockup([
             ns(
                 member_id='member1',
                 last_usable_date=localisodate('2013-10-01'),
             ),
             ])
 
-        s = AssignationSeeker(usagetracker=t, assignationProvider=a)
+        s = AssignmentSeeker(usagetracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
@@ -191,9 +191,9 @@ class AssignationSeeker_Test(unittest.TestCase):
         
         
 
-    def test_assign_manyAssignations_prioritariesDontInterfere(self):
+    def test_assign_manyAssignments_prioritariesDontInterfere(self):
         t = UsageTrackerMockup([20,30])
-        a = AssignationsMockup([
+        a = AssignmentsMockup([
             ns(
                 member_id='member1',
                 last_usable_date=localisodate('2015-10-01'),
@@ -204,7 +204,7 @@ class AssignationSeeker_Test(unittest.TestCase):
             ),
             ])
 
-        s = AssignationSeeker(usagetracker=t, assignationProvider=a)
+        s = AssignmentSeeker(usagetracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
@@ -228,9 +228,9 @@ class AssignationSeeker_Test(unittest.TestCase):
         self.assertEqual(result, 20+30)
         
         
-    def test_assign_manyAssignations_firstHaveOldInvoicing(self):
+    def test_assign_manyAssignments_firstHaveOldInvoicing(self):
         t = UsageTrackerMockup([30])
-        a = AssignationsMockup([
+        a = AssignmentsMockup([
             ns(
                 member_id='member1',
                 last_usable_date=localisodate('2013-10-01'),
@@ -241,7 +241,7 @@ class AssignationSeeker_Test(unittest.TestCase):
             ),
             ])
 
-        s = AssignationSeeker(usagetracker=t, assignationProvider=a)
+        s = AssignmentSeeker(usagetracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),

@@ -301,8 +301,8 @@ class GenerationkWhAssignments(osv.osv):
         priority=fields.integer(
             'Priority',
             required=True,
-            help="Assignation precedence. "
-                "This assignation won't use rights generated on dates that have not "
+            help="Assignment precedence. "
+                "This assignment won't use rights generated on dates that have not "
                 "been invoiced yet by assignments of the same member having higher priority "
                 "(lower the value, higher the priority).",
             ),
