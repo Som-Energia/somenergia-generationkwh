@@ -398,6 +398,7 @@ class AssignmentsProvider(ErpWrapper):
             LEFT JOIN generationkwh_assignments AS peer
                 ON ass.member_id = peer.member_id
                 AND peer.contract_id != ass.contract_id
+                AND peer.priority < ass.priority
             LEFT JOIN (
                 SELECT
                     id,
@@ -425,15 +426,6 @@ class AssignmentsProvider(ErpWrapper):
             for member, last_usable_date, _
             in self.cursor.fetchall()
             ]
-
-        self.cursor.execute("""
-            select assignments.member_id
-            from generationkwh_assignments as assignments 
-            where assignments.contract_id = %(contract) 
-        """, dict(contract=contract_id))
-        return [ns(member_id=assignment[0]) for assignment in self.cursor.fetchall()]
-
-
 
 
 class GenerationkWhInvestment(osv.osv):

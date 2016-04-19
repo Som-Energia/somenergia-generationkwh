@@ -224,12 +224,11 @@ class AssigmentProvider_Test(unittest.TestCase):
         expectation=[dict(expect_elem) for expect_elem in expectation]
         self.assertEqual(result,expectation)
 
-    def test_seek_no_assignment(self):
+    def test_seek_noAssignment(self):
         self.setupAssignments([])
-        
         self.assertAssignmentsSeekEqual(self.contract, [])
     
-    def test_seek_oneAssignment_noCompetition(self):
+    def test_seek_oneAssignment_noCompetitors(self):
         self.setupAssignments([
             [self.contract,self.member,1],
         ])
@@ -240,17 +239,17 @@ class AssigmentProvider_Test(unittest.TestCase):
             ),
         ])
 
-    def test_seek_ignoresAssigmentsForOtherContracts(self):
+    def test_seek_assigmentsForOtherContracts_ignored(self):
         self.setupAssignments([
             [self.contract2,self.member,1],
         ])
         self.assertAssignmentsSeekEqual(self.contract, [
         ])
 
-    def test_seek_manyAssignment_noCompetition(self):
+    def test_seek_manyAssignments_noCompetitors(self):
         self.setupAssignments([
             [self.contract,self.member,1],
-            [self.contract,self.member2,1],
+            [self.contract,self.member2,0],
         ])
         self.assertAssignmentsSeekEqual(self.contract, [
             ns(
@@ -263,10 +262,10 @@ class AssigmentProvider_Test(unittest.TestCase):
             ),
         ])
 
-    def test_seek_oneAssignment_withCompetitionWithoutInvoices(self):
+    def test_seek_competitorWithoutInvoices_takesActivationDate(self):
         self.setupAssignments([
             [self.contract,self.member,1],
-            [self.newContract,self.member,1],
+            [self.newContract,self.member,0],
         ])
         self.assertAssignmentsSeekEqual(self.contract, [
             ns(
@@ -275,10 +274,10 @@ class AssigmentProvider_Test(unittest.TestCase):
             ),
         ])
 
-    def test_seek_oneAssignment_withCompetitionWithInvoices(self):
+    def test_seek_competitorWithInvoices_takesLastInvoicedDate(self):
         self.setupAssignments([
             [self.contract,self.member,1],
-            [self.contract2,self.member,1],
+            [self.contract2,self.member,0],
         ])
         self.assertAssignmentsSeekEqual(self.contract, [
             ns(
@@ -286,6 +285,20 @@ class AssigmentProvider_Test(unittest.TestCase):
                 last_usable_date=self.contract2LastInvoicedDate,
             ),
         ])
+
+    def test_seek_competitorWithEqualOrLowerPriority_ignored(self):
+        self.setupAssignments([
+            [self.contract,self.member,1],
+            [self.contract2,self.member,1], # equal
+            [self.newContract,self.member,2], # lower (higher number)
+        ])
+        self.assertAssignmentsSeekEqual(self.contract, [
+            ns(
+                member_id=self.member,
+                last_usable_date=str(datetime.date.today()),
+            ),
+        ])
+
 
             
 if __name__ == '__main__':
