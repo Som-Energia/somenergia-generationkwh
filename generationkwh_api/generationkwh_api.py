@@ -373,7 +373,7 @@ class GenerationkWhAssignments(osv.osv):
 
     def expire(self, cr, ids, context=None):
         ""
-        
+
     def availableAssigmentsForContract(self, cursor, uid, contract_id, context=None):
         assignmentsProvider = AssignmentsProvider(self, cursor, uid, context)
         #Conversion of ns to dict in order to marshall to XML-RPC
@@ -388,11 +388,35 @@ class AssignmentsProvider(ErpWrapper):
     def seek(self, contract_id):
         self.cursor.execute("""
             SELECT
-                member_id AS member_id,
-                DATE(NOW()) AS last_usable_date,
+                ass.member_id AS member_id,
+                COALESCE(
+                    MAX(contracte.last_usable_date),
+                    DATE(NOW()) /* no peers, now */
+                ) AS last_usable_date,
                 FALSE
-            FROM generationkwh_assignments                
-        """)
+            FROM generationkwh_assignments AS ass
+            LEFT JOIN generationkwh_assignments AS peer
+                ON ass.member_id = peer.member_id
+                AND peer.contract_id != ass.contract_id
+            LEFT JOIN (
+                SELECT
+                    id,
+                    COALESCE(
+                        data_ultima_lectura,
+                        data_alta
+                    ) AS last_usable_date
+                FROM giscedata_polissa
+                ) AS contracte
+                ON contracte.id = peer.contract_id
+            WHERE ass.contract_id = %(contract_id)s
+            GROUP BY
+                ass.id,
+                ass.member_id,
+                FALSE
+            ORDER BY
+                ass.id,
+                FALSE
+        """, dict(contract_id=contract_id))
         return [
             ns(
                 member_id=member,

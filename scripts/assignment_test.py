@@ -190,8 +190,26 @@ class AssigmentProvider_Test(unittest.TestCase):
         self.erp = erppeek.Client(**dbconfig.erppeek)
         self.Assignments = self.erp.GenerationkwhAssignments
         self.Assignments.dropAll()
-        self.contract = self.erp.GiscedataPolissa.browse([], limit=1)[0].id
-        self.member = self.erp.ResPartner.browse([], limit=1)[0].id
+
+        self.member, self.member2 = [
+            m.id for m in self.erp.ResPartner.browse([], limit=2)]
+
+        contract, contract2 = [ c for c in self.erp.GiscedataPolissa.browse(
+                [('data_ultima_lectura','!=',False)], limit=2)
+            ]
+        self.contract = contract.id
+        self.contract2 = contract2.id
+        self.contractLastInvoicedDate = contract.data_ultima_lectura
+        self.contract2LastInvoicedDate = contract2.data_ultima_lectura
+
+        newContract, = self.erp.GiscedataPolissa.browse(
+                [('data_ultima_lectura','=',False),
+                 ('state','=','activa')], limit=1)
+        self.newContract = newContract.id
+        self.newContractActivationDate = newContract.data_alta
+
+    def tearDown(self):
+        self.Assignments.dropAll()
 
     def setupAssignments(self, assignments):
         for contract, member, priority in assignments:
@@ -213,27 +231,61 @@ class AssigmentProvider_Test(unittest.TestCase):
     
     def test_seek_oneAssignment_noCompetition(self):
         self.setupAssignments([
-            [self.contract,self.member,1]
+            [self.contract,self.member,1],
         ])
         self.assertAssignmentsSeekEqual(self.contract, [
             ns(
                 member_id=self.member,
                 last_usable_date=str(datetime.date.today()),
             ),
+        ])
+
+    def test_seek_ignoresAssigmentsForOtherContracts(self):
+        self.setupAssignments([
+            [self.contract2,self.member,1],
+        ])
+        self.assertAssignmentsSeekEqual(self.contract, [
         ])
 
     def test_seek_manyAssignment_noCompetition(self):
         self.setupAssignments([
-            [self.contract,self.member,1]
-            [self.contract,self.member2,1]
+            [self.contract,self.member,1],
+            [self.contract,self.member2,1],
         ])
         self.assertAssignmentsSeekEqual(self.contract, [
             ns(
                 member_id=self.member,
                 last_usable_date=str(datetime.date.today()),
             ),
+            ns(
+                member_id=self.member2,
+                last_usable_date=str(datetime.date.today()),
+            ),
         ])
 
+    def test_seek_oneAssignment_withCompetitionWithoutInvoices(self):
+        self.setupAssignments([
+            [self.contract,self.member,1],
+            [self.newContract,self.member,1],
+        ])
+        self.assertAssignmentsSeekEqual(self.contract, [
+            ns(
+                member_id=self.member,
+                last_usable_date=self.newContractActivationDate,
+            ),
+        ])
+
+    def test_seek_oneAssignment_withCompetitionWithInvoices(self):
+        self.setupAssignments([
+            [self.contract,self.member,1],
+            [self.contract2,self.member,1],
+        ])
+        self.assertAssignmentsSeekEqual(self.contract, [
+            ns(
+                member_id=self.member,
+                last_usable_date=self.contract2LastInvoicedDate,
+            ),
+        ])
 
             
 if __name__ == '__main__':
