@@ -15,6 +15,7 @@ from generationkwh.usagetracker import UsageTracker
 from generationkwh.productionloader import ProductionLoader
 from plantmeter.mongotimecurve import toLocal
 from yamlns import namespace as ns
+import dbutils
 
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -44,16 +45,6 @@ class RemainderProvider(ErpWrapper):
     def set(self,remainders):
         remainders=self.erp.pool.get('generationkwh.remainders')
         remainders.add(self.cursor,self.uid,remainders, context=self.context)
-
-
-class AssignmentsProvider(ErpWrapper):
-    def seek(self, contract_id):
-        self.cursor.execute("""
-            select assignments.member_id
-            from generationkwh_assignments as assignments 
-            where assignments.contract_id = {} 
-        """.format(contract_id))
-        return [dict(member_id=assignment[0]) for assignment in self.cursor.fetchall()]
 
 
 class ProductionAggregatorProvider(ErpWrapper):
@@ -162,12 +153,6 @@ class GenerationkWhTestHelper(osv.osv):
 
     _name = 'generationkwh.testhelper'
     _auto = False
-
-    def assignments(self, cursor, uid, contract_id, context=None):
-        print "before provider init"
-        assignmentsProvider = AssignmentsProvider(self, cursor, uid, context)
-        print "after provider init"
-        return assignmentsProvider.seek(contract_id)
 
     def holidays(self, cursor, uid,
             start, stop,
@@ -388,9 +373,43 @@ class GenerationkWhAssignments(osv.osv):
 
     def expire(self, cr, ids, context=None):
         ""
+        
+    def availableAssigmentsForContract(self, cursor, uid, contract_id, context=None):
+        assignmentsProvider = AssignmentsProvider(self, cursor, uid, context)
+        #Conversion of ns to dict in order to marshall to XML-RPC
+        return [dict(assign) for assign in assignmentsProvider.seek(contract_id)]
 
 
 GenerationkWhAssignments()
+
+
+
+class AssignmentsProvider(ErpWrapper):
+    def seek(self, contract_id):
+        self.cursor.execute("""
+            SELECT
+                member_id AS member_id,
+                DATE(NOW()) AS last_usable_date,
+                FALSE
+            FROM generationkwh_assignments                
+        """)
+        return [
+            ns(
+                member_id=member,
+                last_usable_date=last_usable_date,
+            )
+            for member, last_usable_date, _
+            in self.cursor.fetchall()
+            ]
+
+        self.cursor.execute("""
+            select assignments.member_id
+            from generationkwh_assignments as assignments 
+            where assignments.contract_id = %(contract) 
+        """, dict(contract=contract_id))
+        return [ns(member_id=assignment[0]) for assignment in self.cursor.fetchall()]
+
+
 
 
 class GenerationkWhInvestment(osv.osv):

@@ -22,11 +22,6 @@ class Assignment_Test(unittest.TestCase):
         self.Assignments.add(assignments)
     
 
-    def assertAssignmentsSeekEqual(self, contract_id, expectation):
-        result = self.Helper.assignments(contract_id)
-        expectation=[dict(expect_elem) for expect_elem in expectation]
-        self.assertEqual(result,expectation)
-
     def assertAllAssignmentsEqual(self, expectation):
         result = self.Assignments.browse([
             ])
@@ -189,20 +184,53 @@ class Assignment_Test(unittest.TestCase):
             for gp_iter in contracts
             ])
 
+class AssigmentProvider_Test(unittest.TestCase):
+
+    def setUp(self):
+        self.erp = erppeek.Client(**dbconfig.erppeek)
+        self.Assignments = self.erp.GenerationkwhAssignments
+        self.Assignments.dropAll()
+        self.contract = self.erp.GiscedataPolissa.browse([], limit=1)[0].id
+        self.member = self.erp.ResPartner.browse([], limit=1)[0].id
+
+    def setupAssignments(self, assignments):
+        for contract, member, priority in assignments:
+            self.Assignments.create(dict(
+                contract_id=contract,
+                member_id=member,
+                priority=priority,
+                ))
+
+    def assertAssignmentsSeekEqual(self, contract_id, expectation):
+        result = self.Assignments.availableAssigmentsForContract(contract_id)
+        expectation=[dict(expect_elem) for expect_elem in expectation]
+        self.assertEqual(result,expectation)
+
     def test_seek_no_assignment(self):
-        self.setupProvider()
-        contract_id=self.erp.GiscedataPolissa.browse([], limit=1)[0].id
-        self.assertAssignmentsSeekEqual(contract_id, [])
+        self.setupAssignments([])
+        
+        self.assertAssignmentsSeekEqual(self.contract, [])
     
-    def test_seek_one_assignment(self):
-        contract_id=self.erp.GiscedataPolissa.browse([], limit=1)[0].id
-        member_id=self.erp.ResPartner.browse([], limit=1)[0].id
-        self.setupProvider([
-            [contract_id,member_id,1]
+    def test_seek_oneAssignment_noCompetition(self):
+        self.setupAssignments([
+            [self.contract,self.member,1]
         ])
-        self.assertAssignmentsSeekEqual(contract_id, [
+        self.assertAssignmentsSeekEqual(self.contract, [
             ns(
-                member_id=member_id,
+                member_id=self.member,
+                last_usable_date=str(datetime.date.today()),
+            ),
+        ])
+
+    def test_seek_manyAssignment_noCompetition(self):
+        self.setupAssignments([
+            [self.contract,self.member,1]
+            [self.contract,self.member2,1]
+        ])
+        self.assertAssignmentsSeekEqual(self.contract, [
+            ns(
+                member_id=self.member,
+                last_usable_date=str(datetime.date.today()),
             ),
         ])
 
