@@ -184,7 +184,9 @@ class Assignment_Test(unittest.TestCase):
             for gp_iter in contracts
             ])
 
-class AssigmentProvider_Test(unittest.TestCase):
+
+@unittest.skipIf(not dbconfig, "depends on ERP")
+class AssignmentProvider_Test(unittest.TestCase):
 
     def setUp(self):
         self.erp = erppeek.Client(**dbconfig.erppeek)
