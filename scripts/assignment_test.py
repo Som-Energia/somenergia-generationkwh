@@ -213,9 +213,6 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.newContract = newContract.id
         self.newContractActivationDate = newContract.data_alta
 
-    def tearDown(self):
-        self.Assignments.dropAll()
-
     def setupAssignments(self, assignments):
         for contract, member, priority in assignments:
             self.Assignments.create(dict(
@@ -226,8 +223,17 @@ class AssignmentProvider_Test(unittest.TestCase):
 
     def assertAssignmentsSeekEqual(self, contract_id, expectation):
         result = self.Assignments.availableAssigmentsForContract(contract_id)
-        expectation=[dict(expect_elem) for expect_elem in expectation]
-        self.assertEqual(result,expectation)
+        self.assertEqual([
+            dict(
+                member_id=member_id,
+                last_usable_date=str(last_usable_date),
+            )
+            for member_id, last_usable_date in expectation
+            ], result)
+
+    def tearDown(self):
+        self.Assignments.dropAll()
+
 
     def test_seek_noAssignment(self):
         self.setupAssignments([])
@@ -235,90 +241,69 @@ class AssignmentProvider_Test(unittest.TestCase):
     
     def test_seek_oneAssignment_noCompetitors(self):
         self.setupAssignments([
-            [self.contract,self.member,1],
-        ])
+            (self.contract, self.member, 1),
+            ])
         self.assertAssignmentsSeekEqual(self.contract, [
-            ns(
-                member_id=self.member,
-                last_usable_date=str(datetime.date.today()),
-            ),
-        ])
+            (self.member, datetime.date.today()),
+            ])
 
     def test_seek_assigmentsForOtherContracts_ignored(self):
         self.setupAssignments([
-            [self.contract2,self.member,1],
-        ])
+            (self.contract2, self.member, 1),
+            ])
         self.assertAssignmentsSeekEqual(self.contract, [
         ])
 
     def test_seek_manyAssignments_noCompetitors(self):
         self.setupAssignments([
-            [self.contract,self.member,1],
-            [self.contract,self.member2,0],
-        ])
+            (self.contract, self.member, 1),
+            (self.contract, self.member2, 0),
+            ])
         self.assertAssignmentsSeekEqual(self.contract, [
-            ns(
-                member_id=self.member,
-                last_usable_date=str(datetime.date.today()),
-            ),
-            ns(
-                member_id=self.member2,
-                last_usable_date=str(datetime.date.today()),
-            ),
-        ])
+            (self.member, datetime.date.today()),
+            (self.member2, datetime.date.today()),
+            ])
 
     def test_seek_competitorWithoutInvoices_takesActivationDate(self):
         self.setupAssignments([
-            [self.contract,self.member,1],
-            [self.newContract,self.member,0],
-        ])
+            (self.contract, self.member, 1),
+            (self.newContract, self.member, 0),
+            ])
         self.assertAssignmentsSeekEqual(self.contract, [
-            ns(
-                member_id=self.member,
-                last_usable_date=self.newContractActivationDate,
-            ),
-        ])
+            (self.member, self.newContractActivationDate),
+            ])
 
     def test_seek_competitorWithInvoices_takesLastInvoicedDate(self):
         self.setupAssignments([
-            [self.contract,self.member,1],
-            [self.contract2,self.member,0],
-        ])
+            (self.contract, self.member, 1),
+            (self.contract2, self.member, 0),
+            ])
         self.assertAssignmentsSeekEqual(self.contract, [
-            ns(
-                member_id=self.member,
-                last_usable_date=self.contract2LastInvoicedDate,
-            ),
-        ])
+            (self.member, self.contract2LastInvoicedDate),
+            ])
 
     def test_seek_competitorWithEqualOrLowerPriority_ignored(self):
         self.setupAssignments([
-            [self.contract,self.member,1],
-            [self.contract2,self.member,1], # equal
-            [self.newContract,self.member,2], # lower (higher number)
-        ])
+            (self.contract, self.member, 1),
+            (self.contract2, self.member, 1), # equal
+            (self.newContract, self.member, 2), # lower (higher number)
+            ])
         self.assertAssignmentsSeekEqual(self.contract, [
-            ns(
-                member_id=self.member,
-                last_usable_date=str(datetime.date.today()),
-            ),
-        ])
+            (self.member, datetime.date.today()),
+            ])
 
     def test_seek_manyCompetitors_earlierLastInvoicedPrevails(self):
         self.setupAssignments([
-            [self.newContract,self.member,1],
-            [self.contract,self.member,0],
-            [self.contract2,self.member,0],
-        ])
+            (self.newContract,self.member,1),
+            (self.contract,self.member,0),
+            (self.contract2,self.member,0),
+            ])
         self.assertAssignmentsSeekEqual(self.newContract, [
-            ns(
-                member_id=self.member,
-                last_usable_date=str(min(
-                    self.contractLastInvoicedDate,
-                    self.contract2LastInvoicedDate,
-                    )),
-            ),
-        ])
+            (self.member, min(
+                self.contractLastInvoicedDate,
+                self.contract2LastInvoicedDate,
+                )),
+            ])
 
             
 if __name__ == '__main__':
