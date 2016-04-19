@@ -52,7 +52,7 @@ class AssignmentsProvider(ErpWrapper):
             from generationkwh_assignments as assignments 
             where assignments.contract_id = {} 
         """.format(contract_id))
-        return [dict(member_id=assignment[0]) for assignment in self.cursor.fetchall()]
+        return [ns(member_id=assignment[0]) for assignment in self.cursor.fetchall()]
 
 class InvestmentProvider(ErpWrapper):
 
@@ -131,10 +131,9 @@ class GenerationkWhTestHelper(osv.osv):
     _auto = False
 
     def assignments(self, cursor, uid, contract_id, context=None):
-        print "before provider init"
         assignmentsProvider = AssignmentsProvider(self, cursor, uid, context)
-        print "after provider init"
-        return assignmentsProvider.seek(contract_id)
+        #Conversion of ns to dict in order to marshall to XML-RPC
+        return [dict(assign) for assign in assignmentsProvider.seek(contract_id)]
 
     def holidays(self, cursor, uid,
             start, stop,
