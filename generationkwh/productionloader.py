@@ -21,12 +21,15 @@ TODO:
 
 """
 
-from plantmeter.mongotimecurve import addDays, assertLocalDateTime
+from plantmeter.mongotimecurve import addDays, assertLocalDateTime, toLocal
 from .productiontorightspershare import ProductionToRightsPerShare
 
 import datetime
 def isodate(string):
-    return datetime.datetime.strptime(string, '%Y-%m-%d').date()
+    return datetime.datetime.strptime(string, '%Y-%m-%d %H:%M:%S').date()
+
+def isodateToStr(tdatetime):
+    return isodate(tdatetime).strftime('%Y-%m-%d')
 
 class ProductionLoader(object):
     def __init__(self, productionAggregator=None, plantShareCurver=None, rightsPerShare=None, remainders=None):
