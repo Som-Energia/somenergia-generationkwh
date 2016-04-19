@@ -195,7 +195,10 @@ class AssigmentProvider_Test(unittest.TestCase):
             m.id for m in self.erp.ResPartner.browse([], limit=2)]
 
         contract, contract2 = [ c for c in self.erp.GiscedataPolissa.browse(
-                [('data_ultima_lectura','!=',False)], limit=2)
+                [('data_ultima_lectura','!=',False)],
+                order='data_ultima_lectura',
+                limit=2,
+                )
             ]
         self.contract = contract.id
         self.contract2 = contract2.id
@@ -299,6 +302,21 @@ class AssigmentProvider_Test(unittest.TestCase):
             ),
         ])
 
+    def test_seek_manyCompetitors_earlierLastInvoicedPrevails(self):
+        self.setupAssignments([
+            [self.newContract,self.member,1],
+            [self.contract,self.member,0],
+            [self.contract2,self.member,0],
+        ])
+        self.assertAssignmentsSeekEqual(self.newContract, [
+            ns(
+                member_id=self.member,
+                last_usable_date=str(min(
+                    self.contractLastInvoicedDate,
+                    self.contract2LastInvoicedDate,
+                    )),
+            ),
+        ])
 
             
 if __name__ == '__main__':

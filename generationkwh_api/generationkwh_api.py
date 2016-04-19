@@ -384,13 +384,17 @@ GenerationkWhAssignments()
 
 
 class AssignmentsProvider(ErpWrapper):
+
+    # TODO: sort rights sources if many members assigned the same contract
+    # TODO: Filter out inactive contracts
+
     def seek(self, contract_id):
         self.cursor.execute("""
             SELECT
                 ass.member_id AS member_id,
                 COALESCE(
-                    MAX(contracte.last_usable_date),
-                    DATE(NOW()) /* no peers, now */
+                    MIN(contracte.last_usable_date),
+                    DATE(NOW()) /* no peers, so now */
                 ) AS last_usable_date,
                 FALSE
             FROM generationkwh_assignments AS ass
@@ -419,10 +423,10 @@ class AssignmentsProvider(ErpWrapper):
         """, dict(contract_id=contract_id))
         return [
             ns(
-                member_id=member,
+                member_id=member_id,
                 last_usable_date=last_usable_date,
             )
-            for member, last_usable_date, _
+            for member_id, last_usable_date, _
             in self.cursor.fetchall()
             ]
 
