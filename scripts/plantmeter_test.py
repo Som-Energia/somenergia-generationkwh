@@ -8,8 +8,11 @@ from yamlns import namespace as ns
 
 import unittest
 
-def isodatetime(string):
+def isodate(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d")
+
+def isodatetime(string):
+    return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
 
 def localTime(string):
     isSummer = string.endswith("S")
@@ -98,7 +101,7 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
     def setupPointsByDay(self, points):
 
         for meter, start, end, values in points:
-            daterange = datespan(isodatetime(start), isodatetime(end)+datetime.timedelta(days=1))
+            daterange = datespan(isodate(start), isodate(end)+datetime.timedelta(days=1))
             for date, value in zip(daterange, values):
                 self.curveProvider.fillPoint(
                     datetime=localTime(str(date)),
@@ -121,8 +124,8 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
             writer = csv.writer(tmpfile, delimiter=';')
             writer.writerows([[toStr(date),summer,value,0,0]
                 for start, end, summer, values in points
-                for date,value in zip(datespan(isodatetime(start),
-                    isodatetime(end)+datetime.timedelta(days=1)), values)])
+                for date,value in zip(datespan(isodate(start),
+                    isodate(end)+datetime.timedelta(days=1)), values)])
 
     def test_GenerationkwhProductionAggregator_getwh_onePlant_withNoPoints(self):
         aggr_id = self.setupAggregator(
@@ -283,7 +286,7 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
                 ])
 
             self.c.GenerationkwhProductionAggregator.updateWh(
-                    aggr_id, '2015-08-16', '2015-08-16')
+                    aggr_id, isodate('2015-08-16'), isodate('2015-08-16'))
             production = self.c.GenerationkwhProductionAggregator.getWh(
                     aggr_id, '2015-08-16', '2015-08-16')
             self.assertEqual(production, 25*[0])
@@ -344,7 +347,7 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
                 ])
 
             date = self.c.GenerationkwhProductionAggregator.firstMeasurementDate(aggr_id)
-            self.assertEqual(date, '')
+            self.assertEqual(date, False)
 
     def test_GenerationkwhProductionAggregator_firstMeasurementDate_onePlant(self):
             aggr_id = self.setupAggregator(
@@ -357,7 +360,7 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
                     aggr_id, '2015-08-16', '2015-08-17')
 
             date = self.c.GenerationkwhProductionAggregator.firstMeasurementDate(aggr_id)
-            self.assertEqual(date, '2015-08-16 00:00:00')
+            self.assertEqual(date, isodatetime('2015-08-16 00:00:00'))
 
     def test_GenerationkwhProductionAggregator_firstMeasurementDate_twoPlant(self):
             aggr_id = self.setupAggregator(
@@ -373,7 +376,7 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
                     aggr_id, '2015-08-16', '2015-08-17')
 
             date = self.c.GenerationkwhProductionAggregator.firstMeasurementDate(aggr_id)
-            self.assertEqual(date, '2015-08-16 00:00:00')
+            self.assertEqual(date, isodatetime('2015-08-16 00:00:00'))
 
     def test_GenerationkwhProductionAggregator_lastMeasurementDate_onePlant(self):
             aggr_id = self.setupAggregator(
@@ -386,7 +389,7 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
                     aggr_id, '2015-08-16', '2015-08-17')
 
             date = self.c.GenerationkwhProductionAggregator.lastMeasurementDate(aggr_id)
-            self.assertEqual(date, '2015-08-17 00:00:00')
+            self.assertEqual(date, isodatetime('2015-08-17 00:00:00'))
 
     def test_GenerationkwhProductionAggregator_lastMeasurementDate_twoPlant(self):
             aggr_id = self.setupAggregator(
@@ -402,7 +405,7 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
                     aggr_id, '2015-08-16', '2015-08-17')
 
             date = self.c.GenerationkwhProductionAggregator.lastMeasurementDate(aggr_id)
-            self.assertEqual(date, '2015-08-17 00:00:00')
+            self.assertEqual(date, isodatetime('2015-08-17 00:00:00'))
 
     def test_GenerationkwhProductionAggregator_getNshares_onePlant(self):
             aggr_id = self.setupAggregator(

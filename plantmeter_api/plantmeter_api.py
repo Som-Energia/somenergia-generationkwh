@@ -7,13 +7,10 @@ from mongodb_backend.mongodb2 import mdbpool
 
 from datetime import datetime
 from plantmeter.resource import ProductionAggregator, ProductionPlant, ProductionMeter 
-from plantmeter.mongotimecurve import MongoTimeCurve,tz
+from plantmeter.mongotimecurve import MongoTimeCurve
 
-def isodate(string):
-    return tz.localize(datetime.strptime(string, "%Y-%m-%d"))
-
-def isodatetimeToStr(tdatetime):
-    return tdatetime.strftime('%Y-%m-%d %H:%M:%S')
+def isodate(d): # NULL
+    return d
 
 class GenerationkwhProductionAggregator(osv.osv):
     '''Implements generationkwh production aggregation '''
@@ -59,7 +56,7 @@ class GenerationkwhProductionAggregator(osv.osv):
         aggr = self.browse(cursor, uid, pid, context)
         _aggr = self._createAggregator(aggr, args)
         date = _aggr.firstMeasurementDate()
-        return isodatetimeToStr(date) if date else ''
+        return date if date else None
 
     def lastMeasurementDate(self, cursor, uid, pid, context=None):
         '''Get last measurement date'''
@@ -73,7 +70,7 @@ class GenerationkwhProductionAggregator(osv.osv):
         aggr = self.browse(cursor, uid, pid, context)
         _aggr = self._createAggregator(aggr, args)
         date = _aggr.lastMeasurementDate()
-        return isodatetimeToStr(date) if date else ''
+        return date if date else None
 
     def getNshares(self, cursor, uid, pid, context=None):
         '''Get number of shares'''
