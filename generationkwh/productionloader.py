@@ -100,11 +100,7 @@ class ProductionLoader(object):
                 lastDateToCompute = recomputeStop,
                 )
 
-    def retrieveMeasuresFromPlants(self):
-        "TODO"
-
-
-
-
+    def retrieveMeasuresFromPlants(self, start, end):
+        return self.productionAggregator.updateWh(start, end)
 
 # vim: ts=4 sw=4 et
