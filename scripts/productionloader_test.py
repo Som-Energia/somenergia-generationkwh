@@ -163,6 +163,7 @@ class ProductionLoader_Test(unittest.TestCase):
         aggr_obj = self.erp.model('generationkwh.production.aggregator')
         return aggr_obj.getWh(aggr_id, '2015-08-16', '2015-08-16')
 
+    @unittest.skip("Current Aleix test")
     def test_computeAvailableRights_singleDay(self):
         aggr_id = self.setupAggregator(
                 nplants=1,
