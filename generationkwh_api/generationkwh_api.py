@@ -15,7 +15,6 @@ from generationkwh.usagetracker import UsageTracker
 from generationkwh.productionloader import ProductionLoader
 from plantmeter.mongotimecurve import toLocal
 from yamlns import namespace as ns
-import dbutils
 
 import datetime
 from dateutil.relativedelta import relativedelta
