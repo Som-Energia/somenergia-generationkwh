@@ -12,7 +12,7 @@ from plantmeter.mongotimecurve import MongoTimeCurve,tz
 def isodate(string):
     return tz.localize(datetime.strptime(string, "%Y-%m-%d"))
 
-def toStr(tdatetime):
+def isodatetimeToStr(tdatetime):
     return tdatetime.strftime('%Y-%m-%d %H:%M:%S')
 
 class GenerationkwhProductionAggregator(osv.osv):
@@ -59,7 +59,7 @@ class GenerationkwhProductionAggregator(osv.osv):
         aggr = self.browse(cursor, uid, pid, context)
         _aggr = self._createAggregator(aggr, args)
         date = _aggr.firstMeasurementDate()
-        return toStr(date) if date else ''
+        return isodatetimeToStr(date) if date else ''
 
     def lastMeasurementDate(self, cursor, uid, pid, context=None):
         '''Get last measurement date'''
@@ -73,7 +73,7 @@ class GenerationkwhProductionAggregator(osv.osv):
         aggr = self.browse(cursor, uid, pid, context)
         _aggr = self._createAggregator(aggr, args)
         date = _aggr.lastMeasurementDate()
-        return toStr(date) if date else ''
+        return isodatetimeToStr(date) if date else ''
 
     def getNshares(self, cursor, uid, pid, context=None):
         '''Get number of shares'''
