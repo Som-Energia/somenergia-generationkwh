@@ -16,6 +16,7 @@ from holidaysprovider_test import *
 from investmentmanagement_test import *
 from usagetracker_test import *
 from assignment_test import *
+from productionloader_test import *
 
 def parseArgumments():
     import argparse
