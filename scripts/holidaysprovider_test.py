@@ -2,9 +2,7 @@
 
 import datetime
 from genkwh_investments_from_accounting import *
-
-def isodatetime(string):
-    return datetime.datetime.strptime(string, "%Y-%m-%d")
+from generationkwh.isodates import naiveisodate
 
 import unittest
 
@@ -23,7 +21,7 @@ class Holidays_Test(unittest.TestCase):
         self.c = erppeek.Client(**dbconfig.erppeek)
 
     def assertEqualDates(self, result, expected):
-        self.assertEqual([ isodatetime(date) for date in expected], result)
+        self.assertEqual([ naiveisodate(date) for date in expected], result)
 
     def test_holidays(self):
         self.assertEqualDates(

@@ -2,10 +2,7 @@
 
 from memberrightscurve import MemberRightsCurve
 import unittest
-import datetime
-
-def isodate(date):
-    return datetime.datetime.strptime(date, '%Y-%m-%d').date()
+from .isodates import isodate
 
 class CurveProvider_MockUp(object):
     def __init__(self, value):

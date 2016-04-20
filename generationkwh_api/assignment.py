@@ -72,15 +72,15 @@ class GenerationkWhAssignment(osv.osv):
         ""
 
     def availableAssigmentsForContract(self, cursor, uid, contract_id, context=None):
-        assignmentsProvider = AssignmentsProvider(self, cursor, uid, context)
+        assignmentProvider = AssignmentProvider(self, cursor, uid, context)
         #Conversion of ns to dict in order to marshall to XML-RPC
-        return [dict(assign) for assign in assignmentsProvider.seek(contract_id)]
+        return [dict(assign) for assign in assignmentProvider.seek(contract_id)]
 
 
 GenerationkWhAssignment()
 
 
-class AssignmentsProvider(ErpWrapper):
+class AssignmentProvider(ErpWrapper):
 
     def seek(self, contract_id):
         self.cursor.execute("""

@@ -5,11 +5,9 @@ import unittest
 import datetime
 import pymongo
 from .rightspershare import RightsPerShare
-from plantmeter.mongotimecurve import toLocal, asUtc
 import numpy
 
 from .isodates import localisodate, isodate
-
 
 class ProductionAggregatorMockUp(object):
 

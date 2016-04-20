@@ -9,9 +9,7 @@ from .productiontorightspershare import ProductionToRightsPerShare
 import numpy
 import unittest
 import datetime
-
-def isodate(date):
-    return datetime.datetime.strptime(date, '%Y-%m-%d').date()
+from .isodates import isodate
 
 class ProductionToRightsPerShare_Test(unittest.TestCase):
 

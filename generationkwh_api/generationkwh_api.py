@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 from osv import osv, fields
+import netsvc
 from mongodb_backend.mongodb2 import mdbpool
 
 from generationkwh.dealer import Dealer
@@ -14,17 +15,13 @@ from generationkwh.fareperiodcurve import FarePeriodCurve
 from generationkwh.usagetracker import UsageTracker
 from generationkwh.productionloader import ProductionLoader
 from generationkwh.isodates import localisodate
-
-import datetime
-import netsvc
-
-from .erpwrapper import ErpWrapper
-from .assignment import *
-from .remainder import *
-from .investment import *
+from .assignment import AssignmentProvider
+from .remainder import RemainderProvider
+from .investment import InvestmentProvider
 
 # Data providers
 
+from .erpwrapper import ErpWrapper
 
 class ProductionAggregatorProvider(ErpWrapper):
     def __init__(self, erp, cursor, uid, pid, context=None):
@@ -60,13 +57,17 @@ class ProductionAggregatorProvider(ErpWrapper):
 class HolidaysProvider(ErpWrapper):
 
     def get(self, start, stop):
+        """Returns the holidays to be considering by fares
+        between start and stop date including both.
+        """
+
         Holidays = self.erp.pool.get('giscedata.dfestius')
         ids = Holidays.search(self.cursor, self.uid, [
             ('name', '>=', start),
             ('name', '<=', stop),
             ], 0,None,'name desc',self.context)
         return [
-            isodate(h['name'])
+            localisodate(h['name'])
             for h in Holidays.read(self.cursor, self.uid,
                 ids, ['name'], self.context)
             ]

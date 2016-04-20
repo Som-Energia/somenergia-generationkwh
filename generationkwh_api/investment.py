@@ -6,12 +6,7 @@ from plantmeter.mongotimecurve import toLocal
 from dateutil.relativedelta import relativedelta
 import datetime
 from yamlns import namespace as ns
-
-from generationkwh.isodates import localisodate
-def isodatetime(string):
-    return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
-def isodate(date):
-    return date and datetime.datetime.strptime(date, '%Y-%m-%d')
+from generationkwh.isodates import localisodate, naiveisodate, naiveisodatetime
 
 class InvestmentProvider(ErpWrapper):
 
@@ -144,12 +139,12 @@ class GenerationkWhInvestment(osv.osv):
             deactivation = None
             if waitingDays is not None:
                 activation = str(
-                    isodate(line.date_created)
+                    naiveisodate(line.date_created)
                     +relativedelta(days=waitingDays))
 
                 if expirationYears is not None:
                     deactivation = str(
-                        isodatetime(activation)
+                        naiveisodatetime(activation)
                         +relativedelta(years=expirationYears))
 
             self.create(cursor, uid, dict(
@@ -176,12 +171,12 @@ class GenerationkWhInvestment(osv.osv):
             deactivation = None
             if waitingDays is not None:
                 activation = str(
-                    isodatetime(payment.create_date)
+                    naiveisodatetime(payment.create_date)
                     +relativedelta(days=waitingDays))
 
                 if expirationYears is not None:
                     deactivation = str(
-                        isodatetime(activation)
+                        naiveisodatetime(activation)
                         +relativedelta(years=expirationYears))
 
             self.create(cursor, uid, dict(

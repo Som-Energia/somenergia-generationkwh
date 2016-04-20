@@ -3,7 +3,6 @@
 from .memberrightsusage import MemberRightsUsage
 import unittest
 import pymongo
-import datetime
 from .isodates import localisodate
 
 class MemberRightsUsage_Test(unittest.TestCase):

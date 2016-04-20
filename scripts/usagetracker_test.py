@@ -2,10 +2,6 @@
 
 import datetime
 from genkwh_investments_from_accounting import *
-from genkwh_investments_from_accounting import *
-
-def isodatetime(string):
-    return datetime.datetime.strptime(string, "%Y-%m-%d")
 
 import unittest
 

@@ -8,6 +8,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 import dbconfig
 from yamlns import namespace as ns
+from generationkwh.isodates import isodate
 
 def parseArgumments():
     import argparse
@@ -77,12 +78,6 @@ def parseArgumments():
             help="number of years the shares will provide usufruct"
             )
     return parser.parse_args(namespace=ns())
-
-def isodatetime(string):
-    return datetime.datetime.strptime(string, "%Y-%m-%d")
-
-def isodate(string):
-    return datetime.datetime.strptime(string, "%Y-%m-%d").date()
 
 def clear(**args):
     allinvestments = c.search('generationkwh.investment')

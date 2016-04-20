@@ -3,9 +3,7 @@
 from fareperiodcurve import FarePeriodCurve, libfacturacioatr
 import unittest
 import datetime
-
-def isodate(string):
-    return datetime.datetime.strptime(string, '%Y-%m-%d').date()
+from .isodates import isodate
 
 class HolidaysProvidersMockup(object):
     def get(self, start, stop):

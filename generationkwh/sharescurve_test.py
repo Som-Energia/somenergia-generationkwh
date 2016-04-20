@@ -5,10 +5,7 @@ from plantmeter.mongotimecurve import toLocal
 
 import unittest
 from yamlns import namespace as ns
-import datetime
-
-def isodate(date):
-    return date and toLocal(datetime.datetime.strptime(date, '%Y-%m-%d')).date()
+from .isodates import isodate
 
 class InvestmentProvider_MockUp(object):
     def __init__(self, shareContracts):
