@@ -7,10 +7,13 @@ from mongodb_backend.mongodb2 import mdbpool
 
 from datetime import datetime
 from plantmeter.resource import ProductionAggregator, ProductionPlant, ProductionMeter 
-from plantmeter.mongotimecurve import MongoTimeCurve
+from plantmeter.mongotimecurve import MongoTimeCurve, tz
 
 def isodate(d): # NULL
     return d
+
+def _isodate(string):
+        return tz.localize(datetime.strptime(string, "%Y-%m-%d"))
 
 class GenerationkwhProductionAggregator(osv.osv):
     '''Implements generationkwh production aggregation '''
@@ -110,6 +113,36 @@ class GenerationkwhProductionAggregator(osv.osv):
     }
 GenerationkwhProductionAggregator()
 
+
+class GenerationkwhProductionAggregatorTesthelper(osv.osv):
+    '''Implements generationkwh production aggregation testhelper '''
+
+    _name = 'generationkwh.production.aggregator.testhelper'
+
+
+    def getWh(self, cursor, uid, pid, start, end, context=None):
+        production = self.pool.get('generationkwh.production.aggregator')
+        return production.getWh(cursor, uid, pid,
+                _isodate(start), _isodate(end), context)
+
+    def updateWh(self, cursor, uid, pid, start, end, context=None):
+        production = self.pool.get('generationkwh.production.aggregator')
+        return production.updateWh(cursor, uid, pid,
+                _isodate(start), _isodate(end), context)
+
+    def firstMeasurementDate(self, cursor, uid, pid, context=None):
+        production = self.pool.get('generationkwh.production.aggregator')
+        return production.firstMeasurementDate(cursor, uid, pid, context)
+
+    def lastMeasurementDate(self, cursor, uid, pid, context=None):
+        production = self.pool.get('generationkwh.production.aggregator')
+        return production.lastMeasurementDate(cursor, uid, pid, context)
+
+    def getNshares(self, cursor, uid, pid, context=None):
+        production = self.pool.get('generationkwh.production.aggregator')
+        return production.getNshares(cursor, uid, pid, context)
+
+GenerationkwhProductionAggregatorTesthelper()
 
 class GenerationkwhProductionPlant(osv.osv):
 
