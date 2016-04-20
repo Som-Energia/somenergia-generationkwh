@@ -20,6 +20,8 @@ import datetime
 from dateutil.relativedelta import relativedelta
 import netsvc
 
+from .erpwrapper import ErpWrapper
+
 def isodatetime(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
 def isodate(date):
@@ -28,14 +30,6 @@ def localisodate(date):
     return date and toLocal(datetime.datetime.strptime(date, '%Y-%m-%d'))
 
 # Data providers
-
-class ErpWrapper(object):
-
-    def __init__(self, erp, cursor, uid, context=None):
-        self.erp = erp
-        self.cursor = cursor
-        self.uid = uid
-        self.context = context
 
 class RemainderProvider(ErpWrapper):
     def get(self):
