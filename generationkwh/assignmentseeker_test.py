@@ -2,12 +2,8 @@
 
 import unittest
 from .assignmentseeker import AssignmentSeeker
-import datetime
-from plantmeter.mongotimecurve import toLocal
 from yamlns import namespace as ns
-
-def localisodate(string):
-    return toLocal(datetime.datetime.strptime(string, "%Y-%m-%d"))
+from .isodates import localisodate
 
 class AssignmentsMockup(object):
     def __init__(self, assignments):

@@ -13,6 +13,7 @@ from generationkwh.memberrightsusage import MemberRightsUsage
 from generationkwh.fareperiodcurve import FarePeriodCurve
 from generationkwh.usagetracker import UsageTracker
 from generationkwh.productionloader import ProductionLoader
+from generationkwh.isodates import localisodate
 
 import datetime
 import netsvc
@@ -21,7 +22,6 @@ from .erpwrapper import ErpWrapper
 from .assignment import *
 from .remainder import *
 from .investment import *
-
 
 # Data providers
 

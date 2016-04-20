@@ -12,6 +12,8 @@ try:
 except ImportError:
     pass
 
+from generationkwh.isodates import localisodate
+
 def isodatetime(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d")
 
@@ -20,9 +22,6 @@ def datespan(startDate, endDate, delta=datetime.timedelta(hours=1)):
     while currentDate < endDate:
         yield currentDate
         currentDate += delta
-
-def localisodate(string):
-    return toLocal(datetime.datetime.strptime(string, "%Y-%m-%d"))
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class ProductionLoader_Test(unittest.TestCase):

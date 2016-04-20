@@ -7,12 +7,11 @@ from dateutil.relativedelta import relativedelta
 import datetime
 from yamlns import namespace as ns
 
+from generationkwh.isodates import localisodate
 def isodatetime(string):
     return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
 def isodate(date):
     return date and datetime.datetime.strptime(date, '%Y-%m-%d')
-def localisodate(date):
-    return date and toLocal(datetime.datetime.strptime(date, '%Y-%m-%d'))
 
 class InvestmentProvider(ErpWrapper):
 
