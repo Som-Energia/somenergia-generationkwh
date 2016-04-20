@@ -48,17 +48,21 @@ Dealing
                 Un dels inversors d’on podem treure drets
                 té dos contractes mes prioritaris
                 ja facturats fins els dies 2015-02-03, i 2015-02-15.
-                Això implica que un contracte menys prioritari només pot fer servirs
-                drets generats el 2015-02-02 o abans.
+                Això implica que un contracte menys prioritari només pot
+                fer servir drets generats el 2015-02-02 o abans.
         - before a years before of the invoicing period start
             - **Exemple:**
                 Una factura del periode de 3 de Juny de 2017 a 2 de Juliol,
                 no pot utilitzar drets generats abans del 3 de Juny de 2016,
                 aquests ja han caducat.
-    - The contract list will be initialized with:
-        - the biggest contract having the investor as payer
-        - if none is found, the biggest contract having the investor as owner
-        - left unassigned if no contracts have the investor as payer or owner
+    - The contract list will be initialized with: [Marc-David-Pere]
+        - With priority 0
+            - the biggest contract having the investor as payer
+            - if investor is not a payer of any contract, then
+                the biggest contract having the investor as owner
+        - With priority 1
+            - Any other contract where the investor as owner or payer
+        - If the investor is not payer or owner of any contract, no assigment
     - A mail will be sent
         - At start of generation or whenever a new investment is created
         - Telling the assignment if any by default and why
@@ -68,6 +72,11 @@ Dealing
     - ERP client IF will manage this list for a given member
     - ERP client IF will display the list of investment
         - Set the activation date relative to the purchase date of many at once
+- Corner cases:
+    - When a contract is a new one, no last invoiced date is available,
+        in this case use the prior date to the contract activation date.
+        [David-Pere]
+    - Disabled contracts should be discarded
 
 - Next iterations, will address:
     - more complex deal policies (or not)
