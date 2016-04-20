@@ -1,4 +1,4 @@
-﻿        SELECT
+SELECT
             soci_id,
             name,
             nsoci,
@@ -9,9 +9,10 @@
             ncontractes,
             polizas_titular,
             polizas_pagador,
+	    polizas_socio,
             email,
             CEIL((0-inversion)/100) as acciones,
-            already_invested IS NOT NULL AS already_invested,
+            already_invested AS already_invested,
             ARRAY[8] @> categories AS essoci,
             FALSE
         FROM (
@@ -26,7 +27,8 @@
                 sub.ncontractes AS ncontractes,
 		sub.polizas_titular AS polizas_titular,
 		sub.polizas_pagador AS polizas_pagador,
-                address.email,
+		sub.polizas_socio as polizas_socio,                
+		address.email,
                 categories,
                 FALSE
             FROM (
@@ -38,18 +40,23 @@
                     soci.lang AS lang,
                     SUM(cups.conany_kwh) AS consumannual,
                     COALESCE(	MAX(CASE when POL.PAGADOR=soci.id THEN cups.conany_kwh ELSE NULL END), 
-				MAX(CASE when POL.PAGADOR!=soci.id AND POL.TITULAR=soci.id THEN cups.conany_kwh ELSE NULL END)
+				MAX(CASE when POL.PAGADOR!=soci.id AND POL.TITULAR=soci.id THEN cups.conany_kwh ELSE NULL END),
+				MAX(CASE when POL.PAGADOR!=soci.id AND POL.TITULAR!=soci.id AND POL.SOCI=soci.id THEN cups.conany_kwh ELSE NULL END)
 			    ) as consumprioritario,
                     COUNT(CUPS.ID) AS ncontractes,
                     SUM(CASE WHEN POL.PAGADOR!=soci.id and pol.titular=soci.id then 1 else 0 end) AS polizas_titular,
                     ARRAY_AGG(cat.category_id) as categories,
                     SUM(CASE WHEN POL.PAGADOR=soci.id then 1 ELSE 0 end) AS polizas_pagador,
+                    SUM(CASE WHEN POL.PAGADOR!=soci.id AND POL.TITULAR!=soci.id AND POL.SOCI=soci.id then 1 ELSE 0 end) AS polizas_socio,
                     FALSE
                 FROM res_partner AS soci
                 LEFT JOIN
                     giscedata_polissa AS pol ON 
-                        pol.titular = soci.id OR
-                        pol.pagador = soci.id AND 
+			(
+			    pol.titular = soci.id OR
+                            pol.pagador = soci.id OR
+			    pol.soci = soci.id
+                        ) AND 
                         pol.active AND 
                         pol.state = 'activa'
 		LEFT JOIN
@@ -86,6 +93,7 @@
                 sub.ncontractes,
 		sub.polizas_titular,
 		sub.polizas_pagador,
+		sub.polizas_socio,
                 address.email,
                 categories,
                 TRUE
