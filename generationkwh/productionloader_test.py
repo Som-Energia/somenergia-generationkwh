@@ -43,10 +43,10 @@ class RemainderProviderMockup(object):
     def get(self):
         return [self.remainders[nshares] for nshares in self.remainders]
     
-    def set(self, nshares, date, remainder):
-        #self.remainders.setdefault(nshares,(nshares, date, remainder))
-        self.remainders[nshares] = (nshares, date, remainder)
- 
+    def set(self, remainders):
+        for nshares, date, remainder in remainders:
+            self.remainders[nshares] = (nshares, date, remainder)
+
 class PlantShareCurverMockup(object):
 
     def __init__(self, data):
