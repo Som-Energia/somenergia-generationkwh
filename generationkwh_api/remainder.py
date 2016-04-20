@@ -6,16 +6,16 @@ from .erpwrapper import ErpWrapper
 class RemainderProvider(ErpWrapper):
 
     def get(self):
-        remainders=self.erp.pool.get('generationkwh.remainders')
+        Remainder=self.erp.pool.get('generationkwh.remainder')
         return remainders.last(self.cursor,self.uid, context=self.context)
 
-    # TODO: FIX: 'remainders' parameter aliased here!!!
+
     def set(self,remainders):
-        remainders=self.erp.pool.get('generationkwh.remainders')
+        Remainder=self.erp.pool.get('generationkwh.remainder')
         remainders.add(self.cursor,self.uid,remainders, context=self.context)
 
 
-class GenerationkWhRemainders(osv.osv):
+class GenerationkWhRemainder(osv.osv):
     """
     Remainders, in Wh, after dividing the aggregated
     production of the plants into a hourly curve of
@@ -23,7 +23,7 @@ class GenerationkWhRemainders(osv.osv):
     shares.
     """
 
-    _name = "generationkwh.remainders"
+    _name = "generationkwh.remainder"
     _columns = dict(
         n_shares=fields.integer(
             required=True,
@@ -46,10 +46,12 @@ class GenerationkWhRemainders(osv.osv):
         )]
 
     def last(self, cr, uid, context=None):
+        "Returns the latest remainder for each number of shares."""
+
         cr.execute("""
             SELECT o.n_shares,o.target_day,o.remainder_wh
-                FROM generationkwh_remainders AS o
-                LEFT JOIN generationkwh_remainders AS b
+                FROM generationkwh_remainder AS o
+                LEFT JOIN generationkwh_remainder AS b
                     ON o.n_shares=b.n_shares
                     AND o.target_day < b.target_day
                 WHERE b.target_day IS NULL
@@ -84,5 +86,5 @@ class GenerationkWhRemainders(osv.osv):
         ids=self.search(cr,uid, [], context=context)
         self.unlink(cr,uid,ids)
 
-GenerationkWhRemainders()
+GenerationkWhRemainder()
 

@@ -1,4 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+"access_generationkwh_invoice_line_owner_r","generationkwh.invoice.line.owner","model_generationkwh_invoice_line_owner","generationkwh_api.group_generationkwh_api_r",1,0,0,0
+"access_generationkwh_invoice_line_owner_u","generationkwh.invoice.line.owner","model_generationkwh_invoice_line_owner","generationkwh_api.group_generationkwh_api_u",1,1,1,1
+"access_generationkwh_invoice_line_owner_w","generationkwh.invoice.line.owner","model_generationkwh_invoice_line_owner","generationkwh_api.group_generationkwh_api_w",1,1,1,0
 "access_generationkwh_assignment_r","generationkwh.assignment","model_generationkwh_assignment","generationkwh_api.group_generationkwh_api_r",1,0,0,0
 "access_generationkwh_assignment_u","generationkwh.assignment","model_generationkwh_assignment","generationkwh_api.group_generationkwh_api_u",1,1,1,1
 "access_generationkwh_assignment_w","generationkwh.assignment","model_generationkwh_assignment","generationkwh_api.group_generationkwh_api_w",1,1,1,0
@@ -8,12 +11,9 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 "access_generationkwh_investment_r","generationkwh.investment","model_generationkwh_investment","generationkwh_api.group_generationkwh_api_r",1,0,0,0
 "access_generationkwh_investment_u","generationkwh.investment","model_generationkwh_investment","generationkwh_api.group_generationkwh_api_u",1,1,1,1
 "access_generationkwh_investment_w","generationkwh.investment","model_generationkwh_investment","generationkwh_api.group_generationkwh_api_w",1,1,1,0
-"access_generationkwh_invoice_line_owner_r","generationkwh.invoice.line.owner","model_generationkwh_invoice_line_owner","generationkwh_api.group_generationkwh_api_r",1,0,0,0
-"access_generationkwh_invoice_line_owner_u","generationkwh.invoice.line.owner","model_generationkwh_invoice_line_owner","generationkwh_api.group_generationkwh_api_u",1,1,1,1
-"access_generationkwh_invoice_line_owner_w","generationkwh.invoice.line.owner","model_generationkwh_invoice_line_owner","generationkwh_api.group_generationkwh_api_w",1,1,1,0
-"access_generationkwh_remainders_r","generationkwh.remainders","model_generationkwh_remainders","generationkwh_api.group_generationkwh_api_r",1,0,0,0
-"access_generationkwh_remainders_u","generationkwh.remainders","model_generationkwh_remainders","generationkwh_api.group_generationkwh_api_u",1,1,1,1
-"access_generationkwh_remainders_w","generationkwh.remainders","model_generationkwh_remainders","generationkwh_api.group_generationkwh_api_w",1,1,1,0
+"access_generationkwh_remainder_r","generationkwh.remainder","model_generationkwh_remainder","generationkwh_api.group_generationkwh_api_r",1,0,0,0
+"access_generationkwh_remainder_u","generationkwh.remainder","model_generationkwh_remainder","generationkwh_api.group_generationkwh_api_u",1,1,1,1
+"access_generationkwh_remainder_w","generationkwh.remainder","model_generationkwh_remainder","generationkwh_api.group_generationkwh_api_w",1,1,1,0
 "access_generationkwh_testhelper_r","generationkwh.testhelper","model_generationkwh_testhelper","generationkwh_api.group_generationkwh_api_r",1,0,0,0
 "access_generationkwh_testhelper_u","generationkwh.testhelper","model_generationkwh_testhelper","generationkwh_api.group_generationkwh_api_u",1,1,1,1
 "access_generationkwh_testhelper_w","generationkwh.testhelper","model_generationkwh_testhelper","generationkwh_api.group_generationkwh_api_w",1,1,1,0

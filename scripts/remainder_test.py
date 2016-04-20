@@ -13,78 +13,78 @@ class Remainder_Test(unittest.TestCase):
 
     def setUp(self):
         erp = erppeek.Client(**dbconfig.erppeek)
-        self.Remainders = erp.GenerationkwhRemainders
-        self.Remainders.clean()
+        self.Remainder = erp.GenerationkwhRemainder
+        self.Remainder.clean()
 
     def setupProvider(self,remainders=[]):
-        self.Remainders.add(remainders)
+        self.Remainder.add(remainders)
 
-    def assertRemaindersEqual(self, expectation):
-        result = self.Remainders.last()
+    def assertLastEquals(self, expectation):
+        result = self.Remainder.last()
         self.assertEqual(result, [list(a) for a in expectation])
 
     def tearDown(self):
-        self.Remainders.clean()
+        self.Remainder.clean()
 
-    def test_no_remainders(self):
+    def test_last_noRemainders(self):
         remainders=self.setupProvider()
-        self.assertRemaindersEqual([])
+        self.assertLastEquals([])
 
-    def test_one_remainder(self):
+    def test_last_oneRemainder(self):
         remainders=self.setupProvider([
-            [1,'2016-02-25',3]
+            (1,'2016-02-25',3),
             ])
-        self.assertRemaindersEqual([
-            [1,'2016-02-25',3]
-            ])
-
-    def test_two_remainder(self):
-        remainders=self.setupProvider([
-            [1,'2016-02-25',3],
-            [2,'2016-02-25',1]
-            ])
-        self.assertRemaindersEqual([
-            [1,'2016-02-25',3],
-            [2,'2016-02-25',1]
+        self.assertLastEquals([
+            (1,'2016-02-25',3),
             ])
 
-    def test_dup_dates_remainder(self):
+    def test_last_manyRemainder(self):
         remainders=self.setupProvider([
-            [1,'2016-02-25',3],
-            [2,'2016-02-25',1],
-            [1,'2016-01-24',2],
-            [2,'2016-02-27',4],
+            (1,'2016-02-25',3),
+            (2,'2016-02-25',1),
             ])
-        self.assertRemaindersEqual([
-            [1,'2016-02-25',3],
-            [2,'2016-02-27',4],
+        self.assertLastEquals([
+            (1,'2016-02-25',3),
+            (2,'2016-02-25',1),
+            ])
+
+    def test_last_dupDates_remainder(self):
+        remainders=self.setupProvider([
+            (1,'2016-02-25',3),
+            (2,'2016-02-25',1),
+            (1,'2016-01-24',2),
+            (2,'2016-02-27',4),
+            ])
+        self.assertLastEquals([
+            (1,'2016-02-25',3),
+            (2,'2016-02-27',4),
         ])
 
     def test_return_last_dup_dates_remainder(self):
         remainders=self.setupProvider([
-            [1,'2016-02-25',1],
-            [1,'2016-02-25',2],
-            [1,'2016-02-25',3],
-            [1,'2016-02-25',4],
-            [1,'2016-02-25',5],
-            [1,'2016-02-25',6],
+            (1,'2016-02-25',1),
+            (1,'2016-02-25',2),
+            (1,'2016-02-25',3),
+            (1,'2016-02-25',4),
+            (1,'2016-02-25',5),
+            (1,'2016-02-25',6),
         ])
-        self.assertRemaindersEqual([
-            [1,'2016-02-25',6]
+        self.assertLastEquals([
+            (1,'2016-02-25',6),
         ])
 
     def test_uniq_creation(self):
-        remainders=self.Remainders.create({
-            'n_shares': 1,
-            'target_day': '2016-02-25',
-            'remainder_wh': 1
-        })
+        remainders=self.Remainder.create(dict(
+            n_shares=1,
+            target_day='2016-02-25',
+            remainder_wh=1,
+        ))
         with self.assertRaises(Exception):
-            self.Remainders.create({
-                'n_shares': 1,
-                'target_day': '2016-02-25',
-                'remainder_wh': 2
-             })
+            self.Remainder.create(dict(
+                n_shares=1,
+                target_day='2016-02-25',
+                remainder_wh=2,
+             ))
 
 if __name__ == '__main__':
     unittest.main()
