@@ -4,12 +4,7 @@ from .memberrightsusage import MemberRightsUsage
 import unittest
 import pymongo
 import datetime
-
-def isodate(string):
-    import pytz
-    return pytz.timezone("Europe/Madrid").localize(
-        datetime.datetime.strptime(string, '%Y-%m-%d'))
-
+from .isodates import localisodate
 
 class MemberRightsUsage_Test(unittest.TestCase):
 
@@ -29,8 +24,8 @@ class MemberRightsUsage_Test(unittest.TestCase):
         provider = MemberRightsUsage(self.db)
         usage = provider.usage(
             member='1',
-            start=isodate('2015-08-15'),
-            stop=isodate('2015-08-15'),
+            start=localisodate('2015-08-15'),
+            stop=localisodate('2015-08-15'),
             )
         self.assertEqual(
             +25*[0],
@@ -41,13 +36,13 @@ class MemberRightsUsage_Test(unittest.TestCase):
         provider = MemberRightsUsage(self.db)
         usage = provider.updateUsage(
             member='1',
-            start=isodate('2015-08-15'),
+            start=localisodate('2015-08-15'),
             data=range(1,25)+[0],
             )
         usage = provider.usage(
             member='1',
-            start=isodate('2015-08-15'),
-            stop=isodate('2015-08-15'),
+            start=localisodate('2015-08-15'),
+            stop=localisodate('2015-08-15'),
             )
         self.assertEqual(
             range(1,25)+[0],
