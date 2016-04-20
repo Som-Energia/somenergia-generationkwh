@@ -1,7 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-"access_generationkwh_assignments_r","generationkwh.assignments","model_generationkwh_assignments","generationkwh_api.group_generationkwh_api_r",1,0,0,0
-"access_generationkwh_assignments_u","generationkwh.assignments","model_generationkwh_assignments","generationkwh_api.group_generationkwh_api_u",1,1,1,1
-"access_generationkwh_assignments_w","generationkwh.assignments","model_generationkwh_assignments","generationkwh_api.group_generationkwh_api_w",1,1,1,0
+"access_generationkwh_assignment_r","generationkwh.assignment","model_generationkwh_assignment","generationkwh_api.group_generationkwh_api_r",1,0,0,0
+"access_generationkwh_assignment_u","generationkwh.assignment","model_generationkwh_assignment","generationkwh_api.group_generationkwh_api_u",1,1,1,1
+"access_generationkwh_assignment_w","generationkwh.assignment","model_generationkwh_assignment","generationkwh_api.group_generationkwh_api_w",1,1,1,0
 "access_generationkwh_dealer_r","generationkwh.dealer","model_generationkwh_dealer","generationkwh_api.group_generationkwh_api_r",1,0,0,0
 "access_generationkwh_dealer_u","generationkwh.dealer","model_generationkwh_dealer","generationkwh_api.group_generationkwh_api_u",1,1,1,1
 "access_generationkwh_dealer_w","generationkwh.dealer","model_generationkwh_dealer","generationkwh_api.group_generationkwh_api_w",1,1,1,0

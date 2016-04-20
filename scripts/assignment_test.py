@@ -14,16 +14,15 @@ class Assignment_Test(unittest.TestCase):
 
     def setUp(self):
         self.erp = erppeek.Client(**dbconfig.erppeek)
-        self.Assignments = self.erp.GenerationkwhAssignments
-        self.Assignments.dropAll()
-        self.Helper = self.erp.GenerationkwhTesthelper
+        self.Assignment = self.erp.GenerationkwhAssignment
+        self.Assignment.dropAll()
 
     def setupProvider(self,assignments=[]):
-        self.Assignments.add(assignments)
+        self.Assignment.add(assignments)
     
 
     def assertAllAssignmentsEqual(self, expectation):
-        result = self.Assignments.browse([
+        result = self.Assignment.browse([
             ])
         self.assertEqual( [
                 [
@@ -36,7 +35,7 @@ class Assignment_Test(unittest.TestCase):
             ],expectation)
 
     def assertAssignmentsEqual(self, expectation):
-        result = self.Assignments.browse([])
+        result = self.Assignment.browse([])
         self.assertEqual([
             [
                 r.contract_id.id,
@@ -46,7 +45,7 @@ class Assignment_Test(unittest.TestCase):
             expectation)
 
     def tearDown(self):
-        self.Assignments.dropAll()
+        self.Assignment.dropAll()
 
     def test_no_assignments(self):
         self.setupProvider()
@@ -55,7 +54,7 @@ class Assignment_Test(unittest.TestCase):
     def test_default_values(self):
         member=self.erp.ResPartner.browse([],limit=1)[0]
         contract=self.erp.GiscedataPolissa.browse([], limit=1)[0]
-        self.Assignments.create(dict(
+        self.Assignment.create(dict(
             member_id = member,
             contract_id = contract,
             priority = 0,
@@ -69,7 +68,7 @@ class Assignment_Test(unittest.TestCase):
         contract=self.erp.GiscedataPolissa.browse([], limit=1)[0]
 
         with self.assertRaises(Exception) as ctx:
-            self.Assignments.create(dict(
+            self.Assignment.create(dict(
                 member_id = member,
                 contract_id = contract,
                 ))
@@ -81,7 +80,7 @@ class Assignment_Test(unittest.TestCase):
         member=self.erp.ResPartner.browse([],limit=1)[0]
 
         with self.assertRaises(Exception) as ctx:
-            self.Assignments.create(dict(
+            self.Assignment.create(dict(
                 member_id = member,
                 priority = 0,
                 ))
@@ -93,7 +92,7 @@ class Assignment_Test(unittest.TestCase):
         contract=self.erp.GiscedataPolissa.browse([], limit=1)[0]
 
         with self.assertRaises(Exception) as ctx:
-            self.Assignments.create(dict(
+            self.Assignment.create(dict(
                 contract_id = contract,
                 priority = 0,
                 ))
@@ -106,7 +105,7 @@ class Assignment_Test(unittest.TestCase):
         contract=self.erp.GiscedataPolissa.browse([], limit=1)[0]
 
         with self.assertRaises(Exception) as ctx:
-            self.Assignments.create(dict(
+            self.Assignment.create(dict(
                 contract_id = contract,
                 priority = 0,
                 ))
@@ -190,8 +189,8 @@ class AssignmentProvider_Test(unittest.TestCase):
 
     def setUp(self):
         self.erp = erppeek.Client(**dbconfig.erppeek)
-        self.Assignments = self.erp.GenerationkwhAssignments
-        self.Assignments.dropAll()
+        self.Assignment = self.erp.GenerationkwhAssignment
+        self.Assignment.dropAll()
 
         self.member, self.member2 = [
             m.id for m in self.erp.ResPartner.browse([], limit=2)]
@@ -215,14 +214,14 @@ class AssignmentProvider_Test(unittest.TestCase):
 
     def setupAssignments(self, assignments):
         for contract, member, priority in assignments:
-            self.Assignments.create(dict(
+            self.Assignment.create(dict(
                 contract_id=contract,
                 member_id=member,
                 priority=priority,
                 ))
 
     def assertAssignmentsSeekEqual(self, contract_id, expectation):
-        result = self.Assignments.availableAssigmentsForContract(contract_id)
+        result = self.Assignment.availableAssigmentsForContract(contract_id)
         self.assertEqual([
             dict(
                 member_id=member_id,
@@ -232,7 +231,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             ], result)
 
     def tearDown(self):
-        self.Assignments.dropAll()
+        self.Assignment.dropAll()
 
 
     def test_seek_noAssignment(self):

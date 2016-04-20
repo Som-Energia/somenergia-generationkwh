@@ -5,9 +5,12 @@ from .erpwrapper import ErpWrapper
 import datetime
 from yamlns import namespace as ns
 
-class GenerationkWhAssignments(osv.osv):
+# TODO: sort rights sources if many members assigned the same contract
+# TODO: Filter out inactive contracts
 
-    _name = 'generationkwh.assignments'
+class GenerationkWhAssignment(osv.osv):
+
+    _name = 'generationkwh.assignment'
 
     _columns = dict(
         contract_id=fields.many2one(
@@ -74,13 +77,10 @@ class GenerationkWhAssignments(osv.osv):
         return [dict(assign) for assign in assignmentsProvider.seek(contract_id)]
 
 
-GenerationkWhAssignments()
+GenerationkWhAssignment()
 
 
 class AssignmentsProvider(ErpWrapper):
-
-    # TODO: sort rights sources if many members assigned the same contract
-    # TODO: Filter out inactive contracts
 
     def seek(self, contract_id):
         self.cursor.execute("""
@@ -91,8 +91,8 @@ class AssignmentsProvider(ErpWrapper):
                     DATE(NOW()) /* no peers, so now */
                 ) AS last_usable_date,
                 FALSE
-            FROM generationkwh_assignments AS ass
-            LEFT JOIN generationkwh_assignments AS peer
+            FROM generationkwh_assignment AS ass
+            LEFT JOIN generationkwh_assignment AS peer
                 ON ass.member_id = peer.member_id
                 AND peer.contract_id != ass.contract_id
                 AND peer.priority < ass.priority
