@@ -21,7 +21,7 @@ class Remainder_Test(unittest.TestCase):
 
     def assertLastEquals(self, expectation):
         result = self.Remainder.last()
-        self.assertEqual(result, [list(a) for a in expectation])
+        self.assertEqual([list(a) for a in expectation], result)
 
     def tearDown(self):
         self.Remainder.clean()
@@ -48,7 +48,7 @@ class Remainder_Test(unittest.TestCase):
             (2,'2016-02-25',1),
             ])
 
-    def test_last_dupDates_remainder(self):
+    def test_last_manyDates_takesLast(self):
         remainders=self.setupProvider([
             (1,'2016-02-25',3),
             (2,'2016-02-25',1),
@@ -58,9 +58,9 @@ class Remainder_Test(unittest.TestCase):
         self.assertLastEquals([
             (1,'2016-02-25',3),
             (2,'2016-02-27',4),
-        ])
+            ])
 
-    def test_return_last_dup_dates_remainder(self):
+    def test_last_sameDate_lastInsertedPrevails(self):
         remainders=self.setupProvider([
             (1,'2016-02-25',1),
             (1,'2016-02-25',2),
@@ -68,23 +68,30 @@ class Remainder_Test(unittest.TestCase):
             (1,'2016-02-25',4),
             (1,'2016-02-25',5),
             (1,'2016-02-25',6),
-        ])
+            ])
         self.assertLastEquals([
             (1,'2016-02-25',6),
-        ])
+            ])
 
-    def test_uniq_creation(self):
+    # TODO: Does this has sense at all? DGG
+    def test_last_sameDateAndNShares_raises(self):
         remainders=self.Remainder.create(dict(
             n_shares=1,
             target_day='2016-02-25',
             remainder_wh=1,
         ))
-        with self.assertRaises(Exception):
+        with self.assertRaises(Exception) as ctx:
             self.Remainder.create(dict(
                 n_shares=1,
                 target_day='2016-02-25',
                 remainder_wh=2,
              ))
+
+        self.assertIn(
+            "Only one remainder of last date computed and "
+            "number of shares is allowed",
+            ctx.exception.faultCode
+            )
 
 if __name__ == '__main__':
     unittest.main()
