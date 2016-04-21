@@ -13,8 +13,8 @@ class Remainder_Test(unittest.TestCase):
 
     def setUp(self):
         erp = erppeek.Client(**dbconfig.erppeek)
-        self.RemainderHelper = erp.GenerationkwhRemainderTesthelper
         self.Remainder = erp.GenerationkwhRemainder
+        self.RemainderHelper = erp.GenerationkwhRemainderTesthelper
         self.RemainderHelper.clean()
 
     def setupProvider(self,remainders=[]):
