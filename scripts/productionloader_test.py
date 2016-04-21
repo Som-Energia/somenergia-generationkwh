@@ -36,7 +36,7 @@ class ProductionLoader_Test(unittest.TestCase):
         aggr_obj.unlink(aggr_obj.search([]))
 
     def setUpMeasurements(self):
-        self.database = dbconfig.pymongo['database']
+        self.database = 'somenergia'
         self.collection = 'generationkwh.production.measurement'
         self.m = pymongo.Connection()
         self.mdb = self.m[self.database]
