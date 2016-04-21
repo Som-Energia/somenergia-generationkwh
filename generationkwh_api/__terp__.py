@@ -5,7 +5,12 @@
   "version": "0.0.1",
   "author": "GISCE",
   "category": "Master",
-  "depends": ['base', 'som_polissa_soci'],
+  "depends": [
+    'base',
+    'som_polissa_soci',
+    'som_inversions',
+    'plantmeter_api',
+    ],
   "init_xml": [],
   "demo_xml": [],
   "update_xml": [
