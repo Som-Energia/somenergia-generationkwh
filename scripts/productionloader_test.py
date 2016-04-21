@@ -185,7 +185,7 @@ class ProductionLoader_Test(unittest.TestCase):
 
         self.ProductionLoader.computeAvailableRights(aggr_id)
 
-        result = self.TestHelper.rightsPerShare(1, '2015-08-16', '2015-08-16')
+        result = self.TestHelper.rights_per_share(1, '2015-08-16', '2015-08-16')
         self.assertEqual(result, +10*[0]+[1]+14*[0])
         self.assertEqual(remainder.last(), [
             [1, localisodate('2015-08-17'), 0],
@@ -205,7 +205,7 @@ class ProductionLoader_Test(unittest.TestCase):
 
         self.ProductionLoader.computeAvailableRights(aggr_id)
 
-        result = self.TestHelper.rightsPerShare(1,'2015-08-16','2015-08-16')
+        result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-16')
         self.assertEqual(result, +10*[0]+[5]+14*[0])
         self.assertEqual(remainder.last(), [
             [1, localisodate('2015-08-17'), 0],
@@ -225,7 +225,7 @@ class ProductionLoader_Test(unittest.TestCase):
 
         self.ProductionLoader.computeAvailableRights(aggr_id)
 
-        result = self.TestHelper.rightsPerShare(1,'2015-08-16','2015-08-17')
+        result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-17')
         self.assertEqual(result, 2*(10*[0]+[5]+14*[0]))
         self.assertEqual(remainder.last(), [
             [1, localisodate('2015-08-18'), 0],
