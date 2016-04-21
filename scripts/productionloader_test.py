@@ -44,6 +44,7 @@ class ProductionLoader_Test(unittest.TestCase):
         self.clearMeasurements()
 
     def clearMeasurements(self):
+        self.TestHelper.clear_mongo_collections(self.collection)
         self.mdc.delete_many({})
 
     def setUpTemp(self):
@@ -57,11 +58,11 @@ class ProductionLoader_Test(unittest.TestCase):
 
     def setUp(self):
         self.erp = erppeek.Client(**dbconfig.erppeek)
-
+        self.ProductionLoader = self.erp.GenerationkwhProductionLoader
+        self.TestHelper = self.erp.GenerationkwhTesthelper
         self.setUpAggregator()
         self.setUpMeasurements()
         self.setUpTemp()
-        self.productionLoader = self.erp.GenerationkwhProductionLoader
 
     def tearDown(self):
         self.clearAggregator()
@@ -133,7 +134,7 @@ class ProductionLoader_Test(unittest.TestCase):
                 nshares=[1]).read(['id'])['id']
         self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
             ])
-        self.productionLoader.retrieveMeasuresFromPlants(aggr_id,
+        self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
                 '2015-08-16', '2015-08-16')
 
         production = self.getProduction(aggr_id, '2015-08-16', '2015-08-16')
@@ -147,7 +148,7 @@ class ProductionLoader_Test(unittest.TestCase):
         self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
             ('2015-08-16', '2015-08-16', 'S', 10*[0]+[1000]+13*[0])
             ])
-        self.productionLoader.retrieveMeasuresFromPlants(aggr_id,
+        self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
                 '2015-08-16', '2015-08-16')
 
         production = self.getProduction(aggr_id, '2015-08-16', '2015-08-16')
@@ -164,7 +165,7 @@ class ProductionLoader_Test(unittest.TestCase):
         self.setupLocalMeter(os.path.join(self.tempdir,'mymeter10'),[
             ('2015-08-16', '2015-08-16', 'S', 10*[0]+[1000]+13*[0])
             ])
-        self.productionLoader.retrieveMeasuresFromPlants(aggr_id,
+        self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
                 '2015-08-16', '2015-08-16')
 
         production = self.getProduction(aggr_id, '2015-08-16', '2015-08-16')
@@ -183,11 +184,11 @@ class ProductionLoader_Test(unittest.TestCase):
         self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
             ('2015-08-16', '2015-08-16', 'S', 10*[0]+[1000]+13*[0])
             ])
-        self.productionLoader.retrieveMeasuresFromPlants(aggr_id,
+        self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
                 '2015-08-16', '2015-08-16')
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
-        self.productionLoader.computeAvailableRights(aggr_id)
+        self.ProductionLoader.computeAvailableRights(aggr_id)
 
         rights = RightsPerShare(self.mdb)
         result = rights.rightsPerShare(1,
@@ -207,11 +208,11 @@ class ProductionLoader_Test(unittest.TestCase):
         self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
             ('2015-08-16', '2015-08-16', 'S', 10*[0]+[20000]+13*[0])
             ])
-        self.productionLoader.retrieveMeasuresFromPlants(aggr_id,
+        self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
                 '2015-08-16', '2015-08-16')
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
-        self.productionLoader.computeAvailableRights(aggr_id)
+        self.ProductionLoader.computeAvailableRights(aggr_id)
 
         rights = RightsPerShare(self.mdb)
         result = rights.rightsPerShare(1,
@@ -231,11 +232,11 @@ class ProductionLoader_Test(unittest.TestCase):
         self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
             ('2015-08-16', '2015-08-17', 'S', 2*(10*[0]+[20000]+13*[0]))
             ])
-        self.productionLoader.retrieveMeasuresFromPlants(aggr_id,
+        self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
                 '2015-08-16', '2015-08-17')
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
-        self.productionLoader.computeAvailableRights(aggr_id)
+        self.ProductionLoader.computeAvailableRights(aggr_id)
 
         rights = RightsPerShare(self.mdb)
         result = rights.rightsPerShare(1,

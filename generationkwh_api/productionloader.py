@@ -77,3 +77,4 @@ class GenerationkWhProductionLoader(osv.osv):
 
 GenerationkWhProductionLoader()
 
+
