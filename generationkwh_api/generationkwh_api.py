@@ -18,6 +18,7 @@ from generationkwh.isodates import localisodate
 from .assignment import AssignmentProvider
 from .remainder import RemainderProvider
 from .investment import InvestmentProvider
+from .holidays import HolidaysProvider
 
 # Data providers
 
@@ -53,24 +54,6 @@ class ProductionAggregatorProvider(ErpWrapper):
         return production.getNshares(self.cursor, self.uid,
                 pid, context=self.context)
 
-
-class HolidaysProvider(ErpWrapper):
-
-    def get(self, start, stop):
-        """Returns the holidays to be considering by fares
-        between start and stop date including both.
-        """
-
-        Holidays = self.erp.pool.get('giscedata.dfestius')
-        ids = Holidays.search(self.cursor, self.uid, [
-            ('name', '>=', start),
-            ('name', '<=', stop),
-            ], 0,None,'name desc',self.context)
-        return [
-            localisodate(h['name'])
-            for h in Holidays.read(self.cursor, self.uid,
-                ids, ['name'], self.context)
-            ]
 
 # Models
 
