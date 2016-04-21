@@ -3,7 +3,7 @@
   "name": "Generation kWh",
   "description": """Support for SomEnergia's Generation kWh in GisceERP""",
   "version": "0.0.1",
-  "author": "GISCE",
+  "author": "GISCE-TI & Som Energia",
   "category": "Master",
   "depends": [
     'base',
