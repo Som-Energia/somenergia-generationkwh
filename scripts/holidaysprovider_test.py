@@ -20,20 +20,21 @@ class Holidays_Test(unittest.TestCase):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
         self.c = erppeek.Client(**dbconfig.erppeek)
+        self.HolidaysHelper = self.c.GenerationkwhHolidaysTesthelper
 
     def assertEqualDates(self, result, expected):
         self.assertEqual([ naiveisodate(date) for date in expected], result)
 
     def test_holidays(self):
         self.assertEqualDates(
-            self.c.GenerationkwhHolidaysTesthelper.holidays("2015-12-25", "2015-12-25"),
+            self.HolidaysHelper.holidays("2015-12-25", "2015-12-25"),
             [
                 '2015-12-25',
             ])
 
     def test_holidays_severalDays(self):
         self.assertEqualDates(
-            self.c.GenerationkwhHolidaysTesthelper.holidays("2015-12-25", "2016-01-01"),
+            self.HolidaysHelper.holidays("2015-12-25", "2016-01-01"),
             [
                 '2015-12-25',
                 '2016-01-01',

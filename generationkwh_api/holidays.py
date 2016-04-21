@@ -37,5 +37,6 @@ class GenerationkWhHolidaysTestHelper(osv.osv):
         holidaysProvider = HolidaysProvider(self, cursor, uid, context)
         return holidaysProvider.get(start, stop)
 
+GenerationkWhHolidaysTestHelper()
 
 
