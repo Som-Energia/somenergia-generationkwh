@@ -15,8 +15,7 @@ import datetime
 
 import unittest
 
-def isodate(string):
-    return tz.localize(datetime.datetime.strptime(string, "%Y-%m-%d"))
+from .isodates import localisodate
 
 def localTime(string):
     isSummer = string.endswith("S")
@@ -103,138 +102,138 @@ class CurveDatetimeMapper_Test(unittest.TestCase):
     def test_dateToCurveIndex_inSummer(self):
        self.assertEquals(
             dateToCurveIndex(
-                isodate("2016-08-15"),
+                localisodate("2016-08-15"),
                 localTime("2016-08-15 00:00:00")
                 ), 0)
 
     def test_dateToCurveIndex_inSummer_secondHour(self):
        self.assertEquals(
             dateToCurveIndex(
-                isodate("2016-08-15"),
+                localisodate("2016-08-15"),
                 localTime("2016-08-15 01:00:00")
                 ), 1)
 
     def test_dateToCurveIndex_inSummer_nextDay(self):
        self.assertEquals(
             dateToCurveIndex(
-                isodate("2016-08-15"),
+                localisodate("2016-08-15"),
                 localTime("2016-08-16 00:00:00")
                 ), 25)
 
     def test_dateToCurveIndex_inWinter(self):
        self.assertEquals(
             dateToCurveIndex(
-                isodate("2016-12-25"),
+                localisodate("2016-12-25"),
                 localTime("2016-12-25 00:00:00")
                 ), 1)
 
     def test_dateToCurveIndex_beforeSummerToWinterChange(self):
        self.assertEquals(
             dateToCurveIndex(
-                isodate("2016-10-30"),
+                localisodate("2016-10-30"),
                 localTime("2016-10-30 02:00:00S")
                 ), 2)
 
     def test_dateToCurveIndex_afterSummerToWinterChange(self):
        self.assertEquals(
             dateToCurveIndex(
-                isodate("2016-10-30"),
+                localisodate("2016-10-30"),
                 localTime("2016-10-30 02:00:00")
                 ), 3)
 
     def test_dateToCurveIndex_beforeWinterToSummerChange(self):
        self.assertEquals(
             dateToCurveIndex(
-                isodate("2016-03-27"),
+                localisodate("2016-03-27"),
                 localTime("2016-03-27 01:00:00")
                 ), 2)
 
     def test_dateToCurveIndex_afterWinterToSummerChange(self):
        self.assertEquals(
             dateToCurveIndex(
-                isodate("2016-03-27"),
+                localisodate("2016-03-27"),
                 localTime("2016-03-27 03:00:00")
                 ), 3)
 
     def test_curveIndexToDate_summer(self):
        self.assertDateEqual(
-            curveIndexToDate(isodate("2016-08-15"), 0),
+            curveIndexToDate(localisodate("2016-08-15"), 0),
             localTime("2016-08-15 00:00:00"))
 
     def test_curveIndexToDate_summer_secondHour(self):
        self.assertDateEqual(
-            curveIndexToDate(isodate("2016-08-15"), 1),
+            curveIndexToDate(localisodate("2016-08-15"), 1),
             localTime("2016-08-15 01:00:00"))
 
     def test_curveIndexToDate_summer_nextDay(self):
        self.assertDateEqual(
-            curveIndexToDate(isodate("2016-08-15"), 25),
+            curveIndexToDate(localisodate("2016-08-15"), 25),
             localTime("2016-08-16 00:00:00"))
 
     def test_curveIndexToDate_summer_paddingReturnsNone(self):
        self.assertDateEqual(
-            curveIndexToDate(isodate("2016-08-15"), 24),
+            curveIndexToDate(localisodate("2016-08-15"), 24),
             None)
 
     def test_curveIndexToDate_winter(self):
        self.assertDateEqual(
-            curveIndexToDate(isodate("2016-12-25"), 1),
+            curveIndexToDate(localisodate("2016-12-25"), 1),
             localTime("2016-12-25 00:00:00"))
 
     def test_curveIndexToDate_winter_paddingReturnsNone(self):
        self.assertDateEqual(
-            curveIndexToDate(isodate("2016-12-25"), 0),
+            curveIndexToDate(localisodate("2016-12-25"), 0),
             None)
 
     def test_curveIndexToDate_winter_nextDay(self):
        self.assertDateEqual(
-            curveIndexToDate(isodate("2016-12-25"), 26),
+            curveIndexToDate(localisodate("2016-12-25"), 26),
             localTime("2016-12-26 00:00:00"))
 
     
     def test_curveIndexToDate_beforeChanginToWinter(self):
        self.assertDateEqual(
-            curveIndexToDate(isodate("2016-10-30"), 2),
+            curveIndexToDate(localisodate("2016-10-30"), 2),
             localTime("2016-10-30 02:00:00S"))
 
     def test_curveIndexToDate_afterChanginToWinter(self):
        self.assertDateEqual(
-            curveIndexToDate(isodate("2016-10-30"), 3),
+            curveIndexToDate(localisodate("2016-10-30"), 3),
             localTime("2016-10-30 02:00:00"))
 
     def test_curveIndexToDate_afterChanginToWinter(self):
        self.assertDateEqual(
-            curveIndexToDate(isodate("2016-10-30"), 3),
+            curveIndexToDate(localisodate("2016-10-30"), 3),
             localTime("2016-10-30 02:00:00"))
 
     def test_curveIndexToDate_summerButStartIsWinter(self):
        self.assertDateEqual(
-            curveIndexToDate(isodate("2016-10-29"), 51),
+            curveIndexToDate(localisodate("2016-10-29"), 51),
             localTime("2016-10-31 00:00:00"))
 
     def test_curveIndexToDate_winterButStartIsSummer(self):
         self.assertDateEqual(
-            curveIndexToDate(isodate("2016-3-26"), 50),
+            curveIndexToDate(localisodate("2016-3-26"), 50),
             localTime("2016-3-28 00:00:00"))
 
     def test_curveIndexToDate_noPaddingBeforeSummerToWinter(self):
         self.assertDateEqual(
-            curveIndexToDate(isodate("2016-10-30"), 0),
+            curveIndexToDate(localisodate("2016-10-30"), 0),
             localTime("2016-10-30 00:00:00"))
 
     def test_curveIndexToDate_noPaddingAfterSummerToWinter(self):
         self.assertDateEqual(
-            curveIndexToDate(isodate("2016-10-30"), 24),
+            curveIndexToDate(localisodate("2016-10-30"), 24),
             localTime("2016-10-30 23:00:00"))
 
     def test_curveIndexToDate_paddingBeforeWinterToSummer(self):
         self.assertDateEqual(
-            curveIndexToDate(isodate("2016-03-27"), 0),
+            curveIndexToDate(localisodate("2016-03-27"), 0),
             None)
 
     def test_curveIndexToDate_paddingAfterWinterToSummer(self):
         self.assertDateEqual(
-            curveIndexToDate(isodate("2016-03-27"), 24),
+            curveIndexToDate(localisodate("2016-03-27"), 24),
             None)
 
     
@@ -268,8 +267,8 @@ class MongoTimeCurve_Test(unittest.TestCase):
         mtc = self.setupPoints([
             ])
         curve = mtc.get(
-            start=isodate('2015-01-01'),
-            stop=isodate('2015-01-01'),
+            start=localisodate('2015-01-01'),
+            stop=localisodate('2015-01-01'),
             filter='miplanta',
             field='ae',
             )
@@ -283,8 +282,8 @@ class MongoTimeCurve_Test(unittest.TestCase):
             ])
 
         curve = mtc.get(
-            start=isodate('2015-01-01'),
-            stop=isodate('2015-01-01'),
+            start=localisodate('2015-01-01'),
+            stop=localisodate('2015-01-01'),
             filter='miplanta',
             field='ae',
             )
@@ -298,8 +297,8 @@ class MongoTimeCurve_Test(unittest.TestCase):
             ])
 
         curve = mtc.get(
-            start=isodate('2014-12-31'),
-            stop=isodate('2015-01-01'),
+            start=localisodate('2014-12-31'),
+            stop=localisodate('2015-01-01'),
             filter='miplanta',
             field='ae',
             )
@@ -315,8 +314,8 @@ class MongoTimeCurve_Test(unittest.TestCase):
             ])
 
         curve = mtc.get(
-            start=isodate('2015-01-01'),
-            stop=isodate('2015-01-01'),
+            start=localisodate('2015-01-01'),
+            stop=localisodate('2015-01-01'),
             filter='miplanta',
             field='ae',
             )
@@ -331,8 +330,8 @@ class MongoTimeCurve_Test(unittest.TestCase):
             ])
 
         curve = mtc.get(
-            start=isodate('2015-01-01'),
-            stop=isodate('2015-01-01'),
+            start=localisodate('2015-01-01'),
+            stop=localisodate('2015-01-01'),
             filter='miplanta',
             field='ae',
             )
@@ -347,8 +346,8 @@ class MongoTimeCurve_Test(unittest.TestCase):
             ])
 
         curve = mtc.get(
-            start=isodate('2015-01-01'),
-            stop=isodate('2015-01-01'),
+            start=localisodate('2015-01-01'),
+            stop=localisodate('2015-01-01'),
             filter='miplanta',
             field='ae',
             )
@@ -362,8 +361,8 @@ class MongoTimeCurve_Test(unittest.TestCase):
             ])
 
         curve = mtc.get(
-            start=isodate('2015-01-01'),
-            stop=isodate('2015-01-01'),
+            start=localisodate('2015-01-01'),
+            stop=localisodate('2015-01-01'),
             filter='miplanta',
             field='ae',
             )
@@ -379,8 +378,8 @@ class MongoTimeCurve_Test(unittest.TestCase):
             ])
 
         curve = mtc.get(
-            start=isodate('2015-01-01'),
-            stop=isodate('2015-01-01'),
+            start=localisodate('2015-01-01'),
+            stop=localisodate('2015-01-01'),
             filter='miplanta',
             field='ae',
             )
@@ -395,8 +394,8 @@ class MongoTimeCurve_Test(unittest.TestCase):
             ])
 
         curve = mtc.get(
-            start=isodate('2015-08-01'),
-            stop=isodate('2015-08-01'),
+            start=localisodate('2015-08-01'),
+            stop=localisodate('2015-08-01'),
             filter='miplanta',
             field='ae',
             )
@@ -414,8 +413,8 @@ class MongoTimeCurve_Test(unittest.TestCase):
             ])
 
         curve = mtc.get(
-            start=isodate('2015-03-29'),
-            stop=isodate('2015-03-29'),
+            start=localisodate('2015-03-29'),
+            stop=localisodate('2015-03-29'),
             filter='miplanta',
             field='ae',
             )
@@ -432,8 +431,8 @@ class MongoTimeCurve_Test(unittest.TestCase):
             ])
 
         curve = mtc.get(
-            start=isodate('2015-10-25'),
-            stop=isodate('2015-10-25'),
+            start=localisodate('2015-10-25'),
+            stop=localisodate('2015-10-25'),
             filter='miplanta',
             field='ae',
             )
@@ -474,7 +473,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             ])
 
         lastdate = mtc.lastDate('miplanta')
-        self.assertEqual(lastdate,isodate('2015-01-01'))
+        self.assertEqual(lastdate,localisodate('2015-01-01'))
 
     def test_lastDate_withOnePoint_atMidnight(self):
         mtc = self.setupPoints([
@@ -482,7 +481,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             ])
 
         lastdate = mtc.lastDate('miplanta')
-        self.assertEqual(lastdate,isodate('2015-01-01'))
+        self.assertEqual(lastdate,localisodate('2015-01-01'))
 
     def test_lastDate_withForeignPoint_ignored(self):
         mtc = self.setupPoints([
@@ -499,7 +498,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             ])
 
         lastdate = mtc.lastDate('miplanta')
-        self.assertEqual(lastdate,isodate('2015-01-02'))
+        self.assertEqual(lastdate,localisodate('2015-01-02'))
 
     def test_firstDate_whenNoPoint_returnsNone(self):
         mtc = self.setupPoints([
@@ -514,7 +513,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             ])
 
         lastdate = mtc.firstDate('miplanta')
-        self.assertEqual(lastdate,isodate('2015-01-01'))
+        self.assertEqual(lastdate,localisodate('2015-01-01'))
 
     def test_firstDate_withForeignPoint_ignored(self):
         mtc = self.setupPoints([
@@ -531,7 +530,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             ])
 
         lastdate = mtc.firstDate('miplanta')
-        self.assertEqual(lastdate,isodate('2015-01-01'))
+        self.assertEqual(lastdate,localisodate('2015-01-01'))
 
     def setupDatePoints(self, date, name, values):
         return self.setupPoints([
@@ -543,8 +542,8 @@ class MongoTimeCurve_Test(unittest.TestCase):
         mtc = self.setupDatePoints('2015-01-01', 'miplanta', range(1,25))
 
         curve = mtc.get(
-            start=isodate('2015-01-01'),
-            stop=isodate('2015-01-01'),
+            start=localisodate('2015-01-01'),
+            stop=localisodate('2015-01-01'),
             filter='miplanta',
             field='ae',
             )
@@ -556,20 +555,20 @@ class MongoTimeCurve_Test(unittest.TestCase):
         mtc = self.setupDatePoints('2015-01-01', 'miplanta', [1]*24)
 
         lastdate = mtc.lastFullDate('miplanta')
-        self.assertEqual(lastdate,isodate('2015-01-01'))
+        self.assertEqual(lastdate,localisodate('2015-01-01'))
 
     def test_firstFullDate_withNoPoints(self):
         mtc = self.setupDatePoints('2015-01-01', 'miplanta', [1]*24)
 
         firstdate = mtc.lastFullDate('miplanta')
-        self.assertEqual(firstdate,isodate('2015-01-01'))
+        self.assertEqual(firstdate,localisodate('2015-01-01'))
 
     def test_filled_whenEmpty(self):
         mtc = self.setupPoints([])
 
         _, curve = mtc.get(
-            start=isodate('2015-08-15'),
-            stop=isodate('2015-08-15'),
+            start=localisodate('2015-08-15'),
+            stop=localisodate('2015-08-15'),
             filter='miplanta',
             field='ae',
             filling=True,
@@ -585,8 +584,8 @@ class MongoTimeCurve_Test(unittest.TestCase):
             ])
 
         _,curve = mtc.get(
-            start=isodate('2015-08-15'),
-            stop=isodate('2015-08-15'),
+            start=localisodate('2015-08-15'),
+            stop=localisodate('2015-08-15'),
             filter='miplanta',
             field='ae',
             filling=True,
@@ -627,7 +626,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
         with self.assertRaises(AssertionError) as ctx:
             mtc.get(
                 start=datetime.datetime(2015,8,15),
-                stop=isodate("2015-08-15"),
+                stop=localisodate("2015-08-15"),
                 filter='miplanta',
                 field='ae',
                 )
@@ -639,7 +638,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
         with self.assertRaises(AssertionError) as ctx:
             mtc.get(
-                start=isodate("2015-08-15"),
+                start=localisodate("2015-08-15"),
                 stop=datetime.datetime(2015,8,15),
                 filter='miplanta',
                 field='ae',
@@ -651,14 +650,14 @@ class MongoTimeCurve_Test(unittest.TestCase):
         mtc = self.setupPoints([])
 
         curve = mtc.update(
-            start=isodate('2015-08-15'),
+            start=localisodate('2015-08-15'),
             filter='miplanta',
             field='ae',
             data=[1]+24*[0]
             )
         curve, filling = mtc.get(
-            start=isodate('2015-08-15'),
-            stop=isodate('2015-08-15'),
+            start=localisodate('2015-08-15'),
+            stop=localisodate('2015-08-15'),
             filter='miplanta',
             field='ae',
             filling=True,
@@ -676,14 +675,14 @@ class MongoTimeCurve_Test(unittest.TestCase):
         mtc = self.setupPoints([])
 
         curve = mtc.update(
-            start=isodate('2015-08-01'),
+            start=localisodate('2015-08-01'),
             filter='miplanta',
             field='ae',
             data=+25*[1]+[1]+24*[1]
             )
         curve = mtc.get(
-            start=isodate('2015-08-01'),
-            stop=isodate('2015-08-01'),
+            start=localisodate('2015-08-01'),
+            stop=localisodate('2015-08-01'),
             filter='miplanta',
             field='ae',
             )
@@ -696,14 +695,14 @@ class MongoTimeCurve_Test(unittest.TestCase):
         mtc = self.setupPoints([])
 
         curve = mtc.update(
-            start=isodate('2015-08-15'),
+            start=localisodate('2015-08-15'),
             filter='miplanta',
             field='ae',
             data=+25*[1]
             )
         curve, filling = mtc.get(
-            start=isodate('2015-08-15'),
-            stop=isodate('2015-08-15'),
+            start=localisodate('2015-08-15'),
+            stop=localisodate('2015-08-15'),
             filter='miplanta',
             field='ae',
             filling=True,
