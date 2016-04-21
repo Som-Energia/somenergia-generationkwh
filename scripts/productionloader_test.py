@@ -6,9 +6,7 @@ dbconfig = None
 try:
     import dbconfig
     import erppeek
-    import pymongo
-    from generationkwh.rightspershare import RightsPerShare
-    from plantmeter.mongotimecurve import toLocal, addDays
+    from plantmeter.mongotimecurve import addDays
 except ImportError:
     pass
 
