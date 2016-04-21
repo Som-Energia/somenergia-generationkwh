@@ -8,10 +8,8 @@ from .rightspershare import RightsPerShare
 from plantmeter.mongotimecurve import toLocal, asUtc
 import numpy
 
-from .isodates import localisodate
+from .isodates import localisodate, isodate
 
-def isodate(string):
-    return datetime.datetime.strptime(string, "%Y-%m-%d").date()
 
 class ProductionAggregatorMockUp(object):
 
