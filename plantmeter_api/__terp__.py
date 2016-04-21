@@ -8,7 +8,10 @@
   "depends": ['base'],
   "init_xml": [],
   "demo_xml": [],
-  "update_xml": [],
+  "update_xml": [
+    "security/plantmeter_api.xml",
+    "security/ir.model.access.csv",
+    ],
   "active": False,
   "installable": True
 }
