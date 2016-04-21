@@ -43,6 +43,14 @@ class GenerationkWhTestHelper(osv.osv):
         rightsPerShare = RightsPerShare(mdbpool.get_db())
         rightsPerShare.updateRightsPerShare(nshares, localisodate(startDate), data)
 
+    def rights_per_share(self, cursor, uid,
+            nshares, startDate, stopDate,
+            context=None):
+        rights = RightsPerShare(mdbpool.get_db())
+        return list(int(i) for i in rights.rightsPerShare(nshares,
+                localisodate(startDate),
+                localisodate(stopDate)))
+
     def clear_mongo_collections(self, cursor, uid, collections, context=None):
         for collection in collections:
             mdbpool.get_db().drop_collection(collection)

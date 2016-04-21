@@ -36,16 +36,11 @@ class ProductionLoader_Test(unittest.TestCase):
         aggr_obj.unlink(aggr_obj.search([]))
 
     def setUpMeasurements(self):
-        self.database = 'somenergia'
         self.collection = 'generationkwh.production.measurement'
-        self.m = pymongo.Connection()
-        self.mdb = self.m[self.database]
-        self.mdc = self.mdb[self.collection]
         self.clearMeasurements()
 
     def clearMeasurements(self):
-        self.TestHelper.clear_mongo_collections(self.collection)
-        self.mdc.delete_many({})
+        self.TestHelper.clear_mongo_collections([self.collection])
 
     def setUpTemp(self):
         import tempfile
@@ -190,12 +185,8 @@ class ProductionLoader_Test(unittest.TestCase):
 
         self.ProductionLoader.computeAvailableRights(aggr_id)
 
-        rights = RightsPerShare(self.mdb)
-        result = rights.rightsPerShare(1,
-                localisodate('2015-08-16'),
-                localisodate('2015-08-16'))
-        self.assertEqual(list(result),
-            +10*[0]+[1]+14*[0])
+        result = self.TestHelper.rightsPerShare(1, '2015-08-16', '2015-08-16')
+        self.assertEqual(result, +10*[0]+[1]+14*[0])
         self.assertEqual(remainder.last(), [
             [1, localisodate('2015-08-17'), 0],
             ])
@@ -214,12 +205,8 @@ class ProductionLoader_Test(unittest.TestCase):
 
         self.ProductionLoader.computeAvailableRights(aggr_id)
 
-        rights = RightsPerShare(self.mdb)
-        result = rights.rightsPerShare(1,
-                localisodate('2015-08-16'),
-                localisodate('2015-08-16'))
-        self.assertEqual(list(result),
-            +10*[0]+[5]+14*[0])
+        result = self.TestHelper.rightsPerShare(1,'2015-08-16','2015-08-16')
+        self.assertEqual(result, +10*[0]+[5]+14*[0])
         self.assertEqual(remainder.last(), [
             [1, localisodate('2015-08-17'), 0],
             ])
@@ -238,12 +225,8 @@ class ProductionLoader_Test(unittest.TestCase):
 
         self.ProductionLoader.computeAvailableRights(aggr_id)
 
-        rights = RightsPerShare(self.mdb)
-        result = rights.rightsPerShare(1,
-                localisodate('2015-08-16'),
-                localisodate('2015-08-17'))
-        self.assertEqual(list(result),
-            2*(10*[0]+[5]+14*[0]))
+        result = self.TestHelper.rightsPerShare(1,'2015-08-16','2015-08-17')
+        self.assertEqual(result, 2*(10*[0]+[5]+14*[0]))
         self.assertEqual(remainder.last(), [
             [1, localisodate('2015-08-18'), 0],
             ])
