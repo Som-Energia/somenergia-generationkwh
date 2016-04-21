@@ -8,13 +8,13 @@ try:
     import erppeek
     import pymongo
     from generationkwh.rightspershare import RightsPerShare
-    from plantmeter.mongotimecurve import toLocal
+    from plantmeter.mongotimecurve import toLocal, addDays
 except ImportError:
     pass
 
 from generationkwh.isodates import localisodate
 def isodatetime(string):
-    return datetime.datetime.strptime(string, "%Y-%m-%d")
+    return toLocal(datetime.datetime.strptime(string, "%Y-%m-%d"))
 
 def datespan(startDate, endDate, delta=datetime.timedelta(hours=1)):
     currentDate = startDate
@@ -119,7 +119,8 @@ class ProductionLoader_Test(unittest.TestCase):
             writer.writerows([[toStr(date),summer,value,0,0]
                 for start, end, summer, values in points
                 for date,value in zip(datespan(isodatetime(start),
-                    isodatetime(end)+datetime.timedelta(days=1)), values)])
+                    addDays(isodatetime(end),1)),
+                    values)])
 
     def getProduction(self, aggr_id, start, end):
         aggr_obj = self.erp.model('generationkwh.production.aggregator.testhelper')
