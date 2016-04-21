@@ -13,18 +13,19 @@ class Remainder_Test(unittest.TestCase):
 
     def setUp(self):
         erp = erppeek.Client(**dbconfig.erppeek)
-        self.Remainder = erp.GenerationkwhRemainderTesthelper
-        self.Remainder.clean()
+        self.RemainderHelper = erp.GenerationkwhRemainderTesthelper
+        self.Remainder = erp.GenerationkwhRemainder
+        self.RemainderHelper.clean()
 
     def setupProvider(self,remainders=[]):
-        self.Remainder.add(remainders)
+        self.RemainderHelper.add(remainders)
 
     def assertLastEquals(self, expectation):
-        result = self.Remainder.last()
+        result = self.RemainderHelper.last()
         self.assertEqual([list(a) for a in expectation], result)
 
     def tearDown(self):
-        self.Remainder.clean()
+        self.RemainderHelper.clean()
 
     def test_last_noRemainders(self):
         remainders=self.setupProvider()
