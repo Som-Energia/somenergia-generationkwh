@@ -223,6 +223,30 @@ class ProductionLoader_Test(unittest.TestCase):
             [1, localisodate('2015-08-17'), 0],
             ])
 
+    def test_computeAvailableRights_withManyPlantShares_twoDays(self):
+        aggr_id = self.setupAggregator(
+                nplants=1,
+                nmeters=1,
+                nshares=[4]).read(['id'])['id']
+        self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
+            ('2015-08-16', '2015-08-17', 'S', 2*(10*[0]+[20000]+13*[0]))
+            ])
+        self.productionLoader.retrieveMeasuresFromPlants(aggr_id,
+                '2015-08-16', '2015-08-17')
+        remainder = self.setupRemainders([(1,'2015-08-16',0)])
+
+        self.productionLoader.computeAvailableRights(aggr_id)
+
+        rights = RightsPerShare(self.mdb)
+        result = rights.rightsPerShare(1,
+                localisodate('2015-08-16'),
+                localisodate('2015-08-17'))
+        self.assertEqual(list(result),
+            2*(10*[0]+[5]+14*[0]))
+        self.assertEqual(remainder.last(), [
+            [1, localisodate('2015-08-18'), 0],
+            ])
+
 if __name__ == '__main__':
     unittest.main()
 
