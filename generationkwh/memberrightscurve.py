@@ -29,10 +29,12 @@ class MemberRightsCurve(object):
         kWh/share curve instead of having different curves for each
         number of shares.
     """
-    def __init__(self, activeShares, rightsPerShare, eager=False):
+    def __init__(self, activeShares, rightsPerShare,
+            eager=False, remainders=None):
         self._activeShares = activeShares
         self._rightsPerShare = rightsPerShare
         self._eager = eager
+        self._remainders = remainders
 
     def _get_naive(self, member, start, end):
             nshares=1
@@ -45,12 +47,23 @@ class MemberRightsCurve(object):
     def _get_eager(self, member, start, end):
         shares = self._activeShares.hourly(start, end, member)
         choiceset = list(sorted(set(shares)))
+        remainders = set([
+            nshares
+            for nshares, date, wh
+            in self._remainders.get()
+            ])
         choices = [
+            None
+            if nshares not in choiceset else
             self._rightsPerShare.rightsPerShare(nshares, start, end)
-            if nshares in choiceset
-            else None
+            if nshares in remainders else
+            self._rightsPerShare.rightsPerShare(1, start, end) * nshares
             for nshares in xrange(max(choiceset)+1)
             ]
+        self._remainders.init([
+            n for n in choiceset
+            if n not in remainders
+            ])
         return numpy.choose(shares, choices)
 
     def rights_kwh(self, member, start, end):
