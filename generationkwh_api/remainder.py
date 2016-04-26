@@ -16,6 +16,13 @@ class RemainderProvider(ErpWrapper):
         Remainder=self.erp.pool.get('generationkwh.remainder')
         Remainder.add(self.cursor,self.uid,remainders, context=self.context)
 
+    def init(self, nSharesToInit):
+        """
+            Creates a initial remainder with 0Wh for the many nSharesToInit
+            received at the same date than the first remainder for 1-shares.
+            If there is no remainder with nshares = 1 then...
+        """
+
 
 class GenerationkWhRemainder(osv.osv):
     """
@@ -51,12 +58,12 @@ class GenerationkWhRemainder(osv.osv):
         "Returns the latest remainder for each number of shares."""
 
         cr.execute("""
-            SELECT o.n_shares,o.target_day,o.remainder_wh
-                FROM generationkwh_remainder AS o
-                LEFT JOIN generationkwh_remainder AS b
-                    ON o.n_shares=b.n_shares
-                    AND o.target_day < b.target_day
-                WHERE b.target_day IS NULL
+            SELECT r.n_shares,r.target_day,r.remainder_wh
+                FROM generationkwh_remainder AS r
+                LEFT JOIN generationkwh_remainder AS r2
+                    ON r.n_shares=r2.n_shares
+                    AND r.target_day < r2.target_day
+                WHERE r2.target_day IS NULL
             """)
         result = [
             (
@@ -87,6 +94,27 @@ class GenerationkWhRemainder(osv.osv):
     def clean(self,cr,uid,context=None):
         ids=self.search(cr,uid, [], context=context)
         self.unlink(cr,uid,ids)
+
+    def newRemaindersToTrack(self,cr,uid,nshares,context=None):
+        """
+            Add an startup remainder for each number of shares
+            provided, with 0Wh and the date of the first 1-share
+            remainder.
+            If no 1-share remainder exists, it has no effect.
+        """
+        cr.execute("""
+            SELECT r.n_shares,r.target_day,r.remainder_wh
+            FROM generationkwh_remainder AS r
+            WHERE n_shares = 1
+            ORDER BY r.target_day ASC LIMIT 1
+            """)
+
+        first1ShareRemainder = cr.fetchone()
+        if first1ShareRemainder is None: return
+        _,date,_ = first1ShareRemainder
+        for n in nshares:
+            self.add(cr,uid,[(n,date,0)],context)
+        
 
 GenerationkWhRemainder()
 

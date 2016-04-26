@@ -8,6 +8,7 @@ try:
 except ImportError:
     pass
 
+
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Remainder_Test(unittest.TestCase):
 
@@ -28,11 +29,11 @@ class Remainder_Test(unittest.TestCase):
         self.RemainderHelper.clean()
 
     def test_last_noRemainders(self):
-        remainders=self.setupProvider()
+        self.setupProvider()
         self.assertLastEquals([])
 
     def test_last_oneRemainder(self):
-        remainders=self.setupProvider([
+        self.setupProvider([
             (1,'2016-02-25',3),
             ])
         self.assertLastEquals([
@@ -40,7 +41,7 @@ class Remainder_Test(unittest.TestCase):
             ])
 
     def test_last_manyRemainder(self):
-        remainders=self.setupProvider([
+        self.setupProvider([
             (1,'2016-02-25',3),
             (2,'2016-02-25',1),
             ])
@@ -50,7 +51,7 @@ class Remainder_Test(unittest.TestCase):
             ])
 
     def test_last_manyDates_takesLast(self):
-        remainders=self.setupProvider([
+        self.setupProvider([
             (1,'2016-02-25',3),
             (2,'2016-02-25',1),
             (1,'2016-01-24',2),
@@ -62,7 +63,7 @@ class Remainder_Test(unittest.TestCase):
             ])
 
     def test_last_sameDate_lastInsertedPrevails(self):
-        remainders=self.setupProvider([
+        self.setupProvider([
             (1,'2016-02-25',1),
             (1,'2016-02-25',2),
             (1,'2016-02-25',3),
@@ -76,7 +77,7 @@ class Remainder_Test(unittest.TestCase):
 
     # TODO: Does this has sense at all? DGG
     def test_last_sameDateAndNShares_raises(self):
-        remainders=self.Remainder.create(dict(
+        self.Remainder.create(dict(
             n_shares=1,
             target_day='2016-02-25',
             remainder_wh=1,
@@ -93,6 +94,43 @@ class Remainder_Test(unittest.TestCase):
             "number of shares is allowed",
             ctx.exception.faultCode
             )
+
+    def test_newRemaindersToTrack_when1SharesAvailable(self):
+        self.setupProvider([
+            (1,'2016-02-25',1),
+            ])
+        self.Remainder.newRemaindersToTrack([3])
+        self.assertLastEquals([
+            (1,'2016-02-25',1),
+            (3,'2016-02-25',0),
+            ])
+
+    def test_newRemaindersToTrack_when1SharesAvailable_takesOlder(self):
+        self.setupProvider([
+            (1,'2016-02-25',1),
+            (1,'2016-02-28',1),
+            ])
+        self.Remainder.newRemaindersToTrack([3])
+        self.assertLastEquals([
+            (1,'2016-02-28',1),
+            (3,'2016-02-25',0),
+            ])
+
+    def test_newRemaindersToTrack_no1Shares_ignores(self):
+        self.setupProvider([
+            ])
+        self.Remainder.newRemaindersToTrack([3])
+        self.assertLastEquals([
+            ])
+
+    def test_newRemaindersToTrack_otherButNo1Shares_ignored(self):
+        self.setupProvider([
+            (2,'2016-02-25',1),
+            ])
+        self.Remainder.newRemaindersToTrack([3])
+        self.assertLastEquals([
+            (2,'2016-02-25',1),
+            ])
 
 if __name__ == '__main__':
     unittest.main()
