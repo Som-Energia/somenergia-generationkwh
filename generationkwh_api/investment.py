@@ -162,37 +162,6 @@ class GenerationkWhInvestment(osv.osv):
                 move_line_id=line.id,
                 ))
 
-    def create_investments_from_paymentlines(self, cursor, uid,
-            start, stop, waitingDays, expirationYears,
-            context=None):
-        tail = 0,None,None,context
-
-        criteria = [('name','like','GKWH')]
-        if stop: criteria.append(('create_date', '<=', str(stop)))
-        if start: criteria.append(('create_date', '>=', str(start)))
-
-        PaymentLine = self.pool.get('payment.line')
-        paymentlineids = PaymentLine.search(cursor, uid, criteria,*tail)
-        for payment in PaymentLine.browse(cursor, uid, paymentlineids, context):
-            activation = None
-            deactivation = None
-            if waitingDays is not None:
-                activation = str(
-                    naiveisodatetime(payment.create_date)
-                    +relativedelta(days=waitingDays))
-
-                if expirationYears is not None:
-                    deactivation = str(
-                        naiveisodatetime(activation)
-                        +relativedelta(years=expirationYears))
-
-            self.create(cursor, uid, dict(
-                member_id=payment.partner_id.id,
-                nshares=-payment.amount_currency//100,
-                purchase_date=payment.create_date,
-                activation_date=activation,
-                deactivation_date=deactivation,
-                ))
 
 GenerationkWhInvestment()
 

@@ -115,16 +115,6 @@ def create(start=None, stop=None,
     c.GenerationkwhInvestment.create_investments_from_accounting(
         start, stop, waitingDays, expirationYears)
 
-def create_fromPaymentLines(start=None, stop=None,
-        waitingDays=None,
-        expirationYears=None,
-        force=False,
-        **_):
-    if force: clear()
-
-    c.GenerationkwhInvestment.create_investments_from_paymentlines(
-        start, stop, waitingDays, expirationYears)
-
 # TODO: Tests
 # TODO: Move implementation to the ERP side
 def activate(
