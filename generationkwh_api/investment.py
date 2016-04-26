@@ -88,12 +88,12 @@ class GenerationkWhInvestment(osv.osv):
             "Data de desactivació",
             help="Dia que les accions deixaran de generar drets a kWh",
             ),
-#        move_line_id=fields.many1one(
-#            'account.move.line'
-#            'Línia del moviment contable',
-#            required=True,
-#            help="Línia del moviment contable corresponent a la inversió",
-#            )
+        move_line_id=fields.many2one(
+            'account.move.line',
+            'Línia del moviment contable',
+#            required=True, # TODO: make it required
+            help="Línia del moviment contable corresponent a la inversió",
+            )
         )
 
     def active_investments(self, cursor, uid,
@@ -159,6 +159,7 @@ class GenerationkWhInvestment(osv.osv):
                 purchase_date=line.date_created,
                 activation_date=activation,
                 deactivation_date=deactivation,
+                move_line_id=line.id,
                 ))
 
     def create_investments_from_paymentlines(self, cursor, uid,
