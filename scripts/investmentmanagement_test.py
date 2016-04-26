@@ -34,7 +34,6 @@ class InvestmentManagement_Test(unittest.TestCase):
         data = listactive(csv=True)
         self.assertB2BEqual(data)
 
-    @unittest.skip("My current test [DAVID]")
     def test_create_firstBatch_twice(self):
         clear()
         create(stop="2015-06-30")

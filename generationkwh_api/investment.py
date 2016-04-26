@@ -134,6 +134,13 @@ class GenerationkWhInvestment(osv.osv):
             context=context
             )
         for line in MoveLine.browse(cursor, uid, movelinesids, context):
+            # Filter out already converted move lines
+            if self.search(cursor, uid,
+                [('move_line_id','=',line.id)],
+                context=context,
+                ):
+                continue
+
             partnerid = line.partner_id.id
             if not partnerid:
                 # Handle cases with no partner_id
