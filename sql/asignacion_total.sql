@@ -1,4 +1,4 @@
-﻿SELECT
+SELECT
     sub.name AS soci,
     max(pol.name) AS assigned_polissa
 FROM (
