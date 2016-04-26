@@ -8,12 +8,7 @@ from mongodb_backend.mongodb2 import mdbpool
 from datetime import datetime
 from plantmeter.resource import ProductionAggregator, ProductionPlant, ProductionMeter 
 from plantmeter.mongotimecurve import MongoTimeCurve, tz
-
-def isodate(d): # NULL
-    return d
-
-def _isodate(string):
-        return tz.localize(datetime.strptime(string, "%Y-%m-%d"))
+from plantmeter.isodates import localisodate
 
 class GenerationkwhProductionAggregator(osv.osv):
     '''Implements generationkwh production aggregation '''
@@ -31,12 +26,12 @@ class GenerationkwhProductionAggregator(osv.osv):
 
         aggr = self.browse(cursor, uid, pid, context)
         _aggr = self._createAggregator(aggr, ['name', 'description', 'enabled'])
-        return _aggr.getWh(isodate(start), isodate(end)).tolist()
+        return _aggr.getWh(start, end).tolist()
 
     def updateWh(self, cursor, uid, pid, start, end, context=None):
         '''Update Wh measurements'''
 
-        if isodate(start) > isodate(end): return
+        if start > end: return
         if not context:
             context = {}
         if isinstance(pid, list) or isinstance(pid, tuple):
@@ -45,7 +40,7 @@ class GenerationkwhProductionAggregator(osv.osv):
         args = ['name', 'description', 'enabled']
         aggr = self.browse(cursor, uid, pid, context)
         _aggr = self._createAggregator(aggr, args)
-        return _aggr.updateWh(isodate(start), isodate(end))
+        return _aggr.updateWh(start, end)
 
     def firstMeasurementDate(self, cursor, uid, pid, context=None):
         '''Get first measurement date'''
@@ -123,12 +118,12 @@ class GenerationkwhProductionAggregatorTesthelper(osv.osv):
     def getWh(self, cursor, uid, pid, start, end, context=None):
         production = self.pool.get('generationkwh.production.aggregator')
         return production.getWh(cursor, uid, pid,
-                _isodate(start), _isodate(end), context)
+                localisodate(start), localisodate(end), context)
 
     def updateWh(self, cursor, uid, pid, start, end, context=None):
         production = self.pool.get('generationkwh.production.aggregator')
         return production.updateWh(cursor, uid, pid,
-                _isodate(start), _isodate(end), context)
+                localisodate(start), localisodate(end), context)
 
     def firstMeasurementDate(self, cursor, uid, pid, context=None):
         production = self.pool.get('generationkwh.production.aggregator')
