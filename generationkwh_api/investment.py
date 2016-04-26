@@ -91,7 +91,7 @@ class GenerationkWhInvestment(osv.osv):
         move_line_id=fields.many2one(
             'account.move.line',
             'Línia del moviment contable',
-#            required=True, # TODO: make it required
+            required=True,
             help="Línia del moviment contable corresponent a la inversió",
             )
         )
