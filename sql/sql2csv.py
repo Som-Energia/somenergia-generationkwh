@@ -1,4 +1,4 @@
-#!/home/cesar/myenv-py2/bin/python2
+#!/usr/bin/env python
 #-*- coding: utf8 -*-
 
 import psycopg2
