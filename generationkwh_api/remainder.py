@@ -112,8 +112,10 @@ class GenerationkWhRemainder(osv.osv):
         first1ShareRemainder = cr.fetchone()
         if first1ShareRemainder is None: return
         _,date,_ = first1ShareRemainder
-        for n in nshares:
-            self.add(cr,uid,[(n,date,0)],context)
+        self.add(cr,uid,[
+            (n,date,0)
+            for n in nshares
+            ] ,context)
         
 
 GenerationkWhRemainder()

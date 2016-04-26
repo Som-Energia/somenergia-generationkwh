@@ -132,6 +132,17 @@ class Remainder_Test(unittest.TestCase):
             (2,'2016-02-25',1),
             ])
 
+    def test_newRemaindersToTrack_manyRemindersToTrack(self):
+        self.setupProvider([
+            (1,'2016-02-25',0),
+            ])
+        self.Remainder.newRemaindersToTrack([3,6])
+        self.assertLastEquals([
+            (1,'2016-02-25',0),
+            (3,'2016-02-25',0),
+            (6,'2016-02-25',0),
+            ])
+
 if __name__ == '__main__':
     unittest.main()
 
