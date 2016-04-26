@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
   "name": "Generationkwh production manager",
-  "description": """Support for SomEnergia's plantmete in GisceERP""",
+  "description": """Support for SomEnergia's plantmeter in GisceERP""",
   "version": "0.0.3",
   "author": "Som-Energia",
   "category": "Master",
