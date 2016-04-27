@@ -1,5 +1,5 @@
     SELECT
-	pol.name as polissa_id,
+        pol.id as polissa_id,
         soci.id AS soci_id,
         CASE
             WHEN pol.pagador=soci.id THEN 1

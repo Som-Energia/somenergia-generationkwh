@@ -60,7 +60,26 @@ class GenerationkWhAssignment(osv.osv):
                 'member_id': member_id,
                 'priority': priority,
             }, context=context)
-    
+
+    def sortedDefaultContractsForMember(self, cr, uid, member_ids, context=None):
+        """ Gets default contract to assign for a given member ids
+            Criteria are:
+            - Contracts the member being the payer first,
+              then the ones the member is owner but not payer.
+            - Within both groups the ones with more anual use first.
+        """
+        from tools import config
+        import os
+        sqlfile = os.path.join(
+            config['addons_path'], 'generationkwh_api',
+                'sql', 'asignacion_total_b2b.sql')
+        with open(sqlfile) as f:
+            sql = f.read()
+        cr.execute(sql, dict(socis=tuple(member_ids)))
+        return [
+            (contract,member)
+            for contract,member,_ in cr.fetchall()]
+
     def createOnePrioritaryAndManySecondaries(self, cr, uid, assignments, context=None):
         """ Creates assignments from a list of pairs of contract_id, member_id.
             The first pair of a member is the priority 0 and the 

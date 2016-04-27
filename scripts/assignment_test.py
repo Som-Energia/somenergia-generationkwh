@@ -365,7 +365,25 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.contract2, self.member, 1),
             ])
 
-
+    def test_sortedDefaultContractsForMember_(self):
+        result=self.Assignment.sortedDefaultContractsForMember([
+            10283,24500,13846,32922,12992,4320,400,3
+            ])
+        self.assertEqual(result, [
+            [ 3662,   400],
+            [26010,   400],
+            [44944,   400],
+            [  149,   400],
+            [  150,   400],
+            [22309,  4320],
+            [22502,  4320],
+            [12652, 10283],
+            [15212, 13846],
+            [32325, 24500],
+            [32327, 24500],
+            [45653, 32922],
+            [50606, 32922],
+            ])
 if __name__ == '__main__':
     unittest.main()
 
