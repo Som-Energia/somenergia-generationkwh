@@ -60,7 +60,22 @@ class GenerationkWhAssignment(osv.osv):
                 'member_id': member_id,
                 'priority': priority,
             }, context=context)
-
+    
+    def createOnePrioritaryAndManySecondaries(self, cr, uid, assignments, context=None):
+        """ Creates assignments from a list of pairs of member_id and contract_id.
+            The first pair of a member is the priority 0 and the 
+            remaining contracts of the same member are inserted as priority zero.
+            @pre contracts of the same member are together
+            """
+        if not assignments:
+            return
+        member, contract = assignments[0]
+        self.create(cr, uid, dict(
+            contract_id = contract,
+            member_id = member,
+            priority = 0,
+            ), context=context)
+    
     def dropAll(self, cr, uid, context=None):
         """Remove all records"""
         ids = self.search(cr, uid, [

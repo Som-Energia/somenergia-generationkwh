@@ -303,8 +303,26 @@ class AssignmentProvider_Test(unittest.TestCase):
                 self.contract2LastInvoicedDate,
                 )),
             ])
+    def assertAllAssignmentsEqual(self,expectation):
+        self.assertEqual([
+            (record.member_id.id, record.contract_id.id, record.priority) 
+            for record in self.Assignment.browse([])
+            ], expectation)
+        
+    def test_createOnePrioritaryAndManySecondaries_oneAssignment(self):
+        self.Assignment.createOnePrioritaryAndManySecondaries([
+            (self.member,self.contract),
+            ])
+        self.assertAllAssignmentsEqual([
+            (self.member, self.contract, 0),
+            ])
+    def test_createOnePrioritaryAndManySecondaries_noAssignment(self):
+        self.Assignment.createOnePrioritaryAndManySecondaries([
+            ])
+        self.assertAllAssignmentsEqual([
+            ])
+        
 
-            
 if __name__ == '__main__':
     unittest.main()
 
