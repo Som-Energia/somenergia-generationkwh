@@ -3,7 +3,7 @@
 + Investment: protect againts regenerating already generated account lines
 - Investment: Change member_id relation from partner to soci
 - Investment: Janitoring: mode lines without partner
-- Investment: Janitoring: mode lines without datesa
+- Investment: Janitoring: mode lines without dates
 - Investment: negative move line: activation date should be the same or inmediate?
 
 - Remainders: What to do with n-share right curve not yet started:
@@ -18,11 +18,16 @@
     - Right now is an arbitrary order, not bad
     - Rare case, low priority, wait for actual cases
 - Assignment: Default assignment: query with all sorted contracts for a set of members
-- Assignment: Default assignment: given previous list create the assignment with proper priorities
+    + Incorporate the query
+    + Adapt results to the expected ones
+    - Split test cases
+    - Sort by annual use
+    - Integrate both functions
++ Assignment: Default assignment: given previous list create the assignment with proper priorities
 - Assignment: Send an activation mail explaining the result
 
 - FarePeriodCurve: Fares dictionary should be at libfacturacioatr
-- FarePeriodCurve: Include all fares
+- FarePeriodCurve: Include all fares !!!!!!!
 - FarePeriodCurve: Use numpy arrays
 - FarePeriodCurve: Date parameter should be dates not strings
 
