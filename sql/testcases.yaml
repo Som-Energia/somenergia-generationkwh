@@ -1,10 +1,10 @@
 datapath: b2bdata
 testcases:
-    socis_titular_o_pagador:
-        command: ./sql2csv.py gen_kwh_inversion.sql > output.csv
+    socis_titular_o_pagador_b2b:
+        command: ./sql2csv.py gen_kwh_inversion_b2b.sql > output.csv
         outputs:
         - output.csv
-    assignacio_total:
-        command: ./sql2csv.py asignacion_total.sql > output.csv
+    assignacio_total_b2b:
+        command: ./sql2csv.py asignacion_total_b2b.sql > output.csv
         outputs:
         - output.csv
