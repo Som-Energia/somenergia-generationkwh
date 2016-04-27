@@ -305,16 +305,16 @@ class AssignmentProvider_Test(unittest.TestCase):
             ])
     def assertAllAssignmentsEqual(self,expectation):
         self.assertEqual([
-            (record.member_id.id, record.contract_id.id, record.priority) 
+            (record.contract_id.id, record.member_id.id, record.priority) 
             for record in self.Assignment.browse([])
             ], expectation)
         
     def test_createOnePrioritaryAndManySecondaries_oneAssignment(self):
         self.Assignment.createOnePrioritaryAndManySecondaries([
-            (self.member,self.contract),
+            (self.contract, self.member),
             ])
         self.assertAllAssignmentsEqual([
-            (self.member, self.contract, 0),
+            (self.contract, self.member, 0),
             ])
     def test_createOnePrioritaryAndManySecondaries_noAssignment(self):
         self.Assignment.createOnePrioritaryAndManySecondaries([
@@ -327,10 +327,10 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.contract2, self.member, 1),
             ])
         self.Assignment.createOnePrioritaryAndManySecondaries([
-            (self.member,self.contract),
+            (self.contract, self.member),
             ])
         self.assertAllAssignmentsEqual([
-            (self.member, self.contract, 0),
+            (self.contract, self.member, 0),
             ])
 
     def test_createOnePrioritaryAndManySecondaries_preserveOtherMembers(self):
@@ -338,22 +338,33 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.contract2, self.member2, 1),
             ])
         self.Assignment.createOnePrioritaryAndManySecondaries([
-            (self.member,self.contract),
+            (self.contract,self.member),
             ])
         self.assertAllAssignmentsEqual([
-            (self.member2, self.contract2, 1),
-            (self.member, self.contract, 0),
+            (self.contract2, self.member2, 1),
+            (self.contract, self.member, 0),
             ])
     
     def test_createOnePrioritaryAndManySecondaries_manyMembers_singleContract(self):
         self.Assignment.createOnePrioritaryAndManySecondaries([
-            (self.member,self.contract),
-            (self.member2,self.contract2),
+            (self.contract,self.member),
+            (self.contract2,self.member2),
             ])
         self.assertAllAssignmentsEqual([
-            (self.member, self.contract, 0),
-            (self.member2, self.contract2, 0),
+            (self.contract, self.member, 0),
+            (self.contract2, self.member2, 0),
             ])
+
+    def test_createOnePrioritaryAndManySecondaries_sameMember_manyContracts(self):
+        self.Assignment.createOnePrioritaryAndManySecondaries([
+            (self.contract, self.member),
+            (self.contract2, self.member),
+            ])
+        self.assertAllAssignmentsEqual([
+            (self.contract, self.member, 0),
+            (self.contract2, self.member, 1),
+            ])
+
 
 if __name__ == '__main__':
     unittest.main()
