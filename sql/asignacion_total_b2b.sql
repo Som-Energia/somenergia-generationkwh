@@ -18,7 +18,7 @@
         pol.state = 'activa' AND
         cups.active AND
         pol.active AND
-        soci.id in (10283,24500,13846,32922,12992,4320,400,3) AND
+        soci.id in %(socis)s AND
         TRUE
     ORDER BY
         soci.id,prioridad,polissa_id ASC
