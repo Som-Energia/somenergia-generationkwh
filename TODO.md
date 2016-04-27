@@ -1,4 +1,4 @@
-- ProductionToRightsPerShare: Protect againts divby0 when total active actions is zero
+ ProductionToRightsPerShare: Protect againts divby0 when total active actions is zero
 + Investment: backref to the account lines
 + Investment: protect againts regenerating already generated account lines
 - Investment: Change member_id relation from partner to soci
@@ -19,6 +19,7 @@
     - Rare case, low priority, wait for actual cases
 - Assignment: Default assignment: query with all sorted contracts for a set of members
 - Assignment: Default assignment: given previous list create the assignment with proper priorities
+- Assignment: Send an activation mail explaining the result
 
 - FarePeriodCurve: Fares dictionary should be at libfacturacioatr
 - FarePeriodCurve: Include all fares
@@ -26,5 +27,7 @@
 - FarePeriodCurve: Date parameter should be dates not strings
 
 - BUG: Mongodb erp integration: reconnections do not refresh connection attr
-
+- Review dates management across interfaces
+- Security: add users to generationkwh group
+- Security: add users to plantmeter group
 
