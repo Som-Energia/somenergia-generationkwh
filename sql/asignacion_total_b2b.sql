@@ -13,12 +13,23 @@
     LEFT JOIN
         giscedata_cups_ps AS cups ON
             cups.id = pol.cups
+    INNER JOIN (
+        SELECT 
+            sum(LINE.AMOUNT) AS inversion,
+            max(partner_id) AS already_invested
+        FROM payment_line AS line
+        LEFT JOIN
+            payment_order AS remesa ON remesa.id = line.order_id 
+        WHERE
+            remesa.mode = 19
+        GROUP BY partner_id
+        ) AS investments on already_invested=soci.id
     WHERE
-        COALESCE(soci.active,TRUE) AND
-        COALESCE(pol.state = 'activa',TRUE) AND
-        COALESCE(cups.active, TRUE) AND
-        COALESCE(pol.active, TRUE) AND
-        soci.id in (10283,24500,13846,32922,12992,4320,400) AND
+        soci.active AND
+        pol.state = 'activa' AND
+        cups.active AND
+        pol.active AND
+        soci.id in (10283,24500,13846,32922,12992,4320,400,3) AND
         TRUE
     ORDER BY
-        soci.id,prioridad ASC
+        soci.id,prioridad,polissa_id ASC
