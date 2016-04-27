@@ -322,7 +322,28 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.assertAllAssignmentsEqual([
             ])
         
+    def test_createOnePrioritaryAndManySecondaries_clearPrevious(self):
+        self.setupAssignments([
+            (self.contract2, self.member, 1),
+            ])
+        self.Assignment.createOnePrioritaryAndManySecondaries([
+            (self.member,self.contract),
+            ])
+        self.assertAllAssignmentsEqual([
+            (self.member, self.contract, 0),
+            ])
 
+    def test_createOnePrioritaryAndManySecondaries_preserveOtherMembers(self):
+        self.setupAssignments([
+            (self.contract2, self.member2, 1),
+            ])
+        self.Assignment.createOnePrioritaryAndManySecondaries([
+            (self.member,self.contract),
+            ])
+        self.assertAllAssignmentsEqual([
+            (self.member2, self.contract2, 1),
+            (self.member, self.contract, 0),
+            ])
 if __name__ == '__main__':
     unittest.main()
 

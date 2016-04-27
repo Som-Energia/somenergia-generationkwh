@@ -70,6 +70,11 @@ class GenerationkWhAssignment(osv.osv):
         if not assignments:
             return
         member, contract = assignments[0]
+        ids = self.search(cr, uid, [
+            ('member_id','=',member),
+            ],context=context)
+        for a in self.browse(cr, uid, ids, context=context):
+            a.unlink()
         self.create(cr, uid, dict(
             contract_id = contract,
             member_id = member,
