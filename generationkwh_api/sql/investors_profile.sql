@@ -1,3 +1,6 @@
+-- Sumarizes how many contracts investors have related
+-- as payer, not payer but owner or not payer nor owner but member.
+
 SELECT
     soci.id,
     partner_id,
