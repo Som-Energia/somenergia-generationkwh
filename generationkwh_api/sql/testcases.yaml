@@ -1,10 +1,14 @@
 datapath: b2bdata
 testcases:
+    genkwh_investors_profile:
+        command: sql2csv.py investors_profile.sql -C config.py > output.csv
+        outputs:
+        - output.csv
     socis_titular_o_pagador_b2b:
-        command: sql2csv.py gen_kwh_inversion_b2b.sql > output.csv
+        command: sql2csv.py gen_kwh_inversion_b2b.sql  -C config.py > output.csv
         outputs:
         - output.csv
     assignacio_total_b2b:
-        command: sql2csv.py asignacion_total_b2b.sql --socis "(10283,24500,13846,32922,12992,4320,400,3)"  > output.csv
+        command: sql2csv.py asignacion_total_b2b.sql  -C config.py --socis "(10283,24500,13846,32922,12992,4320,400,3)"  > output.csv
         outputs:
         - output.csv
