@@ -1,10 +1,19 @@
- ProductionToRightsPerShare: Protect againts divby0 when total active actions is zero
+- Rename `generationkwh_api` -> `som_generationkwh`
+- Rename `plantmeter_api` -> `som_plantmeter`
+- ProductionToRightsPerShare: Protect againts divby0 when total active actions is zero
 + Investment: backref to the account lines
 + Investment: protect againts regenerating already generated account lines
-- Investment: Change member_id relation from partner to soci
++ Investment: Change `member_id` relation from partner to soci
+- Investment: create receives as parameter `partner_id` instead `soci_id`
 - Investment: Janitoring: mode lines without partner
 - Investment: Janitoring: mode lines without dates
 - Investment: negative move line: activation date should be the same or inmediate?
+- Investment: test activate and move it from erppeek to erp
+- Investment: constant for the number of digits for the soci code in accountsa
+    - Can be found at `ir_secuence.code="socis"`
+- Investment: constant for the account root for generationkwh accounts
+- Investment: `active` field to hide failed payments (the original one and the refund)
+- Investment: Add the investment reference to the model
 
 - Remainders: What to do with n-share right curve not yet started:
 	+ Add Remainder method (startTrackingRights?) to add a 0 kW remainder at production start for n-shares if there is no remainder yet
@@ -35,4 +44,9 @@
 - Review dates management across interfaces
 - Security: add users to generationkwh group
 - Security: add users to plantmeter group
+- WebForms: Create the soci
+- WebForms: Create the investments form webforms
+
+
+
 
