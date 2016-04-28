@@ -74,7 +74,7 @@ class InvestmentManagement_Test(unittest.TestCase):
     def test_listactive_withMember(self):
         clear()
         create(stop="2015-06-30")
-        data = listactive(csv=True, member=550)
+        data = listactive(csv=True, member=469)
         self.assertMultiLineEqual(data,
             '550\tFalse\tFalse\t3\n'
             '550\tFalse\tFalse\t2\n'

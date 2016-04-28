@@ -37,9 +37,17 @@ class InvestmentProvider(ErpWrapper):
         ids = Investment.search(self.cursor, self.uid, filters)
         contracts = Investment.read(self.cursor, self.uid, ids)
 
+        def membertopartner(member_id):
+            Member = self.erp.pool.get('somenergia.soci')
+
+            partner_id = Member.read(
+                self.cursor, self.uid, member_id, ['partner_id']
+            )['partner_id'][0]
+            return partner_id
+
         return [
             (
-                c['member_id'][0],
+                membertopartner(c['member_id'][0]),
                 localisodate(c['activation_date']),
                 localisodate(c['deactivation_date']),
                 c['nshares'],
@@ -65,7 +73,7 @@ class GenerationkWhInvestment(osv.osv):
 
     _columns = dict(
         member_id=fields.many2one(
-            'res.partner',
+            'somenergia.soci',
             "Inversor",
             required=True,
             help="Inversor que ha comprat les accions",
@@ -120,7 +128,7 @@ class GenerationkWhInvestment(osv.osv):
 
         Account = self.pool.get('account.account')
         MoveLine = self.pool.get('account.move.line')
-        Partner = self.pool.get('res.partner')
+        Member = self.pool.get('somenergia.soci')
 
         accountIds = Account.search(cursor, uid, [('code','ilike','163500%')])
 
@@ -145,9 +153,12 @@ class GenerationkWhInvestment(osv.osv):
             if not partnerid:
                 # Handle cases with no partner_id
                 membercode = int(line.account_id.code[4:])
-                partnerid = Partner.search(cursor, uid, [
-                    ('ref', 'ilike', '%'+str(membercode).zfill(6))
-                    ])[0]
+                filter = [('ref', 'ilike', '%'+str(membercode).zfill(6))]
+            else:
+                filter = [('partner_id', '=', partnerid)]
+
+            # partner to member conversion
+            memberid = Member.search(cursor, uid, filter)[0]
             activation = None
             deactivation = None
             if waitingDays is not None:
@@ -161,7 +172,7 @@ class GenerationkWhInvestment(osv.osv):
                         +relativedelta(years=expirationYears))
 
             self.create(cursor, uid, dict(
-                member_id=partnerid,
+                member_id=memberid,
                 nshares=(line.credit-line.debit)//100,
                 purchase_date=line.date_created,
                 activation_date=activation,
