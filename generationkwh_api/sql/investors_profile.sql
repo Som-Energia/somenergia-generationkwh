@@ -1,5 +1,6 @@
 -- Sumarizes how many contracts investors have related
 -- as payer, not payer but owner or not payer nor owner but member.
+-- TODO: Do not use payment lines
 
 SELECT
     soci.id,
