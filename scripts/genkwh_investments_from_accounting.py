@@ -112,7 +112,7 @@ def create(start=None, stop=None,
         **_):
     if force: clear()
 
-    c.GenerationkwhInvestment.create_investments_from_accounting(
+    c.GenerationkwhInvestment.create_from_accounting(
         start, stop, waitingDays, expirationYears)
 
 # TODO: Tests

@@ -112,7 +112,7 @@ class GenerationkWhInvestment(osv.osv):
         return provider.shareContractsTuple(member, start, end)
 
 
-    def create_investments_from_accounting(self, cursor, uid,
+    def create_from_accounting(self, cursor, uid,
             start, stop, waitingDays, expirationYears,
             context=None):
         """
@@ -153,12 +153,13 @@ class GenerationkWhInvestment(osv.osv):
             if not partnerid:
                 # Handle cases with no partner_id
                 membercode = int(line.account_id.code[4:])
-                filter = [('ref', 'ilike', '%'+str(membercode).zfill(6))]
+                domain = [('ref', 'ilike', '%'+str(membercode).zfill(6))]
             else:
-                filter = [('partner_id', '=', partnerid)]
+                domain = [('partner_id', '=', partnerid)]
 
             # partner to member conversion
-            memberid = Member.search(cursor, uid, filter)[0]
+            memberid = Member.search(cursor, uid, domain)[0]
+
             activation = None
             deactivation = None
             if waitingDays is not None:
