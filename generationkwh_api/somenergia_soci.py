@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from osv import osv, fields
 from tools.translate import _
 
+from datetime import datetime, date
 
 def field_function(ff_func):
     def string_key(*args, **kwargs):
@@ -75,7 +76,22 @@ SomenergiaSoci()
 class GenerationkWhkWhxShare(osv.osv):
 
     _name = "generationkwh.kwh.per.share"
-    _order = "version_date DESC"
+    _order = "version_start_date DESC"
+
+    def get_kwh_per_date(self, cursor, uid, date=None, context=None):
+        """ Returns kwh on date
+        :param date: date of calc. today if None
+        :return: kwh per share on date
+        """
+        if date is None:
+            date = datetime.today().strftime("%Y-%m-%d")
+
+        v_ids = self.search(
+            cursor, uid, [
+                ('version_start_date', '<=', date)
+            ], order='version_start_date desc'
+        )
+        return self.read(cursor, uid, v_ids[0], ['kwh'])['kwh']
 
     _columns = {
         'version_start_date': fields.date(u"Data Valor"),
