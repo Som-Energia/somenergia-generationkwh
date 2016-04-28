@@ -10,7 +10,12 @@
                 <page string="Soci" position="after">
                     <page string="Generation kWh" attrs="{'invisible': [('has_gkwh','=', 0)]}">
                         <field name="has_gkwh" select="1"/>
-                        <separator string="Observacions" colspan="4"/>
+                        <separator string="Resum Generation kWh" colspan="4"/>
+                        <field name="active_shares"/>
+                        <field name="estimated_anual_kwh"/>
+                        <separator string="Inversions" colspan="4"/>
+                        <field name="investment_ids" colspan="4" nolabel="1"/>
+                        <separator string="Historial Generation kWh" colspan="4"/>
                         <field colspan="4" name="gkwh_comments" nolabel="1"/>
                     </page>
                 </page>

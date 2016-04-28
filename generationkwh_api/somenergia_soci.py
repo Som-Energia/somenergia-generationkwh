@@ -29,9 +29,11 @@ class SomenergiaSoci(osv.osv):
     _inherit = 'somenergia.soci'
 
     @field_function
-    def _ff_te_gkwh(self, cursor, uid, ids, field_name, args, context=None):
+    def _ff_investments(self, cursor, uid, ids, field_names, args,
+                        context=None):
         """ Check's if a member any gkwh investment"""
         invest_obj = self.pool.get('generationkwh.investment')
+        kwhpershare_obj = self.pool.get('generationkwh.kwh.per.share')
 
         if context is None:
             context = {}
@@ -39,16 +41,32 @@ class SomenergiaSoci(osv.osv):
         if not isinstance(ids, (tuple, list)):
             ids = [ids]
 
-        res = {}.fromkeys(ids, False)
+        init_dict = dict([(f, False) for f in field_names])
+        res = {}.fromkeys(ids, init_dict.copy())
 
-        for member_vals in self.read(cursor, uid, ids, ['partner_id']):
-            member_id = member_vals['id']
-            partner_id = member_vals['partner_id'][0]
+        for member_id in ids:
             investments = invest_obj.active_investments(
-                cursor, uid, partner_id, None, None,
-                context=context
+                cursor, uid, member_id, None, None, context=context
             )
-            res[member_id] = len(investments) > 0
+            member_data = res[member_id]
+            if 'has_gkwh' in field_names:
+                member_data['has_gkwh'] = len(investments) > 0
+            # Current investments
+            total_fields = ['active_shares', 'estimated_anual_kwh']
+            if set(total_fields).intersection(field_names):
+                today = date.today().strftime('%Y-%m-%d')
+                current_investments = invest_obj.active_investments(
+                    cursor, uid, member_id, today, today, context=context
+                )
+                total_investments = sum([i.shares for i in current_investments])
+                if 'active_shares' in field_names:
+                    member_data['active_shares'] = total_investments
+                if 'estimated_anual_kwh' in field_names:
+                    kwhpershare = kwhpershare_obj.get_kwh_per_date(
+                        cursor, uid, context=context
+                    )
+                    total_kwh = kwhpershare * total_investments
+                    member_data['estimated_anual_kwh'] = total_kwh
 
         return res
 
@@ -59,14 +77,28 @@ class SomenergiaSoci(osv.osv):
         cursor.execute(sql)
         vals = [v[0] for v in cursor.fetchall()]
 
-        return [('partner_id', 'in', vals)]
+        return [('id', 'in', vals)]
 
     _columns = {
         'has_gkwh': fields.function(
-            _ff_te_gkwh, string='Te drets GkWh', readonly=True,
-            fnct_search=_search_has_gkwh, type='boolean', method="True"
+            _ff_investments, string='Te drets GkWh', readonly=True,
+            fnct_search=_search_has_gkwh, type='boolean', method=True,
+            multi='investments'
         ),
-        #'investment_ids': one2many('member_id', )
+        'active_shares': fields.function(
+            _ff_investments, string='Accions actives', readonly=True,
+            type='integer', method=True,
+            multi='investments'
+        ),
+        'estimated_anual_kwh': fields.function(
+            _ff_investments, string='Precisiói de kWh anual', readonly=True,
+            type='integer', method=True,
+            multi='investments'
+        ),
+        'investment_ids': fields.one2many(
+            'generationkwh.investment', 'member_id', string="Inversions",
+            readonly=True
+        ),
         'gkwh_comments': fields.text('Observacions'),
     }
 

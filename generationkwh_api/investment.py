@@ -70,6 +70,7 @@ class InvestmentProvider(ErpWrapper):
 class GenerationkWhInvestment(osv.osv):
 
     _name = 'generationkwh.investment'
+    _order = 'purchase_date DESC'
 
     _columns = dict(
         member_id=fields.many2one(
