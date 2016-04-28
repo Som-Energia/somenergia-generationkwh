@@ -217,6 +217,9 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.member_noContracts = 629 # 537
         self.member_oneAsPayer = 5 # 4
         self.member_asOwnerButNotPayer = 13846 # 8899
+        self.member_aPayerAndAnOwnerContract = 120 # 107
+        self.member_manyAsPayer = 61 # 54
+        self.member_manyAsPayerAndManyAsOwner = 400 # 351
 
     def setupAssignments(self, assignments):
         for contract, member, priority in assignments:
@@ -437,16 +440,6 @@ class AssignmentProvider_Test(unittest.TestCase):
             ]
         )
 
-    def test_sortedDefaultContractsForMember_withoutContracts(self):
-        self.assertContractForMember(self.member_noContracts, [
-            ])
-
-    def test_sortedDefaultContractsForMember_oneAsPayer(self):
-        self.assertContractForMember(self.member_oneAsPayer, [
-            (4646, self.member_oneAsPayer)
-            ])
-
-<<<<<<< HEAD
     def test_sortedDefaultContractsForMember_manyOwners(self):
         self.assertContractForMember(
             32922,
@@ -459,17 +452,6 @@ class AssignmentProvider_Test(unittest.TestCase):
     def test_sortedDefaultContractsForMember_oneMember(self):
         self.assertContractForMember(
             12992,
-=======
-    def test_sortedDefaultContractsForMember_oneAsOwnerButNotPayer(self):
-        self.assertContractForMember(self.member_asOwnerButNotPayer, [
-            (15212, self.member_asOwnerButNotPayer)
-            ])
-
-    def _test_sortedDefaultContractsForMember_(self):
-        self.assertContractForMember([
-                10283,24500,13846,32922,12992,4320,400,3
-            ],
->>>>>>> asOwnerButNotPayer included as well
             [
                 #Contracts as member are not shown
             ]
@@ -500,6 +482,64 @@ class AssignmentProvider_Test(unittest.TestCase):
         )
         
         
+    def test_sortedDefaultContractsForMember_withoutContracts(self):
+        self.assertContractForMember(self.member_noContracts, [
+            ])
+
+    def test_sortedDefaultContractsForMember_oneAsPayer(self):
+        self.assertContractForMember(self.member_oneAsPayer, [
+            (4646, self.member_oneAsPayer),
+            ])
+
+    def test_sortedDefaultContractsForMember_oneAsOwnerButNotPayer(self):
+        self.assertContractForMember(self.member_asOwnerButNotPayer, [
+            (15212, self.member_asOwnerButNotPayer),
+            ])
+
+    def test_sortedDefaultContractsForMember_onePayerAndOneOwner_payerFirst(self):
+        self.assertContractForMember([
+            self.member_aPayerAndAnOwnerContract,
+            ], [
+            (50851, self.member_aPayerAndAnOwnerContract),
+            (43, self.member_aPayerAndAnOwnerContract),
+            ])
+
+    def test_sortedDefaultContractsForMember_manyAsPayer_biggerFirst(self):
+        self.assertContractForMember([
+            self.member_manyAsPayer,
+            ], [
+            (929, self.member_manyAsPayer),
+            (21, self.member_manyAsPayer),
+            ])
+
+    def test_sortedDefaultContractsForMember_manyAsPayerAndManyAsOwner(self):
+        # TODO: Check the order is right
+
+        self.assertContractForMember([
+            self.member_manyAsPayerAndManyAsOwner,
+            ], [
+            (44944, self.member_manyAsPayerAndManyAsOwner),
+            (26010, self.member_manyAsPayerAndManyAsOwner),
+            (3662,  self.member_manyAsPayerAndManyAsOwner),
+            (150,   self.member_manyAsPayerAndManyAsOwner),
+            (149,   self.member_manyAsPayerAndManyAsOwner),
+            ])
+
+    def test_sortedDefaultContractsForMember_severalMembers_doNotBlend(self):
+        self.assertContractForMember([
+            self.member_manyAsPayer,
+            self.member_manyAsPayerAndManyAsOwner,
+            ], [
+            (929, self.member_manyAsPayer),
+            (21, self.member_manyAsPayer),
+        # TODO: Check the order is right
+            (44944, self.member_manyAsPayerAndManyAsOwner),
+            (26010, self.member_manyAsPayerAndManyAsOwner),
+            (3662,  self.member_manyAsPayerAndManyAsOwner),
+            (150,   self.member_manyAsPayerAndManyAsOwner),
+            (149,   self.member_manyAsPayerAndManyAsOwner),
+            ])
+
 if __name__ == '__main__':
     unittest.main()
 
