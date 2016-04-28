@@ -1,4 +1,4 @@
-﻿   SELECT
+   SELECT
 		    pol.name,
                     cups.conany_kwh as consumo,
                     case when pol.pagador=soci.id then 2 when pol.titular=soci.id then 1 end as PRIORIDAD
