@@ -9,11 +9,10 @@
 - Investment: Janitoring: mode lines without dates
 - Investment: negative move line: activation date should be the same or inmediate?
 - Investment: test activate and move it from erppeek to erp
+- Investment: constant for the account root for generationkwh accounts
 - Investment: constant for the number of digits for the soci code in accountsa
     - Can be found at `ir_secuence.code="socis"`
-- Investment: constant for the account root for generationkwh accounts
 - Investment: `active` field to hide failed payments (the original one and the refund)
-- Investment: Add the investment reference to the model
 
 - Remainders: What to do with n-share right curve not yet started:
 	+ Add Remainder method (startTrackingRights?) to add a 0 kW remainder at production start for n-shares if there is no remainder yet
@@ -33,6 +32,9 @@
     - Sort by annual use
     - Integrate both functions
 + Assignment: Default assignment: given previous list create the assignment with proper priorities
+- Assignment: Edit test cases: expire assignments
+- Assignment: Edit test cases: change priority
+- Assignment: Edit test cases: add rule
 - Assignment: Send an activation mail explaining the result
 
 - FarePeriodCurve: Fares dictionary should be at libfacturacioatr

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import unittest
 import datetime
 dbconfig = None
@@ -212,6 +213,10 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.newContract = newContract.id
         self.newContractActivationDate = newContract.data_alta
 
+        # pickup cases (commented out the soci.id)
+        self.member_noContracts = 629 # 537
+        self.member_oneAsPayer = 5 # 4
+
     def setupAssignments(self, assignments):
         for contract, member, priority in assignments:
             self.Assignment.create(dict(
@@ -364,7 +369,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.contract, self.member, 0),
             (self.contract2, self.member, 1),
             ])
-    
+ 
     def assertContractForMember(self, member_id,expectation):
         if not isinstance(member_id,list):
             member_ids=[member_id]
@@ -375,7 +380,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         )
         expectation = [list(e) for e in expectation]
         self.assertEqual(result, expectation) 
-    
+
     def test_sortedDefaultContractsForMember_manyPayers_manyOwners(self):
         self.assertContractForMember(
             400,
@@ -430,7 +435,16 @@ class AssignmentProvider_Test(unittest.TestCase):
                 (32325, 24500), # Member payer. Annual use: 2100
             ]
         )
-    
+
+    def test_sortedDefaultContractsForMember_withoutContracts(self):
+        self.assertContractForMember(self.member_noContracts, [
+            ])
+
+    def test_sortedDefaultContractsForMember_oneAsPayer(self):
+        self.assertContractForMember(self.member_oneAsPayer, [
+            (4646, self.member_oneAsPayer)
+            ])
+
     def test_sortedDefaultContractsForMember_manyOwners(self):
         self.assertContractForMember(
             32922,
