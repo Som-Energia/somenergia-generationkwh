@@ -104,12 +104,19 @@ class GenerationkWhInvestment(osv.osv):
             )
         )
 
-    def active_investments(self, cursor, uid,
+    def active_investments_tuple(self, cursor, uid,
             member, start, end,
             context=None):
 
         provider = InvestmentProvider(self, cursor, uid, context)
         return provider.shareContractsTuple(member, start, end)
+
+    def active_investments(self, cursor, uid,
+            member, start, end,
+            context=None):
+
+        provider = InvestmentProvider(self, cursor, uid, context)
+        return provider.shareContracts(member, start, end)
 
 
     def create_from_accounting(self, cursor, uid,
