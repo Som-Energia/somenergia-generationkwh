@@ -11,7 +11,7 @@ FROM res_partner AS soci
 LEFT JOIN
     giscedata_polissa AS pol ON
         pol.pagador = soci.id OR
---        pol.titular = soci.id OR
+        pol.titular = soci.id OR
         FALSE
 LEFT JOIN
     giscedata_cups_ps AS cups ON

@@ -216,6 +216,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         # pickup cases (commented out the soci.id)
         self.member_noContracts = 629 # 537
         self.member_oneAsPayer = 5 # 4
+        self.member_asOwnerButNotPayer = 13846 # 8899
 
     def setupAssignments(self, assignments):
         for contract, member, priority in assignments:
@@ -445,6 +446,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             (4646, self.member_oneAsPayer)
             ])
 
+<<<<<<< HEAD
     def test_sortedDefaultContractsForMember_manyOwners(self):
         self.assertContractForMember(
             32922,
@@ -457,6 +459,17 @@ class AssignmentProvider_Test(unittest.TestCase):
     def test_sortedDefaultContractsForMember_oneMember(self):
         self.assertContractForMember(
             12992,
+=======
+    def test_sortedDefaultContractsForMember_oneAsOwnerButNotPayer(self):
+        self.assertContractForMember(self.member_asOwnerButNotPayer, [
+            (15212, self.member_asOwnerButNotPayer)
+            ])
+
+    def _test_sortedDefaultContractsForMember_(self):
+        self.assertContractForMember([
+                10283,24500,13846,32922,12992,4320,400,3
+            ],
+>>>>>>> asOwnerButNotPayer included as well
             [
                 #Contracts as member are not shown
             ]
