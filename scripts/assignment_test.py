@@ -364,9 +364,38 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.contract, self.member, 0),
             (self.contract2, self.member, 1),
             ])
-
+    def assertContractForMember(self, member_id,expectation):
+        if not isinstance(member_id,list):
+            member_ids=[member_id]
+        else:
+            member_ids=member_id
+        result=self.Assignment.sortedDefaultContractsForMember(
+            member_ids
+        )
+        expectation = [list(e) for e in expectation]
+        self.assertEqual(result, expectation) 
     def test_sortedDefaultContractsForMember_(self):
-        result=self.Assignment.sortedDefaultContractsForMember([
+        self.assertContractForMember([
+                10283,24500,13846,32922,12992,4320,400,3
+            ],
+            [
+                 (44944,   400),
+                 (26010,   400),
+                 (3662,    400),
+                 (149,     400),
+                 (150,     400),
+                 (22309,  4320),
+                 (22502,  4320),
+                 (12652, 10283),
+                 (15212, 13846),
+                 (32327, 24500),
+                 (32325, 24500),
+                 (50606, 32922),
+                 (45653, 32922),
+                
+            ]
+        )
+        """result=self.Assignment.sortedDefaultContractsForMember([
             10283,24500,13846,32922,12992,4320,400,3
             ])
         self.assertEqual(result, [
@@ -384,6 +413,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             [45653, 32922],
             [50606, 32922],
             ])
+        """
 if __name__ == '__main__':
     unittest.main()
 

@@ -1,6 +1,7 @@
     SELECT
         pol.id as polissa_id,
         soci.id AS soci_id,
+        cups.conany_kwh as annual_use,
         CASE
             WHEN pol.pagador=soci.id THEN 1
             WHEN pol.titular=soci.id THEN 2
@@ -21,4 +22,4 @@
         soci.id in %(socis)s AND
         TRUE
     ORDER BY
-        soci.id,prioridad,polissa_id ASC
+        soci.id, prioridad, annual_use DESC, polissa_id

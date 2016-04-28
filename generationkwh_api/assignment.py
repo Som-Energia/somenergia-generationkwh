@@ -78,7 +78,7 @@ class GenerationkWhAssignment(osv.osv):
         cr.execute(sql, dict(socis=tuple(member_ids)))
         return [
             (contract,member)
-            for contract,member,_ in cr.fetchall()]
+            for contract,member,_,_2 in cr.fetchall()]
 
     def createOnePrioritaryAndManySecondaries(self, cr, uid, assignments, context=None):
         """ Creates assignments from a list of pairs of contract_id, member_id.
