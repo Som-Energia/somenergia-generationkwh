@@ -447,6 +447,7 @@ class AssignmentProvider_Test(unittest.TestCase):
                 #Contracts as member are not shown
             ]
         )
+
     def  test_sortedDefaultContractsForMember_noInversions(self):
         self.assertContractForMember(
             3,
@@ -455,6 +456,23 @@ class AssignmentProvider_Test(unittest.TestCase):
             ]
         )
  
+    def  test_sortedDefaultContractsForMember_noContracts(self):
+        self.assertContractForMember(
+            629,
+            [
+                #The member has generation but no contracts
+            ]
+        )
+    def  test_sortedDefaultContractsForMember_manyMembers(self):
+        self.assertContractForMember(
+            [13846,10283],
+            [
+                (12652, 10283), # Member payer. Annual use: 4576
+                (15212, 13846), # Member owner. Annual use: 3500
+            ]
+        )
+        
+        
 if __name__ == '__main__':
     unittest.main()
 
