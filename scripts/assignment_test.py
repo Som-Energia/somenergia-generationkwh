@@ -22,12 +22,12 @@ class Assignment_Test(unittest.TestCase):
             self.member,
             self.member2,
             self.member3,
-        ) = self.erp.SomenergiaSoci.browse([],limit=3)
+        ) = self.erp.SomenergiaSoci.search([],limit=3)
         (
             self.contract,
             self.contract2,
             self.contract3,
-        ) = self.erp.GiscedataPolissa.browse([], limit=3)
+        ) = self.erp.GiscedataPolissa.search([], limit=3)
 
     def setupProvider(self,assignments=[]):
         self.Assignment.add(assignments)
@@ -37,23 +37,23 @@ class Assignment_Test(unittest.TestCase):
         result = self.Assignment.browse([
             ])
         self.assertEqual( [
-                [
+                (
                     r.contract_id.id,
                     r.member_id.id,
                     r.priority,
                     r.end_date,
-                ]
+                )
                 for r in result
             ],expectation)
 
     def assertAssignmentsEqual(self, expectation):
         result = self.Assignment.browse([])
         self.assertEqual([
-            [
+            (
                 r.contract_id.id,
                 r.member_id.id,
                 r.priority,
-            ] for r in result],
+            ) for r in result],
             expectation)
 
     def tearDown(self):
@@ -70,7 +70,7 @@ class Assignment_Test(unittest.TestCase):
             priority = 0,
             ))
         self.assertAllAssignmentsEqual([
-            [self.contract.id, self.member.id, 0, False]
+            (self.contract, self.member, 0, False),
             ])
 
     def test_create_priorityRequired(self):
@@ -119,64 +119,70 @@ class Assignment_Test(unittest.TestCase):
 
     def test_one_assignment(self):
         self.setupProvider([
-            [self.contract.id,self.member.id,1],
+            (self.contract,self.member,1),
             ])
         self.assertAssignmentsEqual([
-            [self.contract.id,self.member.id,1]
+            (self.contract,self.member,1),
             ])
 
     def test_no_duplication(self):
         self.setupProvider([
-            [self.contract.id, self.member.id, 1],
-            [self.contract.id, self.member.id, 1],
+            (self.contract, self.member, 1),
+            (self.contract, self.member, 1),
             ])
         self.assertAllAssignmentsEqual([
-            [self.contract.id, self.member.id, 1, str(datetime.date.today())],
-            [self.contract.id, self.member.id, 1, False],
+            (self.contract, self.member, 1, str(datetime.date.today())),
+            (self.contract, self.member, 1, False),
             ])
     
     def test_change_priority(self):
         self.setupProvider([
-            [self.contract.id,self.member.id,1],
-            [self.contract.id,self.member.id,2],
+            (self.contract,self.member,1),
+            (self.contract,self.member,2),
             ])
         self.assertAllAssignmentsEqual([
-            [self.contract.id, self.member.id, 1, str(datetime.date.today())],
-            [self.contract.id,self.member.id,2, False]
+            (self.contract, self.member, 1, str(datetime.date.today())),
+            (self.contract,self.member,2, False),
             ])
         
     def test_three_member_three_polissas(self):
         members=self.member, self.member2, self.member3
         contracts=self.contract,self.contract2,self.contract3
         self.setupProvider([
-            [contract.id,member.id,1]
-            for contract,member in zip(contracts,members)
+            (self.contract, self.member, 1),
+            (self.contract2,self.member2,1),
+            (self.contract3,self.member3,1),
             ])
         self.assertAssignmentsEqual([
-            [contract.id,member.id,1]
-            for contract,member in zip(contracts,members)
+            (self.contract, self.member, 1),
+            (self.contract2,self.member2,1),
+            (self.contract3,self.member3,1),
             ])
 
     def test_three_member_one_polissa(self):
         members=self.member, self.member2, self.member3
         self.setupProvider([
-            [self.contract.id,member.id,1]
-            for member in members
+            (self.contract,self.member, 1),
+            (self.contract,self.member2,1),
+            (self.contract,self.member3,1),
             ])
         self.assertAssignmentsEqual([
-            [self.contract.id,member.id,1]
-            for member in members
+            (self.contract,self.member, 1),
+            (self.contract,self.member2,1),
+            (self.contract,self.member3,1),
             ])
 
     def test_one_member_three_polissas(self):
         contracts=self.contract,self.contract2,self.contract3
         self.setupProvider([
-            [gp_iter.id,self.member.id,1]
-            for gp_iter in contracts
+            (self.contract,  self.member,1),
+            (self.contract2, self.member,1),
+            (self.contract3, self.member,1),
             ])
         self.assertAssignmentsEqual([
-            [gp_iter.id,self.member.id,1]
-            for gp_iter in contracts
+            (self.contract , self.member,1),
+            (self.contract2, self.member,1),
+            (self.contract3, self.member,1),
             ])
 
 
