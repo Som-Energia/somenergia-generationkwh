@@ -364,6 +364,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.contract, self.member, 0),
             (self.contract2, self.member, 1),
             ])
+    
     def assertContractForMember(self, member_id,expectation):
         if not isinstance(member_id,list):
             member_ids=[member_id]
@@ -374,39 +375,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         )
         expectation = [list(e) for e in expectation]
         self.assertEqual(result, expectation) 
-    def test_sortedDefaultContractsForMember_allCases(self):
-        self.assertContractForMember([
-                10283,24500,13846,32922,12992,3
-            ],
-            [
-                (12652, 10283),
-                (15212, 13846),
-                (32327, 24500),
-                (32325, 24500),
-                (50606, 32922),
-                (45653, 32922),
-                
-            ]
-        )
-        """result=self.Assignment.sortedDefaultContractsForMember([
-            10283,24500,13846,32922,12992,4320,400,3
-            ])
-        self.assertEqual(result, [
-            [ 3662,   400],
-            [26010,   400],
-            [44944,   400],
-            [  149,   400],
-            [  150,   400],
-            [22309,  4320],
-            [22502,  4320],
-            [12652, 10283],
-            [15212, 13846],
-            [32325, 24500],
-            [32327, 24500],
-            [45653, 32922],
-            [50606, 32922],
-            ])
-        """
+    
     def test_sortedDefaultContractsForMember_manyPayers_manyOwners(self):
         self.assertContractForMember(
             400,
@@ -418,6 +387,7 @@ class AssignmentProvider_Test(unittest.TestCase):
                 (150,     400), # Member owner. Annual use: 1800
             ]
         )
+    
     def test_sortedDefaultContractsForMember_onePayer_oneOwner(self):
         self.assertContractForMember(
             4320,
@@ -435,6 +405,56 @@ class AssignmentProvider_Test(unittest.TestCase):
                 (56149,  3743), # Member owner. Annual use: 4222
             ]
         )
+    
+    def test_sortedDefaultContractsForMember_oneOwner(self):
+        self.assertContractForMember(
+            13846,
+            [
+                (15212, 13846), # Member owner. Annual use: 3500
+            ]
+        )
+    
+    def test_sortedDefaultContractsForMember_onePayer(self):
+        self.assertContractForMember(
+            10283,
+            [
+                (12652, 10283), # Member payer. Annual use: 4576
+            ]
+        )
+
+    def test_sortedDefaultContractsForMember_manyPayers(self):
+        self.assertContractForMember(
+            24500,
+            [
+                (32327, 24500), # Member payer. Annual use: 150044
+                (32325, 24500), # Member payer. Annual use: 2100
+            ]
+        )
+    
+    def test_sortedDefaultContractsForMember_manyOwners(self):
+        self.assertContractForMember(
+            32922,
+            [
+                (50606, 32922), # Member owner. Annual use: 12000
+                (45653, 32922), # Member owner. Annual use: 2880
+            ]
+        )
+
+    def test_sortedDefaultContractsForMember_oneMember(self):
+        self.assertContractForMember(
+            12992,
+            [
+                #Contracts as member are not shown
+            ]
+        )
+    def  test_sortedDefaultContractsForMember_noInversions(self):
+        self.assertContractForMember(
+            3,
+            [
+                #The member has no generation so none is shown
+            ]
+        )
+ 
 if __name__ == '__main__':
     unittest.main()
 
