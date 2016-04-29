@@ -376,22 +376,15 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.assertEqual(result, expectation) 
     def test_sortedDefaultContractsForMember_allCases(self):
         self.assertContractForMember([
-                10283,24500,13846,32922,12992,4320,400,3
+                10283,24500,13846,32922,12992,3
             ],
             [
-                 (44944,   400),
-                 (26010,   400),
-                 (3662,    400),
-                 (149,     400),
-                 (150,     400),
-                 (22309,  4320),
-                 (22502,  4320),
-                 (12652, 10283),
-                 (15212, 13846),
-                 (32327, 24500),
-                 (32325, 24500),
-                 (50606, 32922),
-                 (45653, 32922),
+                (12652, 10283),
+                (15212, 13846),
+                (32327, 24500),
+                (32325, 24500),
+                (50606, 32922),
+                (45653, 32922),
                 
             ]
         )
@@ -418,12 +411,28 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.assertContractForMember(
             400,
             [
-
-                 (44944,   400),
-                 (26010,   400),
-                 (3662,    400),
-                 (149,     400),
-                 (150,     400),
+                (44944,   400), # Member payer. Annual use: 2500
+                (26010,   400), # Member payer. Annual use: 800
+                (3662,    400), # Member payer. Annual use: 700
+                (149,     400), # Member owner. Annual use: 1800 (polissa_id <)
+                (150,     400), # Member owner. Annual use: 1800
+            ]
+        )
+    def test_sortedDefaultContractsForMember_onePayer_oneOwner(self):
+        self.assertContractForMember(
+            4320,
+            [
+                (22309,  4320), # Member payer. Annual use: 1900
+                (22502,  4320), # Member owner. Annual use: 1500
+            ]
+        )
+    def test_sortedDefaultContractsForMember_onePayer_oneOwner_ownerMoreUse(self):
+        self.assertContractForMember(
+            3743,
+            [
+                (1579,   3743), # Member payer. Annual use: 2000  
+                (56153,  3743), # Member payer. Annual use: 484
+                (56149,  3743), # Member owner. Annual use: 4222
             ]
         )
 if __name__ == '__main__':
