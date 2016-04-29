@@ -430,16 +430,16 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.assertContractForMember([
             self.member_aPayerAndAnOwnerContract,
             ], [
-            (50851, self.member_aPayerAndAnOwnerContract),
-            (43, self.member_aPayerAndAnOwnerContract),
+            (50851, self.member_aPayerAndAnOwnerContract), # payer
+            (43,    self.member_aPayerAndAnOwnerContract), # owner
             ])
 
     def test_sortedDefaultContractsForMember_manyAsPayer_biggerFirst(self):
         self.assertContractForMember([
             self.member_manyAsPayer,
             ], [
-            (929, self.member_manyAsPayer),
-            (21, self.member_manyAsPayer),
+            (929, self.member_manyAsPayer), # payer bigger
+            (21,  self.member_manyAsPayer), # payer smaller
             ])
 
     def test_sortedDefaultContractsForMember_manyAsPayerAndManyAsOwner(self):
