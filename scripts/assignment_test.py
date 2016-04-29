@@ -221,6 +221,10 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.member_manyAsPayer = 61 # 54
         self.member_manyAsPayerAndManyAsOwner = 400 # 351
 
+        # Sorted contracts for member_manyAsPayerAndManyAsOwner
+        self.payerContracts= 44944,26010,3662
+        self.ownerContracts= 150,149
+
     def setupAssignments(self, assignments):
         for contract, member, priority in assignments:
             self.Assignment.create(dict(
@@ -382,72 +386,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         result=self.Assignment.sortedDefaultContractsForMember(
             member_ids
         )
-        expectation = [list(e) for e in expectation]
-        self.assertEqual(result, expectation) 
-
-    def test_sortedDefaultContractsForMember_manyPayers_manyOwners(self):
-        self.assertContractForMember(
-            400,
-            [
-                (44944,   400), # Member payer. Annual use: 2500
-                (26010,   400), # Member payer. Annual use: 800
-                (3662,    400), # Member payer. Annual use: 700
-                (149,     400), # Member owner. Annual use: 1800 (polissa_id <)
-                (150,     400), # Member owner. Annual use: 1800
-            ]
-        )
-    
-    def test_sortedDefaultContractsForMember_onePayer_oneOwner(self):
-        self.assertContractForMember(
-            4320,
-            [
-                (22309,  4320), # Member payer. Annual use: 1900
-                (22502,  4320), # Member owner. Annual use: 1500
-            ]
-        )
-    def test_sortedDefaultContractsForMember_onePayer_oneOwner_ownerMoreUse(self):
-        self.assertContractForMember(
-            3743,
-            [
-                (1579,   3743), # Member payer. Annual use: 2000  
-                (56153,  3743), # Member payer. Annual use: 484
-                (56149,  3743), # Member owner. Annual use: 4222
-            ]
-        )
-    
-    def test_sortedDefaultContractsForMember_oneOwner(self):
-        self.assertContractForMember(
-            13846,
-            [
-                (15212, 13846), # Member owner. Annual use: 3500
-            ]
-        )
-    
-    def test_sortedDefaultContractsForMember_onePayer(self):
-        self.assertContractForMember(
-            10283,
-            [
-                (12652, 10283), # Member payer. Annual use: 4576
-            ]
-        )
-
-    def test_sortedDefaultContractsForMember_manyPayers(self):
-        self.assertContractForMember(
-            24500,
-            [
-                (32327, 24500), # Member payer. Annual use: 150044
-                (32325, 24500), # Member payer. Annual use: 2100
-            ]
-        )
-
-    def test_sortedDefaultContractsForMember_manyOwners(self):
-        self.assertContractForMember(
-            32922,
-            [
-                (50606, 32922), # Member owner. Annual use: 12000
-                (45653, 32922), # Member owner. Annual use: 2880
-            ]
-        )
+        self.assertEqual([tuple(r) for r in result], expectation) 
 
     def test_sortedDefaultContractsForMember_oneMember(self):
         self.assertContractForMember(
@@ -472,16 +411,7 @@ class AssignmentProvider_Test(unittest.TestCase):
                 #The member has generation but no contracts
             ]
         )
-    def  test_sortedDefaultContractsForMember_manyMembers(self):
-        self.assertContractForMember(
-            [13846,10283],
-            [
-                (12652, 10283), # Member payer. Annual use: 4576
-                (15212, 13846), # Member owner. Annual use: 3500
-            ]
-        )
-        
-        
+
     def test_sortedDefaultContractsForMember_withoutContracts(self):
         self.assertContractForMember(self.member_noContracts, [
             ])
@@ -518,11 +448,11 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.assertContractForMember([
             self.member_manyAsPayerAndManyAsOwner,
             ], [
-            (44944, self.member_manyAsPayerAndManyAsOwner),
-            (26010, self.member_manyAsPayerAndManyAsOwner),
-            (3662,  self.member_manyAsPayerAndManyAsOwner),
-            (150,   self.member_manyAsPayerAndManyAsOwner),
-            (149,   self.member_manyAsPayerAndManyAsOwner),
+            (self.payerContracts[0], self.member_manyAsPayerAndManyAsOwner),
+            (self.payerContracts[1], self.member_manyAsPayerAndManyAsOwner),
+            (self.payerContracts[2], self.member_manyAsPayerAndManyAsOwner),
+            (self.ownerContracts[0], self.member_manyAsPayerAndManyAsOwner),
+            (self.ownerContracts[1], self.member_manyAsPayerAndManyAsOwner),
             ])
 
     def test_sortedDefaultContractsForMember_severalMembers_doNotBlend(self):
@@ -532,12 +462,11 @@ class AssignmentProvider_Test(unittest.TestCase):
             ], [
             (929, self.member_manyAsPayer),
             (21, self.member_manyAsPayer),
-        # TODO: Check the order is right
-            (44944, self.member_manyAsPayerAndManyAsOwner),
-            (26010, self.member_manyAsPayerAndManyAsOwner),
-            (3662,  self.member_manyAsPayerAndManyAsOwner),
-            (150,   self.member_manyAsPayerAndManyAsOwner),
-            (149,   self.member_manyAsPayerAndManyAsOwner),
+            (self.payerContracts[0], self.member_manyAsPayerAndManyAsOwner),
+            (self.payerContracts[1], self.member_manyAsPayerAndManyAsOwner),
+            (self.payerContracts[2], self.member_manyAsPayerAndManyAsOwner),
+            (self.ownerContracts[0], self.member_manyAsPayerAndManyAsOwner),
+            (self.ownerContracts[1], self.member_manyAsPayerAndManyAsOwner),
             ])
 
 if __name__ == '__main__':

@@ -27,4 +27,5 @@ ORDER BY
     soci.id,
     payerOwner ASC,
     annual_use DESC,
+    pol.id,
     TRUE

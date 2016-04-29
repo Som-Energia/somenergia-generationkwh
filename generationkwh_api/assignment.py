@@ -29,8 +29,9 @@ class GenerationkWhAssignment(osv.osv):
             'Priority',
             required=True,
             help="Assignment precedence. "
-                "This assignment won't use rights generated on dates that have not "
-                "been invoiced yet by assignments of the same member having higher priority "
+                "This assignment won't use rights generated on dates that "
+                "have not been invoiced yet by assignments "
+                "of the same member having higher priority "
                 "(lower the value, higher the priority).",
             ),
         end_date=fields.date(
