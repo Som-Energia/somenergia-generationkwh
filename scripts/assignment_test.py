@@ -374,7 +374,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         )
         expectation = [list(e) for e in expectation]
         self.assertEqual(result, expectation) 
-    def test_sortedDefaultContractsForMember_(self):
+    def test_sortedDefaultContractsForMember_allCases(self):
         self.assertContractForMember([
                 10283,24500,13846,32922,12992,4320,400,3
             ],
@@ -414,6 +414,18 @@ class AssignmentProvider_Test(unittest.TestCase):
             [50606, 32922],
             ])
         """
+    def test_sortedDefaultContractsForMember_manyPayers_manyOwners(self):
+        self.assertContractForMember(
+            400,
+            [
+
+                 (44944,   400),
+                 (26010,   400),
+                 (3662,    400),
+                 (149,     400),
+                 (150,     400),
+            ]
+        )
 if __name__ == '__main__':
     unittest.main()
 
