@@ -18,6 +18,16 @@ class Assignment_Test(unittest.TestCase):
         self.Assignment = self.erp.GenerationkwhAssignment
         self.Assignment.dropAll()
 
+        (
+            self.member,
+            self.member2,
+        ) = self.erp.ResPartner.browse([],limit=2)
+        (
+            self.contract,
+            self.contract2,
+            self.contract3,
+        ) = self.erp.GiscedataPolissa.browse([], limit=3)
+
     def setupProvider(self,assignments=[]):
         self.Assignment.add(assignments)
     
@@ -213,15 +223,17 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.newContract = newContract.id
         self.newContractActivationDate = newContract.data_alta
 
-        # pickup cases (commented out the soci.id)
-        self.member_noContracts = 629 # 537
-        self.member_oneAsPayer = 5 # 4
-        self.member_asOwnerButNotPayer = 13846 # 8899
-        self.member_aPayerAndAnOwnerContract = 120 # 107
-        self.member_manyAsPayer = 61 # 54
-        self.member_manyAsPayerAndManyAsOwner = 400 # 351
+        # pickup cases (commented out the original partner.id)
+        self.member_noContracts = 537 # 629
+        self.member_oneAsPayer = 4 # 5 
+        self.member_asOwnerButNotPayer = 8899 # 13846
+        self.member_aPayerAndAnOwnerContract = 107 # 120
+        self.member_manyAsPayer = 54 # 61
+        self.member_manyAsPayerAndManyAsOwner = 351 # 400
 
         # Sorted contracts for member_manyAsPayerAndManyAsOwner
+        # TODO: Sort them by annual use programatically, if not is fragile,
+        # since annual use depends on the database snapshot
         self.payerContracts= 44944,26010,3662
         self.ownerContracts= 150,149
 
@@ -377,7 +389,8 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.contract, self.member, 0),
             (self.contract2, self.member, 1),
             ])
- 
+
+
     def assertContractForMember(self, member_id,expectation):
         if not isinstance(member_id,list):
             member_ids=[member_id]
@@ -388,29 +401,6 @@ class AssignmentProvider_Test(unittest.TestCase):
         )
         self.assertEqual([tuple(r) for r in result], expectation) 
 
-    def test_sortedDefaultContractsForMember_oneMember(self):
-        self.assertContractForMember(
-            12992,
-            [
-                #Contracts as member are not shown
-            ]
-        )
-
-    def  test_sortedDefaultContractsForMember_noInversions(self):
-        self.assertContractForMember(
-            3,
-            [
-                #The member has no generation so none is shown
-            ]
-        )
- 
-    def  test_sortedDefaultContractsForMember_noContracts(self):
-        self.assertContractForMember(
-            629,
-            [
-                #The member has generation but no contracts
-            ]
-        )
 
     def test_sortedDefaultContractsForMember_withoutContracts(self):
         self.assertContractForMember(self.member_noContracts, [
