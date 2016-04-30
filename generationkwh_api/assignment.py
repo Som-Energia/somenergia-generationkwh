@@ -62,12 +62,20 @@ class GenerationkWhAssignment(osv.osv):
                 'priority': priority,
             }, context=context)
 
+    def createDefaultForMembers(self, cr, uid, member_ids, context=None):
+        """ Creates default contract assignments for the given members.
+        """
+        contracts = self.sortedDefaultContractsForMember(cr, uid, member_ids, context)
+        self.createOnePrioritaryAndManySecondaries(cr, uid, contracts, context)
+
     def sortedDefaultContractsForMember(self, cr, uid, member_ids, context=None):
-        """ Gets default contract to assign for a given member ids
+        """ PRIVATE.
+            Gets default contract to assign for a given member ids
             Criteria are:
             - Contracts the member being the payer first,
               then the ones the member is owner but not payer.
             - Within both groups the ones with more anual use first.
+            - If all criteria match, use contract creation order
         """
         from tools import config
         import os
@@ -84,7 +92,8 @@ class GenerationkWhAssignment(osv.osv):
             ]
 
     def createOnePrioritaryAndManySecondaries(self, cr, uid, assignments, context=None):
-        """ Creates assignments from a list of pairs of contract_id, member_id.
+        """ PRIVATE.
+            Creates assignments from a list of pairs of contract_id, member_id.
             The first pair of a member is the priority 0 and the 
             remaining contracts of the same member are inserted as priority zero.
             @pre contracts of the same member are together
@@ -125,6 +134,10 @@ GenerationkWhAssignment()
 class AssignmentProvider(ErpWrapper):
 
     def seek(self, contract_id):
+        """
+            Returns the sources available GenkWh rights sources for a contract
+            and the earliest date you can use rights from it.
+        """
         self.cursor.execute("""
             SELECT
                 ass.member_id AS member_id,
