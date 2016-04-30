@@ -73,7 +73,7 @@ class GenerationkWhAssignment(osv.osv):
         import os
         sqlfile = os.path.join(
             config['addons_path'], 'generationkwh_api',
-                'sql', 'asignacion_total_b2b.sql')
+                'sql', 'default_contracts_to_assign.sql')
         with open(sqlfile) as f:
             sql = f.read()
         cr.execute(sql, dict(socis=tuple(member_ids)))
