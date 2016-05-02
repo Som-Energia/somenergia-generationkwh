@@ -16,6 +16,7 @@ LEFT JOIN generationkwh_assignment AS peer
     ON ass.member_id = peer.member_id
     AND peer.contract_id != ass.contract_id
     AND peer.priority < ass.priority
+    AND peer.end_date IS NULL
 LEFT JOIN (
     SELECT
         id,
@@ -26,7 +27,10 @@ LEFT JOIN (
     FROM giscedata_polissa
     ) AS contracte
     ON contracte.id = peer.contract_id
-WHERE ass.contract_id = %(contract_id)s
+WHERE
+    ass.contract_id = %(contract_id)s AND
+    ass.end_date IS NULL AND
+    TRUE
 GROUP BY
     ass.id,
     ass.member_id,

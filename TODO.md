@@ -1,10 +1,11 @@
 - Rename `generationkwh_api` -> `som_generationkwh`
 - Rename `plantmeter_api` -> `som_plantmeter`
 - ProductionToRightsPerShare: Protect againts divby0 when total active actions is zero
+- Investment: ondelete -> member
 + Investment: backref to the account lines
 + Investment: protect againts regenerating already generated account lines
 + Investment: Change `member_id` relation from partner to soci
-- Investment: create receives as parameter `partner_id` instead `soci_id`
++ Investment: create receives as parameter `partner_id` instead `soci_id`
 - Investment: Janitoring: mode lines without partner
 - Investment: Janitoring: mode lines without dates
 - Investment: negative move line: activation date should be the same or inmediate?
@@ -21,7 +22,11 @@
 	- Migration: a reminder for 1-shares curve
 	- Migration: a reminder for known to be used n-shares (optional)
 
+- Assignment: ondelete -> polissa
+- Assignment: ondelete -> member
 - Assignment: Filter out inactive contracts and others (ask Pere)
++ Assignment: Filter out expired assignments when seeking
++ Assignment: Expired ones do not constraint the date
 - Assignment: Given a contract that can consume rights from several members, define the order in which it should consume them.
     - Right now is an arbitrary order, not bad
     - Rare case, low priority, wait for actual cases

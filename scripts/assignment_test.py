@@ -309,6 +309,14 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.member, datetime.date.today()),
             ])
 
+    def test_seek_expiredAssignment_notRetrieved(self):
+        self.setupAssignments([
+            (self.contract, self.member, 1),
+            ])
+        self.Assignment.expire([(self.contract, self.member)])
+        self.assertAssignmentsSeekEqual(self.contract, [
+            ])
+
     def test_seek_assigmentsForOtherContracts_ignored(self):
         self.setupAssignments([
             (self.contract2, self.member, 1),
@@ -342,6 +350,16 @@ class AssignmentProvider_Test(unittest.TestCase):
             ])
         self.assertAssignmentsSeekEqual(self.contract, [
             (self.member, self.contract2LastInvoicedDate),
+            ])
+
+    def test_seek_competitor_expired_ignored(self):
+        self.setupAssignments([
+            (self.contract, self.member, 1),
+            (self.contract2, self.member, 0),
+            ])
+        self.Assignment.expire([(self.contract2, self.member)])
+        self.assertAssignmentsSeekEqual(self.contract, [
+            (self.member, datetime.date.today()),
             ])
 
     def test_seek_competitorWithEqualOrLowerPriority_ignored(self):
