@@ -29,7 +29,7 @@ class GenerationkWhAssignment(osv.osv):
             help="Contract which gets rights to use generated kWh",
             ),
         member_id=fields.many2one(
-            'res.partner',
+            'somenergia.soci',
             'Member',
             required=True,
             help="Member who bought Generation kWh shares and assigns them",
