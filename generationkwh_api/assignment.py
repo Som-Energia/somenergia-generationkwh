@@ -20,6 +20,7 @@ def _sqlfromfile(sqlname):
 class GenerationkWhAssignment(osv.osv):
 
     _name = 'generationkwh.assignment'
+    _order = 'member_id, contract_id, priority'
 
     _columns = dict(
         contract_id=fields.many2one(
