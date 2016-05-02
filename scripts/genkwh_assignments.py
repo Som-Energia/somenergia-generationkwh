@@ -101,6 +101,7 @@ def list(csv=False,**args):
             'contract id',
             'contractref',
             'member name',
+            'end_date'
         )]+[
         (
             r['member_id'][0],
@@ -108,10 +109,12 @@ def list(csv=False,**args):
             r['contract_id'][0],
             r['contract_id'][1],
             r['member_id'][1],
+            r['end_date']
         ) for r in c.GenerationkwhAssignment.read([],[
             'member_id',
             'contract_id',
             'priority',
+            'end_date'
             ],)
         ])
     if csv: return csvdata
