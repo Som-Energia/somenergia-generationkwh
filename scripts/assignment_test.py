@@ -195,6 +195,17 @@ class Assignment_Test(unittest.TestCase):
             (self.contract2, self.member,1),
             (self.contract3, self.member,1),
             ])
+    
+    def test_expire_one_member_one_polissa(self):
+        self.setupProvider([
+            (self.contract, self.member,1),
+            ])
+        self.Assignment.expire([
+            (self.contract, self.member),
+        ])
+        self.assertAssignmentsExpiredEqual([
+            (self.contract, self.member,1,str(datetime.date.today())),
+            ])
 
     def test_expire_one_member_two_polissa(self):
         self.setupProvider([
@@ -208,9 +219,10 @@ class Assignment_Test(unittest.TestCase):
             (self.contract, self.member,1,str(datetime.date.today())),
             (self.contract2, self.member,1,False),
             ])
-
-    def test_expire_one_member_one_polissa(self):
+        
+    def test_expire_previously_expired_polissa(self):
         self.setupProvider([
+            (self.contract, self.member,1),
             (self.contract, self.member,1),
             ])
         self.Assignment.expire([
@@ -218,8 +230,8 @@ class Assignment_Test(unittest.TestCase):
         ])
         self.assertAssignmentsExpiredEqual([
             (self.contract, self.member,1,str(datetime.date.today())),
+            (self.contract, self.member,1,str(datetime.date.today())),
             ])
-
         
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class AssignmentProvider_Test(unittest.TestCase):

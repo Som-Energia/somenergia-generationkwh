@@ -21,12 +21,18 @@ def parseArgumments():
     list = subparsers.add_parser('list',
         help="list assignments",
         )
+    expire = subparsers.add_parser('expire',
+        help="expire assignments",
+        )
     default = subparsers.add_parser('default',
         help="create contract assignations following the by default criteria",
         )
     clear = subparsers.add_parser('clear',
         help="clear investments objects",
         )
+    for sub in expire,:
+        sub.add_argument('contract')
+        sub.add_argument('member')
     for sub in default,:
         """
         sub.add_argument(
@@ -110,6 +116,12 @@ def list(csv=False,**args):
         ])
     if csv: return csvdata
     print csvdata
+
+def expire(
+        member=None,
+        contract=None,
+        **_):
+    c.GenerationkwhAssignment.expire([(int(contract),int(member))])
 
 def default(
         members=None,
