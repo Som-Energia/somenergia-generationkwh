@@ -15,6 +15,8 @@ setup(
 	license = 'GNU Affero General Public License v3 or later (AGPLv3+)',
 	packages=find_packages(exclude=['*[tT]est*']),
 	scripts=[
+        'scripts/genkwh_assignments.py',
+        'scripts/genkwh_investments.py',
 		],
 	install_requires=[
 		'yamlns',
