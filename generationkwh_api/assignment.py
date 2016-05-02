@@ -8,6 +8,13 @@ from yamlns import namespace as ns
 # TODO: sort rights sources if many members assigned the same contract
 # TODO: Filter out inactive contracts
 
+FF_CONTRACT_FIELDS = [
+    ('contract_state', 'state'),
+    ('contract_last_invoiced', 'data_ultima_lectura'),
+    ('cups_direction', 'cups_direccio'),
+]
+
+
 def _sqlfromfile(sqlname):
     from tools import config
     import os
@@ -17,10 +24,43 @@ def _sqlfromfile(sqlname):
     with open(sqlfile) as f:
         return f.read()
 
+
 class GenerationkWhAssignment(osv.osv):
 
     _name = 'generationkwh.assignment'
-    _order = 'member_id, contract_id, priority'
+    _order = 'member_id, priority, contract_id'
+
+    def _ff_contract(self, cursor, uid, ids, field_names, args, context=None):
+        """  Function to read contract values from function fields"""
+        contract_obj = self.pool.get('giscedata.polissa')
+        cups_obj = self.pool.get('giscedata.cups.ps')
+
+        if not isinstance(ids, (tuple, list)):
+            ids = [ids]
+
+        init_dict = dict([(f, False) for f in field_names])
+        res = {}.fromkeys(ids, {})
+        for k in res.keys():
+            res[k] = init_dict.copy()
+
+        for assigment_vals in self.read(cursor, uid, ids, ['contract_id']):
+            assignment_id = assigment_vals['id']
+            contract_id = assigment_vals['contract_id'][0]
+            contract_fields = ['cups', 'state', 'data_ultima_lectura',
+                               'cups_direccio']
+            contract_vals = contract_obj.read(
+                cursor, uid, contract_id, contract_fields
+            )
+            if 'cups_anual_use' in field_names:
+                cups_id = contract_vals['cups'][0]
+                cups_vals = cups_obj.read(cursor, uid, cups_id, ['conany_kwh'])
+                res[assignment_id]['cups_anual_use'] = cups_vals['conany_kwh']
+
+            for field, contract_field in FF_CONTRACT_FIELDS:
+                if field in field_names:
+                    res[assignment_id][field] = contract_vals[contract_field]
+
+        return res
 
     _columns = dict(
         contract_id=fields.many2one(
@@ -47,6 +87,28 @@ class GenerationkWhAssignment(osv.osv):
         end_date=fields.date(
             'Expiration date',
             help="Date at which the rule is no longer active",
+            ),
+        # Contract fields
+        contract_state=fields.function(
+            _ff_contract, string='Contract State', readonly=True, type='char',
+            method=True, multi='contract',
+            help="Estate of the selected contract",
+            ),
+        contract_last_invoiced=fields.function(
+            _ff_contract, string='Data última factura', readonly=True,
+            type='date', method=True, multi='contract',
+            help="Last invoiced date",
+            ),
+        cups_direction=fields.function(
+            _ff_contract, string='Direcció CUPS', readonly=True, type='char',
+            method=True, multi='contract',
+            help="CUPS direction",
+            ),
+        # Contract fields
+        cups_anual_use=fields.function(
+            _ff_contract, string='Consum anual', readonly=True, type='integer',
+            method=True, multi='contract',
+            help="Anual CUPS energy use. May be stimated.",
             ),
         )
 

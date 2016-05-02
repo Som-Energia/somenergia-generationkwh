@@ -102,8 +102,7 @@ class SomenergiaSoci(osv.osv):
             readonly=True
         ),
         'assignment_ids': fields.one2many(
-            'generationkwh.assignment', 'member_id', string="Assignacions",
-            readonly=True
+            'generationkwh.assignment', 'member_id', string="Assignacions"
         ),
         'gkwh_comments': fields.text('Observacions'),
     }

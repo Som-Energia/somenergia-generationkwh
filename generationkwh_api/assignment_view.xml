@@ -47,6 +47,10 @@
                     <field name="priority"/>
                     <field name="contract_id"/>
                     <field name="end_date"/>
+                    <field name="contract_state"/>
+                    <field name="contract_last_invoiced"/>
+                    <field name="cups_direction"/>
+                    <field name="cups_anual_use"/>
                 </tree>
             </field>
         </record>
