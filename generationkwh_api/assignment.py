@@ -8,6 +8,15 @@ from yamlns import namespace as ns
 # TODO: sort rights sources if many members assigned the same contract
 # TODO: Filter out inactive contracts
 
+def _sqlfromfile(sqlname):
+    from tools import config
+    import os
+    sqlfile = os.path.join(
+        config['addons_path'], 'generationkwh_api',
+            'sql', sqlname+'.sql')
+    with open(sqlfile) as f:
+        return f.read()
+
 class GenerationkWhAssignment(osv.osv):
 
     _name = 'generationkwh.assignment'
@@ -94,13 +103,7 @@ class GenerationkWhAssignment(osv.osv):
             - Within both groups the ones with more anual use first.
             - If all criteria match, use contract creation order
         """
-        from tools import config
-        import os
-        sqlfile = os.path.join(
-            config['addons_path'], 'generationkwh_api',
-                'sql', 'default_contracts_to_assign.sql')
-        with open(sqlfile) as f:
-            sql = f.read()
+        sql = _sqlfromfile('default_contracts_to_assign')
         cr.execute(sql, dict(socis=tuple(member_ids)))
         return [
             (contract,member)
@@ -153,38 +156,8 @@ class AssignmentProvider(ErpWrapper):
             Returns the sources available GenkWh rights sources for a contract
             and the earliest date you can use rights from it.
         """
-        self.cursor.execute("""
-            SELECT
-                ass.member_id AS member_id,
-                COALESCE(
-                    MIN(contracte.last_usable_date),
-                    DATE(NOW()) /* no peers, so now */
-                ) AS last_usable_date,
-                FALSE
-            FROM generationkwh_assignment AS ass
-            LEFT JOIN generationkwh_assignment AS peer
-                ON ass.member_id = peer.member_id
-                AND peer.contract_id != ass.contract_id
-                AND peer.priority < ass.priority
-            LEFT JOIN (
-                SELECT
-                    id,
-                    COALESCE(
-                        data_ultima_lectura,
-                        data_alta
-                    ) AS last_usable_date
-                FROM giscedata_polissa
-                ) AS contracte
-                ON contracte.id = peer.contract_id
-            WHERE ass.contract_id = %(contract_id)s
-            GROUP BY
-                ass.id,
-                ass.member_id,
-                FALSE
-            ORDER BY
-                ass.id,
-                FALSE
-        """, dict(contract_id=contract_id))
+        sql = _sqlfromfile('right_sources_for_contract')
+        self.cursor.execute(sql, dict(contract_id=contract_id))
         return [
             ns(
                 member_id=member_id,
