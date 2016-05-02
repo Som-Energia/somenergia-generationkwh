@@ -102,7 +102,7 @@ class AssignmentSeeker_Test(unittest.TestCase):
 
         self.assertEqual(t.calls(),[
             ])
-        self.assertEqual(result, 0)
+        self.assertEqual(result, [])
         
     def test_assign_singleAssignment_prioritariesDoNotInterfere(self):
         t = UsageTrackerMockup([20])
@@ -130,7 +130,9 @@ class AssignmentSeeker_Test(unittest.TestCase):
                 '2.0A', 'P1', 100),
             ])
         
-        self.assertEqual(result, 20)
+        self.assertEqual(result, [
+            dict(member_id='member1', kwh=20),
+            ])
         
         
     def test_assign_singleAssignment_prioritariesDoInterfere(self):
@@ -158,8 +160,9 @@ class AssignmentSeeker_Test(unittest.TestCase):
                 '2014-10-01 00:00:00+02:00',
                 '2.0A', 'P1', 100),
             ])
-        
-        self.assertEqual(result, 10)
+        self.assertEqual(result, [
+            dict(member_id='member1', kwh=10),
+            ])
         
     def test_assign_singleAssignment_prioritariesHaveOldInvoicing(self):
         t = UsageTrackerMockup([20])
@@ -183,7 +186,8 @@ class AssignmentSeeker_Test(unittest.TestCase):
         self.assertEqual(t.calls(),[
             ])
         
-        self.assertEqual(result, 0)
+        self.assertEqual(result, [
+            ])
         
         
 
@@ -221,7 +225,10 @@ class AssignmentSeeker_Test(unittest.TestCase):
                 '2.0A', 'P1', 100-20),
             ])
         
-        self.assertEqual(result, 20+30)
+        self.assertEqual(result, [
+            dict(member_id='member1', kwh=20),
+            dict(member_id='member2', kwh=30),
+            ])
         
         
     def test_assign_manyAssignments_firstHaveOldInvoicing(self):
@@ -254,7 +261,9 @@ class AssignmentSeeker_Test(unittest.TestCase):
                 '2.0A', 'P1', 100),
             ])
         
-        self.assertEqual(result, 30)
+        self.assertEqual(result, [
+            dict(member_id='member2', kwh=30),
+            ])
         
         
         

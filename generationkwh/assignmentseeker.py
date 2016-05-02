@@ -12,15 +12,18 @@ class AssignmentSeeker(object):
         seek_start = start_date + relativedelta(years=-1)
         assignments = self._assignments.seek(contract_id)
         used = 0
+        result = []
         for asig in assignments:
             seek_end = min(end_date,asig.last_usable_date)
             if seek_end<seek_start: continue
-            used += self._usage.use_kwh(
+            memberUse = self._usage.use_kwh(
                     asig.member_id,
                     seek_start,
                     seek_end,
                     fare, period, kwh - used)
-        return used
+            result.append(dict(member_id=asig.member_id, kwh=memberUse))
+            used += memberUse
+        return result
 
 
 
