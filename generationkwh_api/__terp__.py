@@ -19,6 +19,7 @@
     "giscedata_facturacio_view.xml",
     "generationkwh_api_view.xml",
     "investment_view.xml",
+    "assignment_view.xml",
     "somenergia_soci_view.xml",
     "security/ir.model.access.csv",
     ],
