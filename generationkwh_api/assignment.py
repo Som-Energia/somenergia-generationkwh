@@ -62,6 +62,23 @@ class GenerationkWhAssignment(osv.osv):
                 'priority': priority,
             }, context=context)
 
+    def expire(self, cr, uid, assignments, context=None):
+        for contract_id, member_id in assignments:
+            same_polissa_member = self.search(cr, uid, [
+                '|', ('end_date', '<', str(datetime.date.today())),
+                    ('end_date','=',False),
+                ('contract_id', '=', contract_id),
+                ('member_id', '=', member_id),
+            ], context = context)
+            if same_polissa_member:
+                self.write(cr,uid,
+                    same_polissa_member,
+                    dict(
+                        end_date=str(datetime.date.today()),
+                    ),
+                    context=context,
+                )
+
     def createDefaultForMembers(self, cr, uid, member_ids, context=None):
         """ Creates default contract assignments for the given members.
         """
@@ -119,8 +136,6 @@ class GenerationkWhAssignment(osv.osv):
         for a in self.browse(cr, uid, ids, context=context):
             a.unlink()
 
-    def expire(self, cr, ids, context=None):
-        "TODO: GenerationkWhAssignment.expire"
 
     def availableAssigmentsForContract(self, cursor, uid, contract_id, context=None):
         assignmentProvider = AssignmentProvider(self, cursor, uid, context)

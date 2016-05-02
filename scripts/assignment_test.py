@@ -56,6 +56,17 @@ class Assignment_Test(unittest.TestCase):
             ) for r in result],
             expectation)
 
+    def assertAssignmentsExpiredEqual(self, expectation):
+        result = self.Assignment.browse([])
+        self.assertEqual([
+            (
+                r.contract_id.id,
+                r.member_id.id,
+                r.priority,
+                r.end_date
+            ) for r in result],
+            expectation)
+
     def tearDown(self):
         self.Assignment.dropAll()
 
@@ -185,7 +196,31 @@ class Assignment_Test(unittest.TestCase):
             (self.contract3, self.member,1),
             ])
 
+    def test_expire_one_member_two_polissa(self):
+        self.setupProvider([
+            (self.contract, self.member,1),
+            (self.contract2, self.member,1),
+            ])
+        self.Assignment.expire([
+            (self.contract, self.member),
+        ])
+        self.assertAssignmentsExpiredEqual([
+            (self.contract, self.member,1,str(datetime.date.today())),
+            (self.contract2, self.member,1,False),
+            ])
 
+    def test_expire_one_member_one_polissa(self):
+        self.setupProvider([
+            (self.contract, self.member,1),
+            ])
+        self.Assignment.expire([
+            (self.contract, self.member),
+        ])
+        self.assertAssignmentsExpiredEqual([
+            (self.contract, self.member,1,str(datetime.date.today())),
+            ])
+
+        
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class AssignmentProvider_Test(unittest.TestCase):
 
