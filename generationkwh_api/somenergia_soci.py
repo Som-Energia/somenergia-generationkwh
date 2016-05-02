@@ -42,7 +42,9 @@ class SomenergiaSoci(osv.osv):
             ids = [ids]
 
         init_dict = dict([(f, False) for f in field_names])
-        res = {}.fromkeys(ids, init_dict.copy())
+        res = {}.fromkeys(ids, {})
+        for k in res.keys():
+            res[k] = init_dict.copy()
 
         for member_id in ids:
             investments = invest_obj.active_investments(
