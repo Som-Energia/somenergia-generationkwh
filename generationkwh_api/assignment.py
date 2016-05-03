@@ -115,7 +115,7 @@ class GenerationkWhAssignment(osv.osv):
     def add(self, cr, uid, assignments, context=None):
         for contract_id, member_id, priority in assignments:
             same_polissa_member = self.search(cr, uid, [
-                '|', ('end_date', '<', str(datetime.date.today())),
+                #'|', ('end_date', '<', str(datetime.date.today())),
                     ('end_date','=',False),
                 ('contract_id', '=', contract_id),
                 ('member_id', '=', member_id),
@@ -137,7 +137,7 @@ class GenerationkWhAssignment(osv.osv):
     def expire(self, cr, uid, assignments, context=None):
         for contract_id, member_id in assignments:
             same_polissa_member = self.search(cr, uid, [
-                '|', ('end_date', '<', str(datetime.date.today())),
+                #'|', ('end_date', '<', str(datetime.date.today())),
                     ('end_date','=',False),
                 ('contract_id', '=', contract_id),
                 ('member_id', '=', member_id),
