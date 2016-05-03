@@ -32,12 +32,16 @@ class AssignmentSeeker(object):
         return result
 
     def refund_kwh(self, contract_id, start_date, end_date, fare, period, kwh,
-                   partner_id):
+            member_id):
         """
             Refunds the indicated kwh, marking them as available again,
             for the contract, date interval, fare and period and
             returns the kwh efectively refunded.
         """
+        seek_start = start_date + relativedelta(years=-1)
+        return self._usage.refund_kwh(member_id, seek_start, end_date,
+            fare, period, kwh)
+
 
 
 
