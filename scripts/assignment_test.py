@@ -31,7 +31,7 @@ class Assignment_Test(unittest.TestCase):
 
     def setupProvider(self,assignments=[]):
         self.Assignment.add(assignments)
-    
+
 
     def assertAllAssignmentsEqual(self, expectation):
         result = self.Assignment.browse([
@@ -155,7 +155,7 @@ class Assignment_Test(unittest.TestCase):
             (self.contract, self.member, 1, str(datetime.date.today())),
             (self.contract,self.member,2, False),
             ])
-        
+
     def test_three_member_three_polissas(self):
         members=self.member, self.member2, self.member3
         contracts=self.contract,self.contract2,self.contract3
@@ -195,7 +195,7 @@ class Assignment_Test(unittest.TestCase):
             (self.contract2, self.member,1),
             (self.contract3, self.member,1),
             ])
-    
+
     def test_expire_one_member_one_polissa(self):
         self.setupProvider([
             (self.contract, self.member,1),
@@ -219,7 +219,7 @@ class Assignment_Test(unittest.TestCase):
             (self.contract, self.member,1,str(datetime.date.today())),
             (self.contract2, self.member,1,False),
             ])
-        
+
     def test_expire_previously_expired_polissa(self):
         self.setupProvider([
             (self.contract, self.member,1),
@@ -232,7 +232,7 @@ class Assignment_Test(unittest.TestCase):
             (self.contract, self.member,1,str(datetime.date.today())),
             (self.contract, self.member,1,str(datetime.date.today())),
             ])
-        
+
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class AssignmentProvider_Test(unittest.TestCase):
 
@@ -301,7 +301,7 @@ class AssignmentProvider_Test(unittest.TestCase):
     def test_seek_noAssignment(self):
         self.setupAssignments([])
         self.assertAssignmentsSeekEqual(self.contract, [])
-    
+
     def test_seek_oneAssignment_noCompetitors(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
@@ -385,12 +385,13 @@ class AssignmentProvider_Test(unittest.TestCase):
                 self.contract2LastInvoicedDate,
                 )),
             ])
+
     def assertAllAssignmentsEqual(self,expectation):
         self.assertEqual([
             (record.contract_id.id, record.member_id.id, record.priority) 
             for record in self.Assignment.browse([], order='id')
             ], expectation)
-        
+
     def test_createOnePrioritaryAndManySecondaries_oneAssignment(self):
         self.Assignment.createOnePrioritaryAndManySecondaries([
             (self.contract, self.member),
@@ -398,12 +399,13 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.assertAllAssignmentsEqual([
             (self.contract, self.member, 0),
             ])
+
     def test_createOnePrioritaryAndManySecondaries_noAssignment(self):
         self.Assignment.createOnePrioritaryAndManySecondaries([
             ])
         self.assertAllAssignmentsEqual([
             ])
-        
+
     def test_createOnePrioritaryAndManySecondaries_clearPrevious(self):
         self.setupAssignments([
             (self.contract2, self.member, 1),
@@ -426,7 +428,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.contract2, self.member2, 1),
             (self.contract, self.member, 0),
             ])
-    
+
     def test_createOnePrioritaryAndManySecondaries_manyMembers_singleContract(self):
         self.Assignment.createOnePrioritaryAndManySecondaries([
             (self.contract,self.member),
@@ -516,7 +518,6 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.ownerContracts[1], self.member_manyAsPayerAndManyAsOwner),
             ])
 
-    @unittest.skip("Cesar dataset")
     def test_map_member_from_partners_all_in(self):
         map={'629':537, '5':4, '120':107, '61':54, '400':351}
         result=self.erp.GenerationkwhTesthelper.get_members_by_partners(
@@ -524,7 +525,6 @@ class AssignmentProvider_Test(unittest.TestCase):
             )
         self.assertEqual(map,result)
 
-    @unittest.skip("Cesar dataset")
     def test_map_partners_from_members_all_in(self):
         map={'537':629, '4':5, '107':120, '54':61, '351':400,
             '999999999': False}
@@ -532,8 +532,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             map.keys()
             )
         self.assertEqual(map,result)
-    
-    @unittest.skip("Cesar dataset")
+
     def test_map_partners_from_members_not_all_in(self):
         map={'537':629, '4':5, '107':120, '54':61, '351':400}
         result=self.erp.GenerationkwhTesthelper.get_partners_by_members(
@@ -541,7 +540,6 @@ class AssignmentProvider_Test(unittest.TestCase):
             )
         self.assertEqual(map,result)
 
-    @unittest.skip("Cesar dataset")
     def test_map_member_from_partners_not_all_in(self):
         map={'629':537, '5':4, '120':107, '61':54, '400':351
             ,'999999999': False
@@ -550,6 +548,8 @@ class AssignmentProvider_Test(unittest.TestCase):
             map.keys()
             )
         self.assertEqual(map,result)
+
+
 if __name__ == '__main__':
     unittest.main()
 

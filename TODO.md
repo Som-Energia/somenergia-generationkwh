@@ -1,3 +1,6 @@
+- DealerAPI: Convert `soci_id` from and to `partner_id`
++ Dealer: `use_kwh`
+- Dealer: `refund_kwh`
 - Rename `generationkwh_api` -> `som_generationkwh`
 - Rename `plantmeter_api` -> `som_plantmeter`
 - ProductionToRightsPerShare: Protect againts divby0 when total active actions is zero
@@ -30,13 +33,14 @@
 - Assignment: Given a contract that can consume rights from several members, define the order in which it should consume them.
     - Right now is an arbitrary order, not bad
     - Rare case, low priority, wait for actual cases
-- Assignment: Default assignment: query with all sorted contracts for a set of members
++ Assignment: Default assignment: query with all sorted contracts for a set of members
     + Incorporate the query
     + Adapt results to the expected ones
-    - Split test cases
-    - Sort by annual use
-    - Integrate both functions
+    + Split test cases
+    + Sort by annual use
+    + Integrate both functions
 + Assignment: Default assignment: given previous list create the assignment with proper priorities
+- Make assignation test resilent to changes on contract annual use
 - Assignment: Edit test cases: expire assignments
 - Assignment: Edit test cases: change priority
 - Assignment: Edit test cases: add rule
