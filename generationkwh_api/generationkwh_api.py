@@ -6,7 +6,7 @@ from osv import osv, fields
 import netsvc
 from mongodb_backend.mongodb2 import mdbpool
 
-from generationkwh.dealer import Dealer
+from generationkwh.dealer import DummyDealer as Dealer # TODO: Point to the real one
 from generationkwh.sharescurve import MemberSharesCurve
 from generationkwh.rightspershare import RightsPerShare
 from generationkwh.memberrightscurve import MemberRightsCurve
