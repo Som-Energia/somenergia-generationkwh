@@ -517,14 +517,14 @@ class AssignmentProvider_Test(unittest.TestCase):
             ])
 
     def test_map_member_from_partners_all_in(self):
-        map={'629':537, '5':4, '13846':8888, '120':107, '61':54, '400':351}
+        map={'629':537, '5':4, '120':107, '61':54, '400':351}
         result=self.erp.GenerationkwhTesthelper.get_members_by_partners(
             map.keys()
             )
         self.assertEqual(map,result)
 
     def test_map_partners_from_members_all_in(self):
-        map={'537':629, '4':5, '8888':13846, '107':120, '54':61, '351':400,
+        map={'537':629, '4':5, '107':120, '54':61, '351':400,
             '999999999': False}
         result=self.erp.GenerationkwhTesthelper.get_partners_by_members(
             map.keys()
@@ -532,15 +532,17 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.assertEqual(map,result)
     
     def test_map_partners_from_members_not_all_in(self):
-        map={'537':629, '4':5, '8888':13846, '107':120, '54':61, '351':400}
+        map={'537':629, '4':5, '107':120, '54':61, '351':400}
         result=self.erp.GenerationkwhTesthelper.get_partners_by_members(
             map.keys()
             )
         self.assertEqual(map,result)
 
     def test_map_member_from_partners_not_all_in(self):
-        map={'537':629, '4':5, '8888':13846, '107':120, '54':61, '351':400, '999999999': False}
-        result=self.erp.GenerationkwhTesthelper.get_partners_by_members(
+        map={'629':537, '5':4, '120':107, '61':54, '400':351
+            ,'999999999': False
+            }
+        result=self.erp.GenerationkwhTesthelper.get_members_by_partners(
             map.keys()
             )
         self.assertEqual(map,result)
