@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from .assignmentseeker import AssignmentSeeker
+from .dealer import Dealer_Real
 from yamlns import namespace as ns
 from .isodates import localisodate
 
@@ -96,7 +96,7 @@ class AssignmentSeeker_Test(unittest.TestCase):
     def test_usekwh_withoutAssignns(self):
         t = UsageTrackerMockup([])
         a = AssignmentsMockup([])
-        s = AssignmentSeeker(usageTracker=t, assignmentProvider=a)
+        s = Dealer_Real(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
@@ -119,7 +119,7 @@ class AssignmentSeeker_Test(unittest.TestCase):
             ),
             ])
 
-        s = AssignmentSeeker(usageTracker=t, assignmentProvider=a)
+        s = Dealer_Real(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
@@ -150,7 +150,7 @@ class AssignmentSeeker_Test(unittest.TestCase):
             ),
             ])
 
-        s = AssignmentSeeker(usageTracker=t, assignmentProvider=a)
+        s = Dealer_Real(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
@@ -179,7 +179,7 @@ class AssignmentSeeker_Test(unittest.TestCase):
             ),
             ])
 
-        s = AssignmentSeeker(usageTracker=t, assignmentProvider=a)
+        s = Dealer_Real(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
@@ -210,7 +210,7 @@ class AssignmentSeeker_Test(unittest.TestCase):
             ),
             ])
 
-        s = AssignmentSeeker(usageTracker=t, assignmentProvider=a)
+        s = Dealer_Real(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
@@ -250,7 +250,7 @@ class AssignmentSeeker_Test(unittest.TestCase):
             ),
             ])
 
-        s = AssignmentSeeker(usageTracker=t, assignmentProvider=a)
+        s = Dealer_Real(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
@@ -280,7 +280,7 @@ class AssignmentSeeker_Test(unittest.TestCase):
             ),
             ])
 
-        s = AssignmentSeeker(usageTracker=t, assignmentProvider=a)
+        s = Dealer_Real(usageTracker=t, assignmentProvider=a)
         result = s.refund_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),

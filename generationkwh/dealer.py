@@ -1,12 +1,56 @@
 # -*- encoding: utf-8 -*-
 
-class Dealer(object):
+from dateutil.relativedelta import relativedelta
+
+
+class AssignmentSeeker(object):
+    def __init__(self, usageTracker=None, assignmentProvider=None):
+        self._usage = usageTracker
+        self._assignments = assignmentProvider
+
+    def use_kwh(self, contract_id, start_date, end_date, fare, period, kwh):
+        """
+            Marks the indicated kwh as used, if available, for the contract,
+            date interval, fare and period.
+            Returns a list of dictionaries each with member_id and kwh
+            effectively allocated.
+        """
+        seek_start = start_date + relativedelta(years=-1)
+        assignments = self._assignments.seek(contract_id)
+        used = 0
+        result = []
+        for asig in assignments:
+            seek_end = min(end_date,asig.last_usable_date)
+            if seek_end<seek_start: continue
+            memberUse = self._usage.use_kwh(
+                    asig.member_id,
+                    seek_start,
+                    seek_end,
+                    fare, period, kwh - used)
+            result.append(dict(member_id=asig.member_id, kwh=memberUse))
+            used += memberUse
+        return result
+
+    def refund_kwh(self, contract_id, start_date, end_date, fare, period, kwh,
+            member_id):
+        """
+            Refunds the indicated kwh, marking them as available again,
+            for the contract, date interval, fare and period and
+            returns the kwh efectively refunded.
+        """
+        seek_start = start_date + relativedelta(years=-1)
+        return self._usage.refund_kwh(member_id, seek_start, end_date,
+            fare, period, kwh)
+
+class DummyDealer(object):
+
     """ It deals investors Generation kWh use rights to contracts according its
         availability and investors criteria.
     """
 
-    def __init__(self, usageTracker):
+    def __init__(self, usageTracker, assignments):
         self._usageTracker = usageTracker
+        self._assignments = assignments
     
     def is_active(self,
             contract_id, start_date, end_date):
@@ -35,9 +79,67 @@ class Dealer(object):
                    partner_id):
         """Refunds the indicated kwh, marking them as available again, for the
            contract, date interval, fare and period and returns the ones
-           efectively used.
+           efectively refund.
         """
         pass
 
+class Dealer_Real(object):
+    """ It deals investors Generation kWh use rights to contracts according its
+        availability and investors criteria.
+    """
+
+    def __init__(self, usageTracker, assignmentProvider):
+        self._dealer = AssignmentSeeker(
+            usageTracker=usageTracker,
+            assignmentProvider=assignmentProvider,
+            )
+    
+    def is_active(self,
+            contract_id, start_date, end_date):
+        """ Returns True if contract_id has generation kwh activated
+            during the period"""
+        if contract_id == 4:
+            return True
+        return False
+
+    # Do not use for invoicing, ONLY statistics
+    def get_available_kwh(self, contract_id, start_date, end_date, fare, period):
+        """ Returns generationkwh [kWh] available for contract_id during the
+            date interval, fare and period"""
+        return 40
+
+    def use_kwh(self, contract_id, start_date, end_date, fare, period, kwh):
+        """Marks the indicated kwh as used, if available, for the contract,
+           date interval, fare and period.
+           Returns a list of dictionaries each with member_id and kwh effectively allocated.
+        """
+        # TODO: Map member_id to partner_id!!
+
+        return self._dealer.use_kwh(
+            contract_id=contract_id,
+            start_date = start_date,
+            end_date = end_date,
+            fare = fare,
+            period = period,
+            kwh = kwh,
+            )
+
+    def refund_kwh(self, contract_id, start_date, end_date, fare, period, kwh,
+                   member_id):
+        """Refunds the indicated kwh, marking them as available again, for the
+           contract, date interval, fare and period and returns the ones
+           efectively used.
+        """
+        return self._dealer.refund_kwh(
+            contract_id,
+            start_date,
+            end_date,
+            fare,
+            period,
+            kwh,
+            member_id,
+            )
+
+Dealer = DummyDealer
 
 # vim: ts=4 sw=4 et
