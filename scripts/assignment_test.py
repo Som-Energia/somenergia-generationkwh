@@ -265,7 +265,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         # pickup cases (commented out the original partner.id)
         self.member_noContracts = 537 # 629
         self.member_oneAsPayer = 4 # 5 
-        self.member_asOwnerButNotPayer = 8888 # 13846
+        self.member_asOwnerButNotPayer = 8899 # 13846
         self.member_aPayerAndAnOwnerContract = 107 # 120
         self.member_manyAsPayer = 54 # 61
         self.member_manyAsPayerAndManyAsOwner = 351 # 400
@@ -423,8 +423,8 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.contract,self.member),
             ])
         self.assertAllAssignmentsEqual([
-            (self.contract, self.member, 0),
             (self.contract2, self.member2, 1),
+            (self.contract, self.member, 0),
             ])
     
     def test_createOnePrioritaryAndManySecondaries_manyMembers_singleContract(self):
