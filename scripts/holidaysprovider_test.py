@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import datetime
-from genkwh_investments_from_accounting import *
 from generationkwh.isodates import naiveisodate
 
 import unittest

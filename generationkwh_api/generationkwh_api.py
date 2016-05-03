@@ -6,6 +6,8 @@ from osv import osv, fields
 import netsvc
 from mongodb_backend.mongodb2 import mdbpool
 
+from plantmeter.mongotimecurve import addDays
+
 from generationkwh.dealer import DummyDealer as Dealer # TODO: Point to the real one
 from generationkwh.sharescurve import MemberSharesCurve
 from generationkwh.rightspershare import RightsPerShare
@@ -42,6 +44,10 @@ class GenerationkWhTestHelper(osv.osv):
             context=None):
         rightsPerShare = RightsPerShare(mdbpool.get_db())
         rightsPerShare.updateRightsPerShare(nshares, localisodate(startDate), data)
+        remainders = RemainderProvider(self, cursor, uid, context)
+        remainders.set([
+            (nshares, addDays(localisodate(startDate), (len(data)+24)%25), 0), 
+            ])
 
     def rights_per_share(self, cursor, uid,
             nshares, startDate, stopDate,
@@ -91,20 +97,23 @@ class GenerationkWhTestHelper(osv.osv):
         investment = InvestmentProvider(self, cursor, uid, context)
         memberActiveShares = MemberSharesCurve(investment)
         rightsPerShare = RightsPerShare(mdbpool.get_db())
+        remainders = RemainderProvider(self, cursor, uid, context)
 
         generatedRights = MemberRightsCurve(
             activeShares=memberActiveShares,
             rightsPerShare=rightsPerShare,
+            remainders=remainders,
             eager=True,
             )
         rightsUsage = MemberRightsUsage(mdbpool.get_db())
         holidays = HolidaysProvider(self, cursor, uid, context)
         farePeriod = FarePeriodCurve(holidays)
 
+        print 'remainders', remainders.get()
         print 'investment', investment.shareContracts(
             start=localisodate(start),
             end=localisodate(stop),
-            member=2)
+            member=member)
         print 'active', memberActiveShares.hourly(
             localisodate(start),
             localisodate(stop),
@@ -237,10 +246,12 @@ class GenerationkWhDealer(osv.osv):
         investments = InvestmentProvider(self, cursor, uid, context)
         memberActiveShares = MemberSharesCurve(investments)
         rightsPerShare = RightsPerShare(mdbpool.get_db())
+        remainders = RemainderProvider(self, cursor, uid, context)
 
         generatedRights = MemberRightsCurve(
             activeShares=memberActiveShares,
             rightsPerShare=rightsPerShare,
+            remainders=remainders,
             eager=True,
             )
 

@@ -1,14 +1,9 @@
 - DealerAPI: Convert `soci_id` from and to `partner_id`
-+ Dealer: `use_kwh`
-- Dealer: `refund_kwh`
+- Implement the whole isActive based InvestmentProvider
 - Rename `generationkwh_api` -> `som_generationkwh`
 - Rename `plantmeter_api` -> `som_plantmeter`
 - ProductionToRightsPerShare: Protect againts divby0 when total active actions is zero
 - Investment: ondelete -> member
-+ Investment: backref to the account lines
-+ Investment: protect againts regenerating already generated account lines
-+ Investment: Change `member_id` relation from partner to soci
-+ Investment: create receives as parameter `partner_id` instead `soci_id`
 - Investment: Janitoring: mode lines without partner
 - Investment: Janitoring: mode lines without dates
 - Investment: negative move line: activation date should be the same or inmediate?
@@ -18,28 +13,15 @@
     - Can be found at `ir_secuence.code="socis"`
 - Investment: `active` field to hide failed payments (the original one and the refund)
 
-- Remainders: What to do with n-share right curve not yet started:
-	+ Add Remainder method (startTrackingRights?) to add a 0 kW remainder at production start for n-shares if there is no remainder yet
-	+ When invoicing, if nshares has no reminder, call startTrackingRights, so next time we load production will be computed, and use 1-share multiplied instead
-	+ Make generationkwh.rightspershare.RightsPerShare.rightspershare resilent to those cases
-	- Migration: a reminder for 1-shares curve
-	- Migration: a reminder for known to be used n-shares (optional)
+- Reminder Migration: a reminder for 1-shares curve
+- Reminder Migration: a reminder for known to be used n-shares (optional)
 
 - Assignment: ondelete -> polissa
 - Assignment: ondelete -> member
 - Assignment: Filter out inactive contracts and others (ask Pere)
-+ Assignment: Filter out expired assignments when seeking
-+ Assignment: Expired ones do not constraint the date
 - Assignment: Given a contract that can consume rights from several members, define the order in which it should consume them.
     - Right now is an arbitrary order, not bad
     - Rare case, low priority, wait for actual cases
-+ Assignment: Default assignment: query with all sorted contracts for a set of members
-    + Incorporate the query
-    + Adapt results to the expected ones
-    + Split test cases
-    + Sort by annual use
-    + Integrate both functions
-+ Assignment: Default assignment: given previous list create the assignment with proper priorities
 - Make assignation test resilent to changes on contract annual use
 - Assignment: Edit test cases: expire assignments
 - Assignment: Edit test cases: change priority
@@ -58,6 +40,28 @@
 - WebForms: Create the soci
 - WebForms: Create the investments form webforms
 
+## DONE
+
++ Dealer: `use_kwh`
++ Dealer: `refund_kwh`
++ AssignmentSeeker becomes Dealer
++ Investment: backref to the account lines
++ Investment: protect againts regenerating already generated account lines
++ Investment: Change `member_id` relation from partner to soci
++ Investment: create receives as parameter `partner_id` instead `soci_id`
++ Assignment: Filter out expired assignments when seeking
++ Assignment: Expired ones do not constraint the date
++ Assignment: Default assignment: query with all sorted contracts for a set of members
+    + Incorporate the query
+    + Adapt results to the expected ones
+    + Split test cases
+    + Sort by annual use
+    + Integrate both functions
++ Assignment: Default assignment: given previous list create the assignment with proper priorities
++ Remainders: What to do with n-share right curve not yet started:
+	+ Add Remainder method (startTrackingRights?) to add a 0 kW remainder at production start for n-shares if there is no remainder yet
+	+ When invoicing, if nshares has no reminder, call startTrackingRights, so next time we load production will be computed, and use 1-share multiplied instead
+	+ Make generationkwh.rightspershare.RightsPerShare.rightspershare resilent to those cases
 
 
 
