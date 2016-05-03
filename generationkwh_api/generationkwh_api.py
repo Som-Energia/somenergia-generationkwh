@@ -152,6 +152,50 @@ class GenerationkWhTestHelper(osv.osv):
             )
         return result
 
+    def usagetracker_use_kwh(self, cursor, uid,
+            member, start, stop, fare, period, kwh,
+            context=None):
+
+        GenerationkWhDealer = self.pool.get('generationkwh.dealer')
+        usageTracker = GenerationkWhDealer._createTracker(cursor, uid, context)
+        result = usageTracker.use_kwh(
+            member,
+            localisodate(start),
+            localisodate(stop),
+            fare,
+            period,
+            kwh,
+            )
+        return int(result)
+
+    def usagetracker_refund_kwh(self, cursor, uid,
+            member, start, stop, fare, period, kwh,
+            context=None):
+
+        GenerationkWhDealer = self.pool.get('generationkwh.dealer')
+        usageTracker = GenerationkWhDealer._createTracker(cursor, uid, context)
+        result = usageTracker.refund_kwh(
+            member,
+            localisodate(start),
+            localisodate(stop),
+            fare,
+            period,
+            kwh,
+            )
+        return int(result)
+
+    def usage(self, cursor, uid,
+            member_id, start_date, stop_date,
+            context=None):
+        rightsUsage = MemberRightsUsage(mdbpool.get_db())
+        result = list(int(i) for i in rightsUsage.usage(
+            member_id,
+            localisodate(start_date),
+            localisodate(stop_date)
+            ))
+        return result
+        
+
 GenerationkWhTestHelper()
 
 
