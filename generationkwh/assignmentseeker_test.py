@@ -90,7 +90,7 @@ class AssignmentSeeker_Test(unittest.TestCase):
     def test_assign_withoutAssignns(self):
         t = UsageTrackerMockup([])
         a = AssignmentsMockup([])
-        s = AssignmentSeeker(usagetracker=t, assignmentProvider=a)
+        s = AssignmentSeeker(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
@@ -113,7 +113,7 @@ class AssignmentSeeker_Test(unittest.TestCase):
             ),
             ])
 
-        s = AssignmentSeeker(usagetracker=t, assignmentProvider=a)
+        s = AssignmentSeeker(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
@@ -144,7 +144,7 @@ class AssignmentSeeker_Test(unittest.TestCase):
             ),
             ])
 
-        s = AssignmentSeeker(usagetracker=t, assignmentProvider=a)
+        s = AssignmentSeeker(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
@@ -173,7 +173,7 @@ class AssignmentSeeker_Test(unittest.TestCase):
             ),
             ])
 
-        s = AssignmentSeeker(usagetracker=t, assignmentProvider=a)
+        s = AssignmentSeeker(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
@@ -204,7 +204,7 @@ class AssignmentSeeker_Test(unittest.TestCase):
             ),
             ])
 
-        s = AssignmentSeeker(usagetracker=t, assignmentProvider=a)
+        s = AssignmentSeeker(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
@@ -244,7 +244,7 @@ class AssignmentSeeker_Test(unittest.TestCase):
             ),
             ])
 
-        s = AssignmentSeeker(usagetracker=t, assignmentProvider=a)
+        s = AssignmentSeeker(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
             start_date = localisodate('2015-08-01'),
