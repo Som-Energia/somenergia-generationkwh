@@ -47,7 +47,7 @@ class InvestmentProvider(ErpWrapper):
 
         return [
             (
-                membertopartner(c['member_id'][0]),
+                c['member_id'][0],
                 localisodate(c['activation_date']),
                 localisodate(c['deactivation_date']),
                 c['nshares'],
@@ -137,8 +137,11 @@ class GenerationkWhInvestment(osv.osv):
         Account = self.pool.get('account.account')
         MoveLine = self.pool.get('account.move.line')
         Member = self.pool.get('somenergia.soci')
+        generationAccountPrefix = '163500%'
 
-        accountIds = Account.search(cursor, uid, [('code','ilike','163500%')])
+        accountIds = Account.search(cursor, uid, [
+            ('code','ilike',generationAccountPrefix),
+            ])
 
         criteria = [('account_id','in',accountIds)]
         if stop: criteria.append(('date_created', '<=', str(stop)))

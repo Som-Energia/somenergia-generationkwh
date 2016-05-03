@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from genkwh_investments_from_accounting import *
+from genkwh_investments import *
 
 import unittest
 
@@ -76,8 +76,8 @@ class InvestmentManagement_Test(unittest.TestCase):
         create(stop="2015-06-30")
         data = listactive(csv=True, member=469)
         self.assertMultiLineEqual(data,
-            '550\tFalse\tFalse\t3\n'
-            '550\tFalse\tFalse\t2\n'
+            '469\tFalse\tFalse\t3\n'
+            '469\tFalse\tFalse\t2\n'
         )
 
     def test_listactive_withStop_shouldBeFirstBatch(self):
