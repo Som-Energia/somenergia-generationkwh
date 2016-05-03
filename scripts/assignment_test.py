@@ -387,7 +387,7 @@ class AssignmentProvider_Test(unittest.TestCase):
     def assertAllAssignmentsEqual(self,expectation):
         self.assertEqual([
             (record.contract_id.id, record.member_id.id, record.priority) 
-            for record in self.Assignment.browse([])
+            for record in self.Assignment.browse([], order='id')
             ], expectation)
         
     def test_createOnePrioritaryAndManySecondaries_oneAssignment(self):
