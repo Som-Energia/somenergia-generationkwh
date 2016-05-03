@@ -55,6 +55,28 @@ class GenerationkWhTestHelper(osv.osv):
         for collection in collections:
             mdbpool.get_db().drop_collection(collection)
 
+    def get_members_by_partners(self, cursor, uid, partner_ids, context=None):
+        res = {str(partner_id): self.pool.get('somenergia.soci').search(
+                    cursor,
+                    uid, 
+                    [('partner_id','=', int(partner_id))], 
+                    context=context) 
+                    for partner_id in partner_ids}
+        for key in res:
+            res[key] = res[key][0] if len(res[key])==1 else False
+        return res
+    
+    def get_partners_by_members(self, cursor, uid, member_ids, context=None):
+        res = self.pool.get('somenergia.soci').read(
+            cursor,
+            uid,
+            member_ids,
+            ['partner_id'],
+            context=context
+            )
+        res = {str(r['id']):r['partner_id'][0] for r in res}
+        res = {str(r):res.get(r,False) for r in member_ids}
+        return res
 
 
     def trace_rigths_compilation(self, cursor, uid,

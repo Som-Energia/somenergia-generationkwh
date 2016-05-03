@@ -239,6 +239,7 @@ class AssignmentProvider_Test(unittest.TestCase):
     def setUp(self):
         self.erp = erppeek.Client(**dbconfig.erppeek)
         self.Assignment = self.erp.GenerationkwhAssignment
+        #self.Generationkwhtesthelper = self.erp.GenerationkwhTesthelper
         self.Assignment.dropAll()
 
         self.member, self.member2 = [
@@ -264,7 +265,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         # pickup cases (commented out the original partner.id)
         self.member_noContracts = 537 # 629
         self.member_oneAsPayer = 4 # 5 
-        self.member_asOwnerButNotPayer = 8899 # 13846
+        self.member_asOwnerButNotPayer = 8888 # 13846
         self.member_aPayerAndAnOwnerContract = 107 # 120
         self.member_manyAsPayer = 54 # 61
         self.member_manyAsPayerAndManyAsOwner = 351 # 400
@@ -422,8 +423,8 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.contract,self.member),
             ])
         self.assertAllAssignmentsEqual([
-            (self.contract2, self.member2, 1),
             (self.contract, self.member, 0),
+            (self.contract2, self.member2, 1),
             ])
     
     def test_createOnePrioritaryAndManySecondaries_manyMembers_singleContract(self):
@@ -515,6 +516,34 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.ownerContracts[1], self.member_manyAsPayerAndManyAsOwner),
             ])
 
+    def test_map_member_from_partners_all_in(self):
+        map={'629':537, '5':4, '13846':8888, '120':107, '61':54, '400':351}
+        result=self.erp.GenerationkwhTesthelper.get_members_by_partners(
+            map.keys()
+            )
+        self.assertEqual(map,result)
+
+    def test_map_partners_from_members_all_in(self):
+        map={'537':629, '4':5, '8888':13846, '107':120, '54':61, '351':400,
+            '999999999': False}
+        result=self.erp.GenerationkwhTesthelper.get_partners_by_members(
+            map.keys()
+            )
+        self.assertEqual(map,result)
+    
+    def test_map_partners_from_members_not_all_in(self):
+        map={'537':629, '4':5, '8888':13846, '107':120, '54':61, '351':400}
+        result=self.erp.GenerationkwhTesthelper.get_partners_by_members(
+            map.keys()
+            )
+        self.assertEqual(map,result)
+
+    def test_map_member_from_partners_not_all_in(self):
+        map={'537':629, '4':5, '8888':13846, '107':120, '54':61, '351':400, '999999999': False}
+        result=self.erp.GenerationkwhTesthelper.get_partners_by_members(
+            map.keys()
+            )
+        self.assertEqual(map,result)
 if __name__ == '__main__':
     unittest.main()
 
