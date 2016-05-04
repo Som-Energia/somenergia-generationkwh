@@ -6,7 +6,7 @@
             <field name="model">generationkwh.assignment</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string="Assignaments a contracte de Generation kWh">
+                <form string="Assignacions a contracte de Generation kWh">
                     <field name="contract_id" select="1"/>
                     <field name="member_id" select="1"/>
                     <field name="priority"/>
@@ -19,7 +19,7 @@
             <field name="model">generationkwh.assignment</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="Assignaments a contracte de Generation kWh">
+                <tree string="Assignacions a contracte de Generation kWh">
                     <field name="contract_id"/>
                     <field name="member_id"/>
                     <field name="priority"/>
@@ -43,7 +43,7 @@
             <field name="model">generationkwh.assignment</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="Assignaments a contracte de Generation kWh">
+                <tree string="Assignacions a contracte de Generation kWh">
                     <field name="priority"/>
                     <field name="contract_id"/>
                     <field name="end_date"/>
