@@ -29,15 +29,16 @@ class Resource_Test(unittest.TestCase):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         curveProvider = self.curveProvider 
         m = ProductionMeter(
+                1,
                 'meterName',
                 'meterDescription',
                 True,
                 uri=uri,
                 curveProvider = self.curveProvider)
 
-        p = ProductionPlant('plantName','plantDescription',True)
+        p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m)
-        aggr = ProductionAggregator('aggrName','eggrDescription',True)
+        aggr = ProductionAggregator(1,'aggrName','eggrDescription',True)
         aggr.plants.append(p)
 
         self.assertEqual(
@@ -51,15 +52,16 @@ class Resource_Test(unittest.TestCase):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         curveProvider = self.curveProvider 
         m = ProductionMeter(
+                1,
                 'meterName',
                 'meterDescription',
                 True,
                 uri=uri,
                 curveProvider = self.curveProvider)
 
-        p = ProductionPlant('plantName','plantDescription',True)
+        p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m)
-        aggr = ProductionAggregator('aggrName','aggrDescription',True)
+        aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
         aggr.plants.append(p)
         m.updateWh(
             localDate(2015,9,4),
@@ -78,6 +80,7 @@ class Resource_Test(unittest.TestCase):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         curveProvider = self.curveProvider 
         m1 = ProductionMeter(
+                1,
                 'meterName1',
                 'meterDescription1',
                 True,
@@ -85,16 +88,17 @@ class Resource_Test(unittest.TestCase):
                 curveProvider = self.curveProvider)
 
         m2 = ProductionMeter(
+                2,
                 'meterName2',
                 'meterDescription2',
                 True,
                 uri=uri,
                 curveProvider = self.curveProvider)
 
-        p = ProductionPlant('plantName','plantDescription',True)
+        p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m1)
         p.meters.append(m2)
-        aggr = ProductionAggregator('aggrName','aggrDescription',True)
+        aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
         aggr.plants.append(p)
         m1.updateWh(localDate(2015,9,4),localDate(2015,9,5))
         m2.updateWh(localDate(2015,9,4),localDate(2015,9,5))
@@ -112,16 +116,17 @@ class Resource_Test(unittest.TestCase):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         curveProvider = self.curveProvider 
         m1 = ProductionMeter(
+                1,
                 'meterName1',
                 'meterDescription1',
                 True,
                 uri=uri,
                 curveProvider = self.curveProvider)
-        p1 = ProductionPlant('plantName1','plantDescription1',True)
+        p1 = ProductionPlant(1,'plantName1','plantDescription1',True)
         p1.meters.append(m1)
-        p2 = ProductionPlant('plantName2','plantDescription2',True)
+        p2 = ProductionPlant(2,'plantName2','plantDescription2',True)
 
-        aggr = ProductionAggregator('aggrName','aggrDescription',True)
+        aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
         aggr.plants.append(p1)
         aggr.plants.append(p2)
         m1.updateWh(localDate(2015,9,4),localDate(2015,9,5))
@@ -139,24 +144,26 @@ class Resource_Test(unittest.TestCase):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         curveProvider = self.curveProvider 
         m1 = ProductionMeter(
+                1,
                 'meterName1',
                 'meterDescription1',
                 True,
                 uri=uri,
                 curveProvider = self.curveProvider)
-        p1 = ProductionPlant('plantName1','plantDescription1',True)
+        p1 = ProductionPlant(1,'plantName1','plantDescription1',True)
         p1.meters.append(m1)
 
         m2 = ProductionMeter(
+                1,
                 'meterName2',
                 'meterDescription2',
                 True,
                 uri=uri,
                 curveProvider = self.curveProvider)
-        p2 = ProductionPlant('plantName2','plantDescription2',True)
+        p2 = ProductionPlant(2,'plantName2','plantDescription2',True)
         p2.meters.append(m2)
 
-        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p1)
         aggr.plants.append(p2)
         m1.updateWh(localDate(2015,9,4),localDate(2015,9,5))
@@ -175,14 +182,15 @@ class Resource_Test(unittest.TestCase):
     def test_lastDate_empty(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         m = ProductionMeter(
+            1,
             'meterName',
             'meterDescription',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
-        p = ProductionPlant('plantName','plantDescription',True)
+        p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m)
-        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p)
 
         self.assertEqual(aggr.lastMeasurementDate(), None)
@@ -190,14 +198,15 @@ class Resource_Test(unittest.TestCase):
     def test_firstDate_empty(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         m = ProductionMeter(
+            1,
             'meterName',
             'meterDescription',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
-        p = ProductionPlant('plantName','plantDescription',True)
+        p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m)
-        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p)
 
         self.assertEqual(aggr.firstMeasurementDate(), None)
@@ -205,14 +214,15 @@ class Resource_Test(unittest.TestCase):
     def test_lastDate_onePlantOneMeter(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         m = ProductionMeter(
+            1,
             'meterName',
             'meterDescription',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
-        p = ProductionPlant('plantName','plantDescription',True)
+        p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m)
-        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p)
         m.updateWh(localDate(2015,9,4), localDate(2015,9,5))
 
@@ -221,14 +231,15 @@ class Resource_Test(unittest.TestCase):
     def test_firstDate_onePlantOneMeter(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         m = ProductionMeter(
+            1,
             'meterName',
             'meterDescription',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
-        p = ProductionPlant('plantName','plantDescription',True)
+        p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m)
-        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p)
         m.updateWh(localDate(2015,9,4), localDate(2015,9,5))
 
@@ -237,6 +248,7 @@ class Resource_Test(unittest.TestCase):
     def test_lastDate_onePlantTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         m1 = ProductionMeter(
+            1,
             'meterName1',
             'meterDescription1',
             True,
@@ -244,16 +256,17 @@ class Resource_Test(unittest.TestCase):
             curveProvider = self.curveProvider)
         uri = 'csv:/' + local_file('data/manlleu_20150804.csv')
         m2 = ProductionMeter(
+            1,
             'meterName2',
             'meterDescription2',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
 
-        p = ProductionPlant('plantName','plantDescription',True)
+        p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m1)
         p.meters.append(m2)
-        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p)
         m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
         m2.updateWh(localDate(2015,8,4), localDate(2015,8,5))
@@ -263,6 +276,7 @@ class Resource_Test(unittest.TestCase):
     def test_firstDate_onePlantTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         m1 = ProductionMeter(
+            1,
             'meterName1',
             'meterDescription1',
             True,
@@ -270,16 +284,17 @@ class Resource_Test(unittest.TestCase):
             curveProvider = self.curveProvider)
         uri = 'csv:/' + local_file('data/manlleu_20150804.csv')
         m2 = ProductionMeter(
+            2,
             'meterName2',
             'meterDescription2',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
 
-        p = ProductionPlant('plantName','plantDescription',True)
+        p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m1)
         p.meters.append(m2)
-        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p)
         m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
         m2.updateWh(localDate(2015,8,4), localDate(2015,8,5))
@@ -289,6 +304,7 @@ class Resource_Test(unittest.TestCase):
     def test_lastDate_twoPlantsTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         m1 = ProductionMeter(
+            1,
             'meterName1',
             'meterDescription1',
             True,
@@ -296,17 +312,18 @@ class Resource_Test(unittest.TestCase):
             curveProvider = self.curveProvider)
         uri = 'csv:/' + local_file('data/manlleu_20150804.csv')
         m2 = ProductionMeter(
+            2,
             'meterName2',
             'meterDescription2',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
 
-        p1 = ProductionPlant('plantName1','plantDescription1',True)
-        p2 = ProductionPlant('plantName2','plantDescription2',True)
+        p1 = ProductionPlant(1,'plantName1','plantDescription1',True)
+        p2 = ProductionPlant(2,'plantName2','plantDescription2',True)
         p1.meters.append(m1)
         p2.meters.append(m2)
-        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p1)
         aggr.plants.append(p2)
         m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
@@ -317,6 +334,7 @@ class Resource_Test(unittest.TestCase):
     def test_firstDate_twoPlantsTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         m1 = ProductionMeter(
+            1,
             'meterName1',
             'meterDescription1',
             True,
@@ -324,17 +342,18 @@ class Resource_Test(unittest.TestCase):
             curveProvider = self.curveProvider)
         uri = 'csv:/' + local_file('data/manlleu_20150804.csv')
         m2 = ProductionMeter(
+            2,
             'meterName2',
             'meterDescription2',
             True,
             uri = uri,
             curveProvider = self.curveProvider)
 
-        p1 = ProductionPlant('plantName1','plantDescription1',True)
-        p2 = ProductionPlant('plantName2','plantDescription2',True)
+        p1 = ProductionPlant(1,'plantName1','plantDescription1',True)
+        p2 = ProductionPlant(2,'plantName2','plantDescription2',True)
         p1.meters.append(m1)
         p2.meters.append(m2)
-        aggr = ProductionAggregator('aggrName','aggreDescription',True)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p1)
         aggr.plants.append(p2)
         m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
@@ -358,6 +377,7 @@ class Meter_Test(unittest.TestCase):
 
     def test_get_whenEmpty(self):
         m = ProductionMeter(
+            1,
             'meterName',
             'meterDescription',
             True,
@@ -373,6 +393,7 @@ class Meter_Test(unittest.TestCase):
 
     def test_get_afterUpdate(self):
         m = ProductionMeter(
+            1,
             'meterName',
             'meterDescription',
             True,
@@ -391,6 +412,7 @@ class Meter_Test(unittest.TestCase):
 
     def test_lastDate_empty(self):
         m = ProductionMeter(
+            1,
             'meterName',
             'meterDescription',
             True,
@@ -400,6 +422,7 @@ class Meter_Test(unittest.TestCase):
 
     def test_lastDate_filled(self):
         m = ProductionMeter(
+            1,
             'meterName',
             'meterDescription',
             True,
@@ -411,6 +434,7 @@ class Meter_Test(unittest.TestCase):
 
     def test_firstDate_empty(self):
         m = ProductionMeter(
+            1,
             'meterName',
             'meterDescription',
             True,
@@ -420,6 +444,7 @@ class Meter_Test(unittest.TestCase):
 
     def test_firstDate_filled(self):
         m = ProductionMeter(
+            1,
             'meterName',
             'meterDescription',
             True,

@@ -15,11 +15,13 @@ def local_file(filename):
     return os.path.join(os.path.abspath(os.path.dirname(__file__)), filename)
 
 class Resource(object):
+    id = None 
     name = None
     description = None
     enabled = None
 
-    def __init__(self, name, description, enabled):
+    def __init__(self, id, name, description, enabled):
+        self.id = id 
         self.name = name
         self.description = description
         self.enabled = enabled
@@ -37,8 +39,8 @@ class ProductionAggregator(Resource):
             if plant.enabled
             ], axis=0)
     
-    def updateWh(self, start, end):
-        return [plant.updateWh(start, end) for plant in self.plants]
+    def updateWh(self, start, end, notifier):
+        return [plant.updateWh(start, end, notifier) for plant in self.plants]
 
     def firstMeasurementDate(self):
         return min([
@@ -66,8 +68,8 @@ class ProductionPlant(Resource):
             if meter.enabled
             ], axis=0)
 
-    def updateWh(self, start, end):
-        return [meter.updateWh(start, end) for meter in self.meters]
+    def updateWh(self, start, end, notifier):
+        return [meter.updateWh(start, end, notifier) for meter in self.meters]
 
     def lastMeasurementDate(self):
         return max([
@@ -92,7 +94,10 @@ class ProductionMeter(Resource):
     def getWh(self, start, end):
         return self.curveProvider.get(start, end, self.name, 'ae')
 
-    def updateWh(self, start, end=None):
+    def updateWh(self, start, end=None , notifier=None):
+        import datetime
+
+        now = datetime.datetime.now()
         provider = get_provider(self.uri)
         with provider(self.uri) as remote:
             for day in remote.get(start, end):
@@ -102,6 +107,8 @@ class ProductionMeter(Resource):
                             datetime = measurement['datetime'],
                             ae = measurement['ae']
                             )
+            if notifier:
+                notifier.push(self.id, now, 'done', '') 
         return True
 
     def lastMeasurementDate(self):

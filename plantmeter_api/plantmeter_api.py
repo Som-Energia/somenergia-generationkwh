@@ -4,6 +4,7 @@ import os
 from osv import osv, fields
 from mongodb_backend import osv_mongodb
 from mongodb_backend.mongodb2 import mdbpool
+from .erpwrapper import ErpWrapper
 
 from datetime import datetime
 from plantmeter.resource import ProductionAggregator, ProductionPlant, ProductionMeter 
@@ -25,22 +26,23 @@ class GenerationkwhProductionAggregator(osv.osv):
             pid = pid[0]
 
         aggr = self.browse(cursor, uid, pid, context)
-        _aggr = self._createAggregator(aggr, ['name', 'description', 'enabled'])
+        _aggr = self._createAggregator(aggr, ['id', 'name', 'description', 'enabled'])
         return _aggr.getWh(start, end).tolist()
 
     def updateWh(self, cursor, uid, pid, start, end, context=None):
         '''Update Wh measurements'''
 
+        notifier = ProductionNotifierProvider(self, cursor, uid, context)
         if start > end: return
         if not context:
             context = {}
         if isinstance(pid, list) or isinstance(pid, tuple):
             pid = pid[0]
 
-        args = ['name', 'description', 'enabled']
+        args = ['id', 'name', 'description', 'enabled']
         aggr = self.browse(cursor, uid, pid, context)
         _aggr = self._createAggregator(aggr, args)
-        return _aggr.updateWh(start, end)
+        return _aggr.updateWh(start, end, notifier)
 
     def firstMeasurementDate(self, cursor, uid, pid, context=None):
         '''Get first measurement date'''
@@ -50,7 +52,7 @@ class GenerationkwhProductionAggregator(osv.osv):
         if isinstance(pid, list) or isinstance(pid, tuple):
             pid = pid[0]
 
-        args = ['name', 'description', 'enabled']
+        args = ['id', 'name', 'description', 'enabled']
         aggr = self.browse(cursor, uid, pid, context)
         _aggr = self._createAggregator(aggr, args)
         date = _aggr.firstMeasurementDate()
@@ -64,7 +66,7 @@ class GenerationkwhProductionAggregator(osv.osv):
         if isinstance(pid, list) or isinstance(pid, tuple):
             pid = pid[0]
 
-        args = ['name', 'description', 'enabled']
+        args = ['id', 'name', 'description', 'enabled']
         aggr = self.browse(cursor, uid, pid, context)
         _aggr = self._createAggregator(aggr, args)
         date = _aggr.lastMeasurementDate()
@@ -92,7 +94,7 @@ class GenerationkwhProductionAggregator(osv.osv):
         return ProductionAggregator(**dict(obj_to_dict(aggr, args).items() + 
             dict(plants=[ProductionPlant(**dict(obj_to_dict(plant, args).items() +
                 dict(meters=[ProductionMeter(**dict(obj_to_dict(meter, args + ['uri']).items() +
-                    dict(curveProvider=curveProvider).items()))
+                    dict(curveProvider=curveProvider).items())) 
                 for meter in plant.meters if meter.enabled]).items()))
             for plant in aggr.plants if plant.enabled]).items()))
 
@@ -139,6 +141,7 @@ class GenerationkwhProductionAggregatorTesthelper(osv.osv):
 
 GenerationkwhProductionAggregatorTesthelper()
 
+
 class GenerationkwhProductionPlant(osv.osv):
 
     _name = 'generationkwh.production.plant'
@@ -171,6 +174,52 @@ class GenerationkwhProductionMeter(osv.osv):
         'enabled': lambda *a: False,
     }
 GenerationkwhProductionMeter()
+
+
+class ProductionNotifierProvider(ErpWrapper):
+    def __init__(self, erp, cursor, uid, pid, context=None):
+        self.pid = pid
+        super(ProductionNotifierProvider, self).__init__(erp, cursor, uid, context)
+
+    def push(self, meter_id, date, status, message):
+        notifier=self.erp.pool.get('generationkwh.production.notifier')
+        return notifier.create(self.cursor, self.uid, {
+            'meter_id': meter_id,
+            'date_pull': date,
+            'status': status,
+            'message': message
+            })
+
+class GenerationkwhProductionNotifier(osv.osv):
+    _name = 'generationkwh.production.notifier'
+    _rec_name = 'contract_id'
+
+    _columns = {
+        'meter_id': fields.many2one(
+            'generationkwh.production.meter',
+            'meter'
+        ),
+        'date_pull': fields.datetime('Last pull datetime'),
+        'status': fields.selection([
+            ('failed', 'Failed'),
+            ('done', 'Done')]),
+        'message': fields.char('Message', size=200)
+    }
+
+    _order = 'date_pull desc'
+GenerationkwhProductionNotifier()
+
+
+class GenerationkwhProductionNotifierTesthelper(osv.osv):
+    _name = 'generationkwh.production.notifier.testhelper'
+
+    def push(self, cursor, uid, meter_id, date, status, message, context=None):
+        from datetime import datetime
+
+        notifier = ProductionNotifierProvider(self, cursor, uid, context)
+        return notifier.push(meter_id, date, status, message) 
+
+GenerationkwhProductionNotifierTesthelper()
 
 
 class GenerationkwhProductionMeasurement(osv_mongodb.osv_mongodb):
