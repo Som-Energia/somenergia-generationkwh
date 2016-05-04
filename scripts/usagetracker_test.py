@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
 import datetime
-from genkwh_investments import clear, create
-
+from genkwh_investments import (
+    clear as investmentClear, 
+    create as investmentCreate,
+    )
 import unittest
 
 binsPerDay = 25
@@ -24,7 +26,8 @@ class UsageTracker_Test(unittest.TestCase):
             'rightspershare',
             'memberrightusage',
             ])
-        clear()
+        investmentClear()
+        self.c.GenerationkwhAssignment.dropAll()
         self.c.GenerationkwhRemainderTesthelper.clean()
 
     def test_available_kwh_withNoActiveShares(self):
@@ -34,20 +37,17 @@ class UsageTracker_Test(unittest.TestCase):
             0)
 
     def test_available_kwh_rightsAndInvestments(self):
-        create(stop="2015-06-30", waitingDays=0)
+        investmentCreate(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [3]*2*binsPerDay)
 
-#        self.c.GenerationkwhTesthelper.trace_rigths_compilation(
-#            self.member, '2015-08-01', '2015-09-01', '2.0A', 'P1')
-    
         self.assertEqual(
             self.c.GenerationkwhTesthelper.usagetracker_available_kwh(
                 self.member, '2015-08-01', '2015-09-01', '2.0A', 'P1'),
             3*2*24)
 
     def test_available_kwh_noRights(self):
-        create(stop="2015-06-30", waitingDays=0)
+        investmentCreate(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             20, '2015-08-01', [2]*2*binsPerDay)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
@@ -60,7 +60,7 @@ class UsageTracker_Test(unittest.TestCase):
 
 
     def test_available_kwh_rightsForOne(self):
-        create(stop="2015-06-30", waitingDays=0)
+        investmentCreate(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             1, '2015-08-01', [2]*2*binsPerDay)
 
@@ -69,8 +69,10 @@ class UsageTracker_Test(unittest.TestCase):
                 self.member, '2015-08-01', '2015-09-01', '2.0A', 'P1'),
             50*2*24)
 
+        # TODO: assert remainder has been added
+
     def test_use_kwh_exhaustingAvailable(self):
-        create(stop="2015-06-30", waitingDays=0)
+        investmentCreate(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [3]*2*binsPerDay)
 
@@ -88,7 +90,7 @@ class UsageTracker_Test(unittest.TestCase):
 
 
     def test_use_kwh_notExhaustingAvailable(self):
-        create(stop="2015-06-30", waitingDays=0)
+        investmentCreate(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [3]*2*binsPerDay)
 
@@ -105,7 +107,7 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
     def test_use_kwh_consumingOnConsumedDays(self):
-        create(stop="2015-06-30", waitingDays=0)
+        investmentCreate(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [3]*2*binsPerDay)
 
@@ -127,7 +129,7 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
     def test_refund_kwh(self):
-        create(stop="2015-06-30", waitingDays=0)
+        investmentCreate(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [3]*2*binsPerDay)
 
@@ -149,4 +151,43 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
 
- 
+
+
+    def test_dealer(self):
+        self.contract = 4
+        self.member2 = 469
+        investmentCreate(stop="2015-06-30", waitingDays=0)
+        self.c.GenerationkwhTesthelper.setup_rights_per_share(
+            25, '2015-08-01', [0,3,0,0,0])
+        self.c.GenerationkwhTesthelper.setup_rights_per_share(
+            5, '2015-08-01', [0,0,7,0,0])
+
+        self.c.GenerationkwhAssignment.create(
+            dict(contract_id=self.contract, member_id=self.member, priority=0))
+        self.c.GenerationkwhAssignment.create(
+            dict(contract_id=self.contract, member_id=self.member2, priority=0))
+    
+        self.c.GenerationkwhTesthelper.trace_rigths_compilation(
+            self.member2, '2015-08-01', '2015-09-01', '2.0A', 'P1')
+
+        self.assertEqual(
+            self.c.GenerationkwhTesthelper.dealer_use_kwh(
+                self.contract, '2015-08-01', '2015-09-01', '2.0A', 'P1', 10), [
+                dict(member_id=self.member, kwh=3),
+                dict(member_id=self.member2, kwh=7),
+            ])
+
+        self.assertEqual(
+            self.c.GenerationkwhTesthelper.usage(self.member, '2015-08-01', '2015-08-03'),
+            [0,3,0]+22*[0]
+            +25*[0]
+            +25*[0]
+            )
+
+        self.assertEqual(
+            self.c.GenerationkwhTesthelper.usage(self.member2, '2015-08-01', '2015-08-03'),
+            [0,0,7]+22*[0]
+            +25*[0]
+            +25*[0]
+            )
+

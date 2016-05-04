@@ -9,6 +9,7 @@ from mongodb_backend.mongodb2 import mdbpool
 from plantmeter.mongotimecurve import addDays
 
 from generationkwh.dealer import DummyDealer as Dealer # TODO: Point to the real one
+from generationkwh.dealer import Dealer
 from generationkwh.sharescurve import MemberSharesCurve
 from generationkwh.rightspershare import RightsPerShare
 from generationkwh.memberrightscurve import MemberRightsCurve
@@ -195,6 +196,22 @@ class GenerationkWhTestHelper(osv.osv):
             ))
         return result
         
+    def dealer_use_kwh(self, cursor, uid,
+            contract, start, stop, fare, period, kwh,
+            context=None):
+
+        GenerationkWhDealer = self.pool.get('generationkwh.dealer')
+        dealer = GenerationkWhDealer._createDealer(cursor, uid, context)
+        result = dealer.use_kwh(
+            contract,
+            localisodate(start),
+            localisodate(stop),
+            fare,
+            period,
+            kwh,
+            )
+        return result
+
 
 GenerationkWhTestHelper()
 
@@ -309,8 +326,8 @@ class GenerationkWhDealer(osv.osv):
     def _createDealer(self, cursor, uid, context):
 
         usageTracker = self._createTracker(cursor, uid, context)
-        # TODO: Feed the dealer with data sources
-        return Dealer(usageTracker)
+        assignments = AssignmentProvider(self, cursor, uid, context)
+        return Dealer(usageTracker, assignments)
 
 GenerationkWhDealer()
 
