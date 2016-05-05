@@ -41,23 +41,20 @@ class MemberRightsCurve(object):
     def _get_naive(self, member, start, end):
         assert type(start) == datetime.date
         assert type(end) == datetime.date
-        start = dateToLocal(start)
-        end = dateToLocal(end)
 
         nshares=1
         return (
             numpy.array(self._rightsPerShare.rightsPerShare(
-                nshares, start.date(), end.date())) *
-            numpy.array(self._activeShares.hourly(start, end, member))
+                nshares, start, end)) *
+            numpy.array(self._activeShares.hourly(
+                dateToLocal(start), dateToLocal(end), member))
             )
 
     def _get_eager(self, member, start, end):
         assert type(start) == datetime.date
         assert type(end) == datetime.date
-        start = dateToLocal(start)
-        end = dateToLocal(end)
 
-        shares = self._activeShares.hourly(start, end, member)
+        shares = self._activeShares.hourly(dateToLocal(start), dateToLocal(end), member)
         choiceset = list(sorted(set(shares)))
         remainders = set([
             nshares
@@ -67,9 +64,9 @@ class MemberRightsCurve(object):
         choices = [
             None
             if nshares not in choiceset else
-            self._rightsPerShare.rightsPerShare(nshares, start.date(), end.date())
+            self._rightsPerShare.rightsPerShare(nshares, start, end)
             if nshares in remainders else
-            self._rightsPerShare.rightsPerShare(1, start.date(), end.date()) * nshares
+            self._rightsPerShare.rightsPerShare(1, start, end) * nshares
             for nshares in xrange(max(choiceset)+1)
             ]
         self._remainders.init([
