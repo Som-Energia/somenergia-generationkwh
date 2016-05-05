@@ -81,7 +81,7 @@ class ProductionLoader(object):
         self.remainders.set([
                 [nshares, addDays(lastDateToCompute,1), newRemainder]])
         self.rightsPerShare.updateRightsPerShare(
-                nshares, lastDateToCompute, userRights)
+                nshares, lastDateToCompute.date(), userRights)
 
 
 

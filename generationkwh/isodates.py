@@ -1,4 +1,4 @@
-from plantmeter.mongotimecurve import toLocal
+from plantmeter.mongotimecurve import toLocal, asUtc
 import datetime
 
 def localisodate(string):
@@ -15,4 +15,9 @@ def naiveisodatetime(string):
 
 def localisodatetime(string):
     return string and toLocal(datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S"))
+
+
+def dateToLocal(date):
+    # TODO: optimize dateToLocal
+    return localisodate(str(date))
 

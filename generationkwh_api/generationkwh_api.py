@@ -15,7 +15,7 @@ from generationkwh.memberrightscurve import MemberRightsCurve
 from generationkwh.memberrightsusage import MemberRightsUsage
 from generationkwh.fareperiodcurve import FarePeriodCurve
 from generationkwh.usagetracker import UsageTracker
-from generationkwh.isodates import localisodate
+from generationkwh.isodates import localisodate, isodate
 from .assignment import AssignmentProvider
 from .remainder import RemainderProvider
 from .investment import InvestmentProvider
@@ -43,7 +43,7 @@ class GenerationkWhTestHelper(osv.osv):
             nshares, startDate, data,
             context=None):
         rightsPerShare = RightsPerShare(mdbpool.get_db())
-        rightsPerShare.updateRightsPerShare(nshares, localisodate(startDate), data)
+        rightsPerShare.updateRightsPerShare(nshares, isodate(startDate), data)
         remainders = RemainderProvider(self, cursor, uid, context)
         remainders.set([
             (nshares, addDays(localisodate(startDate), (len(data)+24)%25), 0), 
@@ -54,8 +54,8 @@ class GenerationkWhTestHelper(osv.osv):
             context=None):
         rights = RightsPerShare(mdbpool.get_db())
         return list(int(i) for i in rights.rightsPerShare(nshares,
-                localisodate(startDate),
-                localisodate(stopDate)))
+                isodate(startDate),
+                isodate(stopDate)))
 
     def clear_mongo_collections(self, cursor, uid, collections, context=None):
         for collection in collections:
@@ -100,8 +100,8 @@ class GenerationkWhTestHelper(osv.osv):
             localisodate(stop),
             member)):
             print 'rightsPerShare', nshares, rightsPerShare.rightsPerShare(nshares,
-                localisodate(start),
-                localisodate(stop),
+                isodate(start),
+                isodate(stop),
                 )
         print 'rights', generatedRights.rights_kwh(member,
             localisodate(start),

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from plantmeter.mongotimecurve import MongoTimeCurve
+import datetime
+from .isodates import dateToLocal
 
 class RightsPerShare(object):
     """
@@ -20,10 +22,13 @@ class RightsPerShare(object):
         """
         # TODO: No remainder for nshares? -> create 0Wh remainder and use 1 shares and multiply by n
 
+        assert type(start) == datetime.date
+        assert type(stop) == datetime.date
+
         return self.curve.get(
             filter=str(nshares),
-            start=start,
-            stop=stop,
+            start=dateToLocal(start),
+            stop=dateToLocal(stop),
             field='rights_kwh',
             )
 
@@ -34,8 +39,10 @@ class RightsPerShare(object):
             between start and stop dates both included.
         """
 
+        assert type(start) == datetime.date
+
         curve = self.curve.update(
-            start=start,
+            start=dateToLocal(start),
             filter=str(nshares),
             field='rights_kwh',
             data=data,

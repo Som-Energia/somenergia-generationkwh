@@ -15,11 +15,16 @@
 - Dealer.`use_kwh`: Retornar els consums tot i que siguin 0 per un member [Cesar?]
 - Rename `generationkwh_api` -> `som_generationkwh`
 - Rename `plantmeter_api` -> `som_plantmeter`
-- datetime review: start by AssignmentProvider.seek [David]
-    - Use dates instead local datetimes wherever we can
+- datetime review: Use dates instead local datetimes wherever we can
+    + RightsPerShare receives date (and uses datetime with mongotimecurve)
+    - MemberRightCurver receives date (and still sends local to ActiveShareCurve)
 - Assignment: update priority overwritting write?? (Low)
 - Assignment: log in soci observations
 - Investment: test activate and move it from erppeek to erp
+- Assignment: Script: add command
+- Assignment: Script: test expire command
+- Assignment: Script: id conversion
+
 
 ## Unscheduled TODO's
 

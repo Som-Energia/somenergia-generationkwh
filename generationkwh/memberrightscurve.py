@@ -40,7 +40,7 @@ class MemberRightsCurve(object):
             nshares=1
             return (
                 numpy.array(self._rightsPerShare.rightsPerShare(
-                    nshares, start, end)) *
+                    nshares, start.date(), end.date())) *
                 numpy.array(self._activeShares.hourly(start, end, member))
                 )
 
@@ -55,9 +55,9 @@ class MemberRightsCurve(object):
         choices = [
             None
             if nshares not in choiceset else
-            self._rightsPerShare.rightsPerShare(nshares, start, end)
+            self._rightsPerShare.rightsPerShare(nshares, start.date(), end.date())
             if nshares in remainders else
-            self._rightsPerShare.rightsPerShare(1, start, end) * nshares
+            self._rightsPerShare.rightsPerShare(1, start.date(), end.date()) * nshares
             for nshares in xrange(max(choiceset)+1)
             ]
         self._remainders.init([

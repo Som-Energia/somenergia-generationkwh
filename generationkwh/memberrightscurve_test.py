@@ -53,8 +53,8 @@ class MemberRightsCurve_Test(unittest.TestCase):
             remainders = remainders,
             )
         result = curve.rights_kwh(member,
-            start=isodate(start),
-            end=isodate(end),
+            start=localisodate(start),
+            end=localisodate(end),
             )
         self.assertEqual(list(result), expected)
 

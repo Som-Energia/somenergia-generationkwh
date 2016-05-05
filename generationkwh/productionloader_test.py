@@ -185,8 +185,8 @@ class ProductionLoaderTest(unittest.TestCase):
             plantshares=numpy.array(25*[1]),
             )
         result = rights.rightsPerShare(1,
-            localisodate('2015-08-16'),
-            localisodate('2015-08-16'))
+            isodate('2015-08-16'),
+            isodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[1]+14*[0])
         self.assertEqual(remainders.get(), [
@@ -206,8 +206,8 @@ class ProductionLoaderTest(unittest.TestCase):
             plantshares=numpy.array(25*[4]), # here
             )
         result = rights.rightsPerShare(1,
-            localisodate('2015-08-16'),
-            localisodate('2015-08-16'))
+            isodate('2015-08-16'),
+            isodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[5]+14*[0])
         self.assertEqual(remainders.get(), [
@@ -227,8 +227,8 @@ class ProductionLoaderTest(unittest.TestCase):
             plantshares=numpy.array(25*[1]),
             )
         result = rights.rightsPerShare(2,
-            localisodate('2015-08-16'),
-            localisodate('2015-08-16'))
+            isodate('2015-08-16'),
+            isodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[2]+14*[0])
         self.assertEqual(remainders.get(), [
@@ -248,8 +248,8 @@ class ProductionLoaderTest(unittest.TestCase):
             plantshares=numpy.array(100*[0]+25*[1]),
             )
         result = rights.rightsPerShare(1,
-            localisodate('2015-08-16'),
-            localisodate('2015-08-16'))
+            isodate('2015-08-16'),
+            isodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[1]+14*[0])
         self.assertEqual(remainders.get(), [
@@ -351,8 +351,8 @@ class ProductionLoaderTest(unittest.TestCase):
                 remainders=remainders)
         l.computeAvailableRights()
         result = rights.rightsPerShare(1,
-            localisodate('2015-08-16'),
-            localisodate('2015-08-16'))
+            isodate('2015-08-16'),
+            isodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[1]+14*[0])
         self.assertEqual(remainders.get(), [
@@ -376,8 +376,8 @@ class ProductionLoaderTest(unittest.TestCase):
                 remainders=remainders)
         l.computeAvailableRights()
         result = rights.rightsPerShare(1,
-            localisodate('2015-08-16'),
-            localisodate('2015-08-16'))
+            isodate('2015-08-16'),
+            isodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[5]+14*[0])
         self.assertEqual(remainders.get(), [
@@ -402,8 +402,8 @@ class ProductionLoaderTest(unittest.TestCase):
                 remainders=remainders)
         l.computeAvailableRights()
         result = rights.rightsPerShare(2,
-            localisodate('2015-08-16'),
-            localisodate('2015-08-16'))
+            isodate('2015-08-16'),
+            isodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[2]+14*[0])
         self.assertEqual(remainders.get(), [
@@ -428,8 +428,8 @@ class ProductionLoaderTest(unittest.TestCase):
                 remainders=remainders)
         l.computeAvailableRights()
         result = rights.rightsPerShare(1,
-            localisodate('2015-08-16'),
-            localisodate('2015-08-16'))
+            isodate('2015-08-16'),
+            isodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[1]+14*[0])
         self.assertEqual(remainders.get(), [

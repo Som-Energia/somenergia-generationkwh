@@ -4,7 +4,7 @@ from .rightspershare import RightsPerShare
 import unittest
 import pymongo
 import datetime
-from .isodates import localisodate
+from .isodates import isodate
 
 class RightsPerShare_Test(unittest.TestCase):
 
@@ -24,8 +24,8 @@ class RightsPerShare_Test(unittest.TestCase):
         provider = RightsPerShare(self.db)
         rightsPerShare = provider.rightsPerShare(
             nshares='1',
-            start=localisodate('2015-08-15'),
-            stop=localisodate('2015-08-15'),
+            start=isodate('2015-08-15'),
+            stop=isodate('2015-08-15'),
             )
         self.assertEqual(
             +25*[0],
@@ -36,13 +36,13 @@ class RightsPerShare_Test(unittest.TestCase):
         provider = RightsPerShare(self.db)
         provider.updateRightsPerShare(
             nshares='1',
-            start=localisodate('2015-08-15'),
+            start=isodate('2015-08-15'),
             data=range(1,25)+[0],
             )
         rightsPerShare = provider.rightsPerShare(
             nshares='1',
-            start=localisodate('2015-08-15'),
-            stop=localisodate('2015-08-15'),
+            start=isodate('2015-08-15'),
+            stop=isodate('2015-08-15'),
             )
         self.assertEqual(
             range(1,25)+[0],
