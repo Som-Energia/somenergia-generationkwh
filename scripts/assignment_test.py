@@ -31,7 +31,15 @@ class Assignment_Test(unittest.TestCase):
         ) = self.erp.GiscedataPolissa.search([], limit=3)
 
     def setupProvider(self,assignments=[]):
+        for contract, member, priority in assignments:
+            self.Assignment.create(dict(
+                contract_id = contract,
+                member_id = member,
+                priority = priority,
+                ))
+        return
         self.Assignment.add(assignments)
+        
 
 
     def assertAllAssignmentsEqual(self, expectation):
@@ -201,9 +209,7 @@ class Assignment_Test(unittest.TestCase):
         self.setupProvider([
             (self.contract, self.member,1),
             ])
-        self.Assignment.expire([
-            (self.contract, self.member),
-        ])
+        self.Assignment.expire(self.contract, self.member)
         self.assertAssignmentsExpiredEqual([
             (self.contract, self.member,1,str(datetime.date.today())),
             ])
@@ -213,9 +219,7 @@ class Assignment_Test(unittest.TestCase):
             (self.contract, self.member,1),
             (self.contract2, self.member,1),
             ])
-        self.Assignment.expire([
-            (self.contract, self.member),
-        ])
+        self.Assignment.expire(self.contract, self.member)
         self.assertAssignmentsExpiredEqual([
             (self.contract, self.member,1,str(datetime.date.today())),
             (self.contract2, self.member,1,False),
@@ -226,9 +230,7 @@ class Assignment_Test(unittest.TestCase):
             (self.contract, self.member,1),
             (self.contract, self.member,1),
             ])
-        self.Assignment.expire([
-            (self.contract, self.member),
-        ])
+        self.Assignment.expire(self.contract, self.member)
         self.assertAssignmentsExpiredEqual([
             (self.contract, self.member,1,str(datetime.date.today())),
             (self.contract, self.member,1,str(datetime.date.today())),
@@ -316,7 +318,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.setupAssignments([
             (self.contract, self.member, 1),
             ])
-        self.Assignment.expire([(self.contract, self.member)])
+        self.Assignment.expire(self.contract, self.member)
         self.assertAssignmentsSeekEqual(self.contract, [
             ])
 
@@ -360,7 +362,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.contract, self.member, 1),
             (self.contract2, self.member, 0),
             ])
-        self.Assignment.expire([(self.contract2, self.member)])
+        self.Assignment.expire(self.contract2, self.member)
         self.assertAssignmentsSeekEqual(self.contract, [
             (self.member, datetime.date.today()),
             ])

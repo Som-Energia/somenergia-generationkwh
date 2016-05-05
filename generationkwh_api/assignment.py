@@ -113,31 +113,25 @@ class GenerationkWhAssignment(osv.osv):
             ),
         )
 
-    def add(self, cr, uid, assignments, context=None):
-        self.expire(cr, uid, [(a,b) for a,b,c in assignments], context=context)
-        for contract_id, member_id, priority in assignments:
-            self.create(cr, uid, {
-                'contract_id': contract_id,
-                'member_id': member_id,
-                'priority': priority,
-            }, context=context)
+    def create(self, cr, uid, values, context=None):
+        self.expire(cr, uid, values['contract_id'], values['member_id'], context=context)
+        return super(GenerationkWhAssignment, self).create(cr, uid, values, context=context)
 
-    def expire(self, cr, uid, assignments, context=None):
-        for contract_id, member_id in assignments:
-            same_polissa_member = self.search(cr, uid, [
-                #'|', ('end_date', '<', str(datetime.date.today())),
-                    ('end_date','=',False),
-                ('contract_id', '=', contract_id),
-                ('member_id', '=', member_id),
-            ], context = context)
-            if same_polissa_member:
-                self.write(cr,uid,
-                    same_polissa_member,
-                    dict(
-                        end_date=str(datetime.date.today()),
-                    ),
-                    context=context,
-                )
+    def expire(self, cr, uid, contract_id, member_id, context=None):
+        same_polissa_member = self.search(cr, uid, [
+            #'|', ('end_date', '<', str(datetime.date.today())),
+                ('end_date','=',False),
+            ('contract_id', '=', contract_id),
+            ('member_id', '=', member_id),
+        ], context = context)
+        if same_polissa_member:
+            self.write(cr,uid,
+                same_polissa_member,
+                dict(
+                    end_date=str(datetime.date.today()),
+                ),
+                context=context,
+            )
 
     def createDefaultForMembers(self, cr, uid, member_ids, context=None):
         """ Creates default contract assignments for the given members.

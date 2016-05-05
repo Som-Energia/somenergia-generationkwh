@@ -31,8 +31,14 @@ def parseArgumments():
         help="clear investments objects",
         )
     for sub in expire,:
-        sub.add_argument('contract')
-        sub.add_argument('member')
+        sub.add_argument(
+            'contract',
+            type=int,
+            )
+        sub.add_argument(
+            'member',
+            type=int,
+            )
     for sub in default,:
         
         sub.add_argument(
@@ -129,7 +135,7 @@ def expire(
         member=None,
         contract=None,
         **_):
-    c.GenerationkwhAssignment.expire([(int(contract),int(member))])
+    c.GenerationkwhAssignment.expire(contract, member)
 
 def default(
         members=None,
