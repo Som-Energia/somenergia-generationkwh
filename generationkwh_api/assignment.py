@@ -4,7 +4,7 @@ from osv import osv, fields
 from .erpwrapper import ErpWrapper
 import datetime
 from yamlns import namespace as ns
-from generationkwh.isodates import localisodate
+from generationkwh.isodates import isodate
 
 # TODO: sort rights sources if many members assigned the same contract
 # TODO: Filter out inactive contracts
@@ -194,7 +194,10 @@ class GenerationkWhAssignment(osv.osv):
         # TODO Control inversion with AssignmentProvider.seek
         assignmentProvider = AssignmentProvider(self, cursor, uid, context)
         #Conversion of ns to dict in order to marshall to XML-RPC
-        return [dict(assign) for assign in assignmentProvider.seek(contract_id)]
+        return [dict(
+            member_id=assign.member_id,
+            last_usable_date=str(assign.last_usable_date),
+        ) for assign in assignmentProvider.seek(contract_id)]
 
 
 GenerationkWhAssignment()
@@ -212,7 +215,7 @@ class AssignmentProvider(ErpWrapper):
         return [
             ns(
                 member_id=member_id,
-                last_usable_date=localisodate(last_usable_date),
+                last_usable_date=isodate(last_usable_date),
             )
             for member_id, last_usable_date, _
             in self.cursor.fetchall()

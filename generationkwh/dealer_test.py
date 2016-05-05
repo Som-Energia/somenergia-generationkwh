@@ -3,7 +3,7 @@
 import unittest
 from .dealer import Dealer
 from yamlns import namespace as ns
-from .isodates import localisodate, isodate
+from .isodates import isodate
 
 class AssignmentsMockup(object):
     def __init__(self, assignments):
@@ -115,7 +115,7 @@ class Dealer_Test(unittest.TestCase):
         a = AssignmentsMockup([
             ns(
                 member_id='member1',
-                last_usable_date=localisodate('2015-10-01'),
+                last_usable_date=isodate('2015-10-01'),
             ),
             ])
 
@@ -146,7 +146,7 @@ class Dealer_Test(unittest.TestCase):
         a = AssignmentsMockup([
             ns(
                 member_id='member1',
-                last_usable_date=localisodate('2014-10-01'),
+                last_usable_date=isodate('2014-10-01'),
             ),
             ])
 
@@ -175,7 +175,7 @@ class Dealer_Test(unittest.TestCase):
         a = AssignmentsMockup([
             ns(
                 member_id='member1',
-                last_usable_date=localisodate('2013-10-01'),
+                last_usable_date=isodate('2013-10-01'),
             ),
             ])
 
@@ -202,11 +202,11 @@ class Dealer_Test(unittest.TestCase):
         a = AssignmentsMockup([
             ns(
                 member_id='member1',
-                last_usable_date=localisodate('2015-10-01'),
+                last_usable_date=isodate('2015-10-01'),
             ),
             ns(
                 member_id='member2',
-                last_usable_date=localisodate('2015-10-01'),
+                last_usable_date=isodate('2015-10-01'),
             ),
             ])
 
@@ -242,11 +242,11 @@ class Dealer_Test(unittest.TestCase):
         a = AssignmentsMockup([
             ns(
                 member_id='member1',
-                last_usable_date=localisodate('2013-10-01'),
+                last_usable_date=isodate('2013-10-01'),
             ),
             ns(
                 member_id='member2',
-                last_usable_date=localisodate('2015-10-01'),
+                last_usable_date=isodate('2015-10-01'),
             ),
             ])
 
@@ -276,7 +276,7 @@ class Dealer_Test(unittest.TestCase):
         a = AssignmentsMockup([
             ns(
                 member_id='member1',
-                last_usable_date=localisodate('2015-10-01'),
+                last_usable_date=isodate('2015-10-01'),
             ),
             ])
 

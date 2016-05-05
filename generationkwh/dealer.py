@@ -84,7 +84,7 @@ class Dealer(object):
         used = 0
         result = []
         for asig in assignments:
-            seek_end = min(end_date,asig.last_usable_date.date())
+            seek_end = min(end_date,asig.last_usable_date)
             if seek_end<seek_start: continue
             memberUse = self._tracker.use_kwh(
                     asig.member_id,

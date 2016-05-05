@@ -4,7 +4,7 @@ import unittest
 import datetime
 dbconfig = None
 from yamlns import namespace as ns
-from generationkwh.isodates import localisodate
+from generationkwh.isodates import isodate
 try:
     import dbconfig
     import erppeek
@@ -29,6 +29,7 @@ class Assignment_Test(unittest.TestCase):
             self.contract2,
             self.contract3,
         ) = self.erp.GiscedataPolissa.search([], limit=3)
+        self.today = str(datetime.date.today())
 
     def setupProvider(self,assignments=[]):
         for contract, member, priority in assignments:
@@ -151,7 +152,7 @@ class Assignment_Test(unittest.TestCase):
             (self.contract, self.member, 1),
             ])
         self.assertAllAssignmentsEqual([
-            (self.contract, self.member, 1, str(datetime.date.today())),
+            (self.contract, self.member, 1, self.today),
             (self.contract, self.member, 1, False),
             ])
     
@@ -161,7 +162,7 @@ class Assignment_Test(unittest.TestCase):
             (self.contract,self.member,2),
             ])
         self.assertAllAssignmentsEqual([
-            (self.contract, self.member, 1, str(datetime.date.today())),
+            (self.contract, self.member, 1, self.today),
             (self.contract,self.member,2, False),
             ])
 
@@ -211,7 +212,7 @@ class Assignment_Test(unittest.TestCase):
             ])
         self.Assignment.expire(self.contract, self.member)
         self.assertAssignmentsExpiredEqual([
-            (self.contract, self.member,1,str(datetime.date.today())),
+            (self.contract, self.member,1,self.today),
             ])
 
     def test_expire_one_member_two_polissa(self):
@@ -221,7 +222,7 @@ class Assignment_Test(unittest.TestCase):
             ])
         self.Assignment.expire(self.contract, self.member)
         self.assertAssignmentsExpiredEqual([
-            (self.contract, self.member,1,str(datetime.date.today())),
+            (self.contract, self.member,1,self.today),
             (self.contract2, self.member,1,False),
             ])
 
@@ -232,8 +233,8 @@ class Assignment_Test(unittest.TestCase):
             ])
         self.Assignment.expire(self.contract, self.member)
         self.assertAssignmentsExpiredEqual([
-            (self.contract, self.member,1,str(datetime.date.today())),
-            (self.contract, self.member,1,str(datetime.date.today())),
+            (self.contract, self.member,1,self.today),
+            (self.contract, self.member,1,self.today),
             ])
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
@@ -258,6 +259,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.contract2 = contract2.id
         self.contractLastInvoicedDate = contract.data_ultima_lectura
         self.contract2LastInvoicedDate = contract2.data_ultima_lectura
+        self.today = datetime.date.today()
 
         newContract, = self.erp.GiscedataPolissa.browse(
                 [('data_ultima_lectura','=',False),
@@ -293,7 +295,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             dict(
                 member_id=member_id,
                 # TODO: compare strings at the end
-                last_usable_date=localisodate(str(last_usable_date)),
+                last_usable_date=str(last_usable_date),
             )
             for member_id, last_usable_date in expectation
             ], result)
@@ -311,7 +313,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.contract, self.member, 1),
             ])
         self.assertAssignmentsSeekEqual(self.contract, [
-            (self.member, datetime.date.today()),
+            (self.member, self.today),
             ])
 
     def test_seek_expiredAssignment_notRetrieved(self):
@@ -335,8 +337,8 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.contract, self.member2, 0),
             ])
         self.assertAssignmentsSeekEqual(self.contract, [
-            (self.member, datetime.date.today()),
-            (self.member2, datetime.date.today()),
+            (self.member, self.today),
+            (self.member2, self.today),
             ])
 
     def test_seek_competitorWithoutInvoices_takesActivationDate(self):
@@ -364,7 +366,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             ])
         self.Assignment.expire(self.contract2, self.member)
         self.assertAssignmentsSeekEqual(self.contract, [
-            (self.member, datetime.date.today()),
+            (self.member, self.today),
             ])
 
     def test_seek_competitorWithEqualOrLowerPriority_ignored(self):
@@ -374,7 +376,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.newContract, self.member, 2), # lower (higher number)
             ])
         self.assertAssignmentsSeekEqual(self.contract, [
-            (self.member, datetime.date.today()),
+            (self.member, self.today),
             ])
 
     def test_seek_manyCompetitors_earlierLastInvoicedPrevails(self):
