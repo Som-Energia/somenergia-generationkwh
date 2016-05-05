@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from generationkwh.usagetracker import UsageTracker
+from .isodates import localisodate
 import unittest
 
 
@@ -30,6 +31,7 @@ unittest.TestCase.__str__ = unittest.TestCase.id
 class UsageTracker_Test(unittest.TestCase):
 
     def setupUsageTracker(self, rights, usage, periodMask):
+        self.today = localisodate('2015-01-02')
         return UsageTracker(
             rights=CurveProvider_MockUp(rights),
             usage=CurveProvider_MockUp(usage),
@@ -42,7 +44,7 @@ class UsageTracker_Test(unittest.TestCase):
             usage=[0,0],
             periodMask=[1,1],
             )
-        kwh = t.available_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1')
+        kwh = t.available_kwh('soci', self.today, self.today, '2.0A', 'P1')
         self.assertEqual(kwh, 0)
 
     def test_available_singleBinProduction(self):
@@ -52,7 +54,7 @@ class UsageTracker_Test(unittest.TestCase):
             periodMask=[1,1],
             )
 
-        kwh = t.available_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1')
+        kwh = t.available_kwh('soci', self.today, self.today, '2.0A', 'P1')
         self.assertEqual(kwh, 2)
 
     def test_available_manyBinsProduction_getAdded(self):
@@ -62,7 +64,7 @@ class UsageTracker_Test(unittest.TestCase):
             periodMask=[1,1],
             )
 
-        kwh = t.available_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1')
+        kwh = t.available_kwh('soci', self.today, self.today, '2.0A', 'P1')
         self.assertEqual(kwh, 5)
 
 
@@ -73,7 +75,7 @@ class UsageTracker_Test(unittest.TestCase):
             periodMask=[0,1],
             )
 
-        kwh = t.available_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1')
+        kwh = t.available_kwh('soci', self.today, self.today, '2.0A', 'P1')
         self.assertEqual(kwh, 3)
 
     def test_available_manyBinsProduction_used(self):
@@ -83,7 +85,7 @@ class UsageTracker_Test(unittest.TestCase):
             periodMask=[1,1],
             )
 
-        kwh = t.available_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1')
+        kwh = t.available_kwh('soci', self.today, self.today, '2.0A', 'P1')
         self.assertEqual(kwh, 4)
 
     def test_available_manyBinsProduction_usedMasked(self):
@@ -93,7 +95,7 @@ class UsageTracker_Test(unittest.TestCase):
             periodMask=[0,1],
             )
 
-        kwh = t.available_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1')
+        kwh = t.available_kwh('soci', self.today, self.today, '2.0A', 'P1')
         self.assertEqual(kwh, 2)
 
     def test_use_halfBin(self):
@@ -103,9 +105,9 @@ class UsageTracker_Test(unittest.TestCase):
             periodMask=[1,1],
             )
 
-        real = t.use_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1', 4)
+        real = t.use_kwh('soci', self.today, self.today, '2.0A', 'P1', 4)
         self.assertEqual(
-            [4,0], t.usage('soci', '2015-01-02', '2015-01-02'))
+            [4,0], t.usage('soci', self.today, self.today))
 
     def test_use_fullBin(self):
         t = self.setupUsageTracker(
@@ -114,9 +116,9 @@ class UsageTracker_Test(unittest.TestCase):
             periodMask=[1,1],
             )
 
-        real = t.use_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1', 5)
+        real = t.use_kwh('soci', self.today, self.today, '2.0A', 'P1', 5)
         self.assertEqual(
-            [5,0], t.usage('soci', '2015-01-02', '2015-01-02'))
+            [5,0], t.usage('soci', self.today, self.today))
         self.assertEqual(5, real)
 
     def test_use_pastBin(self):
@@ -126,9 +128,9 @@ class UsageTracker_Test(unittest.TestCase):
             periodMask=[1,1],
             )
 
-        real = t.use_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1', 6)
+        real = t.use_kwh('soci', self.today, self.today, '2.0A', 'P1', 6)
         self.assertEqual(
-            [5,1], t.usage('soci', '2015-01-02', '2015-01-02'))
+            [5,1], t.usage('soci', self.today, self.today))
         self.assertEqual(6, real)
 
     def test_use_beyondAvailable(self):
@@ -138,9 +140,9 @@ class UsageTracker_Test(unittest.TestCase):
             periodMask=[1,1],
             )
 
-        real = t.use_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1', 9)
+        real = t.use_kwh('soci', self.today, self.today, '2.0A', 'P1', 9)
         self.assertEqual(
-             [5,3], t.usage('soci', '2015-01-02', '2015-01-02'))
+             [5,3], t.usage('soci', self.today, self.today))
         self.assertEqual(8, real)
 
     def test_use_previouslyUsed(self):
@@ -150,9 +152,9 @@ class UsageTracker_Test(unittest.TestCase):
             periodMask=[1,1],
             )
 
-        real = t.use_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1', 2)
+        real = t.use_kwh('soci', self.today, self.today, '2.0A', 'P1', 2)
         self.assertEqual(
-             [3,0], t.usage('soci', '2015-01-02', '2015-01-02'))
+             [3,0], t.usage('soci', self.today, self.today))
         self.assertEqual(2, real)
 
     def test_use_previouslyUsed(self):
@@ -162,9 +164,9 @@ class UsageTracker_Test(unittest.TestCase):
             periodMask=[0,1],
             )
 
-        real = t.use_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1', 2)
+        real = t.use_kwh('soci', self.today, self.today, '2.0A', 'P1', 2)
         self.assertEqual(
-             [1,2], t.usage('soci', '2015-01-02', '2015-01-02'))
+             [1,2], t.usage('soci', self.today, self.today))
         self.assertEqual(2, real)
 
     def test_refund_singleBin(self):
@@ -174,9 +176,9 @@ class UsageTracker_Test(unittest.TestCase):
             periodMask=[1,1],
             )
 
-        real = t.refund_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1', 2)
+        real = t.refund_kwh('soci', self.today, self.today, '2.0A', 'P1', 2)
         self.assertEqual(
-             [1,0], t.usage('soci', '2015-01-02', '2015-01-02'))
+             [1,0], t.usage('soci', self.today, self.today))
         self.assertEqual(2, real)
 
     def test_refund_severalBins_refundsBackward(self):
@@ -186,9 +188,9 @@ class UsageTracker_Test(unittest.TestCase):
             periodMask=[1,1],
             )
 
-        real = t.refund_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1', 3)
+        real = t.refund_kwh('soci', self.today, self.today, '2.0A', 'P1', 3)
         self.assertEqual(
-             [1,0], t.usage('soci', '2015-01-02', '2015-01-02'))
+             [1,0], t.usage('soci', self.today, self.today))
         self.assertEqual(3, real)
 
     def test_refund_beyondUsed(self):
@@ -198,9 +200,9 @@ class UsageTracker_Test(unittest.TestCase):
             periodMask=[1,1],
             )
 
-        real = t.refund_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1', 5)
+        real = t.refund_kwh('soci', self.today, self.today, '2.0A', 'P1', 5)
         self.assertEqual(
-             [0,0], t.usage('soci', '2015-01-02', '2015-01-02'))
+             [0,0], t.usage('soci', self.today, self.today))
         self.assertEqual(4, real)
 
     def test_refund_masked(self):
@@ -210,9 +212,9 @@ class UsageTracker_Test(unittest.TestCase):
             periodMask=[0,1],
             )
 
-        real = t.refund_kwh('soci', '2015-01-02', '2015-01-02', '2.0A', 'P1', 2)
+        real = t.refund_kwh('soci', self.today, self.today, '2.0A', 'P1', 2)
         self.assertEqual(
-             [2,0], t.usage('soci', '2015-01-02', '2015-01-02'))
+             [2,0], t.usage('soci', self.today, self.today))
         self.assertEqual(2, real)
 
 

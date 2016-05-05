@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import numpy
+from .isodates import dateToLocal
+import datetime
 
 class MemberRightsCurve(object):
     """
@@ -37,14 +39,24 @@ class MemberRightsCurve(object):
         self._remainders = remainders
 
     def _get_naive(self, member, start, end):
-            nshares=1
-            return (
-                numpy.array(self._rightsPerShare.rightsPerShare(
-                    nshares, start.date(), end.date())) *
-                numpy.array(self._activeShares.hourly(start, end, member))
-                )
+        assert type(start) == datetime.date
+        assert type(end) == datetime.date
+        start = dateToLocal(start)
+        end = dateToLocal(end)
+
+        nshares=1
+        return (
+            numpy.array(self._rightsPerShare.rightsPerShare(
+                nshares, start.date(), end.date())) *
+            numpy.array(self._activeShares.hourly(start, end, member))
+            )
 
     def _get_eager(self, member, start, end):
+        assert type(start) == datetime.date
+        assert type(end) == datetime.date
+        start = dateToLocal(start)
+        end = dateToLocal(end)
+
         shares = self._activeShares.hourly(start, end, member)
         choiceset = list(sorted(set(shares)))
         remainders = set([
