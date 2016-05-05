@@ -15,7 +15,7 @@ import pytz
 + last meassure
 + first meassure
 + remove urlparse dependency on backends
-- Properly detect summer daylight change
++ Properly detect summer daylight change
 - lastFullDate: proper implementation
 
 """
