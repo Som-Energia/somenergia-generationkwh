@@ -2,16 +2,24 @@
 
 ## Inmediate TODO's
 
-* DealerAPI: Convert `soci_id` from and to `partner_id` [David]
++ DealerAPI: Convert `soci_id` from and to `partner_id` [David]
+- Dealer: `refund_kwh` test
+- DealerAPI: `refund_kwh`
+- Assignment.isActive(contract) returns true if contract has any assignment right now [Cesar]
 - Dealer.isActive(contract) returns true if contract has any assignment right now [Cesar]
+- DealerAPI.isActive(contract) returns true if contract has any assignment right now [Cesar]
 - Investment: `active` field to hide failed payments (the original one and the refund) [Agusti]
 - Investments: Wizard to disable them in batch from tree [Agusti]
 - Investments: Wizard to disable them from form [Agusti]
-- Assignment: rewrite create, call expire, then super, deprecate add
-+ FarePeriodCurve: Fares dictionary should be at libfacturacioatr
-+ FarePeriodCurve: Include all fares !!!!!!!
+- Investments: Evaluate implications of active flag
+- Dealer.`use_kwh`: Retornar els consums tot i que siguin 0 per un member [Cesar?]
 - Rename `generationkwh_api` -> `som_generationkwh`
 - Rename `plantmeter_api` -> `som_plantmeter`
+- datetime review: start by AssignmentProvider.seek [David]
+    - Use dates instead local datetimes wherever we can
+- Assignment: update priority overwritting write?? (Low)
+- Assignment: log in soci observations
+- Investment: test activate and move it from erppeek to erp
 
 ## Unscheduled TODO's
 
@@ -20,12 +28,9 @@
 - Investment: Janitoring: mode lines without partner
 - Investment: Janitoring: mode lines without dates
 - Investment: negative move line: activation date should be the same or inmediate?
-- Investment: test activate and move it from erppeek to erp
 - Investment: constant for the account root for generationkwh accounts
 - Investment: constant for the number of digits for the soci code in accounts
     - Can be found at `ir_secuence.code="socis"`
-- Contrast API usage from invoice with actual API
-- Use dates instead local datetimes wherever we can
 
 - Reminder Migration: a reminder for 1-shares curve
 - Reminder Migration: a reminder for known to be used n-shares (optional)
@@ -36,8 +41,8 @@
 - Assignment: Change priority expires assigments and creates new
 - Assignment: Send an activation mail explaining default assignment
 
-- FarePeriodCurve: Use numpy arrays
-- FarePeriodCurve: Date parameter should be dates not strings
++ FarePeriodCurve: Use numpy arrays
++ FarePeriodCurve: Date parameter should be dates not strings
 
 - BUG: Mongodb erp integration: reconnections do not refresh connection attr
 - Review dates management across interfaces
@@ -58,6 +63,10 @@
 
 ## DONE
 
++ Contrast API usage from invoice with actual API
++ Assignment: rewrite create, call expire, then super, deprecate add
++ FarePeriodCurve: Fares dictionary should be at libfacturacioatr
++ FarePeriodCurve: Include all fares !!!!!!!
 + Verify invoicing refund should not depend on isActive: if it has genkwh lines, refund should be ok
 + Assignment: Filter out inactive contracts and others (ask Pere)
 + Dealer: `use_kwh`
