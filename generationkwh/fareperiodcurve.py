@@ -25,11 +25,8 @@ class FarePeriodCurve(object):
         import libfacturacioatr
         begin = begin_date
         end = end_date
-        fares = {
-            '2.0A': libfacturacioatr.tarifes.Tarifa20A,
-            '3.0A': libfacturacioatr.tarifes.Tarifa30A,
-        }
-        t = fares[fare]({},{},
+        Tarifa = libfacturacioatr.tarifes.Tarifa.get_class_by_code(fare)
+        t = Tarifa({},{},
             '1970-01-01',
             '1970-01-01',
             data_inici_periode='1970-01-01',

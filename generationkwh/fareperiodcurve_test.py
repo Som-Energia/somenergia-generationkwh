@@ -154,4 +154,30 @@ class FarePeriodCurve_Test(unittest.TestCase):
             + 1 * [ [0]*25 ]
             )
 
+    def test_get_class_by_code(self):
+        import libfacturacioatr.tarifes as tarifes
+        for code, clss in [
+            ('2.0A', tarifes.Tarifa20A),
+            ('3.0A', tarifes.Tarifa30A),
+            ('2.0DHA', tarifes.Tarifa20DHA),
+            ]:
+            self.assertEqual(
+                tarifes.Tarifa.get_class_by_code(code), clss)
+
+        with self.assertRaises(KeyError):
+            tarifes.Tarifa.get_class_by_code("Bad")
+
+    def test_get_class_by_code_fromPool(self):
+        import libfacturacioatr.pool.tarifes as tarifespool
+        for code, clss in [
+            ('2.0A', tarifespool.Tarifa20APool),
+            ('3.0A', tarifespool.Tarifa30APool),
+            ('2.0DHA', tarifespool.Tarifa20DHAPool),
+            ]:
+            self.assertEqual(
+                tarifespool.TarifaPool.get_class_by_code(code), clss)
+
+        with self.assertRaises(KeyError):
+            tarifespool.TarifaPool.get_class_by_code("Bad")
+
 # vim: ts=4 sw=4 et
