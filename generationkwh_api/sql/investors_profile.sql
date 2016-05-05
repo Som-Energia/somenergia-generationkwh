@@ -1,10 +1,7 @@
--- Sumarizes how many contracts investors have related
--- as payer, not payer but owner or not payer nor owner but member.
--- TODO: Do not use payment lines
-
 SELECT
     soci.id,
     partner_id,
+    MAX(CEIL((0-inversion)/100)) as acciones,
     COUNT(cups.id) AS ncontractes,
     SUM(CASE
         WHEN pol.pagador=soci.partner_id
@@ -32,6 +29,7 @@ SELECT
     SUM(cups.conany_kwh) AS consumannual,
     MAX(cups.conany_kwh) AS maxconsumannual,
     STRING_AGG(pol.id::text,',') AS polizas,
+    string_agg(tar.name,',') AS tarifas,
     TRUE
 FROM somenergia_soci AS soci
 LEFT JOIN giscedata_polissa AS pol ON
@@ -43,6 +41,8 @@ LEFT JOIN giscedata_polissa AS pol ON
     pol.active AND 
     pol.state = 'activa' AND
     TRUE
+LEFT JOIN giscedata_polissa_tarifa AS tar ON
+    tar.id = pol.tarifa
 LEFT JOIN giscedata_cups_ps AS cups ON
     cups.id = pol.cups
 INNER JOIN (
@@ -60,6 +60,3 @@ GROUP BY
     soci.id,
     partner_id,
     TRUE
-
-
-
