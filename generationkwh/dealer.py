@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 
 from dateutil.relativedelta import relativedelta
+import datetime
 
 class DummyDealer(object):
 
@@ -76,16 +77,18 @@ class Dealer(object):
             Returns a list of dictionaries each with member_id and kwh
             effectively allocated.
         """
+        assert type(start_date) == datetime.date
+        assert type(end_date) == datetime.date
         seek_start = start_date + relativedelta(years=-1)
         assignments = self._assignments.seek(contract_id)
         used = 0
         result = []
         for asig in assignments:
-            seek_end = min(end_date.date(),asig.last_usable_date.date())
-            if seek_end<seek_start.date(): continue
+            seek_end = min(end_date,asig.last_usable_date.date())
+            if seek_end<seek_start: continue
             memberUse = self._tracker.use_kwh(
                     asig.member_id,
-                    seek_start.date(),
+                    seek_start,
                     seek_end,
                     fare, period, kwh - used)
             result.append(dict(member_id=asig.member_id, kwh=int(memberUse)))
@@ -99,9 +102,11 @@ class Dealer(object):
             for the contract, date interval, fare and period and
             returns the kwh efectively refunded.
         """
+        assert type(start_date) == datetime.date
+        assert type(end_date) == datetime.date
         seek_start = start_date + relativedelta(years=-1)
         return self._tracker.refund_kwh(member_id,
-            seek_start.date(), end_date.date(),
+            seek_start, end_date,
             fare, period, kwh)
 
 

@@ -25,6 +25,7 @@
     - MemberRights usage uses dates
     - UseTracker uses dates
     - Remainders uses dates
+    - Dealer uses dates
 - Assignment: update priority overwritting write?? (Low)
 - Assignment: log in soci observations
 - Investment: test activate and move it from erppeek to erp

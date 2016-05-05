@@ -180,8 +180,8 @@ class GenerationkWhTestHelper(osv.osv):
         dealer = GenerationkWhDealer._createDealer(cursor, uid, context)
         result = dealer.use_kwh(
             contract,
-            localisodate(start),
-            localisodate(stop),
+            isodate(start),
+            isodate(stop),
             fare,
             period,
             kwh,
@@ -264,7 +264,7 @@ class GenerationkWhDealer(osv.osv):
 
         dealer = self._createDealer(cursor, uid, context)
         res = dealer.use_kwh(
-            contract_id, localisodate(start_date), localisodate(end_date), fare, period, kwh)
+            contract_id, isodate(start_date), isodate(end_date), fare, period, kwh)
 
         socis = [ line['member_id'] for line in res ]
         members2partners = self.get_partners_by_members(cursor, uid, socis, context=context)
@@ -323,7 +323,7 @@ class GenerationkWhDealer(osv.osv):
 
         dealer = self._createDealer(cursor, uid, context)
         res = dealer.refund_kwh(
-            contract_id, localisodate(start_date), localisodate(end_date), fare, period, kwh, partner_id)
+            contract_id, isodate(start_date), localisodate(end_date), fare, period, kwh, partner_id)
         return res
 
     def _createTracker(self, cursor, uid, context):

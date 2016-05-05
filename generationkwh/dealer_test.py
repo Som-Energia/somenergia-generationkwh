@@ -36,7 +36,7 @@ class UsageTrackerMockup(object):
         return self._results.pop(0)
 
 
-class Dealer_Integration_Test(unittest.TestCase):
+class Dealer_Test(unittest.TestCase):
 
     def test_trackerMockup_withNoCalls(self):
 
@@ -99,8 +99,8 @@ class Dealer_Integration_Test(unittest.TestCase):
         s = Dealer(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
-            start_date = localisodate('2015-08-01'),
-            end_date = localisodate('2015-09-01'),
+            start_date = isodate('2015-08-01'),
+            end_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
             kwh = 100,
@@ -122,8 +122,8 @@ class Dealer_Integration_Test(unittest.TestCase):
         s = Dealer(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
-            start_date = localisodate('2015-08-01'),
-            end_date = localisodate('2015-09-01'),
+            start_date = isodate('2015-08-01'),
+            end_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
             kwh = 100,
@@ -153,8 +153,8 @@ class Dealer_Integration_Test(unittest.TestCase):
         s = Dealer(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
-            start_date = localisodate('2015-08-01'),
-            end_date = localisodate('2015-09-01'),
+            start_date = isodate('2015-08-01'),
+            end_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
             kwh = 100,
@@ -182,8 +182,8 @@ class Dealer_Integration_Test(unittest.TestCase):
         s = Dealer(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
-            start_date = localisodate('2015-08-01'),
-            end_date = localisodate('2015-09-01'),
+            start_date = isodate('2015-08-01'),
+            end_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
             kwh = 100,
@@ -213,8 +213,8 @@ class Dealer_Integration_Test(unittest.TestCase):
         s = Dealer(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
-            start_date = localisodate('2015-08-01'),
-            end_date = localisodate('2015-09-01'),
+            start_date = isodate('2015-08-01'),
+            end_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
             kwh = 100,
@@ -253,8 +253,8 @@ class Dealer_Integration_Test(unittest.TestCase):
         s = Dealer(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
-            start_date = localisodate('2015-08-01'),
-            end_date = localisodate('2015-09-01'),
+            start_date = isodate('2015-08-01'),
+            end_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
             kwh = 100,
@@ -283,8 +283,8 @@ class Dealer_Integration_Test(unittest.TestCase):
         s = Dealer(usageTracker=t, assignmentProvider=a)
         result = s.refund_kwh(
             contract_id = 1,
-            start_date = localisodate('2015-08-01'),
-            end_date = localisodate('2015-09-01'),
+            start_date = isodate('2015-08-01'),
+            end_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
             kwh = 100,
@@ -302,12 +302,6 @@ class Dealer_Integration_Test(unittest.TestCase):
         
         
         
-        
-"""
-- TODO: Think: intervalo de refund vs intervalo de use cuando en use tenemos limites por contratos mas prioritarios
-
-"""        
-
 
 
 
