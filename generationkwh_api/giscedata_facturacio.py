@@ -87,8 +87,8 @@ class GiscedataFacturacioFactura(osv.osv):
                           'tarifa_acces_id']
         refund_ids = []
         for inv_vals in self.read(cursor, uid, ids, fields_to_read, context):
+            inv_id = inv_vals['id']
             if inv_vals['is_gkwh']:
-                inv_id = inv_vals['id']
                 # refund gkwh rights
                 for glo_id in inv_vals['gkwh_linia_ids']:
                     gkwh_lineowner = gkwh_lineowner_obj.browse(
@@ -123,18 +123,20 @@ class GiscedataFacturacioFactura(osv.osv):
             refund_invoice_lines = self.get_gkwh_lines(
                 cursor, uid, refund_id, context=context
             )
-            ctx = context.copy()
-            ctx.update({'gkwh_manage_rights': False})
-            fact_line_obj.unlink(
-                cursor, uid, refund_invoice_lines, context=ctx
-            )
+            if refund_invoice_lines:
+                ctx = context.copy()
+                ctx.update({'gkwh_manage_rights': False})
+                fact_line_obj.unlink(
+                    cursor, uid, refund_invoice_lines, context=ctx
+                )
             # drop incorrect owner lines
             bad_owner_ids = gkwh_lineowner_obj.search(
                 cursor, uid, [('factura_id', '=', refund_id)], context=context
             )
-            gkwh_lineowner_obj.unlink(
-                cursor, uid, bad_owner_ids, context=context
-            )
+            if bad_owner_ids:
+                gkwh_lineowner_obj.unlink(
+                    cursor, uid, bad_owner_ids, context=context
+                )
 
             # recreates lines with original invoice rights
             original_invoice_lines_ids = self.get_gkwh_lines(
