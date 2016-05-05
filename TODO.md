@@ -2,20 +2,19 @@
 
 ## Inmediate TODO's
 
-- DealerAPI: Convert `soci_id` from and to `partner_id`
+* DealerAPI: Convert `soci_id` from and to `partner_id` [David]
 - Dealer.isActive(contract) returns true if contract has any assignment right now [Cesar]
-- Investment: `active` field to hide failed payments (the original one and the refund)
-- Investments: Wizard to disable them in batch from tree
-- Investments: Wizard to disable them from form
-- Assignment: rewrite create
-- FarePeriodCurve: Fares dictionary should be at libfacturacioatr
-- FarePeriodCurve: Include all fares !!!!!!!
-
+- Investment: `active` field to hide failed payments (the original one and the refund) [Agusti]
+- Investments: Wizard to disable them in batch from tree [Agusti]
+- Investments: Wizard to disable them from form [Agusti]
+- Assignment: rewrite create, call expire, then super, deprecate add
++ FarePeriodCurve: Fares dictionary should be at libfacturacioatr
++ FarePeriodCurve: Include all fares !!!!!!!
+- Rename `generationkwh_api` -> `som_generationkwh`
+- Rename `plantmeter_api` -> `som_plantmeter`
 
 ## Unscheduled TODO's
 
-- Rename `generationkwh_api` -> `som_generationkwh`
-- Rename `plantmeter_api` -> `som_plantmeter`
 - ProductionToRightsPerShare naive: Protect againts divby0 when total active actions is zero
 - Investment: ondelete -> member
 - Investment: Janitoring: mode lines without partner
@@ -34,10 +33,8 @@
 - Assignment: ondelete -> polissa
 - Assignment: ondelete -> member
 - Make assignation test resilent to changes on contract annual use
-+ Assignment: Edit test cases: expire assignments
-- Assignment: Edit test cases: change priority
-- Assignment: Edit test cases: add rule
-- Assignment: Send an activation mail explaining the result
+- Assignment: Change priority expires assigments and creates new
+- Assignment: Send an activation mail explaining default assignment
 
 - FarePeriodCurve: Use numpy arrays
 - FarePeriodCurve: Date parameter should be dates not strings
