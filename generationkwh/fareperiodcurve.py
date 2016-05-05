@@ -22,6 +22,8 @@ class FarePeriodCurve(object):
         import libfacturacioatr
         begin = begin_date
         end = end_date
+        assert type(begin) == datetime.date
+        assert type(end) == datetime.date
         Tarifa = libfacturacioatr.tarifes.Tarifa.get_class_by_code(fare)
         t = Tarifa({},{},
             '1970-01-01',

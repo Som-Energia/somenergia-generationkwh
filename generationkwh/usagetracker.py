@@ -11,7 +11,7 @@ class UsageTracker(object):
 
     def available_kwh(self, member, start, end, fare, period):
         rights = self._rights.rights_kwh(member, start.date(), end.date())
-        periodMask = self._periodMask.periodMask(fare, period, start, end)
+        periodMask = self._periodMask.periodMask(fare, period, start.date(), end.date())
         usage = self._usage.usage(member, start, end)
         return int(sum(
             p-u if m else 0
@@ -21,7 +21,7 @@ class UsageTracker(object):
 
     def use_kwh(self, member, start, end, fare, period, kwh):
         rights = self._rights.rights_kwh(member, start.date(), end.date())
-        periodMask = self._periodMask.periodMask(fare, period, start, end)
+        periodMask = self._periodMask.periodMask(fare, period, start.date(), end.date())
         usage = self._usage.usage(member, start, end)
 
         allocated = 0
@@ -36,7 +36,7 @@ class UsageTracker(object):
 
     def refund_kwh(self, member, start, end, fare, period, kwh):
         rights = self._rights.rights_kwh(member, start.date(), end.date())
-        periodMask = self._periodMask.periodMask(fare, period, start, end)
+        periodMask = self._periodMask.periodMask(fare, period, start.date(), end.date())
         usage = self._usage.usage(member, start, end)
 
         deallocated = 0

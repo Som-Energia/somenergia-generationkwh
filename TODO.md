@@ -21,7 +21,7 @@
     + MemberShareCurve uses date
     + InvestmentProvider: uses date
     + genkwh-investment list sends dates as strings instead of local
-    - FarePeriod uses dates
+    + FarePeriod uses dates
     - MemberRights usage uses dates
     - UseTracker uses dates
 - Assignment: update priority overwritting write?? (Low)
