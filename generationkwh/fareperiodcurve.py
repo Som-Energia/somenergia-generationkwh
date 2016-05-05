@@ -2,10 +2,7 @@
 
 """
 TODO:
-- Fares dictionary should be at libfacturacioatr
-- Include all fares
 - Use numpy arrays
-- Where to get holidays?
 - Date parameter should be dates not strings
 """
 
@@ -21,7 +18,7 @@ class FarePeriodCurve(object):
     def __init__(self, holidays):
         self.holidays = holidays
 
-    def mask(self, begin_date, end_date, fare, period):
+    def _mask(self, begin_date, end_date, fare, period):
         import libfacturacioatr
         begin = begin_date
         end = end_date
@@ -44,7 +41,8 @@ class FarePeriodCurve(object):
         return allDays[begin.day-1:] [:(end-begin).days+1]
 
     def periodMask(self, fare, period, begin_date, end_date):
-        return numpy.array(sum(self.mask(begin_date, end_date, fare, period),[]))
+        return numpy.array(sum(
+            self._mask(begin_date, end_date, fare, period),[]))
 
 
 # vim: ts=4 sw=4 et
