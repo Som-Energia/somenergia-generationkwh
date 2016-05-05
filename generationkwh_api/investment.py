@@ -59,8 +59,8 @@ class InvestmentProvider(ErpWrapper):
         return [
             ns(
                 member=member,
-                activationStart=start,
-                activationEnd=end,
+                activationStart=start and start.date(),
+                activationEnd=end and end.date(),
                 shares=shares,
             )
             for member, start, end, shares

@@ -14,6 +14,8 @@ class MemberSharesCurve(object):
         self._provider = investments
 
     def atDay(self, day, member=None):
+        assert type(day) == datetime.date
+
         return sum(
             investment.shares
             for investment in self._provider.shareContracts()
@@ -23,6 +25,9 @@ class MemberSharesCurve(object):
         )
 
     def hourly(self, start, end, member=None):
+        assert type(start) == datetime.date
+        assert type(end) == datetime.date
+
         if end<start:
             return numpy.array([], dtype=int)
         hoursADay=25

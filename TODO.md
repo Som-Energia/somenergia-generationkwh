@@ -17,7 +17,9 @@
 - Rename `plantmeter_api` -> `som_plantmeter`
 - datetime review: Use dates instead local datetimes wherever we can
     + RightsPerShare receives date (and uses datetime with mongotimecurve)
-    - MemberRightCurver receives date (and still sends local to ActiveShareCurve)
+    + MemberRightCurver receives date (and still sends local to ActiveShareCurve)
+    + MemberShareCurve uses date
+    + InvestmentProvider: uses date
 - Assignment: update priority overwritting write?? (Low)
 - Assignment: log in soci observations
 - Investment: test activate and move it from erppeek to erp
@@ -25,6 +27,7 @@
 - Assignment: Script: test expire command
 - Assignment: Script: id conversion
 
+- genkwh-investment list sends dates as strings
 
 ## Unscheduled TODO's
 

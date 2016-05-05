@@ -47,14 +47,14 @@ class MemberRightsCurve(object):
             numpy.array(self._rightsPerShare.rightsPerShare(
                 nshares, start, end)) *
             numpy.array(self._activeShares.hourly(
-                dateToLocal(start), dateToLocal(end), member))
+                start, end, member))
             )
 
     def _get_eager(self, member, start, end):
         assert type(start) == datetime.date
         assert type(end) == datetime.date
 
-        shares = self._activeShares.hourly(dateToLocal(start), dateToLocal(end), member)
+        shares = self._activeShares.hourly(start, end, member)
         choiceset = list(sorted(set(shares)))
         remainders = set([
             nshares
