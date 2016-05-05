@@ -10,9 +10,11 @@ class UsageTracker(object):
         self._periodMask = periodMask
 
     def available_kwh(self, member, start, end, fare, period):
-        rights = self._rights.rights_kwh(member, start.date(), end.date())
-        periodMask = self._periodMask.periodMask(fare, period, start.date(), end.date())
-        usage = self._usage.usage(member, start.date(), end.date())
+        start = start.date()
+        end = end.date()
+        rights = self._rights.rights_kwh(member, start, end)
+        periodMask = self._periodMask.periodMask(fare, period, start, end)
+        usage = self._usage.usage(member, start, end)
         return int(sum(
             p-u if m else 0
             for p,u,m
@@ -20,9 +22,11 @@ class UsageTracker(object):
             ))
 
     def use_kwh(self, member, start, end, fare, period, kwh):
-        rights = self._rights.rights_kwh(member, start.date(), end.date())
-        periodMask = self._periodMask.periodMask(fare, period, start.date(), end.date())
-        usage = self._usage.usage(member, start.date(), end.date())
+        start = start.date()
+        end = end.date()
+        rights = self._rights.rights_kwh(member, start, end)
+        periodMask = self._periodMask.periodMask(fare, period, start, end)
+        usage = self._usage.usage(member, start, end)
 
         allocated = 0
         for i, (p, u, m) in enumerate(zip(rights, usage, periodMask)):
@@ -31,13 +35,15 @@ class UsageTracker(object):
             usage[i] += used
             allocated += used
 
-        self._usage.updateUsage(member, start.date(), usage)
+        self._usage.updateUsage(member, start, usage)
         return allocated
 
     def refund_kwh(self, member, start, end, fare, period, kwh):
-        rights = self._rights.rights_kwh(member, start.date(), end.date())
-        periodMask = self._periodMask.periodMask(fare, period, start.date(), end.date())
-        usage = self._usage.usage(member, start.date(), end.date())
+        start = start.date()
+        end = end.date()
+        rights = self._rights.rights_kwh(member, start, end)
+        periodMask = self._periodMask.periodMask(fare, period, start, end)
+        usage = self._usage.usage(member, start, end)
 
         deallocated = 0
         for i, (u, m) in reversed(list(enumerate(zip(usage, periodMask)))):
@@ -46,10 +52,12 @@ class UsageTracker(object):
             usage[i] -= unused
             deallocated += unused
 
-        self._usage.updateUsage(member, start.date(), usage)
+        self._usage.updateUsage(member, start, usage)
         return deallocated
 
     def usage(self, member, start, end):
-        return self._usage.usage(member, start.date(), end.date())
+        start = start.date()
+        end = end.date()
+        return self._usage.usage(member, start, end)
 
 # vim: ts=4 sw=4 et
