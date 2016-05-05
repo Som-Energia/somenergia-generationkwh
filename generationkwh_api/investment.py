@@ -6,7 +6,7 @@ from plantmeter.mongotimecurve import toLocal
 from dateutil.relativedelta import relativedelta
 import datetime
 from yamlns import namespace as ns
-from generationkwh.isodates import localisodate, naiveisodate, naiveisodatetime
+from generationkwh.isodates import isodate, naiveisodate, naiveisodatetime
 
 class InvestmentProvider(ErpWrapper):
 
@@ -48,8 +48,8 @@ class InvestmentProvider(ErpWrapper):
         return [
             (
                 c['member_id'][0],
-                localisodate(c['activation_date']),
-                localisodate(c['deactivation_date']),
+                c['activation_date'] and str(c['activation_date']),
+                c['deactivation_date'] and str(c['deactivation_date']),
                 c['nshares'],
             )
             for c in sorted(contracts, key=lambda x: x['id'] )
@@ -59,8 +59,8 @@ class InvestmentProvider(ErpWrapper):
         return [
             ns(
                 member=member,
-                activationStart=start and start.date(),
-                activationEnd=end and end.date(),
+                activationStart=start and isodate(start),
+                activationEnd=end and isodate(end),
                 shares=shares,
             )
             for member, start, end, shares

@@ -20,6 +20,10 @@
     + MemberRightCurver receives date (and still sends local to ActiveShareCurve)
     + MemberShareCurve uses date
     + InvestmentProvider: uses date
+    + genkwh-investment list sends dates as strings instead of local
+    - FarePeriod uses dates
+    - MemberRights usage uses dates
+    - UseTracker uses dates
 - Assignment: update priority overwritting write?? (Low)
 - Assignment: log in soci observations
 - Investment: test activate and move it from erppeek to erp
@@ -27,7 +31,6 @@
 - Assignment: Script: test expire command
 - Assignment: Script: id conversion
 
-- genkwh-investment list sends dates as strings
 
 ## Unscheduled TODO's
 
