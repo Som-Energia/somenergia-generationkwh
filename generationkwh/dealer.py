@@ -8,15 +8,15 @@ class DummyDealer(object):
         availability and investors criteria.
     """
 
-    def __init__(self, usageTracker, assignments):
+    def __init__(self, usageTracker, assignmentProvider):
         self._usageTracker = usageTracker
-        self._assignments = assignments
+        self._assignments = assignmentProvider
     
     def is_active(self,
             contract_id, start_date, end_date):
         """ Returns True if contract_id has generation kwh activated
             during the period"""
-        if contract_id == 4:
+        if contract_id == 2:
             return True
         return False
 
