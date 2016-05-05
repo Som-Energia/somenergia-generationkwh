@@ -114,10 +114,15 @@ class GenerationkWhAssignment(osv.osv):
         )
 
     def create(self, cr, uid, values, context=None):
-        self.expire(cr, uid, values['contract_id'], values['member_id'], context=context)
+        self.expire(cr, uid,
+            values.get('contract_id',None),
+            values.get('member_id',None),
+            context=context)
         return super(GenerationkWhAssignment, self).create(cr, uid, values, context=context)
 
     def expire(self, cr, uid, contract_id, member_id, context=None):
+        if contract_id is None: return
+        if member_id is None: return
         same_polissa_member = self.search(cr, uid, [
             #'|', ('end_date', '<', str(datetime.date.today())),
                 ('end_date','=',False),
