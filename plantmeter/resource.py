@@ -100,15 +100,22 @@ class ProductionMeter(Resource):
         now = datetime.datetime.now()
         provider = get_provider(self.uri)
         with provider(self.uri) as remote:
-            for day in remote.get(start, end):
-                for measurement in day:
-                    self.curveProvider.fillPoint(
-                            name = self.name,
-                            datetime = measurement['datetime'],
-                            ae = measurement['ae']
-                            )
-            if notifier:
-                notifier.push(self.id, now, 'done', '') 
+            status = 'done'
+            message = None
+            try:
+                for day in remote.get(start, end):
+                    for measurement in day:
+                        self.curveProvider.fillPoint(
+                                name = self.name,
+                                datetime = measurement['datetime'],
+                                ae = measurement['ae']
+                                )
+            except Exception as e:
+                status = 'failed'
+                message = str(e)
+            finally:
+                if notifier:
+                    notifier.push(self.id, now, status, message)
         return True
 
     def lastMeasurementDate(self):
