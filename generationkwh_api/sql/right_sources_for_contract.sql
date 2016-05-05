@@ -24,7 +24,11 @@ LEFT JOIN (
             data_ultima_lectura,
             data_alta
         ) AS last_usable_date
-    FROM giscedata_polissa
+    FROM giscedata_polissa AS polissa
+    WHERE
+        polissa.active AND -- UNTESTED
+        polissa.state != 'esborrany' AND -- UNTESTED
+        TRUE
     ) AS contracte
     ON contracte.id = peer.contract_id
 WHERE
