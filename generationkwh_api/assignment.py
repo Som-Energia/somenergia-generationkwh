@@ -114,21 +114,8 @@ class GenerationkWhAssignment(osv.osv):
         )
 
     def add(self, cr, uid, assignments, context=None):
+        self.expire(cr, uid, [(a,b) for a,b,c in assignments], context=context)
         for contract_id, member_id, priority in assignments:
-            same_polissa_member = self.search(cr, uid, [
-                #'|', ('end_date', '<', str(datetime.date.today())),
-                    ('end_date','=',False),
-                ('contract_id', '=', contract_id),
-                ('member_id', '=', member_id),
-            ], context = context)
-            if same_polissa_member:
-                self.write(cr,uid,
-                    same_polissa_member,
-                    dict(
-                        end_date=str(datetime.date.today()),
-                    ),
-                    context=context,
-                )
             self.create(cr, uid, {
                 'contract_id': contract_id,
                 'member_id': member_id,
