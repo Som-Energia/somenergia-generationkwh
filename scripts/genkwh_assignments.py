@@ -34,6 +34,15 @@ def parseArgumments():
         sub.add_argument('contract')
         sub.add_argument('member')
     for sub in default,:
+        
+        sub.add_argument(
+            '-p','--partner',
+            dest='idmode',
+            action='store_const',
+            const='partner',
+            help="select members by its partner database id, "
+                "instead member database id",
+            )
         """
         sub.add_argument(
             '-n','--number',
@@ -42,14 +51,6 @@ def parseArgumments():
             const='number',
             default='memberid',
             help="select members by its member code number, "
-                "instead member database id",
-            )
-        sub.add_argument(
-            '-p','--partner',
-            dest='idmode',
-            action='store_const',
-            const='partner',
-            help="select members by its partner database id, "
                 "instead member database id",
             )
         sub.add_argument(
@@ -72,9 +73,13 @@ def parseArgumments():
 
     return parser.parse_args(namespace=ns())
 
-def preprocessMembers(args):
+def preprocessMembers(members=None,idmode=None):
     """Turns members in which ever format to the ones required by commands"""
-
+    if idmode=="partner":
+        members = c.GenerationkwhTesthelper.get_members_by_partners(members).values()
+    else:
+        pass
+    return members
 def clear(**args):
     c.GenerationkwhAssignment.dropAll()
 
@@ -129,9 +134,11 @@ def expire(
 def default(
         members=None,
         force=False,
+        idmode=None,
         **_):
     if force: clear()
-    c.GenerationkwhAssignment.createDefaultForMembers(members[0])
+    members=preprocessMembers(members[0],idmode)
+    c.GenerationkwhAssignment.createDefaultForMembers(members)
 
 
 c = erppeek.Client(**dbconfig.erppeek)
