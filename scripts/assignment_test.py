@@ -4,6 +4,7 @@ import unittest
 import datetime
 dbconfig = None
 from yamlns import namespace as ns
+from generationkwh.isodates import localisodate
 try:
     import dbconfig
     import erppeek
@@ -289,7 +290,8 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.assertEqual([
             dict(
                 member_id=member_id,
-                last_usable_date=str(last_usable_date),
+                # TODO: compare strings at the end
+                last_usable_date=localisodate(str(last_usable_date)),
             )
             for member_id, last_usable_date in expectation
             ], result)
