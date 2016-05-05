@@ -24,6 +24,7 @@
     + FarePeriod uses dates
     - MemberRights usage uses dates
     - UseTracker uses dates
+    - Remainders uses dates
 - Assignment: update priority overwritting write?? (Low)
 - Assignment: log in soci observations
 - Investment: test activate and move it from erppeek to erp

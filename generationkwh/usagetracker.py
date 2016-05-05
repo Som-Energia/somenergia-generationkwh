@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import datetime
+
 class UsageTracker(object):
     """UsageTracker manages the available use rights for a given partner.
     """
@@ -10,8 +12,8 @@ class UsageTracker(object):
         self._periodMask = periodMask
 
     def available_kwh(self, member, start, end, fare, period):
-        start = start.date()
-        end = end.date()
+        assert type(start) == datetime.date
+        assert type(end) == datetime.date
         rights = self._rights.rights_kwh(member, start, end)
         periodMask = self._periodMask.periodMask(fare, period, start, end)
         usage = self._usage.usage(member, start, end)
@@ -22,8 +24,8 @@ class UsageTracker(object):
             ))
 
     def use_kwh(self, member, start, end, fare, period, kwh):
-        start = start.date()
-        end = end.date()
+        assert type(start) == datetime.date
+        assert type(end) == datetime.date
         rights = self._rights.rights_kwh(member, start, end)
         periodMask = self._periodMask.periodMask(fare, period, start, end)
         usage = self._usage.usage(member, start, end)
@@ -39,8 +41,8 @@ class UsageTracker(object):
         return allocated
 
     def refund_kwh(self, member, start, end, fare, period, kwh):
-        start = start.date()
-        end = end.date()
+        assert type(start) == datetime.date
+        assert type(end) == datetime.date
         rights = self._rights.rights_kwh(member, start, end)
         periodMask = self._periodMask.periodMask(fare, period, start, end)
         usage = self._usage.usage(member, start, end)
@@ -56,8 +58,8 @@ class UsageTracker(object):
         return deallocated
 
     def usage(self, member, start, end):
-        start = start.date()
-        end = end.date()
+        assert type(start) == datetime.date
+        assert type(end) == datetime.date
         return self._usage.usage(member, start, end)
 
 # vim: ts=4 sw=4 et

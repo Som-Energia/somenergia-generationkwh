@@ -122,8 +122,8 @@ class GenerationkWhTestHelper(osv.osv):
         usageTracker = GenerationkWhDealer._createTracker(cursor, uid, context)
         result = usageTracker.available_kwh(
             member,
-            localisodate(start),
-            localisodate(stop),
+            isodate(start),
+            isodate(stop),
             fare,
             period
             )
@@ -137,8 +137,8 @@ class GenerationkWhTestHelper(osv.osv):
         usageTracker = GenerationkWhDealer._createTracker(cursor, uid, context)
         result = usageTracker.use_kwh(
             member,
-            localisodate(start),
-            localisodate(stop),
+            isodate(start),
+            isodate(stop),
             fare,
             period,
             kwh,
@@ -153,8 +153,8 @@ class GenerationkWhTestHelper(osv.osv):
         usageTracker = GenerationkWhDealer._createTracker(cursor, uid, context)
         result = usageTracker.refund_kwh(
             member,
-            localisodate(start),
-            localisodate(stop),
+            isodate(start),
+            isodate(stop),
             fare,
             period,
             kwh,

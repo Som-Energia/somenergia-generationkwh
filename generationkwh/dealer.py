@@ -50,7 +50,7 @@ class Dealer(object):
     """
 
     def __init__(self, usageTracker, assignmentProvider):
-        self._usage = usageTracker
+        self._tracker = usageTracker
         self._assignments = assignmentProvider
 
     
@@ -81,11 +81,11 @@ class Dealer(object):
         used = 0
         result = []
         for asig in assignments:
-            seek_end = min(end_date,asig.last_usable_date)
-            if seek_end<seek_start: continue
-            memberUse = self._usage.use_kwh(
+            seek_end = min(end_date.date(),asig.last_usable_date.date())
+            if seek_end<seek_start.date(): continue
+            memberUse = self._tracker.use_kwh(
                     asig.member_id,
-                    seek_start,
+                    seek_start.date(),
                     seek_end,
                     fare, period, kwh - used)
             result.append(dict(member_id=asig.member_id, kwh=int(memberUse)))
@@ -100,7 +100,8 @@ class Dealer(object):
             returns the kwh efectively refunded.
         """
         seek_start = start_date + relativedelta(years=-1)
-        return self._usage.refund_kwh(member_id, seek_start, end_date,
+        return self._tracker.refund_kwh(member_id,
+            seek_start.date(), end_date.date(),
             fare, period, kwh)
 
 

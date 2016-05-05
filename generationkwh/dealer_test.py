@@ -3,7 +3,7 @@
 import unittest
 from .dealer import Dealer
 from yamlns import namespace as ns
-from .isodates import localisodate
+from .isodates import localisodate, isodate
 
 class AssignmentsMockup(object):
     def __init__(self, assignments):
@@ -36,7 +36,7 @@ class UsageTrackerMockup(object):
         return self._results.pop(0)
 
 
-class AssignmentSeeker_Test(unittest.TestCase):
+class Dealer_Integration_Test(unittest.TestCase):
 
     def test_trackerMockup_withNoCalls(self):
 
@@ -49,16 +49,16 @@ class AssignmentSeeker_Test(unittest.TestCase):
 
         t = UsageTrackerMockup([2])
         result = t.use_kwh(member='member',
-            start=localisodate('2015-09-01'),
-            end=localisodate('2015-09-01'),
+            start=isodate('2015-09-01'),
+            end=isodate('2015-09-01'),
             fare='myfare', period='myperiod',
             kwh=100)
 
         self.assertEqual(result, 2)
         self.assertEqual(t.calls(), [
             ('use_kwh', 'member',
-                '2015-09-01 00:00:00+02:00',
-                '2015-09-01 00:00:00+02:00',
+                '2015-09-01',
+                '2015-09-01',
                 'myfare', 'myperiod', 100),
         ])
         
@@ -66,16 +66,16 @@ class AssignmentSeeker_Test(unittest.TestCase):
 
         t = UsageTrackerMockup([3,1])
         result = t.use_kwh(member='member1',
-            start=localisodate('2015-09-01'),
-            end=localisodate('2015-09-01'),
+            start=isodate('2015-09-01'),
+            end=isodate('2015-09-01'),
             fare='myfare', period='myperiod',
             kwh=100)
 
         self.assertEqual(result, 3)
 
         result = t.use_kwh(member='member2',
-            start=localisodate('2015-09-01'),
-            end=localisodate('2015-09-01'),
+            start=isodate('2015-09-01'),
+            end=isodate('2015-09-01'),
             fare='myfare', period='myperiod',
             kwh=100)
 
@@ -83,12 +83,12 @@ class AssignmentSeeker_Test(unittest.TestCase):
         
         self.assertEqual(t.calls(), [
             ('use_kwh', 'member1',
-                '2015-09-01 00:00:00+02:00',
-                '2015-09-01 00:00:00+02:00',
+                '2015-09-01',
+                '2015-09-01',
                 'myfare', 'myperiod', 100),
             ('use_kwh', 'member2',
-                '2015-09-01 00:00:00+02:00',
-                '2015-09-01 00:00:00+02:00',
+                '2015-09-01',
+                '2015-09-01',
                 'myfare', 'myperiod', 100),
         ])
 
@@ -131,8 +131,8 @@ class AssignmentSeeker_Test(unittest.TestCase):
 
         self.assertEqual(t.calls(),[
             ('use_kwh', 'member1',
-                '2014-08-01 00:00:00+02:00',
-                '2015-09-01 00:00:00+02:00',
+                '2014-08-01',
+                '2015-09-01',
                 '2.0A', 'P1', 100),
             ])
         
@@ -162,8 +162,8 @@ class AssignmentSeeker_Test(unittest.TestCase):
 
         self.assertEqual(t.calls(),[
             ('use_kwh', 'member1',
-                '2014-08-01 00:00:00+02:00',
-                '2014-10-01 00:00:00+02:00',
+                '2014-08-01',
+                '2014-10-01',
                 '2.0A', 'P1', 100),
             ])
         self.assertEqual(result, [
@@ -222,12 +222,12 @@ class AssignmentSeeker_Test(unittest.TestCase):
 
         self.assertEqual(t.calls(),[
             ('use_kwh', 'member1',
-                '2014-08-01 00:00:00+02:00',
-                '2015-09-01 00:00:00+02:00',
+                '2014-08-01',
+                '2015-09-01',
                 '2.0A', 'P1', 100),
             ('use_kwh', 'member2',
-                '2014-08-01 00:00:00+02:00',
-                '2015-09-01 00:00:00+02:00',
+                '2014-08-01',
+                '2015-09-01',
                 '2.0A', 'P1', 100-20),
             ])
         
@@ -262,8 +262,8 @@ class AssignmentSeeker_Test(unittest.TestCase):
 
         self.assertEqual(t.calls(),[
             ('use_kwh', 'member2',
-                '2014-08-01 00:00:00+02:00',
-                '2015-09-01 00:00:00+02:00',
+                '2014-08-01',
+                '2015-09-01',
                 '2.0A', 'P1', 100),
             ])
         
@@ -293,8 +293,8 @@ class AssignmentSeeker_Test(unittest.TestCase):
 
         self.assertEqual(t.calls(),[
             ('refund_kwh', 'member1',
-                '2014-08-01 00:00:00+02:00',
-                '2015-09-01 00:00:00+02:00',
+                '2014-08-01',
+                '2015-09-01',
                 '2.0A', 'P1', 100),
             ])
         

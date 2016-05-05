@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from generationkwh.usagetracker import UsageTracker
-from .isodates import localisodate
+from .isodates import isodate
 import unittest
 
 
@@ -31,7 +31,7 @@ unittest.TestCase.__str__ = unittest.TestCase.id
 class UsageTracker_Test(unittest.TestCase):
 
     def setupUsageTracker(self, rights, usage, periodMask):
-        self.today = localisodate('2015-01-02')
+        self.today = isodate('2015-01-02')
         return UsageTracker(
             rights=CurveProvider_MockUp(rights),
             usage=CurveProvider_MockUp(usage),
