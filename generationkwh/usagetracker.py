@@ -12,7 +12,7 @@ class UsageTracker(object):
     def available_kwh(self, member, start, end, fare, period):
         rights = self._rights.rights_kwh(member, start.date(), end.date())
         periodMask = self._periodMask.periodMask(fare, period, start.date(), end.date())
-        usage = self._usage.usage(member, start, end)
+        usage = self._usage.usage(member, start.date(), end.date())
         return int(sum(
             p-u if m else 0
             for p,u,m
@@ -22,7 +22,7 @@ class UsageTracker(object):
     def use_kwh(self, member, start, end, fare, period, kwh):
         rights = self._rights.rights_kwh(member, start.date(), end.date())
         periodMask = self._periodMask.periodMask(fare, period, start.date(), end.date())
-        usage = self._usage.usage(member, start, end)
+        usage = self._usage.usage(member, start.date(), end.date())
 
         allocated = 0
         for i, (p, u, m) in enumerate(zip(rights, usage, periodMask)):
@@ -31,13 +31,13 @@ class UsageTracker(object):
             usage[i] += used
             allocated += used
 
-        self._usage.updateUsage(member, start, usage)
+        self._usage.updateUsage(member, start.date(), usage)
         return allocated
 
     def refund_kwh(self, member, start, end, fare, period, kwh):
         rights = self._rights.rights_kwh(member, start.date(), end.date())
         periodMask = self._periodMask.periodMask(fare, period, start.date(), end.date())
-        usage = self._usage.usage(member, start, end)
+        usage = self._usage.usage(member, start.date(), end.date())
 
         deallocated = 0
         for i, (u, m) in reversed(list(enumerate(zip(usage, periodMask)))):
@@ -46,10 +46,10 @@ class UsageTracker(object):
             usage[i] -= unused
             deallocated += unused
 
-        self._usage.updateUsage(member, start, usage)
+        self._usage.updateUsage(member, start.date(), usage)
         return deallocated
 
     def usage(self, member, start, end):
-        return self._usage.usage(member, start, end)
+        return self._usage.usage(member, start.date(), end.date())
 
 # vim: ts=4 sw=4 et

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from plantmeter.mongotimecurve import MongoTimeCurve
-
+from .isodates import dateToLocal
+import datetime
 
 class MemberRightsUsage(object):
     """
@@ -13,15 +14,20 @@ class MemberRightsUsage(object):
             self.db,'memberrightusage')
 
     def usage(self, member, start, stop):
+        assert type(start) == datetime.date
+        assert type(stop) == datetime.date
+
         return self.curve.get(
             filter=member,
-            start=start,
-            stop=stop,
+            start=dateToLocal(start),
+            stop=dateToLocal(stop),
             field='usage_kwh',
             )
     def updateUsage(self, member, start, data):
+        assert type(start) == datetime.date
+
         curve = self.curve.update(
-            start=start,
+            start=dateToLocal(start),
             filter=member,
             field='usage_kwh',
             data=data,

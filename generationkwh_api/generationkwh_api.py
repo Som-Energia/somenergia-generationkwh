@@ -167,8 +167,8 @@ class GenerationkWhTestHelper(osv.osv):
         rightsUsage = MemberRightsUsage(mdbpool.get_db())
         result = list(int(i) for i in rightsUsage.usage(
             member_id,
-            localisodate(start_date),
-            localisodate(stop_date)
+            isodate(start_date),
+            isodate(stop_date)
             ))
         return result
         
