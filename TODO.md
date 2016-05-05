@@ -1,35 +1,44 @@
+# TODO's
+
+## Inmediate TODO's
+
 - DealerAPI: Convert `soci_id` from and to `partner_id`
-- Implement the whole isActive based InvestmentProvider
+- Dealer.isActive(contract) returns true if contract has any assignment right now [Cesar]
+- Investment: `active` field to hide failed payments (the original one and the refund)
+- Investments: Wizard to disable them in batch from tree
+- Investments: Wizard to disable them from form
+- Assignment: rewrite create
+- FarePeriodCurve: Fares dictionary should be at libfacturacioatr
+- FarePeriodCurve: Include all fares !!!!!!!
+
+
+## Unscheduled TODO's
+
 - Rename `generationkwh_api` -> `som_generationkwh`
 - Rename `plantmeter_api` -> `som_plantmeter`
-- ProductionToRightsPerShare: Protect againts divby0 when total active actions is zero
+- ProductionToRightsPerShare naive: Protect againts divby0 when total active actions is zero
 - Investment: ondelete -> member
 - Investment: Janitoring: mode lines without partner
 - Investment: Janitoring: mode lines without dates
 - Investment: negative move line: activation date should be the same or inmediate?
 - Investment: test activate and move it from erppeek to erp
 - Investment: constant for the account root for generationkwh accounts
-- Investment: constant for the number of digits for the soci code in accountsa
+- Investment: constant for the number of digits for the soci code in accounts
     - Can be found at `ir_secuence.code="socis"`
-- Investment: `active` field to hide failed payments (the original one and the refund)
+- Contrast API usage from invoice with actual API
+- Use dates instead local datetimes wherever we can
 
 - Reminder Migration: a reminder for 1-shares curve
 - Reminder Migration: a reminder for known to be used n-shares (optional)
 
 - Assignment: ondelete -> polissa
 - Assignment: ondelete -> member
-- Assignment: Filter out inactive contracts and others (ask Pere)
-- Assignment: Given a contract that can consume rights from several members, define the order in which it should consume them.
-    - Right now is an arbitrary order, not bad
-    - Rare case, low priority, wait for actual cases
 - Make assignation test resilent to changes on contract annual use
-- Assignment: Edit test cases: expire assignments
++ Assignment: Edit test cases: expire assignments
 - Assignment: Edit test cases: change priority
 - Assignment: Edit test cases: add rule
 - Assignment: Send an activation mail explaining the result
 
-- FarePeriodCurve: Fares dictionary should be at libfacturacioatr
-- FarePeriodCurve: Include all fares !!!!!!!
 - FarePeriodCurve: Use numpy arrays
 - FarePeriodCurve: Date parameter should be dates not strings
 
@@ -37,11 +46,23 @@
 - Review dates management across interfaces
 - Security: add users to generationkwh group
 - Security: add users to plantmeter group
+- Refund to a member that does not exist
+
+
+## Postponed for Next Iteration
+
+- Invert the investment creation flux: webform -> draft investment -> payment -> active investment
+- Assignment: Given a contract that can consume rights from several members, define the order in which it should consume them.
+    - Right now is an arbitrary order, not bad
+    - Rare case, low priority, wait for actual cases
 - WebForms: Create the soci
 - WebForms: Create the investments form webforms
 
+
 ## DONE
 
++ Verify invoicing refund should not depend on isActive: if it has genkwh lines, refund should be ok
++ Assignment: Filter out inactive contracts and others (ask Pere)
 + Dealer: `use_kwh`
 + Dealer: `refund_kwh`
 + AssignmentSeeker becomes Dealer
