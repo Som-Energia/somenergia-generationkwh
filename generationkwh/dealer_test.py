@@ -12,6 +12,9 @@ class AssignmentsMockup(object):
     def seek(self, contract_id):
         return self._assignments
 
+    def isActive(self, contract_id):
+        return not not self._assignments
+
 
 class UsageTrackerMockup(object):
 
@@ -301,7 +304,34 @@ class Dealer_Test(unittest.TestCase):
         self.assertEqual(result, 20)
         
         
-        
+    def test_isactive_withAssignments(self):
+        t = UsageTrackerMockup([20])
+        a = AssignmentsMockup([
+            ns(
+                member_id='member1',
+                last_usable_date=isodate('2015-10-01'),
+            ),
+            ])
+
+        s = Dealer(usageTracker=t, assignmentProvider=a)
+        self.assertTrue(s.is_active(
+            contract_id=1,
+            start_date=isodate('2015-10-01'),
+            end_date=isodate('2015-10-01'),
+            ))
+
+    def test_isactive_withoutAssignments(self):
+        t = UsageTrackerMockup([20])
+        a = AssignmentsMockup([
+            ])
+
+        s = Dealer(usageTracker=t, assignmentProvider=a)
+        self.assertFalse(s.is_active(
+            contract_id=1,
+            start_date=isodate('2015-10-01'),
+            end_date=isodate('2015-10-01'),
+            ))
+
 
 
 
