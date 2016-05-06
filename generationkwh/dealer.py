@@ -87,7 +87,7 @@ class Dealer(object):
                     asig.member_id,
                     seek_start,
                     seek_end,
-                    fare, period, kwh - used)
+                    fare, period, kwh - used if kwh - used >0 else 0)
             result.append(dict(member_id=asig.member_id, kwh=int(memberUse)))
             used += memberUse
         return result

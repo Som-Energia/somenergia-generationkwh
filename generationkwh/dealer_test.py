@@ -239,6 +239,44 @@ class Dealer_Test(unittest.TestCase):
             dict(member_id='member2', kwh=30),
             ])
         
+    def test_usekwh_manyAssignments_zeroUseSecond(self):
+        t = UsageTrackerMockup([20,30])
+        a = AssignmentsMockup([
+            ns(
+                member_id='member1',
+                last_usable_date=isodate('2015-10-01'),
+            ),
+            ns(
+                member_id='member2',
+                last_usable_date=isodate('2015-10-01'),
+            ),
+            ])
+
+        s = Dealer(usageTracker=t, assignmentProvider=a)
+        result = s.use_kwh(
+            contract_id = 1,
+            start_date = isodate('2015-08-01'),
+            end_date = isodate('2015-09-01'),
+            fare = '2.0A',
+            period = 'P1',
+            kwh = 10,
+            )
+
+        self.assertEqual(t.calls(),[
+            ('use_kwh', 'member1',
+                '2014-08-01',
+                '2015-09-01',
+                '2.0A', 'P1', 10),
+            ('use_kwh', 'member2',
+                '2014-08-01',
+                '2015-09-01',
+                '2.0A', 'P1', 0),
+            ])
+
+        self.assertEqual(result, [
+            dict(member_id='member1', kwh=20),
+            dict(member_id='member2', kwh=30),
+            ])
         
     def test_usekwh_manyAssignments_firstHaveOldInvoicing(self):
         t = UsageTrackerMockup([30])
