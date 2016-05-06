@@ -10,7 +10,7 @@ import b2btest
 import glob
 import os
 from yamlns import namespace as ns
-
+from dealer_test import *
 from remainder_test import *
 from holidaysprovider_test import *
 #from investmentmanagement_test import *

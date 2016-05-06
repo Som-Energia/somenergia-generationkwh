@@ -59,10 +59,7 @@ class Dealer(object):
             contract_id, start_date, end_date):
         """ Returns True if contract_id has generation kwh activated
             during the period"""
-        raise NotImplemented
-        if contract_id == 4:
-            return True
-        return False
+        return self._assignments.isActive(contract_id)
 
     # Do not use for invoicing, ONLY statistics
     def get_available_kwh(self, contract_id, start_date, end_date, fare, period):
