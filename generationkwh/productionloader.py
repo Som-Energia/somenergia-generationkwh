@@ -78,7 +78,7 @@ class ProductionLoader(object):
 
         userRights, newRemainder = ProductionToRightsPerShare().computeRights(
                 production[startIndex:], plantshares[startIndex:], nshares, lastRemainder)
-        self.remainders.set([
+        self.remainders.updateRemainders([
                 [nshares, addDays(lastDateToCompute,1), newRemainder]])
         self.rightsPerShare.updateRightsPerShare(
                 nshares, lastDateToCompute.date(), userRights)
@@ -86,7 +86,7 @@ class ProductionLoader(object):
 
 
     def computeAvailableRights(self):
-        remainders = self.remainders.get()
+        remainders = self.remainders.lastRemainders()
         recomputeStart, recomputeStop = self._recomputationInterval(remainders)
         aggregatedProduction = self.productionAggregator.getWh(recomputeStart, recomputeStop)
         plantShareCurve = self.plantShareCurver.hourly(recomputeStart, recomputeStop)

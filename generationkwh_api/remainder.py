@@ -7,14 +7,14 @@ from generationkwh.isodates import localisodate
 
 class RemainderProvider(ErpWrapper):
 
-    def get(self):
+    def lastRemainders(self):
         Remainder=self.erp.pool.get('generationkwh.remainder')
-        return Remainder.last(self.cursor,self.uid, context=self.context)
+        return Remainder.lastRemainders(self.cursor,self.uid, context=self.context)
 
 
-    def set(self,remainders):
+    def updateRemainders(self,remainders):
         Remainder=self.erp.pool.get('generationkwh.remainder')
-        Remainder.add(self.cursor,self.uid,remainders, context=self.context)
+        Remainder.updateRemainders(self.cursor,self.uid,remainders, context=self.context)
 
     def init(self, nSharesToInit):
         """
@@ -22,6 +22,9 @@ class RemainderProvider(ErpWrapper):
             received at the same date than the first remainder for 1-shares.
             If there is no remainder with nshares = 1 then...
         """
+        Remainder=self.erp.pool.get('generationkwh.remainder')
+        Remainder.newRemaindersToTrack(self.cursor,self.uid, nSharesToInit, context=self.context)
+        
 
 
 class GenerationkWhRemainder(osv.osv):
@@ -54,7 +57,7 @@ class GenerationkWhRemainder(osv.osv):
             'is allowed'
         )]
 
-    def last(self, cr, uid, context=None):
+    def lastRemainders(self, cr, uid, context=None):
         "Returns the latest remainder for each number of shares."""
 
         cr.execute("""
@@ -74,7 +77,7 @@ class GenerationkWhRemainder(osv.osv):
         ]
         return result
 
-    def add(self, cr, uid, remainders, context=None):
+    def updateRemainders(self, cr, uid, remainders, context=None):
         for n,pointsDate,remainder in remainders:
             same_date_n_id=self.search(cr, uid, [
                 ('n_shares','=',n),
@@ -112,7 +115,7 @@ class GenerationkWhRemainder(osv.osv):
         first1ShareRemainder = cr.fetchone()
         if first1ShareRemainder is None: return
         _,date,_ = first1ShareRemainder
-        self.add(cr,uid,[
+        self.updateRemainders(cr,uid,[
             (n,date,0)
             for n in nshares
             ] ,context)
@@ -126,17 +129,17 @@ class GenerationkWhRemainderTesthelper(osv.osv):
 
     _name = "generationkwh.remainder.testhelper"
 
-    def last(self, cr, uid, context=None):
+    def lastRemainders(self, cr, uid, context=None):
         def toStr(date):
             return date.strftime('%Y-%m-%d')
 
         remainder = self.pool.get('generationkwh.remainder')
-        remainders = remainder.last(cr, uid, context)
+        remainders = remainder.lastRemainders(cr, uid, context)
         return [(r[0], toStr(r[1]), r[2]) for r in remainders]
 
-    def add(self, cr, uid, remainders, context=None):
+    def updateRemainders(self, cr, uid, remainders, context=None):
         remainder = self.pool.get('generationkwh.remainder')
-        remainder.add(cr, uid, remainders, context)
+        remainder.updateRemainders(cr, uid, remainders, context)
 
     def clean(self,cr,uid,context=None):
         remainder = self.pool.get('generationkwh.remainder')

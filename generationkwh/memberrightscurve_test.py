@@ -29,7 +29,7 @@ class Remainder_Mockup(object):
             for nsh in nshares
             ]
 
-    def get(self):
+    def lastRemainders(self):
         return self._remainders
 
 

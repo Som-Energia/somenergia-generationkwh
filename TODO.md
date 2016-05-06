@@ -26,12 +26,15 @@
     - UseTracker uses dates
     - Remainders uses dates
     - Dealer uses dates
+    - ProductionLoader uses dates
 - Assignment: update priority overwritting write?? (Low)
 - Assignment: log in soci observations
 - Investment: test activate and move it from erppeek to erp
 - Assignment: Script: add command
 - Assignment: Script: test expire command
 - Assignment: Script: id conversion
+- RemainderProvider.init not yet implemented!!
+- RemainderProvider: More semantics to method names (set,get -> updateRemainders, lastRemainders)
 
 
 ## Unscheduled TODO's

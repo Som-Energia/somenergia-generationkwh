@@ -36,10 +36,10 @@ class RemainderProviderMockup(object):
     def __init__(self,remainders=[]):
         self.remainders = dict((remainder[0], remainder) for remainder in remainders)
 
-    def get(self):
+    def lastRemainders(self):
         return [self.remainders[nshares] for nshares in self.remainders]
     
-    def set(self, remainders):
+    def updateRemainders(self, remainders):
         for nshares, date, remainder in remainders:
             self.remainders[nshares] = (nshares, date, remainder)
 
@@ -189,7 +189,7 @@ class ProductionLoaderTest(unittest.TestCase):
             isodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[1]+14*[0])
-        self.assertEqual(remainders.get(), [
+        self.assertEqual(remainders.lastRemainders(), [
             (1, localisodate('2015-08-17'), 0),
             ])
 
@@ -210,7 +210,7 @@ class ProductionLoaderTest(unittest.TestCase):
             isodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[5]+14*[0])
-        self.assertEqual(remainders.get(), [
+        self.assertEqual(remainders.lastRemainders(), [
             (1, localisodate('2015-08-17'), 0),
             ])
 
@@ -231,7 +231,7 @@ class ProductionLoaderTest(unittest.TestCase):
             isodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[2]+14*[0])
-        self.assertEqual(remainders.get(), [
+        self.assertEqual(remainders.lastRemainders(), [
             (2, localisodate('2015-08-17'), 0),
             ])
 
@@ -252,7 +252,7 @@ class ProductionLoaderTest(unittest.TestCase):
             isodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[1]+14*[0])
-        self.assertEqual(remainders.get(), [
+        self.assertEqual(remainders.lastRemainders(), [
             (1, localisodate('2015-08-17'), 0),
             ])
 
@@ -355,7 +355,7 @@ class ProductionLoaderTest(unittest.TestCase):
             isodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[1]+14*[0])
-        self.assertEqual(remainders.get(), [
+        self.assertEqual(remainders.lastRemainders(), [
             (1, localisodate('2015-08-17'), 0),
             ])
 
@@ -380,7 +380,7 @@ class ProductionLoaderTest(unittest.TestCase):
             isodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[5]+14*[0])
-        self.assertEqual(remainders.get(), [
+        self.assertEqual(remainders.lastRemainders(), [
             (1, localisodate('2015-08-17'), 0),
             ])
 
@@ -406,7 +406,7 @@ class ProductionLoaderTest(unittest.TestCase):
             isodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[2]+14*[0])
-        self.assertEqual(remainders.get(), [
+        self.assertEqual(remainders.lastRemainders(), [
             (1, localisodate('2015-08-17'), 0),
             (2, localisodate('2015-08-17'), 0),
             ])
@@ -432,7 +432,7 @@ class ProductionLoaderTest(unittest.TestCase):
             isodate('2015-08-16'))
         self.assertEqual(list(result),
             +10*[0]+[1]+14*[0])
-        self.assertEqual(remainders.get(), [
+        self.assertEqual(remainders.lastRemainders(), [
             (1, localisodate('2015-08-17'), 0),
             ])
 

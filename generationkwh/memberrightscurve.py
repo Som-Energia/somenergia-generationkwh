@@ -59,7 +59,7 @@ class MemberRightsCurve(object):
         remainders = set([
             nshares
             for nshares, date, wh
-            in self._remainders.get()
+            in self._remainders.lastRemainders()
             ])
         choices = [
             None

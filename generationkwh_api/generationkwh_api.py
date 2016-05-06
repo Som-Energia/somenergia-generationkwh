@@ -45,7 +45,7 @@ class GenerationkWhTestHelper(osv.osv):
         rightsPerShare = RightsPerShare(mdbpool.get_db())
         rightsPerShare.updateRightsPerShare(nshares, isodate(startDate), data)
         remainders = RemainderProvider(self, cursor, uid, context)
-        remainders.set([
+        remainders.updateRemainders([
             (nshares, addDays(localisodate(startDate), (len(data)+24)%25), 0), 
             ])
 
@@ -86,7 +86,7 @@ class GenerationkWhTestHelper(osv.osv):
         holidays = HolidaysProvider(self, cursor, uid, context)
         farePeriod = FarePeriodCurve(holidays)
 
-        print 'remainders', remainders.get()
+        print 'remainders', remainders.lastRemainders()
         print 'investment', investment.shareContracts(
             start=localisodate(start),
             end=localisodate(stop),

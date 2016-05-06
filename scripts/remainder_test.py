@@ -19,10 +19,10 @@ class Remainder_Test(unittest.TestCase):
         self.RemainderHelper.clean()
 
     def setupProvider(self,remainders=[]):
-        self.RemainderHelper.add(remainders)
+        self.RemainderHelper.updateRemainders(remainders)
 
     def assertLastEquals(self, expectation):
-        result = self.RemainderHelper.last()
+        result = self.RemainderHelper.lastRemainders()
         self.assertEqual([list(a) for a in expectation], result)
 
     def tearDown(self):

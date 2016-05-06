@@ -21,3 +21,9 @@ def dateToLocal(date):
     # TODO: optimize dateToLocal
     return localisodate(str(date))
 
+def assertDate(name, date):
+    assert type(date)==datetime.date, (
+        "{} should be a datetime.date but it is {}"
+        .format(name, date))
+    return date
+

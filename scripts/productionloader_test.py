@@ -94,7 +94,7 @@ class ProductionLoader_Test(unittest.TestCase):
 
     def setupRemainders(self, remainders):
         remainder = self.erp.model('generationkwh.remainder')
-        remainder.add(remainders)
+        remainder.updateRemainders(remainders)
         return remainder
 
     def clearRemainders(self):
@@ -183,7 +183,7 @@ class ProductionLoader_Test(unittest.TestCase):
 
         result = self.TestHelper.rights_per_share(1, '2015-08-16', '2015-08-16')
         self.assertEqual(result, +10*[0]+[1]+14*[0])
-        self.assertEqual(remainder.last(), [
+        self.assertEqual(remainder.lastRemainders(), [
             [1, localisodate('2015-08-17'), 0],
             ])
 
@@ -203,7 +203,7 @@ class ProductionLoader_Test(unittest.TestCase):
 
         result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-16')
         self.assertEqual(result, +10*[0]+[5]+14*[0])
-        self.assertEqual(remainder.last(), [
+        self.assertEqual(remainder.lastRemainders(), [
             [1, localisodate('2015-08-17'), 0],
             ])
 
@@ -223,7 +223,7 @@ class ProductionLoader_Test(unittest.TestCase):
 
         result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-17')
         self.assertEqual(result, 2*(10*[0]+[5]+14*[0]))
-        self.assertEqual(remainder.last(), [
+        self.assertEqual(remainder.lastRemainders(), [
             [1, localisodate('2015-08-18'), 0],
             ])
 
