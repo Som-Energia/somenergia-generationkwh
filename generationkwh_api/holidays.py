@@ -2,7 +2,7 @@
 
 from .erpwrapper import ErpWrapper
 from osv import osv, fields
-from generationkwh.isodates import localisodate
+from generationkwh.isodates import isodate
 
 class HolidaysProvider(ErpWrapper):
 
@@ -17,7 +17,7 @@ class HolidaysProvider(ErpWrapper):
             ('name', '<=', stop),
             ], 0,None,'name desc',self.context)
         return [
-            localisodate(h['name'])
+            isodate(h['name'])
             for h in Holidays.read(self.cursor, self.uid,
                 ids, ['name'], self.context)
             ]
