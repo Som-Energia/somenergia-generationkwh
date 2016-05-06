@@ -15,12 +15,13 @@ from generationkwh.memberrightscurve import MemberRightsCurve
 from generationkwh.memberrightsusage import MemberRightsUsage
 from generationkwh.fareperiodcurve import FarePeriodCurve
 from generationkwh.usagetracker import UsageTracker
-from generationkwh.isodates import localisodate, isodate
+from generationkwh.isodates import isodate
 from .assignment import AssignmentProvider
 from .remainder import RemainderProvider
 from .investment import InvestmentProvider
 from .holidays import HolidaysProvider
 from .productionloader import ProductionAggregatorProvider # unused, force load
+import datetime
 
 # Models
 
@@ -45,8 +46,9 @@ class GenerationkWhTestHelper(osv.osv):
         rightsPerShare = RightsPerShare(mdbpool.get_db())
         rightsPerShare.updateRightsPerShare(nshares, isodate(startDate), data)
         remainders = RemainderProvider(self, cursor, uid, context)
+        endDate = isodate(startDate) + datetime.timedelta(days=(len(data)+24)%25)
         remainders.updateRemainders([
-            (nshares, addDays(localisodate(startDate), (len(data)+24)%25), 0), 
+            (nshares, endDate, 0), 
             ])
 
     def rights_per_share(self, cursor, uid,
@@ -88,30 +90,30 @@ class GenerationkWhTestHelper(osv.osv):
 
         print 'remainders', remainders.lastRemainders()
         print 'investment', investment.shareContracts(
-            start=localisodate(start),
-            end=localisodate(stop),
+            start=isodate(start),
+            end=isodate(stop),
             member=member)
         print 'active', memberActiveShares.hourly(
-            localisodate(start),
-            localisodate(stop),
+            isodate(start),
+            isodate(stop),
             member)
         for nshares in set(memberActiveShares.hourly(
-            localisodate(start),
-            localisodate(stop),
+            isodate(start),
+            isodate(stop),
             member)):
             print 'rightsPerShare', nshares, rightsPerShare.rightsPerShare(nshares,
                 isodate(start),
                 isodate(stop),
                 )
         print 'rights', generatedRights.rights_kwh(member,
-            localisodate(start),
-            localisodate(stop),
+            isodate(start),
+            isodate(stop),
             )
 
         print 'periodmask', farePeriod.periodMask(
             fare, period,
-            localisodate(start),
-            localisodate(stop),
+            isodate(start),
+            isodate(stop),
             )
 
     def usagetracker_available_kwh(self, cursor, uid,
@@ -323,7 +325,7 @@ class GenerationkWhDealer(osv.osv):
 
         dealer = self._createDealer(cursor, uid, context)
         res = dealer.refund_kwh(
-            contract_id, isodate(start_date), localisodate(end_date), fare, period, kwh, partner_id)
+            contract_id, isodate(start_date), isodate(end_date), fare, period, kwh, partner_id)
         return res
 
     def _createTracker(self, cursor, uid, context):
