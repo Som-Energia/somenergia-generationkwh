@@ -2,27 +2,36 @@
 
 ## Inmediate TODO's
 
-- Dealer: `refund_kwh` integration test
-- DealerAPI: `refund_kwh` (id mapping)
+- Invoice visual design
+- Assignment: Send an activation mail explaining default assignment
 - Investment: `active` field to hide failed payments (the original one and the refund) [Agusti]
 - Investments: Wizard to disable them in batch from tree [Agusti]
 - Investments: Wizard to disable them from form [Agusti]
-- Investments: Evaluate implications of active flag
+- Investments: Evaluate implications of active flag on Investment usage
 - Rename `generationkwh_api` -> `som_generationkwh`
 - Rename `plantmeter_api` -> `som_plantmeter`
-- ProductionLoader use dates
 - Assignment: update priority overwritting write?? (Low)
-- Assignment: Scrit: --all flag for default
+- Assignment: Script: --all flag for default
 - Assignment: log in soci observations
 - Investment: test activate and move it from erppeek to erp
-- Assignment: Script: add command
-- Assignment: Script: test expire command
+- Investment: optimize with sql
+- Investment: Script: create should return the ids of the resulting investments to pass them to the Assignments script
+- Assignment: Script: default should return the created assignments to pass them to the mail creation
 - RemainderProvider.init not yet implemented!!
-- RemainderProvider: More semantics to method names (set,get -> updateRemainders, lastRemainders)
+- Script to feed testing (and real?) production
+- Init:
+    - Setup plants
+    - First remainder
+    - Run Nightly script for existing investments
+- Nightly:
+    - Turn move lines into investments
+    - Create default assignment
+    - Send email explaining assignment
 
 
 ## Unscheduled TODO's
 
+- ProductionLoader use dates
 - ProductionToRightsPerShare naive: Protect againts divby0 when total active actions is zero
 - Investment: ondelete -> member
 - Investment: Janitoring: mode lines without partner
@@ -39,13 +48,11 @@
 - Assignment: ondelete -> member
 - Make assignation test resilent to changes on contract annual use
 - Assignment: Change priority expires assigments and creates new
-- Assignment: Send an activation mail explaining default assignment
 
 
 - BUG: Mongodb erp integration: reconnections do not refresh connection attr
 - Security: add users to generationkwh group
 - Security: add users to plantmeter group
-- Refund to a member that does not exist
 
 
 ## Postponed for Next Iteration
@@ -60,6 +67,12 @@
 
 ## DONE
 
++ Refund to a member that does not exist -> not refunded
++ RemainderProvider: More semantics to method names (set,get -> updateRemainders, lastRemainders)
++ Dealer: `refund_kwh` integration test
++ DealerAPI: `refund_kwh` (id mapping)
++ Assignment: Script: assign command
++ Assignment: Script: test expire command
 - Dealer.isActive(contract) returns true if contract has any assignment right now [Cesar]
 - DealerAPI.isActive(contract) returns true if contract has any assignment right now [Cesar]
 - Assignment.isActive(contract) returns true if contract has any assignment right now [Cesar]
