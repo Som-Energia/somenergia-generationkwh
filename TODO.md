@@ -8,7 +8,6 @@
 - Investments: Wizard to disable them in batch from tree [Agusti]
 - Investments: Wizard to disable them from form [Agusti]
 - Investments: Evaluate implications of active flag
-- Dealer.`use_kwh`: Retornar els consums tot i que siguin 0 per un member [Cesar?]
 - Rename `generationkwh_api` -> `som_generationkwh`
 - Rename `plantmeter_api` -> `som_plantmeter`
 - ProductionLoader use dates
@@ -64,6 +63,7 @@
 - Dealer.isActive(contract) returns true if contract has any assignment right now [Cesar]
 - DealerAPI.isActive(contract) returns true if contract has any assignment right now [Cesar]
 - Assignment.isActive(contract) returns true if contract has any assignment right now [Cesar]
+- Dealer.`use_kwh`: Retornar els consums tot i que siguin 0 per un member [Cesar]
 + Assignment: Script: id conversion
 + datetime review: Use dates instead local datetimes wherever we can
     + RightsPerShare receives date (and uses datetime with mongotimecurve)
