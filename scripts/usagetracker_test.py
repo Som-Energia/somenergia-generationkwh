@@ -2,7 +2,7 @@
 
 import datetime
 from genkwh_investments import (
-    clear as investmentClear, 
+    clear as investmentClear,
     create as investmentCreate,
     )
 import unittest
@@ -23,7 +23,8 @@ class UsageTracker_Test(unittest.TestCase):
         self.partner = 2
         self.member2 = 469
         self.partner2 = 550
-        
+        self.nonMemberPartner = 1 # SomEnergia
+
     def tearDown(self):
         self.clearData()
 
@@ -94,7 +95,7 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
 
-    def test_use_kwh_notExhaustingAvailable(self):
+    def test_use_kwh__notExhaustingAvailable(self):
         investmentCreate(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [3]*2*binsPerDay)
@@ -111,7 +112,7 @@ class UsageTracker_Test(unittest.TestCase):
             +25*[0]
             )
 
-    def test_use_kwh_consumingOnConsumedDays(self):
+    def test_use_kwh__consumingOnConsumedDays(self):
         investmentCreate(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [3]*2*binsPerDay)
@@ -156,9 +157,7 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
 
-
-
-    def test_dealer(self):
+    def test_dealer__use_kwh(self):
         investmentCreate(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [0,3,0,0,0])
@@ -169,7 +168,7 @@ class UsageTracker_Test(unittest.TestCase):
             dict(contract_id=self.contract, member_id=self.member, priority=0))
         self.c.GenerationkwhAssignment.create(
             dict(contract_id=self.contract, member_id=self.member2, priority=0))
-    
+
 #        self.c.GenerationkwhTesthelper.trace_rigths_compilation(
 #            self.member2, '2015-08-01', '2015-09-01', '2.0A', 'P1')
 
@@ -194,12 +193,42 @@ class UsageTracker_Test(unittest.TestCase):
             +25*[0]
             )
 
+    def test_dealer__refund_kwh(self):
+        investmentCreate(stop="2015-06-30", waitingDays=0)
+        self.c.GenerationkwhTesthelper.setup_rights_per_share(
+            25, '2015-08-01', [3]*2*binsPerDay)
+
+        self.c.GenerationkwhAssignment.create(
+            dict(contract_id=self.contract, member_id=self.member, priority=0))
+
+        self.assertEqual(
+            self.c.GenerationkwhTesthelper.dealer_use_kwh(
+                self.contract, '2015-08-01', '2015-09-01', '2.0A', 'P1', 10), [
+                dict(member_id=self.member, kwh=10),
+            ])
+
+        self.assertEqual(
+            self.c.GenerationkwhTesthelper.dealer_refund_kwh(
+                self.contract, '2015-08-01', '2015-09-01', '2.0A', 'P1', 2, self.member),
+            2)
+
+        self.assertEqual(
+            self.c.GenerationkwhTesthelper.usage(self.member, '2015-08-01', '2015-08-03'),
+            [3,3,2]+22*[0]
+            +25*[0]
+            +25*[0]
+            )
+
     def test_map_member_by_partners_all_in(self):
         map={629:537, 5:4, 120:107, 61:54, 400:351}
         result=self.c.GenerationkwhDealer.get_members_by_partners(
             map.keys()
             )
         self.assertEqual(map,dict(result))
+
+    def test_map_member_by_partners_not_all_in(self):
+        result=self.c.GenerationkwhDealer.get_contracts_by_ref('1')
+        self.assertEqual({'1':1},dict(result))
 
     def test_map_member_by_partners_not_all_in(self):
         map={629:537, 5:4, 120:107, 61:54, 400:351}
@@ -231,7 +260,7 @@ class UsageTracker_Test(unittest.TestCase):
             )
         self.assertEqual({"S001620":1585},dict(result))
 
-    def test_dealer_api(self):
+    def test_dealerApi__use_kwh__turnsPartnersIds(self):
         # Investments
         investmentCreate(stop="2015-06-30", waitingDays=0)
         # Production
@@ -244,7 +273,7 @@ class UsageTracker_Test(unittest.TestCase):
             dict(contract_id=self.contract, member_id=self.member, priority=0))
         self.c.GenerationkwhAssignment.create(
             dict(contract_id=self.contract, member_id=self.member2, priority=0))
-    
+
 #        self.c.GenerationkwhTesthelper.trace_rigths_compilation(
 #            self.partner2, '2015-08-01', '2015-09-01', '2.0A', 'P1')
 
@@ -265,6 +294,58 @@ class UsageTracker_Test(unittest.TestCase):
         self.assertEqual(
             self.c.GenerationkwhTesthelper.usage(self.member2, '2015-08-01', '2015-08-03'),
             [0,0,7]+22*[0]
+            +25*[0]
+            +25*[0]
+            )
+
+    def test_dealerApi__refund_kwh__turnsPartnerIds(self):
+        investmentCreate(stop="2015-06-30", waitingDays=0)
+        self.c.GenerationkwhTesthelper.setup_rights_per_share(
+            25, '2015-08-01', [3]*2*binsPerDay)
+
+        self.c.GenerationkwhAssignment.create(
+            dict(contract_id=self.contract, member_id=self.member, priority=0))
+
+        self.assertEqual(
+            self.c.GenerationkwhDealer.use_kwh(
+                self.contract, '2015-08-01', '2015-09-01', '2.0A', 'P1', 10), [
+                dict(member_id=self.partner, kwh=10), # Here
+            ])
+
+        self.assertEqual(
+            self.c.GenerationkwhDealer.refund_kwh(
+                self.contract, '2015-08-01', '2015-09-01', '2.0A', 'P1', 2, self.partner), # and Here
+            2)
+
+        self.assertEqual(
+            self.c.GenerationkwhTesthelper.usage(self.member, '2015-08-01', '2015-08-03'),
+            [3,3,2]+22*[0]
+            +25*[0]
+            +25*[0]
+            )
+
+    def test_dealerApi__refund_kwh__withNonMemberPartner_doNotRefund(self):
+        investmentCreate(stop="2015-06-30", waitingDays=0)
+        self.c.GenerationkwhTesthelper.setup_rights_per_share(
+            25, '2015-08-01', [3]*2*binsPerDay)
+
+        self.c.GenerationkwhAssignment.create(
+            dict(contract_id=self.contract, member_id=self.member, priority=0))
+
+        self.assertEqual(
+            self.c.GenerationkwhDealer.use_kwh(
+                self.contract, '2015-08-01', '2015-09-01', '2.0A', 'P1', 10), [
+                dict(member_id=self.partner, kwh=10), # Here
+            ])
+
+        self.assertEqual(
+            self.c.GenerationkwhDealer.refund_kwh(
+                self.contract, '2015-08-01', '2015-09-01', '2.0A', 'P1', 2, self.nonMemberPartner),
+            0)
+
+        self.assertEqual(
+            self.c.GenerationkwhTesthelper.usage(self.member, '2015-08-01', '2015-08-03'),
+            [3,3,3,1]+21*[0]
             +25*[0]
             +25*[0]
             )

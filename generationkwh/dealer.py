@@ -37,7 +37,7 @@ class DummyDealer(object):
         ]
 
     def refund_kwh(self, contract_id, start_date, end_date, fare, period, kwh,
-                   partner_id):
+                   member_id):
         """Refunds the indicated kwh, marking them as available again, for the
            contract, date interval, fare and period and returns the ones
            efectively refund.

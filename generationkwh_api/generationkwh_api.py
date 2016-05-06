@@ -48,7 +48,7 @@ class GenerationkWhTestHelper(osv.osv):
         remainders = RemainderProvider(self, cursor, uid, context)
         endDate = isodate(startDate) + datetime.timedelta(days=(len(data)+24)%25)
         remainders.updateRemainders([
-            (nshares, endDate, 0), 
+            (nshares, endDate, 0),
             ])
 
     def rights_per_share(self, cursor, uid,
@@ -72,7 +72,7 @@ class GenerationkWhTestHelper(osv.osv):
             rights.
         """
         print "Dropping results for", member, start, stop, fare, period
-    
+
         investment = InvestmentProvider(self, cursor, uid, context)
         memberActiveShares = MemberSharesCurve(investment)
         rightsPerShare = RightsPerShare(mdbpool.get_db())
@@ -115,6 +115,17 @@ class GenerationkWhTestHelper(osv.osv):
             isodate(start),
             isodate(stop),
             )
+
+    def usage(self, cursor, uid,
+            member_id, start_date, stop_date,
+            context=None):
+        rightsUsage = MemberRightsUsage(mdbpool.get_db())
+        result = list(int(i) for i in rightsUsage.usage(
+            member_id,
+            isodate(start_date),
+            isodate(stop_date)
+            ))
+        return result
 
     def usagetracker_available_kwh(self, cursor, uid,
             member, start, stop, fare, period,
@@ -163,17 +174,6 @@ class GenerationkWhTestHelper(osv.osv):
             )
         return int(result)
 
-    def usage(self, cursor, uid,
-            member_id, start_date, stop_date,
-            context=None):
-        rightsUsage = MemberRightsUsage(mdbpool.get_db())
-        result = list(int(i) for i in rightsUsage.usage(
-            member_id,
-            isodate(start_date),
-            isodate(stop_date)
-            ))
-        return result
-        
     def dealer_use_kwh(self, cursor, uid,
             contract, start, stop, fare, period, kwh,
             context=None):
@@ -189,6 +189,23 @@ class GenerationkWhTestHelper(osv.osv):
             kwh,
             )
         return result
+
+    def dealer_refund_kwh(self, cursor, uid,
+            contract_id, start, stop, fare, period, kwh, member,
+            context=None):
+
+        GenerationkWhDealer = self.pool.get('generationkwh.dealer')
+        dealer = GenerationkWhDealer._createDealer(cursor, uid, context)
+        result = dealer.refund_kwh(
+            contract_id,
+            isodate(start),
+            isodate(stop),
+            fare,
+            period,
+            kwh,
+            member,
+            )
+        return int(result)
 
 
 GenerationkWhTestHelper()
@@ -228,7 +245,7 @@ class GenerationkWhDealer(osv.osv):
         return [ (r['partner_id'][0], r['id'])
             for r in res
             ]
-    
+
     def get_members_by_codes(self, cursor, uid, codes, context=None):
         completedCodes = [
             "S"+str(code).zfill(6)
@@ -240,7 +257,7 @@ class GenerationkWhDealer(osv.osv):
         return [ (r['ref'], r['id'])
             for r in res
             ]
-    
+
     def get_partners_by_members(self, cursor, uid, member_ids, context=None):
         Soci = self.pool.get('somenergia.soci')
         res = Soci.read(cursor, uid, member_ids, ['partner_id'], context=context)
@@ -264,7 +281,7 @@ class GenerationkWhDealer(osv.osv):
 
         socis = [ line['member_id'] for line in res ]
         members2partners = dict(self.get_partners_by_members(cursor, uid, socis, context=context))
-        print members2partners, socis
+
         def soci2partner(soci):
             return members2partners[soci]
 
@@ -294,6 +311,7 @@ class GenerationkWhDealer(osv.osv):
             for line in res
         ]
 
+
     def refund_kwh(self, cursor, uid,
                    contract_id, start_date, end_date, fare, period, kwh,
                    partner_id, context=None):
@@ -317,10 +335,19 @@ class GenerationkWhDealer(osv.osv):
         )
         logger.notifyChannel('gkwh_dealer REFUND', netsvc.LOG_INFO, txt)
 
+        partner2member = dict(self.get_members_by_partners(cursor, uid, [partner_id], context=context))
+        try:
+            member_id = partner2member[partner_id]
+        except KeyError:
+            return 0
+
         dealer = self._createDealer(cursor, uid, context)
         res = dealer.refund_kwh(
-            contract_id, isodate(start_date), isodate(end_date), fare, period, kwh, partner_id)
-        return res
+            contract_id,
+            isodate(start_date),
+            isodate(end_date),
+            fare, period, kwh, member_id)
+        return int(res)
 
     def _createTracker(self, cursor, uid, context):
 
