@@ -194,36 +194,34 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
     def test_map_member_by_partners_all_in(self):
-        map={'629':537, '5':4, '120':107, '61':54, '400':351}
-        result=self.c.GenerationkwhTesthelper.get_members_by_partners(
+        map={629:537, 5:4, 120:107, 61:54, 400:351}
+        result=self.c.GenerationkwhDealer.get_members_by_partners(
             map.keys()
             )
-        self.assertEqual(map,result)
+        self.assertEqual(map,dict(result))
 
     def test_map_member_by_partners_not_all_in(self):
-        map={'629':537, '5':4, '120':107, '61':54, '400':351
-            ,'999999999': False
-            }
-        result=self.c.GenerationkwhTesthelper.get_members_by_partners(
-            map.keys()
+        map={629:537, 5:4, 120:107, 61:54, 400:351}
+
+        result=self.c.GenerationkwhDealer.get_members_by_partners(
+            list(map.keys())+[999999]
             )
-        self.assertEqual(map,result)
+        self.assertEqual(map,dict(result))
 
 
     def test_map_partners_by_members_all_in(self):
-        map={'537':629, '4':5, '107':120, '54':61, '351':400,
-            '999999999': False}
-        result=self.c.GenerationkwhTesthelper.get_partners_by_members(
-            map.keys()
+        map={537:629, 4:5, 107:120, 54:61, 351:400,}
+        result=self.c.GenerationkwhDealer.get_partners_by_members(
+            list(map.keys())
             )
-        self.assertEqual(map,result)
+        self.assertEqual(map,dict(result))
 
     def test_map_partners_by_members_not_all_in(self):
-        map={'537':629, '4':5, '107':120, '54':61, '351':400}
-        result=self.c.GenerationkwhTesthelper.get_partners_by_members(
-            map.keys()
+        map={537:629, 4:5, 107:120, 54:61, 351:400,}
+        result=self.c.GenerationkwhDealer.get_partners_by_members(
+            list(map.keys())+[999999]
             )
-        self.assertEqual(map,result)
+        self.assertEqual(map,dict(result))
 
     def test_dealer_api(self):
         # Investments

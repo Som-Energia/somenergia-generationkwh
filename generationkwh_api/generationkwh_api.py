@@ -190,19 +190,6 @@ class GenerationkWhTestHelper(osv.osv):
             )
         return result
 
-    def get_partners_by_members(self, cursor, uid, member_ids, context=None):
-        GenerationkWhDealer = self.pool.get('generationkwh.dealer')
-        member_ids = [int(i) for i in member_ids]
-        result = GenerationkWhDealer.get_partners_by_members(cursor, uid, member_ids, context)
-        return dict(
-            (str(key),value) for key,value in result.items())
-
-    def get_members_by_partners(self, cursor, uid, partner_ids, context=None):
-        GenerationkWhDealer = self.pool.get('generationkwh.dealer')
-        partner_ids = [int(i) for i in partner_ids]
-        result = GenerationkWhDealer.get_members_by_partners(cursor, uid, partner_ids, context)
-        return dict(
-            (str(key),value) for key,value in result.items())
 
 GenerationkWhTestHelper()
 
@@ -236,24 +223,19 @@ class GenerationkWhDealer(osv.osv):
 
     def get_members_by_partners(self, cursor, uid, partner_ids, context=None):
         Soci = self.pool.get('somenergia.soci')
-        d = dict((id, False) for id in partner_ids)
         member_ids = Soci.search(cursor, uid, [('partner_id','in',partner_ids)], context=context)
         res = Soci.read(cursor, uid, member_ids, ['partner_id'], context=context)
-        d.update(
-            (r['partner_id'][0], r['id'])
+        return [ (r['partner_id'][0], r['id'])
             for r in res
-            )
-        return d
+            ]
     
     def get_partners_by_members(self, cursor, uid, member_ids, context=None):
         Soci = self.pool.get('somenergia.soci')
         res = Soci.read(cursor, uid, member_ids, ['partner_id'], context=context)
-        d = dict((id, False) for id in member_ids)
-        d.update(
+        return [
             (r['id'], r['partner_id'][0])
             for r in res
-            )
-        return d
+            ]
 
     def use_kwh(self, cursor, uid,
                 contract_id, start_date, end_date, fare, period, kwh,
@@ -269,7 +251,7 @@ class GenerationkWhDealer(osv.osv):
             contract_id, isodate(start_date), isodate(end_date), fare, period, kwh)
 
         socis = [ line['member_id'] for line in res ]
-        members2partners = self.get_partners_by_members(cursor, uid, socis, context=context)
+        members2partners = dict(self.get_partners_by_members(cursor, uid, socis, context=context))
         print members2partners, socis
         def soci2partner(soci):
             return members2partners[soci]

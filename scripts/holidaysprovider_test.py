@@ -22,7 +22,7 @@ class Holidays_Test(unittest.TestCase):
         self.HolidaysHelper = self.c.GenerationkwhHolidaysTesthelper
 
     def assertEqualDates(self, result, expected):
-        self.assertEqual([ naiveisodate(date) for date in expected], result)
+        self.assertEqual(expected, result)
 
     def test_holidays(self):
         self.assertEqualDates(
