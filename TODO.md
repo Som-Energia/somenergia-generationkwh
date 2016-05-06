@@ -2,9 +2,8 @@
 
 ## Inmediate TODO's
 
-+ DealerAPI: Convert `soci_id` from and to `partner_id` [David]
-- Dealer: `refund_kwh` test
-- DealerAPI: `refund_kwh`
+- Dealer: `refund_kwh` integration test
+- DealerAPI: `refund_kwh` (id mapping)
 - Assignment.isActive(contract) returns true if contract has any assignment right now [Cesar]
 - Dealer.isActive(contract) returns true if contract has any assignment right now [Cesar]
 - DealerAPI.isActive(contract) returns true if contract has any assignment right now [Cesar]
@@ -15,24 +14,13 @@
 - Dealer.`use_kwh`: Retornar els consums tot i que siguin 0 per un member [Cesar?]
 - Rename `generationkwh_api` -> `som_generationkwh`
 - Rename `plantmeter_api` -> `som_plantmeter`
-- datetime review: Use dates instead local datetimes wherever we can
-    + RightsPerShare receives date (and uses datetime with mongotimecurve)
-    + MemberRightCurver receives date (and still sends local to ActiveShareCurve)
-    + MemberShareCurve uses date
-    + InvestmentProvider: uses date
-    + genkwh-investment list sends dates as strings instead of local
-    + FarePeriod uses dates
-    - MemberRights usage uses dates
-    - UseTracker uses dates
-    + Remainders uses dates
-    + Dealer uses dates
-    - ProductionLoader uses dates
+- ProductionLoader use dates
 - Assignment: update priority overwritting write?? (Low)
+- Assignment: Scrit: --all flag for default
 - Assignment: log in soci observations
 - Investment: test activate and move it from erppeek to erp
 - Assignment: Script: add command
 - Assignment: Script: test expire command
-- Assignment: Script: id conversion
 - RemainderProvider.init not yet implemented!!
 - RemainderProvider: More semantics to method names (set,get -> updateRemainders, lastRemainders)
 
@@ -57,11 +45,8 @@
 - Assignment: Change priority expires assigments and creates new
 - Assignment: Send an activation mail explaining default assignment
 
-+ FarePeriodCurve: Use numpy arrays
-+ FarePeriodCurve: Date parameter should be dates not strings
 
 - BUG: Mongodb erp integration: reconnections do not refresh connection attr
-- Review dates management across interfaces
 - Security: add users to generationkwh group
 - Security: add users to plantmeter group
 - Refund to a member that does not exist
@@ -79,6 +64,21 @@
 
 ## DONE
 
++ Assignment: Script: id conversion
++ datetime review: Use dates instead local datetimes wherever we can
+    + RightsPerShare receives date (and uses datetime with mongotimecurve)
+    + MemberRightCurver receives date (and still sends local to ActiveShareCurve)
+    + MemberShareCurve uses date
+    + InvestmentProvider: uses date
+    + genkwh-investment list sends dates as strings instead of local
+    + FarePeriod uses dates
+    + MemberRights usage uses dates
+    + UseTracker uses dates
+    + Remainders uses dates
+    + Dealer uses dates
++ DealerAPI: Convert `soci_id` from and to `partner_id` [David]
++ FarePeriodCurve: Use numpy arrays
++ FarePeriodCurve: Date parameter should be dates not strings
 + Contrast API usage from invoice with actual API
 + Assignment: rewrite create, call expire, then super, deprecate add
 + FarePeriodCurve: Fares dictionary should be at libfacturacioatr
