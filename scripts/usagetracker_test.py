@@ -223,6 +223,13 @@ class UsageTracker_Test(unittest.TestCase):
             )
         self.assertEqual(map,dict(result))
 
+    def test_getMembersByCode(self):
+        map={1620:1911}
+        result=self.c.GenerationkwhDealer.get_members_by_codes(
+            list(map.keys())
+            )
+        self.assertEqual({"S001620":1585},dict(result))
+
     def test_dealer_api(self):
         # Investments
         investmentCreate(stop="2015-06-30", waitingDays=0)

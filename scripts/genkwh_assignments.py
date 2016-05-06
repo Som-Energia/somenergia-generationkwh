@@ -5,6 +5,7 @@ Manages recipient contracts of kWh rights for a Generation-kWh investor.
 
 import erppeek
 import datetime
+from consolemsg import step, success
 from dateutil.relativedelta import relativedelta
 import dbconfig
 from yamlns import namespace as ns
@@ -49,16 +50,16 @@ def parseArgumments():
             help="select members by its partner database id, "
                 "instead member database id",
             )
-        """
         sub.add_argument(
             '-n','--number',
             dest='idmode',
             action='store_const',
-            const='number',
+            const='code',
             default='memberid',
             help="select members by its member code number, "
                 "instead member database id",
             )
+        """
         sub.add_argument(
             '--all',
             action='store_true',
@@ -72,20 +73,25 @@ def parseArgumments():
         """
         sub.add_argument(
             dest='members',
-            action='append',
             nargs='*',
             help='investors of Generation-kWh (see --partner and --number)',
             )
 
     return parser.parse_args(namespace=ns())
 
-def preprocessMembers(members=None,idmode=None):
+def preprocessMembers(members, idmode):
     """Turns members in which ever format to the ones required by commands"""
     if idmode=="partner":
-        members = c.GenerationkwhTesthelper.get_members_by_partners(members).values()
-    else:
-        pass
+        idmap = dict(c.GenerationkwhDealer.get_members_by_partners(members))
+        return idmap.values()
+
+    if idmode=="code":
+        idmap = dict(c.GenerationkwhDealer.get_members_by_codes(members))
+        return idmap.values()
+
     return members
+
+
 def clear(**args):
     c.GenerationkwhAssignment.dropAll()
 
@@ -102,7 +108,7 @@ def list(csv=False,**args):
     def buildcsv(data):
         return u''.join((
             u"\t".join((
-                unicode(c) for c in line
+                unicode(cell) for cell in line
                 ))+'\n'
             for line in data))
 
@@ -135,16 +141,21 @@ def expire(
         member=None,
         contract=None,
         **_):
+    step("Markin as expired assignation between contract {} and member {}"
+        .format(contract, member))
     c.GenerationkwhAssignment.expire(contract, member)
+    success("Done.")
 
 def default(
         members=None,
         force=False,
         idmode=None,
         **_):
-    if force: clear()
-    members=preprocessMembers(members[0],idmode)
+    members=preprocessMembers(members, idmode)
+    step("Generating default assignments for members: {}".format(
+        ','.join(str(i) for i in members)))
     c.GenerationkwhAssignment.createDefaultForMembers(members)
+    success("Done.")
 
 
 c = erppeek.Client(**dbconfig.erppeek)
