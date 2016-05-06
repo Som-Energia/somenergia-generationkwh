@@ -4,7 +4,6 @@
 
 - Dealer: `refund_kwh` integration test
 - DealerAPI: `refund_kwh` (id mapping)
-- Assignment.isActive(contract) returns true if contract has any assignment right now [Cesar]
 - Dealer.isActive(contract) returns true if contract has any assignment right now [Cesar]
 - DealerAPI.isActive(contract) returns true if contract has any assignment right now [Cesar]
 - Investment: `active` field to hide failed payments (the original one and the refund) [Agusti]
@@ -64,6 +63,7 @@
 
 ## DONE
 
+- Assignment.isActive(contract) returns true if contract has any assignment right now [Cesar]
 + Assignment: Script: id conversion
 + datetime review: Use dates instead local datetimes wherever we can
     + RightsPerShare receives date (and uses datetime with mongotimecurve)

@@ -199,7 +199,8 @@ class GenerationkWhAssignment(osv.osv):
             last_usable_date=str(assign.last_usable_date),
         ) for assign in assignmentProvider.seek(contract_id)]
 
-
+    def isActive(self, cursor, uid, contract_id, context=None):
+        return len(self.search(cursor,uid,[('contract_id','=',contract_id),('end_date','=',False)]))>=1
 GenerationkWhAssignment()
 
 
