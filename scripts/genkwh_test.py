@@ -1,19 +1,16 @@
 #!/usr/bin/env python
-description = """
-Generates investments from the accounting logs.
+"""
+Runs integration tests
 """
 
-import erppeek
-import dbconfig
-import b2btest
 
-import glob
-import os
-from yamlns import namespace as ns
+import b2btest # to activate b2b acceptation on main
+
+# Testsuites
 from dealer_test import *
 from remainder_test import *
 from holidaysprovider_test import *
-from investmentmanagement_test import *
+from investment_test import *
 from usagetracker_test import *
 from assignment_test import *
 from productionloader_test import *

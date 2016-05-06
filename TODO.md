@@ -17,7 +17,7 @@
 - Investment: optimize with sql
 - Investment: Script: create should return the ids of the resulting investments to pass them to the Assignments script
 - Assignment: Script: default should return the created assignments to pass them to the mail creation
-- RemainderProvider.init not yet implemented!!
+- RemainderProvider.init not yet implemented!! (zero remainder for 1-share at first day)
 - Script to feed testing (and real?) production
 - Init:
     - Setup plants
