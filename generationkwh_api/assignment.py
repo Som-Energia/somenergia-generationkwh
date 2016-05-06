@@ -189,6 +189,9 @@ class GenerationkWhAssignment(osv.osv):
         for a in self.browse(cr, uid, ids, context=context):
             a.unlink()
 
+    def isActive(self, cursor, uid, contract_id, context=None):
+        assignmentProvider = AssignmentProvider(self, cursor, uid, context)
+        return assignmentProvider.isActive(contract_id)
 
     def availableAssigmentsForContract(self, cursor, uid, contract_id, context=None):
         # TODO Control inversion with AssignmentProvider.seek
@@ -199,8 +202,6 @@ class GenerationkWhAssignment(osv.osv):
             last_usable_date=str(assign.last_usable_date),
         ) for assign in assignmentProvider.seek(contract_id)]
 
-    def isActive(self, cursor, uid, contract_id, context=None):
-        return len(self.search(cursor,uid,[('contract_id','=',contract_id),('end_date','=',False)]))>=1
 GenerationkWhAssignment()
 
 
@@ -222,5 +223,13 @@ class AssignmentProvider(ErpWrapper):
             in self.cursor.fetchall()
             ]
 
+    def isActive(self, contract_id):
+        Assignment = self.erp.pool.get('generationkwh.assignment')
+        return len(Assignment.search(
+            self.cursor,
+            self.uid,
+            [('contract_id','=',contract_id),('end_date','=',False)],
+            context=self.context
+            ))>=1
 
 
