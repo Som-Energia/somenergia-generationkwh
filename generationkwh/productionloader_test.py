@@ -70,11 +70,11 @@ class ProductionLoaderTest(unittest.TestCase):
 
     def assertStartPointEqual(self, firstProductionDate, remainders, expected):
         l = ProductionLoader()
-        date = l.startPoint(isodate(firstProductionDate),[
+        date = l.startPoint(localisodate(firstProductionDate),[
             (shares, isodate(date), remainderwh)
             for shares, date, remainderwh in remainders
             ])
-        self.assertEqual(str(date), expected)
+        self.assertEqual(str(date.date()), expected)
     
     def test_startPoint_withNoremainders(self):
         self.assertStartPointEqual('2000-01-01',[
@@ -110,12 +110,12 @@ class ProductionLoaderTest(unittest.TestCase):
 
     def assertDatePairEqual(self, expected, result):
         e1,e2 = expected
-        self.assertEqual((isodate(e1),isodate(e2)), result)
+        self.assertEqual((localisodate(e1),localisodate(e2)), result)
 
     def test_getRecomputationInterval_withNoremainders_takesFirstMeassure(self):
         p = ProductionAggregatorMockUp(
-                first=isodate('2000-01-01'),
-                last=isodate('2006-01-01'),
+                first=localisodate('2000-01-01'),
+                last=localisodate('2006-01-01'),
                 )
         l = ProductionLoader(productionAggregator=p)
         interval = l._recomputationInterval([])
@@ -123,8 +123,8 @@ class ProductionLoaderTest(unittest.TestCase):
     
     def test_getRecomputationInterval_withSingleRemainders_takesIt(self):
         p = ProductionAggregatorMockUp(
-                first=isodate('2000-01-01'),
-                last=isodate('2006-01-01'),
+                first=localisodate('2000-01-01'),
+                last=localisodate('2006-01-01'),
                 )
         l = ProductionLoader(productionAggregator=p)
         interval = l._recomputationInterval([
@@ -134,8 +134,8 @@ class ProductionLoaderTest(unittest.TestCase):
 
     def test_getRecomputationInterval_withManyRemainders_takesEarlier(self):
         p = ProductionAggregatorMockUp(
-                first=isodate('2000-01-01'),
-                last=isodate('2006-01-01'),
+                first=localisodate('2000-01-01'),
+                last=localisodate('2006-01-01'),
                 )
         l = ProductionLoader(productionAggregator=p)
         interval = l._recomputationInterval([
@@ -147,8 +147,8 @@ class ProductionLoaderTest(unittest.TestCase):
     @unittest.skip("Failing case!!")
     def test_getRecomputationInterval_withRemaindersSameTarget_takesLater(self):
         p = ProductionAggregatorMockUp(
-                first=isodate('2000-01-01'),
-                last=isodate('2006-01-01'),
+                first=localisodate('2000-01-01'),
+                last=localisodate('2006-01-01'),
                 )
         l = ProductionLoader(productionAggregator=p)
         interval = l._recomputationInterval([
@@ -190,7 +190,7 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(list(result),
             +10*[0]+[1]+14*[0])
         self.assertEqual(remainders.lastRemainders(), [
-            (1, localisodate('2015-08-17'), 0),
+            (1, isodate('2015-08-17'), 0),
             ])
 
     def test_appendRightsPerShare_withManyPlantShares_divides(self):
@@ -211,7 +211,7 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(list(result),
             +10*[0]+[5]+14*[0])
         self.assertEqual(remainders.lastRemainders(), [
-            (1, localisodate('2015-08-17'), 0),
+            (1, isodate('2015-08-17'), 0),
             ])
 
     def test_appendRightsPerShare_withNShares_multiplies(self):
@@ -232,7 +232,7 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(list(result),
             +10*[0]+[2]+14*[0])
         self.assertEqual(remainders.lastRemainders(), [
-            (2, localisodate('2015-08-17'), 0),
+            (2, isodate('2015-08-17'), 0),
             ])
 
     def test_appendRightsPerShare_withAdvancedRemainder(self):
@@ -253,7 +253,7 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(list(result),
             +10*[0]+[1]+14*[0])
         self.assertEqual(remainders.lastRemainders(), [
-            (1, localisodate('2015-08-17'), 0),
+            (1, isodate('2015-08-17'), 0),
             ])
 
     def test_appendRightsPerShare_firstDateToCompute_isProtected(self):
@@ -337,7 +337,7 @@ class ProductionLoaderTest(unittest.TestCase):
     def test_computeAvailableRights_singleDay(self):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([
-            (1, localisodate('2015-08-16'), 0),
+            (1, isodate('2015-08-16'), 0),
             ])
         production = ProductionAggregatorMockUp(
                 first=localisodate('2015-08-16'),
@@ -356,13 +356,13 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(list(result),
             +10*[0]+[1]+14*[0])
         self.assertEqual(remainders.lastRemainders(), [
-            (1, localisodate('2015-08-17'), 0),
+            (1, isodate('2015-08-17'), 0),
             ])
 
     def test_computeAvailableRights_withManyPlantShares_divides(self):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([
-            (1, localisodate('2015-08-16'), 0),
+            (1, isodate('2015-08-16'), 0),
             ])
         production = ProductionAggregatorMockUp(
                 first=localisodate('2015-08-16'),
@@ -381,14 +381,14 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(list(result),
             +10*[0]+[5]+14*[0])
         self.assertEqual(remainders.lastRemainders(), [
-            (1, localisodate('2015-08-17'), 0),
+            (1, isodate('2015-08-17'), 0),
             ])
 
     def test_computeAvailableRights_withNShares_multiplies(self):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([
-            (1, localisodate('2015-08-16'), 0),
-            (2, localisodate('2015-08-16'), 0),
+            (1, isodate('2015-08-16'), 0),
+            (2, isodate('2015-08-16'), 0),
             ])
         production = ProductionAggregatorMockUp(
                 first=localisodate('2015-08-16'),
@@ -407,14 +407,14 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(list(result),
             +10*[0]+[2]+14*[0])
         self.assertEqual(remainders.lastRemainders(), [
-            (1, localisodate('2015-08-17'), 0),
-            (2, localisodate('2015-08-17'), 0),
+            (1, isodate('2015-08-17'), 0),
+            (2, isodate('2015-08-17'), 0),
             ])
 
     def test_computeAvailableRights_withAdvancedRemainder(self):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([
-            (1, localisodate('2015-08-16'), 0),
+            (1, isodate('2015-08-16'), 0),
             ])
         production = ProductionAggregatorMockUp(
                 first=localisodate('2015-08-16'),
@@ -433,7 +433,7 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(list(result),
             +10*[0]+[1]+14*[0])
         self.assertEqual(remainders.lastRemainders(), [
-            (1, localisodate('2015-08-17'), 0),
+            (1, isodate('2015-08-17'), 0),
             ])
 
     def test_retrieveMeasuresFromPlants(self):

@@ -93,7 +93,7 @@ class ProductionLoader_Test(unittest.TestCase):
         return aggr
 
     def setupRemainders(self, remainders):
-        remainder = self.erp.model('generationkwh.remainder')
+        remainder = self.erp.model('generationkwh.remainder.testhelper')
         remainder.updateRemainders(remainders)
         return remainder
 
@@ -184,7 +184,7 @@ class ProductionLoader_Test(unittest.TestCase):
         result = self.TestHelper.rights_per_share(1, '2015-08-16', '2015-08-16')
         self.assertEqual(result, +10*[0]+[1]+14*[0])
         self.assertEqual(remainder.lastRemainders(), [
-            [1, localisodate('2015-08-17'), 0],
+            [1, '2015-08-17', 0],
             ])
 
     def test_computeAvailableRights_withManyPlantShares_divides(self):
@@ -204,7 +204,7 @@ class ProductionLoader_Test(unittest.TestCase):
         result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-16')
         self.assertEqual(result, +10*[0]+[5]+14*[0])
         self.assertEqual(remainder.lastRemainders(), [
-            [1, localisodate('2015-08-17'), 0],
+            [1, '2015-08-17', 0],
             ])
 
     def test_computeAvailableRights_withManyPlantShares_twoDays(self):
@@ -224,7 +224,7 @@ class ProductionLoader_Test(unittest.TestCase):
         result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-17')
         self.assertEqual(result, 2*(10*[0]+[5]+14*[0]))
         self.assertEqual(remainder.lastRemainders(), [
-            [1, localisodate('2015-08-18'), 0],
+            [1, '2015-08-18', 0],
             ])
 
 if __name__ == '__main__':

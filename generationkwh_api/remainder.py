@@ -3,7 +3,7 @@
 from osv import osv, fields
 from .erpwrapper import ErpWrapper
 
-from generationkwh.isodates import localisodate
+from generationkwh.isodates import isodate
 
 class RemainderProvider(ErpWrapper):
 
@@ -71,7 +71,7 @@ class GenerationkWhRemainder(osv.osv):
         result = [
             (
                 n_shares,
-                localisodate(target_day),
+                isodate(target_day),
                 remainder_wh,
             ) for n_shares, target_day, remainder_wh in cr.fetchall()
         ]
@@ -130,16 +130,17 @@ class GenerationkWhRemainderTesthelper(osv.osv):
     _name = "generationkwh.remainder.testhelper"
 
     def lastRemainders(self, cr, uid, context=None):
-        def toStr(date):
-            return date.strftime('%Y-%m-%d')
 
         remainder = self.pool.get('generationkwh.remainder')
         remainders = remainder.lastRemainders(cr, uid, context)
-        return [(r[0], toStr(r[1]), r[2]) for r in remainders]
+        return [(r[0], str(r[1]), r[2]) for r in remainders]
 
     def updateRemainders(self, cr, uid, remainders, context=None):
         remainder = self.pool.get('generationkwh.remainder')
-        remainder.updateRemainders(cr, uid, remainders, context)
+        remainder.updateRemainders(cr, uid, [
+            (nshares, str(target_day), remainder_wh)
+            for nshares, target_day, remainder_wh in remainders
+            ], context)
 
     def clean(self,cr,uid,context=None):
         remainder = self.pool.get('generationkwh.remainder')

@@ -23,6 +23,7 @@ TODO:
 
 from plantmeter.mongotimecurve import addDays, assertLocalDateTime, toLocal
 from .productiontorightspershare import ProductionToRightsPerShare
+from .isodates import dateToLocal
 
 import datetime
 import numpy
@@ -39,7 +40,7 @@ class ProductionLoader(object):
         if not remainders:
             return startDateOfProduction
         return min(
-            date
+            dateToLocal(date)
             for shares, date, remainderwh in remainders
             )
     
@@ -79,7 +80,7 @@ class ProductionLoader(object):
         userRights, newRemainder = ProductionToRightsPerShare().computeRights(
                 production[startIndex:], plantshares[startIndex:], nshares, lastRemainder)
         self.remainders.updateRemainders([
-                [nshares, addDays(lastDateToCompute,1), newRemainder]])
+                [nshares, addDays(lastDateToCompute,1).date(), newRemainder]])
         self.rightsPerShare.updateRightsPerShare(
                 nshares, lastDateToCompute.date(), userRights)
 
@@ -93,7 +94,7 @@ class ProductionLoader(object):
         for n, date, remainder in remainders:
             self._appendRightsPerShare(
                 nshares=n,
-                firstDateToCompute = date,
+                firstDateToCompute = dateToLocal(date),
                 lastRemainder = remainder,
                 production = numpy.asarray(aggregatedProduction),
                 plantshares = plantShareCurve,

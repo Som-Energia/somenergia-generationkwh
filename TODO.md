@@ -24,8 +24,8 @@
     + FarePeriod uses dates
     - MemberRights usage uses dates
     - UseTracker uses dates
-    - Remainders uses dates
-    - Dealer uses dates
+    + Remainders uses dates
+    + Dealer uses dates
     - ProductionLoader uses dates
 - Assignment: update priority overwritting write?? (Low)
 - Assignment: log in soci observations
