@@ -22,6 +22,9 @@ def parseArgumments():
     list = subparsers.add_parser('list',
         help="list assignments",
         )
+    set = subparsers.add_parser('set',
+        help="set assignment",
+        )
     expire = subparsers.add_parser('expire',
         help="expire assignments",
         )
@@ -31,6 +34,12 @@ def parseArgumments():
     clear = subparsers.add_parser('clear',
         help="clear investments objects",
         )
+
+    for sub in set,:
+        sub.add_argument('contract')
+        sub.add_argument('member')
+        sub.add_argument('priority')
+
     for sub in expire,:
         sub.add_argument(
             'contract',
@@ -79,7 +88,15 @@ def parseArgumments():
 
     return parser.parse_args(namespace=ns())
 
-def preprocessMembers(members, idmode):
+def set(member=None,contract=None,priority=None):
+    expire(member=member,contract=contract)
+    c.GenerationkwhAssignment.create({
+        'member_id': member,
+        'contract_id': contract,
+        'priority': priority
+    })
+
+def preprocessMembers(members=None,idmode=None):
     """Turns members in which ever format to the ones required by commands"""
     if idmode=="partner":
         idmap = dict(c.GenerationkwhDealer.get_members_by_partners(members))
