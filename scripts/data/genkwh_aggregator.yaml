@@ -1,0 +1,17 @@
+generationkwh:
+    name: GenerationkWh
+    description: GenerationkWh
+    enabled: True 
+    plants:
+        alcolea:
+            name: Alcolea
+            description: Alcolea
+            enabled: True
+            meters:
+                mains:
+                    name: mains 
+                    description: Alcolea mains meter
+                    uri: csv://tmp/data/alcolea.csv
+                    enabled: True
+
+# vim: ts=4 sw=4 et 
