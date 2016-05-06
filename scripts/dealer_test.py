@@ -1,6 +1,10 @@
+# -*- coding: utf-8 -*-
+
 import unittest
 
+
 class Dealer_test(unittest.TestCase):
+
     def setUp(self):
         self.maxDiff=None
         import erppeek
@@ -12,18 +16,23 @@ class Dealer_test(unittest.TestCase):
         self.partner = 2
         self.member2 = 469
         self.partner2 = 550
+
     def tearDown(self):
         self.clearData()
 
     def clearData(self):
         self.c.GenerationkwhAssignment.dropAll()
     
-    def test_isActive_noActiveContracts(self):
+    def test_isActive_withBadContract(self):
         result = self.c.GenerationkwhDealer.is_active(99999999,False, False)
         self.assertEqual(result,False)
     
 
-    def test_isActive_ActiveOneContract(self):
+    def test_isActive_withoutAssignments(self):
+        result = self.c.GenerationkwhDealer.is_active(self.contract,False, False)
+        self.assertEqual(result,False)
+
+    def test_isActive_withAssignments(self):
         self.c.GenerationkwhAssignment.create(
             dict(contract_id=self.contract, member_id=self.member, priority=1))
         result = self.c.GenerationkwhDealer.is_active(self.contract,False, False)
@@ -31,3 +40,5 @@ class Dealer_test(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+

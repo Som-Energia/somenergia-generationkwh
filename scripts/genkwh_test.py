@@ -13,10 +13,10 @@ from yamlns import namespace as ns
 from dealer_test import *
 from remainder_test import *
 from holidaysprovider_test import *
-#from investmentmanagement_test import *
+from investmentmanagement_test import *
 from usagetracker_test import *
 from assignment_test import *
-#from productionloader_test import *
+from productionloader_test import *
 
 def parseArgumments():
     import argparse
