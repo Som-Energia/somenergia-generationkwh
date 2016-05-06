@@ -22,11 +22,6 @@ class Dealer_test(unittest.TestCase):
         result = self.c.GenerationkwhDealer.is_active(99999999,False, False)
         self.assertEqual(result,False)
     
-    def test_isActive_ActiveOtherContract(self):
-        self.c.GenerationkwhAssignment.create(
-            dict(contract_id=self.contract, member_id=self.member, priority=1))
-        result = self.c.GenerationkwhDealer.is_active(99999999, False, False)
-        self.assertEqual(result,False)
 
     def test_isActive_ActiveOneContract(self):
         self.c.GenerationkwhAssignment.create(
@@ -34,37 +29,5 @@ class Dealer_test(unittest.TestCase):
         result = self.c.GenerationkwhDealer.is_active(self.contract,False, False)
         self.assertEqual(result,True)
 
-    def test_isActive_ExpiredContract(self):
-        self.c.GenerationkwhAssignment.create(
-            dict(contract_id=self.contract, member_id=self.member, priority=1))
-        self.c.GenerationkwhAssignment.expire(self.contract,self.member)
-        result = self.c.GenerationkwhDealer.is_active(self.contract, False, False)
-        self.assertEqual(result,False)
-        
-    def test_isActive_ExpiredAndActiveContract(self):
-        self.c.GenerationkwhAssignment.create(
-            dict(contract_id=self.contract, member_id=self.member, priority=1))
-        self.c.GenerationkwhAssignment.create(
-            dict(contract_id=self.contract, member_id=self.member, priority=1))
-        result = self.c.GenerationkwhDealer.is_active(self.contract, False, False)
-        self.assertEqual(result,True)
-
-    def test_isActive_OtherExpiredActiveContract(self):
-        self.c.GenerationkwhAssignment.create(
-            dict(contract_id=self.contract, member_id=self.member, priority=1))
-        self.c.GenerationkwhAssignment.create(
-            dict(contract_id=self.contract2, member_id=self.member2, priority=1))
-        self.c.GenerationkwhAssignment.expire(self.contract,self.member)
-        result = self.c.GenerationkwhDealer.is_active(self.contract2, False, False)
-        self.assertEqual(result,True)
-        
-    def test_isActive_OtherActiveExpiredContract(self):
-        self.c.GenerationkwhAssignment.create(
-            dict(contract_id=self.contract, member_id=self.member, priority=1))
-        self.c.GenerationkwhAssignment.create(
-            dict(contract_id=self.contract2, member_id=self.member2, priority=1))
-        self.c.GenerationkwhAssignment.expire(self.contract,self.member)
-        result = self.c.GenerationkwhDealer.is_active(self.contract, False, False)
-        self.assertEqual(result,False)
 if __name__ == '__main__':
     unittest.main()
