@@ -125,9 +125,16 @@ class GenerationkWhInvestment(osv.osv):
         Member = self.pool.get('somenergia.soci')
         generationAccountPrefix = '163500%'
 
-        accountIds = Account.search(cursor, uid, [
-            ('code','ilike',generationAccountPrefix),
-            ])
+        cursor.execute("""
+            SELECT
+                account.id
+            FROM account_account AS account
+            WHERE
+                account.code ILIKE %(generationAccountPrefix)s
+            """, dict(
+                generationAccountPrefix=generationAccountPrefix,
+                ))
+        accountIds = cursor.fetchall()
 
         criteria = [('account_id','in',accountIds)]
         if stop: criteria.append(('date_created', '<=', str(stop)))
