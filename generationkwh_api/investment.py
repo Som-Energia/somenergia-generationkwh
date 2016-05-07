@@ -127,24 +127,28 @@ class GenerationkWhInvestment(osv.osv):
 
         cursor.execute("""
             SELECT
-                account.id
-            FROM account_account AS account
+                line.id
+            FROM account_move_line AS line
+            LEFT JOIN
+                account_account AS account
+                ON account.id = line.account_id
             WHERE
-                account.code ILIKE %(generationAccountPrefix)s
+                account.code ILIKE %(generationAccountPrefix)s AND
+                -- TODO: Removing stop is null condition does not fail any test
+                (%(stop)s IS NULL OR date_created <= %(stop)s) AND
+                (%(start)s IS NULL OR date_created >= %(start)s) AND
+                TRUE
+            ORDER BY 
+                line.date_created asc,
+                line.id asc,
+                TRUE
             """, dict(
-                generationAccountPrefix=generationAccountPrefix,
+                generationAccountPrefix = generationAccountPrefix,
+                start = start,
+                stop = stop,
                 ))
-        accountIds = cursor.fetchall()
+        movelinesids = [id for id, in cursor.fetchall()]
 
-        criteria = [('account_id','in',accountIds)]
-        if stop: criteria.append(('date_created', '<=', str(stop)))
-        if start: criteria.append(('date_created', '>=', str(start)))
-
-        movelinesids = MoveLine.search(
-            cursor, uid, criteria,
-            order='date_created asc, id asc',
-            context=context
-            )
         for line in MoveLine.browse(cursor, uid, movelinesids, context):
             # Filter out already converted move lines
             if self.search(cursor, uid,
