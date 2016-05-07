@@ -115,41 +115,15 @@ def create(start=None, stop=None,
     c.GenerationkwhInvestment.create_from_accounting(
         start, stop, waitingDays, expirationYears)
 
-# TODO: Tests
-# TODO: Move implementation to the ERP side
 def activate(
         waitingDays,
         start=None, stop=None,
         expirationYears=None,
         force=False,
         **_):
-    criteria = []
-    if not force: criteria.append(('activation_date', '=', False))
-    if stop: criteria.append(('purchase_date', '<=', str(stop)))
-    if start: criteria.append(('purchase_date', '>=', str(start)))
 
-    investments = c.read( 'generationkwh.investment', criteria)
-
-    for investment in investments:
-        investment = ns(investment)
-        updateDict = dict(
-            activation_date=(
-                str(isodate(investment.purchase_date)
-                    +relativedelta(days=waitingDays))
-                ),
-            )
-        if expirationYears:
-            updateDict.update(
-                deactivation_date=(
-                    str(isodate(investment.purchase_date)
-                        +relativedelta(
-                            years=expirationYears,
-                            days=waitingDays,
-                            )
-                        )
-                    ),
-                )
-        c.write('generationkwh.investment', investment.id, updateDict)
+    return c.GenerationkwhInvestment.activate(
+        start, stop, waitingDays, expirationYears, force)
 
 c = erppeek.Client(**dbconfig.erppeek)
 

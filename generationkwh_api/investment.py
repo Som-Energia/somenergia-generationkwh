@@ -178,6 +178,37 @@ class GenerationkWhInvestment(osv.osv):
                 move_line_id=line.id,
                 ))
 
+    def activate(self, cursor, uid,
+            start, stop, waitingDays, expirationYears, force,
+            context=None):
+        criteria = []
+        if not force: criteria.append(('activation_date', '=', False))
+        if stop: criteria.append(('purchase_date', '<=', str(stop)))
+        if start: criteria.append(('purchase_date', '>=', str(start)))
+
+        investments_id = self.search(cursor, uid, criteria, context=context)
+        investments = self.browse(cursor, uid, investments_id, context=context)
+
+        for investment in investments:
+            updateDict = dict(
+                activation_date=(
+                    str(isodate(investment.purchase_date)
+                        +relativedelta(days=waitingDays))
+                    ),
+                )
+            if expirationYears:
+                updateDict.update(
+                    deactivation_date=(
+                        str(isodate(investment.purchase_date)
+                            +relativedelta(
+                                years=expirationYears,
+                                days=waitingDays,
+                                )
+                            )
+                        ),
+                    )
+            self.write(cursor, uid, investment.id, updateDict, context=context)
+
 class InvestmentProvider(ErpWrapper):
 
     def shareContractsTuple(self, member=None, start=None, end=None):
