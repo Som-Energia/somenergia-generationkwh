@@ -132,3 +132,10 @@ class Investment_Test(unittest.TestCase):
         data = listactive(csv=True)
         self.assertB2BEqual(data)
 
+    def test_activate_withExpiration(self):
+        clear()
+        create(stop="2015-07-03")
+        activate(stop="2015-06-30", waitingDays=0, expirationYears=1)
+        data = listactive(csv=True)
+        self.assertB2BEqual(data)
+
