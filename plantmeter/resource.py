@@ -11,9 +11,6 @@ TODOs
 - Padding
 """
 
-def local_file(filename):
-    return os.path.join(os.path.abspath(os.path.dirname(__file__)), filename)
-
 class Resource(object):
     id = None 
     name = None

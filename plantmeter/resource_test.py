@@ -8,6 +8,9 @@ from datetime import datetime
 
 import unittest
 
+def local_file(filename):
+    return os.path.join(os.path.abspath(os.path.dirname(__file__)), filename)
+
 def localDate(y,m,d):
     return tz.localize(datetime(y,m,d))
 
