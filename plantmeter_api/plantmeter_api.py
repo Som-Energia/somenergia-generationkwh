@@ -115,6 +115,7 @@ class GenerationkwhProductionAggregatorTesthelper(osv.osv):
     '''Implements generationkwh production aggregation testhelper '''
 
     _name = 'generationkwh.production.aggregator.testhelper'
+    _auto = False
 
 
     def getWh(self, cursor, uid, pid, start, end, context=None):
@@ -212,6 +213,7 @@ GenerationkwhProductionNotifier()
 
 class GenerationkwhProductionNotifierTesthelper(osv.osv):
     _name = 'generationkwh.production.notifier.testhelper'
+    _auto = False
 
     def push(self, cursor, uid, meter_id, date, status, message, context=None):
         from datetime import datetime
