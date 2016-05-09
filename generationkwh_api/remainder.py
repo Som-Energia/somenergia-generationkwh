@@ -128,6 +128,7 @@ class GenerationkWhRemainderTesthelper(osv.osv):
     '''Implements generationkwh remainder testhelper '''
 
     _name = "generationkwh.remainder.testhelper"
+    _auto = False
 
     def lastRemainders(self, cr, uid, context=None):
 
