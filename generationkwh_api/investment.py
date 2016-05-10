@@ -43,8 +43,17 @@ class GenerationkWhInvestment(osv.osv):
             'Línia del moviment contable',
             required=True,
             help="Línia del moviment contable corresponent a la inversió",
+            ),
+        active=fields.boolean(
+            "Activa",
+            required=True,
+            help="Permet activar o desactivar la inversió",
             )
         )
+
+    _defaults = dict(
+        active=lambda *a: True,
+    )
 
     def active_investments_tuple(self, cursor, uid,
             member, start, end,

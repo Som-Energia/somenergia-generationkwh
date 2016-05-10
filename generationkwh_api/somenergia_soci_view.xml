@@ -14,7 +14,7 @@
                         <field name="active_shares"/>
                         <field name="estimated_anual_kwh"/>
                         <separator string="Assignacions" colspan="4"/>
-                        <field name="assignment_ids" ref="view_gkwh_assignment_tree" colspan="4" nolabel="1" height="100"/>
+                        <field name="assignment_ids" ref="view_gkwh_assignment_tree" colspan="4" nolabel="1" height="100" context="{'active_test': False}"/>
                         <separator string="Inversions" colspan="4"/>
                         <field name="investment_ids" colspan="4" nolabel="1" height="100"/>
                         <separator string="Historial Generation kWh" colspan="4"/>

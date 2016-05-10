@@ -99,7 +99,8 @@ class SomenergiaSoci(osv.osv):
         ),
         'investment_ids': fields.one2many(
             'generationkwh.investment', 'member_id', string="Inversions",
-            readonly=True
+            readonly=True,
+            context={'active_test': False},
         ),
         'assignment_ids': fields.one2many(
             'generationkwh.assignment', 'member_id', string="Assignacions"
