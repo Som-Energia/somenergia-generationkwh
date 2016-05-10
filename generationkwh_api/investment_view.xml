@@ -13,7 +13,8 @@
                     <field name="purchase_date"/>
                     <field name="activation_date"/>
                     <field name="deactivation_date"/>
-                    <button name="do_activate" string="Activate" icon="gtk-ok" type="object"/>
+                    <button name="%(action_wizard_generationkwh_investment_activation)d" string="Activate" icon="gtk-ok" type="action" attrs="{'readonly': [('active','=',1)]}" context="{'action': 'activate'}"/>
+                    <button name="%(action_wizard_generationkwh_investment_activation)d" string="Deactivate" icon="gtk-ok" type="action" attrs="{'readonly': [('active','!=',1)]}" context="{'action': 'deactivate'}"/>
                 </form>
             </field>
         </record>
