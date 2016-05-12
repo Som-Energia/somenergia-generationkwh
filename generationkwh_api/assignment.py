@@ -203,6 +203,29 @@ class GenerationkWhAssignment(osv.osv):
             last_usable_date=str(assign.last_usable_date),
         ) for assign in assignmentProvider.seek(contract_id)]
 
+
+    def unassignedInvestors(self, cursor, uid, context=None):
+        """Returns all the members that have investments but no assignment"""
+        cursor.execute("""
+            SELECT
+                investment.member_id AS id
+            FROM
+                generationkwh_investment AS investment
+            LEFT JOIN
+                generationkwh_assignment AS assignment
+                ON assignment.member_id = investment.member_id
+            WHERE
+                assignment.id IS NULL
+            GROUP BY
+                investment.member_id
+            ORDER BY
+                investment.member_id
+            """)
+        result = [ id for id, in cursor.fetchall() ]
+        print result
+        return result
+
+
 GenerationkWhAssignment()
 
 

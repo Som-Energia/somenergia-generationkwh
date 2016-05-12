@@ -64,13 +64,11 @@ def parseArgumments():
                 "instead of contract database id",
             )
     for sub in default,:
-        """
         sub.add_argument(
             '--all',
             action='store_true',
             help='apply it to all members with investments',
             )
-        """
         sub.add_argument(
             dest='members',
             nargs='*',
@@ -97,8 +95,11 @@ def parseArgumments():
 
     return parser.parse_args(namespace=ns())
 
-def preprocessMembers(members=None,idmode=None):
+def preprocessMembers(members=None,idmode=None, all=None):
     """Turns members in which ever format to the ones required by commands"""
+
+    if all:
+        return c.GenerationkwhAssignment.unassignedInvestors()
 
     if idmode=="partner":
         idmap = dict(c.GenerationkwhDealer.get_members_by_partners(members))
@@ -174,8 +175,9 @@ def default(
         members=None,
         force=False,
         idmode=None,
+        all=None,
         **_):
-    members=preprocessMembers(members, idmode)
+    members=preprocessMembers(members, idmode, all)
     step("Generating default assignments for members: {}".format(
         ','.join(str(i) for i in members)))
     c.GenerationkwhAssignment.createDefaultForMembers(members)
