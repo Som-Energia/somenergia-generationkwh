@@ -7,11 +7,11 @@ SELECT
     line.id AS move_line_id,
     line.purchase_date
         + %(waitingDays)s * interval '1 day'
-        AS activation_date,
+        AS first_effective_date,
     line.purchase_date
         + %(waitingDays)s * interval '1 day'
         + %(expirationYears)s * interval '1 year'
-        AS deactivation_date
+        AS last_effective_date
 FROM (
     SELECT
         line.credit AS credit,

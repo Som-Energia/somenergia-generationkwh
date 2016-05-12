@@ -12,8 +12,8 @@ class InvestmentProvider_MockUp(object):
         self._contracts = [
             ns(
                 member=member,
-                activationStart=isodate(start),
-                activationEnd=isodate(end),
+                firstEffectiveDate=isodate(start),
+                lastEffectiveDate=isodate(end),
                 shares=shares,
                 )
             for member, start, end, shares in shareContracts

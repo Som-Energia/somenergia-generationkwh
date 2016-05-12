@@ -11,8 +11,8 @@
                     <field name="active"/>
                     <field name="nshares"/>
                     <field name="purchase_date"/>
-                    <field name="activation_date"/>
-                    <field name="deactivation_date"/>
+                    <field name="first_effective_date"/>
+                    <field name="last_effective_date"/>
                     <button name="%(action_wizard_generationkwh_investment_activation)d" string="Activate" icon="gtk-ok" type="action" attrs="{'readonly': [('active','=',1)]}" context="{'action': 'activate'}"/>
                     <button name="%(action_wizard_generationkwh_investment_activation)d" string="Deactivate" icon="gtk-ok" type="action" attrs="{'readonly': [('active','!=',1)]}" context="{'action': 'deactivate'}"/>
                 </form>
@@ -28,8 +28,8 @@
                     <field name="active" select="1"/>
                     <field name="nshares" select="1"/>
                     <field name="purchase_date" select="1"/>
-                    <field name="activation_date" select="1"/>
-                    <field name="deactivation_date" select="1"/>
+                    <field name="first_effective_date" select="1"/>
+                    <field name="last_effective_date" select="1"/>
                 </tree>
             </field>
         </record>

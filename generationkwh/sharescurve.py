@@ -20,8 +20,8 @@ class MemberSharesCurve(object):
             investment.shares
             for investment in self._provider.shareContracts()
             if (member is None or investment.member == member)
-            and investment.activationEnd >= day
-            and investment.activationStart <= day
+            and investment.lastEffectiveDate >= day
+            and investment.firstEffectiveDate <= day
         )
 
     def hourly(self, start, end, member=None):
@@ -38,20 +38,20 @@ class MemberSharesCurve(object):
             if member is not None:
                 if investment.member != member:
                     continue
-            if investment.activationEnd:
-                if investment.activationEnd < start: continue
+            if investment.lastEffectiveDate:
+                if investment.lastEffectiveDate < start: continue
 
-            if not investment.activationStart:
+            if not investment.firstEffectiveDate:
                 continue
 
-            if investment.activationStart > end: continue
+            if investment.firstEffectiveDate > end: continue
 
             firstIndex = hoursADay*max(
-                (investment.activationStart-start).days,
+                (investment.firstEffectiveDate-start).days,
                 0)
             lastIndex = hoursADay*(min(
-                (investment.activationEnd-start).days+1,
-                nDays) if investment.activationEnd else 
+                (investment.lastEffectiveDate-start).days+1,
+                nDays) if investment.lastEffectiveDate else 
                 nDays)
 
             result[firstIndex:lastIndex]+=investment.shares

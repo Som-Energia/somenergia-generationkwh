@@ -41,13 +41,13 @@ class GenerationkWhInvestment(osv.osv):
             required=True,
             help="Quin dia es varen comprar les accions",
             ),
-        activation_date=fields.date(
-            "Data d'activació",
+        first_effective_date=fields.date(
+            "Primera data a la que és fa efectiva",
             help="Dia que les accions començaran a generar drets a kWh",
             ),
-        deactivation_date=fields.date(
-            "Data de desactivació",
-            help="Dia que les accions deixaran de generar drets a kWh",
+        last_effective_date=fields.date(
+            "Darrera data a la que és efectiva",
+            help="Darrer dia que les accions generaran drets a kWh",
             ),
         move_line_id=fields.many2one(
             'account.move.line',
@@ -135,14 +135,14 @@ class GenerationkWhInvestment(osv.osv):
             memberid = Member.search(cursor, uid, domain)[0]
 
             activation = None
-            deactivation = None
+            lastDateEffective = None
             if waitingDays is not None:
                 activation = str(
                     isodate(line.date_created)
                     +relativedelta(days=waitingDays))
 
                 if expirationYears is not None:
-                    deactivation = str(
+                    lastDateEffective = str(
                         isodate(activation)
                         +relativedelta(years=expirationYears))
 
@@ -150,8 +150,8 @@ class GenerationkWhInvestment(osv.osv):
                 member_id=memberid,
                 nshares=(line.credit-line.debit)//100,
                 purchase_date=line.date_created,
-                activation_date=activation,
-                deactivation_date=deactivation,
+                first_effective_date=activation,
+                last_effective_date=lastDateEffective,
                 move_line_id=line.id,
                 ))
 
@@ -183,16 +183,16 @@ class GenerationkWhInvestment(osv.osv):
                 nshares,
                 purchase_date,
                 move_line_id,
-                activation_date,
-                deactivation_date, 
+                first_effective_date,
+                last_effective_date, 
             ) in cursor.fetchall():
 
             self.create(cursor, uid, dict(
                 member_id=member_id,
                 nshares=nshares,
                 purchase_date=purchase_date,
-                activation_date=activation_date,
-                deactivation_date=deactivation_date,
+                first_effective_date=first_effective_date,
+                last_effective_date=last_effective_date,
                 move_line_id=move_line_id,
                 ))
 
@@ -200,7 +200,7 @@ class GenerationkWhInvestment(osv.osv):
             start, stop, waitingDays, expirationYears, force,
             context=None):
         criteria = []
-        if not force: criteria.append(('activation_date', '=', False))
+        if not force: criteria.append(('first_effective_date', '=', False))
         if stop: criteria.append(('purchase_date', '<=', str(stop)))
         if start: criteria.append(('purchase_date', '>=', str(start)))
 
@@ -209,14 +209,14 @@ class GenerationkWhInvestment(osv.osv):
 
         for investment in investments:
             updateDict = dict(
-                activation_date=(
+                first_effective_date=(
                     str(isodate(investment.purchase_date)
                         +relativedelta(days=waitingDays))
                     ),
                 )
             if expirationYears:
                 updateDict.update(
-                    deactivation_date=(
+                    last_effective_date=(
                         str(isodate(investment.purchase_date)
                             +relativedelta(
                                 years=expirationYears,
@@ -242,14 +242,14 @@ class InvestmentProvider(ErpWrapper):
         filters = []
         if member: filters.append( ('member_id','=',member) )
         if end: filters += [
-            ('activation_date','<=',end), # No activation also filtered
+            ('first_effective_date','<=',end), # No activation also filtered
             ]
         if start: filters += [
             '&',
-            ('activation_date','!=',False),
+            ('first_effective_date','!=',False),
             '|',
-            ('deactivation_date','>=',start),
-            ('deactivation_date','=',False),
+            ('last_effective_date','>=',start),
+            ('last_effective_date','=',False),
             ]
 
         Investment = self.erp.pool.get('generationkwh.investment')
@@ -267,8 +267,8 @@ class InvestmentProvider(ErpWrapper):
         return [
             (
                 c['member_id'][0],
-                c['activation_date'] and str(c['activation_date']),
-                c['deactivation_date'] and str(c['deactivation_date']),
+                c['first_effective_date'] and str(c['first_effective_date']),
+                c['last_effective_date'] and str(c['last_effective_date']),
                 c['nshares'],
             )
             for c in sorted(contracts, key=lambda x: x['id'] )
@@ -278,8 +278,8 @@ class InvestmentProvider(ErpWrapper):
         return [
             ns(
                 member=member,
-                activationStart=start and isodate(start),
-                activationEnd=end and isodate(end),
+                firstEffectiveDate=start and isodate(start),
+                lastEffectiveDate=end and isodate(end),
                 shares=shares,
             )
             for member, start, end, shares
