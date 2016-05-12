@@ -364,6 +364,7 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
                     aggr_id, '2015-08-16', '2015-08-17')
             self.assertEqual(production, 10*[0]+14*[10]+[0]+10*[0]+14*[20]+[0])
 
+    @unittest.skip('working on')
     def test_GenerationkwhProductionAggregator_updatewh_missing(self):
             aggr,meters = self.setupAggregator(
                     nplants=1,

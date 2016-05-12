@@ -89,7 +89,7 @@ class ProductionMeter(Resource):
         self.uri = kwargs.pop('uri') if 'uri' in kwargs else None
         self.lastcommit = kwargs.pop('lastcommit') if 'lastcommit' in kwargs else None
         if self.lastcommit:
-            self.lastcommit = localisodate(self.lastcommit)
+            self.lastcommit = localisodate(self.lastcommit).date()
         self.curveProvider = kwargs.pop('curveProvider') if 'curveProvider' in kwargs else None
         super(ProductionMeter, self).__init__(*args, **kwargs)
 

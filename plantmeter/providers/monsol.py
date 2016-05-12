@@ -57,7 +57,7 @@ class MonsolProvider(BaseProvider):
         return [measure
             for date in daterange(start, end + datetime.timedelta(days=1))
                 for measure in (parse(line) for idx,line in enumerate(content) if idx>header_offset)
-                    if measure['datetime'].date() == date.date()
+                    if measure['datetime'].date() == date
             ]
 
     def download(self, date):
@@ -86,7 +86,7 @@ class MonsolProvider(BaseProvider):
 
     def get(self, start, end):
         if not end:
-            end = toLocal(datetime.datetime.now())
+            end = toLocal(datetime.datetime.now()).date()
         return [self.extract(self.download(date), date) for date in daterange(start, end)]
 
     def __enter__(self):

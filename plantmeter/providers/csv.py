@@ -25,7 +25,7 @@ class CSVProvider(BaseProvider):
                 }
 
         if not end:
-            end = toLocal(datetime.datetime.now())
+            end = toLocal(datetime.datetime.now()).date()
 
         with open(self.res, 'rb') as csvfile:
             content = csvfile.readlines()
@@ -36,7 +36,7 @@ class CSVProvider(BaseProvider):
                     extract(line)
                     for line in content[1:]
                     )
-                if measure['datetime'].date() == date.date()
+                if measure['datetime'].date() == date
                 ]]
 
     def disconnect(self):

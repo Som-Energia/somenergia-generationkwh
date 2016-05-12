@@ -13,6 +13,8 @@ def local_file(filename):
     return os.path.join(os.path.abspath(os.path.dirname(__file__)), filename)
 
 def localDate(y,m,d):
+    return tz.localize(datetime(y,m,d)).date()
+def localDateTime(y,m,d):
     return tz.localize(datetime(y,m,d))
 
 class Resource_Test(unittest.TestCase):
@@ -47,8 +49,8 @@ class Resource_Test(unittest.TestCase):
 
         self.assertEqual(
             list(aggr.getWh(
-                localDate(2015,9,4),
-                localDate(2015,9,5))),
+                localDateTime(2015,9,4),
+                localDateTime(2015,9,5))),
                 2*25*[0] 
                 )
       
@@ -73,8 +75,8 @@ class Resource_Test(unittest.TestCase):
 
         self.assertEqual(
             list(aggr.getWh(
-                localDate(2015,9,4),
-                localDate(2015,9,5))),
+                localDateTime(2015,9,4),
+                localDateTime(2015,9,5))),
             [
                 0,0,0,0,0,0,0,0,3,6,5,4,8,17,34,12,12,5,3,1,0,0,0,0,0,
                 0,0,0,0,0,0,0,0,4,7,6,5,9,18,35,13,13,6,4,2,0,0,0,0,0,
@@ -109,8 +111,8 @@ class Resource_Test(unittest.TestCase):
 
         self.assertEqual(
             list(aggr.getWh(
-                localDate(2015,9,4),
-                localDate(2015,9,5))),
+                localDateTime(2015,9,4),
+                localDateTime(2015,9,5))),
             [
                 0,0,0,0,0,0,0,0,6,12,10, 8,16,34,68,24,24,10,6,2,0,0,0,0,0,
                 0,0,0,0,0,0,0,0,8,14,12,10,18,36,70,26,26,12,8,4,0,0,0,0,0,
@@ -137,8 +139,8 @@ class Resource_Test(unittest.TestCase):
 
         self.assertEqual(
             list(aggr.getWh(
-                localDate(2015,9,4),
-                localDate(2015,9,5))),
+                localDateTime(2015,9,4),
+                localDateTime(2015,9,5))),
             [
                 0,0,0,0,0,0,0,0,3,6,5,4,8,17,34,12,12,5,3,1,0,0,0,0,0,
                 0,0,0,0,0,0,0,0,4,7,6,5,9,18,35,13,13,6,4,2,0,0,0,0,0,
@@ -175,8 +177,8 @@ class Resource_Test(unittest.TestCase):
 
         self.assertEqual(
             list(aggr.getWh(
-                localDate(2015,9,4),
-                localDate(2015,9,5))),
+                localDateTime(2015,9,4),
+                localDateTime(2015,9,5))),
             [
                 0,0,0,0,0,0,0,0,6,12,10, 8,16,34,68,24,24,10,6,2,0,0,0,0,0,
                 0,0,0,0,0,0,0,0,8,14,12,10,18,36,70,26,26,12,8,4,0,0,0,0,0,
@@ -249,7 +251,7 @@ class Resource_Test(unittest.TestCase):
         aggr.plants.append(p)
         m.updateWh(localDate(2015,9,4), localDate(2015,9,5))
 
-        self.assertEqual(aggr.lastMeasurementDate(), localDate(2015,9,5))
+        self.assertEqual(aggr.lastMeasurementDate(), localDateTime(2015,9,5))
 
     def test_firstDate_onePlantOneMeter(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -266,7 +268,7 @@ class Resource_Test(unittest.TestCase):
         aggr.plants.append(p)
         m.updateWh(localDate(2015,9,4), localDate(2015,9,5))
 
-        self.assertEqual(aggr.firstMeasurementDate(), localDate(2015,9,4))
+        self.assertEqual(aggr.firstMeasurementDate(), localDateTime(2015,9,4))
 
     def test_lastDate_onePlantTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -294,7 +296,7 @@ class Resource_Test(unittest.TestCase):
         m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
         m2.updateWh(localDate(2015,8,4), localDate(2015,8,5))
 
-        self.assertEqual(aggr.lastMeasurementDate(), localDate(2015,9,5))
+        self.assertEqual(aggr.lastMeasurementDate(), localDateTime(2015,9,5))
 
     def test_firstDate_onePlantTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -322,7 +324,7 @@ class Resource_Test(unittest.TestCase):
         m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
         m2.updateWh(localDate(2015,8,4), localDate(2015,8,5))
 
-        self.assertEqual(aggr.firstMeasurementDate(), localDate(2015,8,4))
+        self.assertEqual(aggr.firstMeasurementDate(), localDateTime(2015,8,4))
 
     def test_lastDate_twoPlantsTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -352,7 +354,7 @@ class Resource_Test(unittest.TestCase):
         m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
         m2.updateWh(localDate(2015,8,4), localDate(2015,8,5))
 
-        self.assertEqual(aggr.lastMeasurementDate(), localDate(2015,9,5))
+        self.assertEqual(aggr.lastMeasurementDate(), localDateTime(2015,9,5))
 
     def test_firstDate_twoPlantsTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -382,7 +384,7 @@ class Resource_Test(unittest.TestCase):
         m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
         m2.updateWh(localDate(2015,8,4), localDate(2015,8,5))
 
-        self.assertEqual(aggr.firstMeasurementDate(), localDate(2015,8,4))
+        self.assertEqual(aggr.firstMeasurementDate(), localDateTime(2015,8,4))
 
 class Meter_Test(unittest.TestCase):
     def setUp(self):
@@ -409,8 +411,8 @@ class Meter_Test(unittest.TestCase):
 
         self.assertEqual(
             list(m.getWh(
-                localDate(2015,9,4),
-                localDate(2015,9,5))),
+                localDateTime(2015,9,4),
+                localDateTime(2015,9,5))),
             2*25*[0]
             )
 
@@ -426,8 +428,8 @@ class Meter_Test(unittest.TestCase):
 
         self.assertEqual(
             list(m.getWh(
-                localDate(2015,9,4),
-                localDate(2015,9,5))),
+                localDateTime(2015,9,4),
+                localDateTime(2015,9,5))),
             [
                 0,0,0,0,0,0,0,0,3,6,5,4,8,17,34,12,12,5,3,1,0,0,0,0,0,
                 0,0,0,0,0,0,0,0,4,7,6,5,9,18,35,13,13,6,4,2,0,0,0,0,0,
@@ -453,7 +455,7 @@ class Meter_Test(unittest.TestCase):
             curveProvider = self.curveProvider)
         m.updateWh(localDate(2015,9,4), localDate(2015,9,5))
 
-        self.assertEqual(m.lastMeasurementDate(), localDate(2015,9,5))
+        self.assertEqual(m.lastMeasurementDate(), localDateTime(2015,9,5))
 
     def test_firstDate_empty(self):
         m = ProductionMeter(
@@ -474,7 +476,7 @@ class Meter_Test(unittest.TestCase):
             uri = self.uri,
             curveProvider = self.curveProvider)
         m.updateWh(localDate(2015,9,4), localDate(2015,9,5))
-        self.assertEqual(m.firstMeasurementDate(), localDate(2015,9,4))
+        self.assertEqual(m.firstMeasurementDate(), localDateTime(2015,9,4))
 
 
 unittest.TestCase.__str__ = unittest.TestCase.id

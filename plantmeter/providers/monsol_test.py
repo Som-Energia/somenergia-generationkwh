@@ -2,6 +2,7 @@ import datetime
 from ..providers import BaseProviderConnectionError, \
         BaseProviderDownloadError, BaseProviderSyntaxError
 from .monsol import MonsolProvider , parseLocalTime
+from ..isodates import isodate
 
 import unittest
 from mock import patch
@@ -33,23 +34,23 @@ class MonsolProvide_Test(unittest.TestCase):
 
     def test_failHostname(self):
         m = MonsolProvider('monsol://user:password@hostname/path')
-        self.assertRaises(BaseProviderConnectionError, m.download, 'tes.csv')
+        self.assertRaises(BaseProviderConnectionError, m.download, isodate('2015-08-01'))
 
     def test_failConnection(self):
         from socket import error
         m = MonsolProvider('monsol://user:password@www.somenergia.coop/path')
-        self.assertRaises(BaseProviderConnectionError, m.download, 'tes.csv')
+        self.assertRaises(BaseProviderConnectionError, m.download, isodate('2015-08-01'))
 
     @patch('ftplib.FTP', autospec=True)
     def test_download(self, ftp_constructor):
         mock_ftp = ftp_constructor.return_value
         m = MonsolProvider('monsol://user:password@hostname/path')
-        m.download('test.csv')
+        m.download(isodate('2015-08-01'))
     
         # TODO: Implement callback mockup
         mock_ftp.login.assert_called_once_with('user', 'password')
         mock_ftp.cwd.assert_called_once_with('path')
-        self.assertEqual(mock_ftp.retrbinary.call_args[0], ('RETR test.csv',))
+        self.assertEqual(mock_ftp.retrbinary.call_args[0], ('RETR 1_20150801.csv',))
 
     def test_extractEmptyFile(self):
         content = self.getContent('20_20160327_empty.csv')
