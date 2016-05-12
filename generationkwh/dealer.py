@@ -76,6 +76,7 @@ class Dealer(object):
         """
         assert type(start_date) == datetime.date
         assert type(end_date) == datetime.date
+        assert kwh>=0, ("Negative use not allowed")
         seek_start = start_date + relativedelta(years=-1)
         assignments = self._assignments.seek(contract_id)
         used = 0
@@ -87,9 +88,18 @@ class Dealer(object):
                     asig.member_id,
                     seek_start,
                     seek_end,
-                    fare, period, kwh - used if kwh - used >0 else 0)
+                    fare, period, kwh - used,
+                    )
+            assert memberUse >= 0, (
+                "Genkwh Usage traker returned negative use ({}) for member {}"
+                .format(memberUse, asig.member_id))
+            assert memberUse <= kwh - used, (
+                "Genkwh Usage traker returned more ({}) than required (10) for member member1"
+                .format( memberUse, kwh-used, asig.member_id ))
+
             result.append(dict(member_id=asig.member_id, kwh=int(memberUse)))
             used += memberUse
+
         return result
 
     def refund_kwh(self, contract_id, start_date, end_date, fare, period, kwh,

@@ -239,8 +239,8 @@ class Dealer_Test(unittest.TestCase):
             dict(member_id='member2', kwh=30),
             ])
         
-    def test_usekwh_manyAssignments_zeroUseSecond(self):
-        t = UsageTrackerMockup([20,30])
+    def test_usekwh_manyAssignments_zeroUseIncluded(self):
+        t = UsageTrackerMockup([0,10])
         a = AssignmentsMockup([
             ns(
                 member_id='member1',
@@ -259,14 +259,53 @@ class Dealer_Test(unittest.TestCase):
             end_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
-            kwh = 10,
+            kwh = 20,
             )
 
         self.assertEqual(t.calls(),[
             ('use_kwh', 'member1',
                 '2014-08-01',
                 '2015-09-01',
-                '2.0A', 'P1', 10),
+                '2.0A', 'P1', 20),
+            ('use_kwh', 'member2',
+                '2014-08-01',
+                '2015-09-01',
+                '2.0A', 'P1', 20),
+            ])
+
+        self.assertEqual(result, [
+            dict(member_id='member1', kwh=0),
+            dict(member_id='member2', kwh=10),
+            ])
+        
+    def test_usekwh_manyAssignments_zeroUseBecauseNoMoreRequired(self):
+        t = UsageTrackerMockup([20,0])
+        a = AssignmentsMockup([
+            ns(
+                member_id='member1',
+                last_usable_date=isodate('2015-10-01'),
+            ),
+            ns(
+                member_id='member2',
+                last_usable_date=isodate('2015-10-01'),
+            ),
+            ])
+
+        s = Dealer(usageTracker=t, assignmentProvider=a)
+        result = s.use_kwh(
+            contract_id = 1,
+            start_date = isodate('2015-08-01'),
+            end_date = isodate('2015-09-01'),
+            fare = '2.0A',
+            period = 'P1',
+            kwh = 20,
+            )
+
+        self.assertEqual(t.calls(),[
+            ('use_kwh', 'member1',
+                '2014-08-01',
+                '2015-09-01',
+                '2.0A', 'P1', 20),
             ('use_kwh', 'member2',
                 '2014-08-01',
                 '2015-09-01',
@@ -275,7 +314,7 @@ class Dealer_Test(unittest.TestCase):
 
         self.assertEqual(result, [
             dict(member_id='member1', kwh=20),
-            dict(member_id='member2', kwh=30),
+            dict(member_id='member2', kwh=0),
             ])
         
     def test_usekwh_manyAssignments_firstHaveOldInvoicing(self):
@@ -370,6 +409,68 @@ class Dealer_Test(unittest.TestCase):
             end_date=isodate('2015-10-01'),
             ))
 
+    def test_usekwh_assertsPositiveRequiredUse(self):
+        t = UsageTrackerMockup([])
+        a = AssignmentsMockup([
+            ])
+
+        s = Dealer(usageTracker=t, assignmentProvider=a)
+        with self.assertRaises(AssertionError) as ctx:
+            result = s.use_kwh(
+                contract_id = 1,
+                start_date = isodate('2015-08-01'),
+                end_date = isodate('2015-09-01'),
+                fare = '2.0A',
+                period = 'P1',
+                kwh = -20,
+                )
+        self.assertEqual(ctx.exception.args[0],
+            "Negative use not allowed")
+
+    def test_usekwh_asserts_ifTrackerReturnsNegative(self):
+        t = UsageTrackerMockup([-1])
+        a = AssignmentsMockup([
+            ns(
+                member_id='member1',
+                last_usable_date=isodate('2015-10-01'),
+            ),
+            ])
+
+        s = Dealer(usageTracker=t, assignmentProvider=a)
+        with self.assertRaises(AssertionError) as ctx:
+            result = s.use_kwh(
+                contract_id = 1,
+                start_date = isodate('2015-08-01'),
+                end_date = isodate('2015-09-01'),
+                fare = '2.0A',
+                period = 'P1',
+                kwh = 20,
+                )
+        self.assertEqual(ctx.exception.args[0],
+            "Genkwh Usage traker returned negative use (-1) for member member1")
+
+    def test_usekwh_asserts_ifTrackerReturnsNegative(self):
+        t = UsageTrackerMockup([11])
+        a = AssignmentsMockup([
+            ns(
+                member_id='member1',
+                last_usable_date=isodate('2015-10-01'),
+            ),
+            ])
+
+        s = Dealer(usageTracker=t, assignmentProvider=a)
+        with self.assertRaises(AssertionError) as ctx:
+            result = s.use_kwh(
+                contract_id = 1,
+                start_date = isodate('2015-08-01'),
+                end_date = isodate('2015-09-01'),
+                fare = '2.0A',
+                period = 'P1',
+                kwh = 10,
+                )
+        self.assertEqual(ctx.exception.args[0],
+            "Genkwh Usage traker returned more (11) than required (10) "
+            "for member member1")
 
 
 
