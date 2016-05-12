@@ -5,27 +5,21 @@
 + Invoice visual design
 - Invoice visual design implementation [gisce]
 - Assignment: Send an activation mail explaining default assignment
-+ Investment: `active` field to hide failed payments (the original one and the refund) [Agusti]
-+ Investments: Wizard to disable them in batch from tree [Agusti]
-+ Investments: Wizard to disable them from form [Agusti]
-- Investments: Evaluate implications of active flag on Investment usagea
-- Investment: rename `de/activation_date` -> `first_effective_date`
-- Investment: activate considered in listActive
-- Investment: init considers already existing but also inactive
+- Investment: Add list tests for inactivated investment
 - Rename `generationkwh_api` -> `som_generationkwh`
 - Rename `plantmeter_api` -> `som_plantmeter`
 - Assignment: update priority overwritting write?? (Low)
 - Assignment: Script: --all flag for default
 - Assignment: log in soci observations
-- Investment: test activate and move it from erppeek to erp
 - Investment: optimize with sql
 - Investment: Script: create should return the ids of the resulting investments to pass them to the Assignments script
 - Assignment: Script: default should return the created assignments to pass them to the mail creation
-- RemainderProvider.init not yet implemented!! (zero remainder for 1-share at first day)
 - Script to feed testing (and real?) production
 - Init:
     - Setup plants
     - First remainder
+        - Reminder Migration: a reminder for 1-shares curve
+        - Reminder Migration: a reminder for known to be used n-shares (optional)
     - Run Nightly script for existing investments
 - Nightly:
     - Turn move lines into investments
@@ -35,7 +29,7 @@
 
 ## Unscheduled TODO's
 
-- Filter invoices by generation
+- Filter invoices by having generation or not
 - ProductionLoader use dates
 - ProductionToRightsPerShare naive: Protect againts divby0 when total active actions is zero
 - Investment: ondelete -> member
@@ -45,9 +39,6 @@
 - Investment: constant for the account root for generationkwh accounts
 - Investment: constant for the number of digits for the soci code in accounts
     - Can be found at `ir_secuence.code="socis"`
-
-- Reminder Migration: a reminder for 1-shares curve
-- Reminder Migration: a reminder for known to be used n-shares (optional)
 
 - Assignment: ondelete -> polissa
 - Assignment: ondelete -> member
@@ -72,16 +63,24 @@
 
 ## DONE
 
++ Investment: test activate and move it from erppeek to erp
++ Investment: `active` field to hide failed payments (the original one and the refund) [Agusti]
++ Investments: Wizard to disable them in batch from tree [Agusti]
++ Investments: Wizard to disable them from form [Agusti]
++ Investments: Evaluate implications of active flag on Investment usagea
++ Investment: rename `de/activation_date` -> `first_effective_date`
++ Investment: activate considered in listActive
++ Investment: init considers already existing but also inactive
 + Refund to a member that does not exist -> not refunded
 + RemainderProvider: More semantics to method names (set,get -> updateRemainders, lastRemainders)
 + Dealer: `refund_kwh` integration test
 + DealerAPI: `refund_kwh` (id mapping)
 + Assignment: Script: assign command
 + Assignment: Script: test expire command
-- Dealer.isActive(contract) returns true if contract has any assignment right now [Cesar]
-- DealerAPI.isActive(contract) returns true if contract has any assignment right now [Cesar]
-- Assignment.isActive(contract) returns true if contract has any assignment right now [Cesar]
-- Dealer.`use_kwh`: Retornar els consums tot i que siguin 0 per un member [Cesar]
++ Dealer.isActive(contract) returns true if contract has any assignment right now [Cesar]
++ DealerAPI.isActive(contract) returns true if contract has any assignment right now [Cesar]
++ Assignment.isActive(contract) returns true if contract has any assignment right now [Cesar]
++ Dealer.`use_kwh`: Retornar els consums tot i que siguin 0 per un member [Cesar]
 + Assignment: Script: id conversion
 + datetime review: Use dates instead local datetimes wherever we can
     + RightsPerShare receives date (and uses datetime with mongotimecurve)
