@@ -42,7 +42,20 @@ class GenerationkwhProductionAggregator(osv.osv):
         args = ['id', 'name', 'description', 'enabled']
         aggr = self.browse(cursor, uid, pid, context)
         _aggr = self._createAggregator(aggr, args)
-        return _aggr.updateWh(start, end, notifier)
+        self.updateLastCommit(cursor, uid, pid,
+                _aggr.updateWh(start, end, notifier))
+
+    def updateLastCommit(self, cursor, uid, pid, lastcommits, context=None):
+        '''Update last commit date'''
+
+        if not context:
+            context = {}
+        if isinstance(pid, list) or isinstance(pid, tuple):
+            pid = pid[0]
+
+        plant = self.pool.get('generationkwh.production.plant')
+        for plant_id, commits in lastcommits:
+            plant.updateLastCommit(cursor, uid, plant_id, commits)
 
     def firstMeasurementDate(self, cursor, uid, pid, context=None):
         '''Get first measurement date'''
@@ -93,7 +106,8 @@ class GenerationkwhProductionAggregator(osv.osv):
         # TODO: Clean initialization method
         return ProductionAggregator(**dict(obj_to_dict(aggr, args).items() + 
             dict(plants=[ProductionPlant(**dict(obj_to_dict(plant, args).items() +
-                dict(meters=[ProductionMeter(**dict(obj_to_dict(meter, args + ['uri']).items() +
+                dict(meters=[ProductionMeter(
+                    **dict(obj_to_dict(meter, args + ['uri','lastcommit']).items() +
                     dict(curveProvider=curveProvider).items())) 
                 for meter in plant.meters if meter.enabled]).items()))
             for plant in aggr.plants if plant.enabled]).items()))
@@ -158,6 +172,19 @@ class GenerationkwhProductionPlant(osv.osv):
     _defaults = {
         'enabled': lambda *a: False,
     }
+
+    def updateLastCommit(self, cursor, uid, pid, lastcommits, context=None):
+        '''Update last commit date'''
+
+        if not context:
+            context = {}
+        if isinstance(pid, list) or isinstance(pid, tuple):
+            pid = pid[0]
+
+        meter = self.pool.get('generationkwh.production.meter')
+        for meter_id, commits in lastcommits:
+            meter.updateLastCommit(cursor, uid, meter_id, commits)
+
 GenerationkwhProductionPlant()
 
 
@@ -170,10 +197,23 @@ class GenerationkwhProductionMeter(osv.osv):
         'enabled': fields.boolean('Enabled'),
         'plant_id': fields.many2one('generationkwh.production.plant'),
         'uri': fields.char('Host', size=150, required=True),
+        'lastcommit': fields.date('Last pull date')
         }
     _defaults = {
         'enabled': lambda *a: False,
     }
+
+    def updateLastCommit(self, cursor, uid, pid, lastcommit, context=None):
+        '''Update last commit date'''
+
+        if not context:
+            context = {}
+        if isinstance(pid, list) or isinstance(pid, tuple):
+            pid = pid[0]
+
+        meter = self.pool.get('generationkwh.production.meter')
+        return meter.write(cursor, uid, pid, {'lastcommit': lastcommit})
+
 GenerationkwhProductionMeter()
 
 
@@ -182,11 +222,11 @@ class ProductionNotifierProvider(ErpWrapper):
         self.pid = pid
         super(ProductionNotifierProvider, self).__init__(erp, cursor, uid, context)
 
-    def push(self, meter_id, date, status, message):
+    def push(self, meter_id, status, message):
         notifier=self.erp.pool.get('generationkwh.production.notifier')
         return notifier.create(self.cursor, self.uid, {
             'meter_id': meter_id,
-            'date_pull': date,
+            'date_pull': datetime.now(),
             'status': status,
             'message': message
             })
@@ -215,11 +255,11 @@ class GenerationkwhProductionNotifierTesthelper(osv.osv):
     _name = 'generationkwh.production.notifier.testhelper'
     _auto = False
 
-    def push(self, cursor, uid, meter_id, date, status, message, context=None):
+    def push(self, cursor, uid, meter_id, status, message, context=None):
         from datetime import datetime
 
         notifier = ProductionNotifierProvider(self, cursor, uid, context)
-        return notifier.push(meter_id, date, status, message) 
+        return notifier.push(meter_id, status, message)
 
 GenerationkwhProductionNotifierTesthelper()
 

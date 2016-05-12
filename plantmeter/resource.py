@@ -2,13 +2,15 @@ import os
 import numpy as np
 
 from plantmeter.providers import get_provider
+from plantmeter.isodates import localisodate
+from plantmeter.mongotimecurve import addDays
 
 """
 TODOs
-- Ordre
++ Ordre
 - Duplicats
 - Gaps
-- Padding
++ Padding
 """
 
 class Resource(object):
@@ -36,8 +38,8 @@ class ProductionAggregator(Resource):
             if plant.enabled
             ], axis=0)
     
-    def updateWh(self, start, end, notifier):
-        return [plant.updateWh(start, end, notifier) for plant in self.plants]
+    def updateWh(self, start=None, end=None, notifier=None):
+        return [(plant.id, plant.updateWh(start, end, notifier)) for plant in self.plants]
 
     def firstMeasurementDate(self):
         return min([
@@ -65,8 +67,8 @@ class ProductionPlant(Resource):
             if meter.enabled
             ], axis=0)
 
-    def updateWh(self, start, end, notifier):
-        return [meter.updateWh(start, end, notifier) for meter in self.meters]
+    def updateWh(self, start=None, end=None, notifier=None):
+        return [(meter.id, meter.updateWh(start, end, notifier)) for meter in self.meters]
 
     def lastMeasurementDate(self):
         return max([
@@ -84,18 +86,24 @@ class ProductionPlant(Resource):
 
 class ProductionMeter(Resource):
     def __init__(self, *args, **kwargs):
-        self.uri = kwargs.pop('uri') if 'uri' in kwargs else None 
+        self.uri = kwargs.pop('uri') if 'uri' in kwargs else None
+        self.lastcommit = kwargs.pop('lastcommit') if 'lastcommit' in kwargs else None
+        if self.lastcommit:
+            self.lastcommit = localisodate(self.lastcommit)
         self.curveProvider = kwargs.pop('curveProvider') if 'curveProvider' in kwargs else None
         super(ProductionMeter, self).__init__(*args, **kwargs)
 
     def getWh(self, start, end):
         return self.curveProvider.get(start, end, self.name, 'ae')
 
-    def updateWh(self, start, end=None , notifier=None):
+    def updateWh(self, start=None, end=None , notifier=None):
         import datetime
 
-        now = datetime.datetime.now()
+        if start is None:
+            start = self.lastcommit
+
         provider = get_provider(self.uri)
+        updated = start
         with provider(self.uri) as remote:
             status = 'done'
             message = None
@@ -107,13 +115,14 @@ class ProductionMeter(Resource):
                                 datetime = measurement['datetime'],
                                 ae = measurement['ae']
                                 )
+                        updated = measurement['datetime']
             except Exception as e:
                 status = 'failed'
                 message = str(e)
             finally:
                 if notifier:
-                    notifier.push(self.id, now, status, message)
-        return True
+                    notifier.push(self.id, status, message)
+        return updated
 
     def lastMeasurementDate(self):
         return self.curveProvider.lastFullDate(self.name)

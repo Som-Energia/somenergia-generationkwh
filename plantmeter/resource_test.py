@@ -2,6 +2,7 @@
 
 from .mongotimecurve import MongoTimeCurve, tz
 from plantmeter.resource import *
+from plantmeter.isodates import localisodatetime,naiveisodatetime
 
 import pymongo
 from datetime import datetime
@@ -181,6 +182,25 @@ class Resource_Test(unittest.TestCase):
                 0,0,0,0,0,0,0,0,8,14,12,10,18,36,70,26,26,12,8,4,0,0,0,0,0,
             ])
 
+    def test_update_startMissing(self):
+        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
+        curveProvider = self.curveProvider
+        m = ProductionMeter(
+                1,
+                'meterName',
+                'meterDescription',
+                True,
+                uri=uri,
+                lastcommit='2015-09-04',
+                curveProvider = self.curveProvider)
+
+        p = ProductionPlant(1,'plantName','plantDescription',True)
+        p.meters.append(m)
+        aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
+        aggr.plants.append(p)
+        updated = aggr.updateWh()
+        # Check single aggregator, with single plant and meter
+        self.assertEqual(updated[0][1][0][1], localisodatetime('2015-09-05 23:00:00'))
 
     def test_lastDate_empty(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')

@@ -73,16 +73,19 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
             enabled=True,
             nshares=1000*(plant+1)))
 
-    def setupMeter(self, plant_id, plant, meter):
+    def setupMeter(self, plant_id, plant, meter, lastcommit=None):
         meter_obj = self.c.model('generationkwh.production.meter')
+        if lastcommit:
+            lastcommit=lastcommit.strftime('%Y-%m-%d')
         return meter_obj.create(dict(
             plant_id=plant_id,
             name='mymeter%d%d' % (plant, meter),
             description='mymeter%d%d' % (plant, meter),
             uri='csv://%s/mymeter%d%d' % (self.tempdir, plant, meter),
+            lastcommit=lastcommit,
             enabled=True))
 
-    def setupAggregator(self, nplants, nmeters):
+    def setupAggregator(self, nplants, nmeters, lastcommit=None):
         aggr_obj = self.c.model('generationkwh.production.aggregator')
         aggr = aggr_obj.create(dict(
             name='myaggr',
@@ -93,14 +96,8 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
         for plant in range(nplants):
             plant_id = self.setupPlant(aggr, plant)
             for meter in range(nmeters):
-                meters.append(self.setupMeter(plant_id, plant, meter))
+                meters.append(self.setupMeter(plant_id, plant, meter, lastcommit))
         return aggr, meters
-
-    def updateMeterUri(self, aggr, plant_id, meter_id, uri):
-        for p in aggr:
-            for m in p:
-                if m['id'] == meter_id:
-                    m['uri']
 
     def setupPointsByDay(self, points):
 
@@ -130,6 +127,9 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
                 for start, end, summer, values in points
                 for date,value in zip(datespan(naiveisodate(start),
                     naiveisodate(end)+datetime.timedelta(days=1)), values)])
+
+    def getLastcommit(self, meter_id):
+        return self.c.GenerationkwhProductionMeter.read(meter_id, ['lastcommit'])['lastcommit']
 
     def searchNotifications(self, search):
         return self.c.GenerationkwhProductionNotifier.search(search)
@@ -364,6 +364,24 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
                     aggr_id, '2015-08-16', '2015-08-17')
             self.assertEqual(production, 10*[0]+14*[10]+[0]+10*[0]+14*[20]+[0])
 
+    def test_GenerationkwhProductionAggregator_updatewh_missing(self):
+            aggr,meters = self.setupAggregator(
+                    nplants=1,
+                    nmeters=1,
+                    lastcommit=naiveisodate('2015-08-15'))
+            aggr_id = aggr.read(['id'])['id']
+            meter_id = meters[0].read(['id'])['id']
+            self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
+                ('2015-08-16', '2015-08-16', 'S', 10*[0]+14*[10])
+                ])
+
+            self.c.GenerationkwhProductionAggregatorTesthelper.updateWh(
+                    aggr_id, None, None)
+            production = self.c.GenerationkwhProductionAggregatorTesthelper.getWh(
+                    aggr_id, '2015-08-16', '2015-08-16')
+            self.assertEqual(production, 10*[0]+14*[10]+[0])
+            self.assertEqual(self.getLastcommit(meter_id), '2015-08-16')
+
     def test_GenerationkwhProductionAggregator_firstMeasurementDate_nonePoint(self):
             aggr,meters = self.setupAggregator(
                     nplants=1,
@@ -461,13 +479,11 @@ class GenerationkwhProductionAggregator_Test(unittest.TestCase):
             meter_id = meters[0].read(['id'])['id']
             notification_id = self.c.GenerationkwhProductionNotifierTesthelper.push(
                     meter_id,
-                    '2015-08-17 12:00:00',
                     'done',
                     'xxxx')
 
             search_params = [
                     ('meter_id', '=', meter_id),
-                    ('date_pull', '=', '2015-08-17 12:00:00'),
                     ('status', '=', 'done'),
                     ('message', '=', 'xxxx')
                     ]
