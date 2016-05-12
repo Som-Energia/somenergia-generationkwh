@@ -2,12 +2,16 @@
 
 ## Inmediate TODO's
 
-- Invoice visual design
++ Invoice visual design
+- Invoice visual design implementation [gisce]
 - Assignment: Send an activation mail explaining default assignment
-- Investment: `active` field to hide failed payments (the original one and the refund) [Agusti]
-- Investments: Wizard to disable them in batch from tree [Agusti]
-- Investments: Wizard to disable them from form [Agusti]
-- Investments: Evaluate implications of active flag on Investment usage
++ Investment: `active` field to hide failed payments (the original one and the refund) [Agusti]
++ Investments: Wizard to disable them in batch from tree [Agusti]
++ Investments: Wizard to disable them from form [Agusti]
+- Investments: Evaluate implications of active flag on Investment usagea
+- Investment: rename `de/activation_date` -> `first_effective_date`
+- Investment: activate considered in listActive
+- Investment: init considers already existing but also inactive
 - Rename `generationkwh_api` -> `som_generationkwh`
 - Rename `plantmeter_api` -> `som_plantmeter`
 - Assignment: update priority overwritting write?? (Low)
@@ -31,6 +35,7 @@
 
 ## Unscheduled TODO's
 
+- Filter invoices by generation
 - ProductionLoader use dates
 - ProductionToRightsPerShare naive: Protect againts divby0 when total active actions is zero
 - Investment: ondelete -> member
