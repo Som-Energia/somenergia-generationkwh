@@ -45,6 +45,10 @@ def setupAggregator(aggr):
             plants = [setupPlant(aggr, plant) for plant in plants.items()]
             )
 
+def getAggregator(name):
+    ids=aggr_obj.search([('name','=',name)])
+    return ids[0] if ids else None
+
 def setupPlant(aggr_id, plant):
     plant = plant[1]
     meters = plant.pop('meters')
@@ -79,12 +83,19 @@ def clear():
 @aggregator.command(
         help="Initialize aggregator objects")
 @click.argument('filename')
-@click.argument('start')
-@click.argument('end')
-def init(filename, start, end):
+def init(filename):
     if filename:
        aggr = setupAggregator(ns.load(filename))
-       aggr_obj.updateWh(aggr['id'], start, end)
+       aggr_obj.updateWh(aggr['id'])
+
+@aggregator.command(
+        help="Update aggregator Wh")
+@click.argument('filename')
+def updateWh(filename):
+    if filename:
+       aggr_name=ns.load(filename)['generationkwh']['name']
+       aggr_id=getAggregator(aggr_name)
+       aggr_obj.updateWh(aggr_id)
 
 if __name__ == '__main__':
     aggregator(obj={})
