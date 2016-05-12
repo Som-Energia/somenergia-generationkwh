@@ -5,7 +5,7 @@ import pytz
 from plantmeter.providers import BaseProvider, BaseProviderConnectionError, \
         BaseProviderDownloadError, BaseProviderSyntaxError, register, urlparse
 from plantmeter.utils import daterange
-
+from ..mongotimecurve import toLocal
 
 tz = pytz.timezone('Europe/Madrid')
 def parseLocalTime(string, isSummer=False):
@@ -57,10 +57,12 @@ class MonsolProvider(BaseProvider):
         return [measure
             for date in daterange(start, end + datetime.timedelta(days=1))
                 for measure in (parse(line) for idx,line in enumerate(content) if idx>header_offset)
-                    if measure['datetime'].date() == date
+                    if measure['datetime'].date() == date.date()
             ]
 
-    def download(self, filename):
+    def download(self, date):
+        # TODO: Dynamic plant identifier
+        filename = '1_{date.year}{date.month:02d}{date.day:02d}.csv'.format(**locals())
         client = None
         try:
             client = ftplib.FTP(self.res['hostname'])
@@ -82,11 +84,16 @@ class MonsolProvider(BaseProvider):
             sio.seek(0)
             return sio.read().splitlines()
 
-    def get(self, start, end=None):
-        return [self.extract(date, self.download(date)) for date in daterange(start, end)]
+    def get(self, start, end):
+        if not end:
+            end = toLocal(datetime.datetime.now())
+        return [self.extract(self.download(date), date) for date in daterange(start, end)]
 
     def __enter__(self):
         return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
 
 register("monsol", MonsolProvider)
 
