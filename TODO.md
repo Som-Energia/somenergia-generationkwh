@@ -2,14 +2,12 @@
 
 ## Inmediate TODO's
 
-+ Invoice visual design
 - Invoice visual design implementation [gisce]
 - Assignment: Send an activation mail explaining default assignment
 - Investment: Add list tests for inactivated investment
 - Rename `generationkwh_api` -> `som_generationkwh`
 - Rename `plantmeter_api` -> `som_plantmeter`
 - Assignment: update priority overwritting write?? (Low)
-- Assignment: Script: --all flag for default
 - Assignment: log in soci observations
 - Investment: optimize with sql
 - Investment: Script: create should return the ids of the resulting investments to pass them to the Assignments script
@@ -29,6 +27,7 @@
 
 ## Unscheduled TODO's
 
+- `genkwh_assigment`default --all: consider active flag and other states
 - Filter invoices by having generation or not
 - ProductionLoader use dates
 - ProductionToRightsPerShare naive: Protect againts divby0 when total active actions is zero
@@ -63,6 +62,8 @@
 
 ## DONE
 
++ Invoice visual design wireframe
++ Assignment: Script: --all flag for default
 + Investment: test activate and move it from erppeek to erp
 + Investment: `active` field to hide failed payments (the original one and the refund) [Agusti]
 + Investments: Wizard to disable them in batch from tree [Agusti]
