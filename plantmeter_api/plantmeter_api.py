@@ -29,7 +29,7 @@ class GenerationkwhProductionAggregator(osv.osv):
         _aggr = self._createAggregator(aggr, ['id', 'name', 'description', 'enabled'])
         return _aggr.getWh(start, end).tolist()
 
-    def updateWh(self, cursor, uid, pid, start, end, context=None):
+    def updateWh(self, cursor, uid, pid, start=None, end=None, context=None):
         '''Update Wh measurements'''
 
         notifier = ProductionNotifierProvider(self, cursor, uid, context)
