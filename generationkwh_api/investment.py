@@ -168,7 +168,7 @@ class GenerationkWhInvestment(osv.osv):
             TODO: Confirm that the expiration is relative to the activation
             instead the purchase.
         """
-        generationAccountPrefix = '163500%'
+
         query = _sqlfromfile('investment_from_accounting')
         cursor.execute(query, dict(
             start = start,
@@ -176,9 +176,8 @@ class GenerationkWhInvestment(osv.osv):
             waitingDays = waitingDays,
             expirationYears = expirationYears,
             generationAccountPrefix = '163500%',
-            timecondition = '',
             ))
-        print start, stop, waitingDays, expirationYears,
+
         for (
                 member_id,
                 nshares,
@@ -186,7 +185,7 @@ class GenerationkWhInvestment(osv.osv):
                 move_line_id,
                 activation_date,
                 deactivation_date, 
-                ) in cursor.fetchall():
+            ) in cursor.fetchall():
 
             self.create(cursor, uid, dict(
                 member_id=member_id,
