@@ -8,6 +8,16 @@ import datetime
 from yamlns import namespace as ns
 from generationkwh.isodates import isodate, naiveisodate, naiveisodatetime
 
+# TODO: This function is duplicated in other sources
+def _sqlfromfile(sqlname):
+    from tools import config
+    import os
+    sqlfile = os.path.join(
+        config['addons_path'], 'generationkwh_api',
+            'sql', sqlname+'.sql')
+    with open(sqlfile) as f:
+        return f.read()
+
 class GenerationkWhInvestment(osv.osv):
 
     _name = 'generationkwh.investment'
@@ -17,6 +27,7 @@ class GenerationkWhInvestment(osv.osv):
         member_id=fields.many2one(
             'somenergia.soci',
             "Inversor",
+            select=True,
             required=True,
             help="Inversor que ha comprat les accions",
             ),
@@ -42,6 +53,7 @@ class GenerationkWhInvestment(osv.osv):
             'account.move.line',
             'Línia del moviment contable',
             required=True,
+            select=True,
             help="Línia del moviment contable corresponent a la inversió",
             ),
         active=fields.boolean(
@@ -84,79 +96,24 @@ class GenerationkWhInvestment(osv.osv):
             instead the purchase.
         """
 
-        """
-        SELECT
-            soci.id as member_id,
-            DIV(line.credit-line.debit,100) AS nshares,
-            line.date_created AS purchase_date,
-            line.id AS move_line_id,
-            CASE
-                WHEN %(waitingDays)s IS NULL
-                THEN NULL
-                ELSE
-                    line.date_created
-                    + interval '%(waitingDays)s days'
-                END AS activation_date,
-            CASE
-                WHEN %(waitingDays)s IS NULL
-                OR %(expirationYears)s IS NULL
-                THEN NULL
-                ELSE
-                    line.date_created
-                    + interval '%(waitingDays)s days'
-                    + interval '%(expirationYears)s years'
-                END AS deactivation_date
-        FROM
-            account_move_line AS line
-        LEFT JOIN
-            account_account AS account
-            ON line.account_id = account.id
-            AND account.code ILIKE %(generation_account_prefix)s
-        LEFT JOIN
-            somenergia.soci AS soci
-            ON line.partner_id = soci.partner_id
-            OR soci.ref = 'S' || LPAD(RIGHT(line.code,6),6,'0')
-        INNER JOIN
-            generationkwh_investment AS investment
-            ON investment.move_line_id = line.id
-        WHERE
-            (%(stop)s IS NULL OR line.date_created <= %(stop)s) AND
-            (%(start)s IS NULL OR line.date_created >= %(start)s) AND
-            investment.id IS NULL AND
-            TRUE
-        ORDER BY 
-            line.date_created asc,
-            line.id asc,
-            TRUE
-        """
         Account = self.pool.get('account.account')
         MoveLine = self.pool.get('account.move.line')
         Member = self.pool.get('somenergia.soci')
         generationAccountPrefix = '163500%'
 
-        cursor.execute("""
-            SELECT
-                line.id
-            FROM account_move_line AS line
-            LEFT JOIN
-                account_account AS account
-                ON account.id = line.account_id
-            WHERE
-                account.code ILIKE %(generationAccountPrefix)s AND
-                -- TODO: Removing stop is null condition does not fail any test
-                (%(stop)s IS NULL OR date_created <= %(stop)s) AND
-                (%(start)s IS NULL OR date_created >= %(start)s) AND
-                TRUE
-            ORDER BY 
-                line.date_created asc,
-                line.id asc,
-                TRUE
-            """, dict(
-                generationAccountPrefix = generationAccountPrefix,
-                start = start,
-                stop = stop,
-                ))
-        movelinesids = [id for id, in cursor.fetchall()]
+        accountIds = Account.search(cursor, uid, [
+            ('code','ilike',generationAccountPrefix),
+            ])
+
+        criteria = [('account_id','in',accountIds)]
+        if stop: criteria.append(('date_created', '<=', str(stop)))
+        if start: criteria.append(('date_created', '>=', str(start)))
+
+        movelinesids = MoveLine.search(
+            cursor, uid, criteria,
+            order='date_created asc, id asc',
+            context=context
+            )
 
         for line in MoveLine.browse(cursor, uid, movelinesids, context):
             # Filter out already converted move lines
@@ -181,12 +138,12 @@ class GenerationkWhInvestment(osv.osv):
             deactivation = None
             if waitingDays is not None:
                 activation = str(
-                    naiveisodate(line.date_created)
+                    isodate(line.date_created)
                     +relativedelta(days=waitingDays))
 
                 if expirationYears is not None:
                     deactivation = str(
-                        naiveisodatetime(activation)
+                        isodate(activation)
                         +relativedelta(years=expirationYears))
 
             self.create(cursor, uid, dict(
