@@ -285,21 +285,15 @@ class GenerationkWhDealer(osv.osv):
         def soci2partner(soci):
             return members2partners[soci]
 
-        txt_vals = dict(
-            contract=contract_id,
-            period=period,
-            start=start_date,
-            end=end_date,
-        )
-        txt =''
         for line in res:
-            txt_vals.update(dict(
-                kwh=line['kwh'],
-                member=line['member_id'],
-            ))
             txt = (u'{kwh} Generation kwh of member {member} to {contract} '
                    u'for period {period} between {start} and {end}').format(
-                **txt_vals
+                    kwh=line['kwh'],
+                    member=line['member_id'],
+                    contract=contract_id,
+                    period=period,
+                    start=start_date,
+                    end=end_date,
             )
             logger.notifyChannel('gkwh_dealer USE', netsvc.LOG_INFO, txt)
 
@@ -321,17 +315,14 @@ class GenerationkWhDealer(osv.osv):
         """
         logger = netsvc.Logger()
 
-        txt_vals = dict(
-            contract=contract_id,
-            period=period,
-            start=start_date,
-            end=end_date,
-            member=partner_id,
-            kwh=kwh
-        )
         txt = (u'{kwh} Generation kwh of member {member} to {contract} '
                u'for period {period} between {start} and {end}').format(
-            **txt_vals
+             contract=contract_id,
+             period=period,
+             start=start_date,
+             end=end_date,
+             member=partner_id,
+             kwh=kwh
         )
         logger.notifyChannel('gkwh_dealer REFUND', netsvc.LOG_INFO, txt)
 
