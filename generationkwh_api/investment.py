@@ -155,6 +155,48 @@ class GenerationkWhInvestment(osv.osv):
                 move_line_id=line.id,
                 ))
 
+    def create_from_accounting(self, cursor, uid,
+            start, stop, waitingDays, expirationYears,
+            context=None):
+        """
+            Takes accounting information and generates GenkWh investments
+            purchased among start and stop dates.
+            If waitingDays is not None, activation date is set those
+            days after the purchase date.
+            If expirationYears is not None, expiration date is set, those
+            years after the activation date.
+            TODO: Confirm that the expiration is relative to the activation
+            instead the purchase.
+        """
+        generationAccountPrefix = '163500%'
+        query = _sqlfromfile('investment_from_accounting')
+        cursor.execute(query, dict(
+            start = start,
+            stop = stop,
+            waitingDays = waitingDays,
+            expirationYears = expirationYears,
+            generationAccountPrefix = '163500%',
+            timecondition = '',
+            ))
+        print start, stop, waitingDays, expirationYears,
+        for (
+                member_id,
+                nshares,
+                purchase_date,
+                move_line_id,
+                activation_date,
+                deactivation_date, 
+                ) in cursor.fetchall():
+
+            self.create(cursor, uid, dict(
+                member_id=member_id,
+                nshares=nshares,
+                purchase_date=purchase_date,
+                activation_date=activation_date,
+                deactivation_date=deactivation_date,
+                move_line_id=move_line_id,
+                ))
+
     def activate(self, cursor, uid,
             start, stop, waitingDays, expirationYears, force,
             context=None):

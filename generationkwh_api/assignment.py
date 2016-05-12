@@ -16,6 +16,7 @@ FF_CONTRACT_FIELDS = [
 ]
 
 
+# TODO: This function is duplicated in other sources
 def _sqlfromfile(sqlname):
     from tools import config
     import os
