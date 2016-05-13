@@ -229,11 +229,13 @@ class GenerationkWhDealer(osv.osv):
             contract_id, start_date, end_date)
 
     def _get_available_kwh(self, cursor, uid,
-                          contract_id, start_date, end_date, fare, period,
+                          contract_id, start_date, end_date, fare_id, period_id,
                           context=None):
         """ Returns generationkwh [kWh] available for contract_id during the
             date interval, fare and period"""
         dealer = self._createDealer(cursor, uid, context)
+
+        fare, period = self.get_fare_name_by_id(cursor, uid, fare_id, period_id)
 
         return dealer.get_available_kwh(
             contract_id, start_date, end_date, fare, period)
@@ -266,8 +268,17 @@ class GenerationkWhDealer(osv.osv):
             for r in res
             ]
 
+    def get_fare_name_by_id(self, cursor, uid, fare_id, period_id, context=None):
+        Fare = self.pool.get('giscedata.polissa.tarifa')
+        Period = self.pool.get('giscedata.polissa.tarifa.periodes')
+
+        return (
+            Fare.read(cursor, uid, fare_id, ['name'])['name'],
+            Period.read(cursor, uid, period_id, ['name'])['name']
+        )
+
     def use_kwh(self, cursor, uid,
-                contract_id, start_date, end_date, fare, period, kwh,
+                contract_id, start_date, end_date, fare_id, period_id, kwh,
                 context=None):
         """Marks the indicated kwh as used, if available, for the contract,
            date interval, fare and period and returns the ones efectively used.
@@ -276,6 +287,9 @@ class GenerationkWhDealer(osv.osv):
         logger = netsvc.Logger()
 
         dealer = self._createDealer(cursor, uid, context)
+
+        fare, period = self.get_fare_name_by_id(cursor, uid, fare_id, period_id)
+
         res = dealer.use_kwh(
             contract_id, isodate(start_date), isodate(end_date), fare, period, kwh)
 
@@ -307,13 +321,15 @@ class GenerationkWhDealer(osv.osv):
 
 
     def refund_kwh(self, cursor, uid,
-                   contract_id, start_date, end_date, fare, period, kwh,
+                   contract_id, start_date, end_date, fare_id, period_id, kwh,
                    partner_id, context=None):
         """Refunds the indicated kwh, marking them as available again, for the
            contract, date interval, fare and period and returns the ones
            efectively used.
         """
         logger = netsvc.Logger()
+
+        fare, period = self.get_fare_name_by_id(cursor, uid, fare_id, period_id)
 
         txt = (u'{kwh} Generation kwh of member {member} to {contract} '
                u'for period {period} between {start} and {end}').format(
