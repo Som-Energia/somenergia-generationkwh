@@ -1,7 +1,7 @@
 SELECT
     soci.id,
     partner_id,
-    MAX(CEIL((0-inversion)/100)) as acciones,
+    CEIL(-COALESCE(inversion,0)/100) as acciones,
     COUNT(cups.id) AS ncontractes,
     SUM(CASE
         WHEN pol.pagador=soci.partner_id
@@ -45,10 +45,10 @@ LEFT JOIN giscedata_polissa_tarifa AS tar ON
     tar.id = pol.tarifa
 LEFT JOIN giscedata_cups_ps AS cups ON
     cups.id = pol.cups
-INNER JOIN (
+INNER JOIN ( -- LEFT JOIN to include also non investors
     SELECT 
         SUM(line.amount) AS inversion,
-        MAX(line.partner_id) AS already_invested
+        line.partner_id AS already_invested
     FROM payment_line AS line
     LEFT JOIN
         payment_order AS remesa ON remesa.id = line.order_id 
@@ -59,4 +59,5 @@ INNER JOIN (
 GROUP BY
     soci.id,
     partner_id,
+    acciones,
     TRUE
