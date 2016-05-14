@@ -262,7 +262,8 @@ class AssignmentProvider_Test(unittest.TestCase):
         # pickup cases (commented out the original partner.id)
         self.member_noContracts = 537 # 629
         self.member_oneAsPayer = 4 # 5 
-        self.member_asOwnerButNotPayer = 8899 # 13846
+        self.member_asOwnerButNotPayer = 8887 # 13846
+        self.contract_asOwnerButNotPayer = 15212
         self.member_aPayerAndAnOwnerContract = 107 # 120
         self.member_manyAsPayer = 54 # 61
         self.member_manyAsPayerAndManyAsOwner = 351 # 400
@@ -271,7 +272,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         # TODO: Sort them by annual use programatically, if not is fragile,
         # since annual use depends on the database snapshot
         self.payerContracts= 44944,26010,3662
-        self.ownerContracts= 150,149
+        self.ownerContracts= 149,150,
 
     def setupAssignments(self, assignments):
         for contract, member, priority in assignments:
@@ -470,7 +471,10 @@ class AssignmentProvider_Test(unittest.TestCase):
 
     def test_sortedDefaultContractsForMember_oneAsOwnerButNotPayer(self):
         self.assertContractForMember(self.member_asOwnerButNotPayer, [
-            (15212, self.member_asOwnerButNotPayer),
+            (
+                self.contract_asOwnerButNotPayer,
+                self.member_asOwnerButNotPayer,
+            ),
             ])
 
     def test_sortedDefaultContractsForMember_onePayerAndOneOwner_payerFirst(self):
