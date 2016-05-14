@@ -222,7 +222,6 @@ class GenerationkWhAssignment(osv.osv):
                 investment.member_id
             """)
         result = [ id for id, in cursor.fetchall() ]
-        print result
         return result
 
 
