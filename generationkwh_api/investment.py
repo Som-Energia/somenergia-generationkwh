@@ -208,22 +208,18 @@ class GenerationkWhInvestment(osv.osv):
         investments = self.browse(cursor, uid, investments_id, context=context)
 
         for investment in investments:
+            first_effective_date = (
+                isodate(investment.purchase_date)
+                +relativedelta(days=waitingDays))
             updateDict = dict(
-                first_effective_date=(
-                    str(isodate(investment.purchase_date)
-                        +relativedelta(days=waitingDays))
-                    ),
+                first_effective_date=str(first_effective_date),
                 )
             if expirationYears:
+                last_effective_date = (
+                    first_effective_date
+                    +relativedelta(years=expirationYears))
                 updateDict.update(
-                    last_effective_date=(
-                        str(isodate(investment.purchase_date)
-                            +relativedelta(
-                                years=expirationYears,
-                                days=waitingDays,
-                                )
-                            )
-                        ),
+                    last_effective_date=str(last_effective_date),
                     )
             self.write(cursor, uid, investment.id, updateDict, context=context)
 
