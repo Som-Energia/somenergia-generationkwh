@@ -1,5 +1,6 @@
 --- Returns tuples to create new investments
---- from the accounting move lines.
+--- from info in accounting move lines.
+--- TODO: Not used because it turns to be very slow when run from the erp
 SELECT
     soci.id AS member_id,
     DIV(credit-debit,100) AS nshares,
