@@ -22,6 +22,7 @@
     "investment_view.xml",
     "assignment_view.xml",
     "somenergia_soci_view.xml",
+    "somenergia_soci_data.xml",
     "security/ir.model.access.csv",
     ],
   "active": False,

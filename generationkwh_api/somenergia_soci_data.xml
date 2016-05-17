@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+    <data>
+        <record model="generationkwh.kwh.per.share" id="gkwh_kwh_per_share_20160301">
+            <field name="version_start_date">2016-03-01</field>
+            <field name="kwh">170</field>
+        </record>
+    </data>
+</openerp>
