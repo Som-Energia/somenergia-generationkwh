@@ -17,6 +17,17 @@ class GenerationkwhProductionAggregator(osv.osv):
     _name = 'generationkwh.production.aggregator'
 
 
+    _columns = {
+        'name': fields.char('Name', size=50),
+        'description': fields.char('Description', size=150),
+        'enabled': fields.boolean('Enabled'),
+        'plants': fields.one2many('generationkwh.production.plant', 'aggr_id', 'Plants')
+    }
+
+    _defaults = {
+        'enabled': lambda *a: False
+    }
+
     def getWh(self, cursor, uid, pid, start, end, context=None):
         '''Get production aggregation'''
    
@@ -112,16 +123,6 @@ class GenerationkwhProductionAggregator(osv.osv):
                 for meter in plant.meters if meter.enabled]).items()))
             for plant in aggr.plants if plant.enabled]).items()))
 
-    _columns = {
-        'name': fields.char('Name', size=50),
-        'description': fields.char('Description', size=150),
-        'enabled': fields.boolean('Enabled'),
-        'plants': fields.one2many('generationkwh.production.plant', 'aggr_id', 'Plants')
-    }
-
-    _defaults = {
-        'enabled': lambda *a: False
-    }
 GenerationkwhProductionAggregator()
 
 
@@ -269,6 +270,14 @@ class GenerationkwhProductionMeasurement(osv_mongodb.osv_mongodb):
     _name = 'generationkwh.production.measurement'
     _order = 'timestamp desc'
 
+    _columns = {
+        'name': fields.integer('Plant identifier'), # NOTE: workaround due mongodb backend
+        'create_at': fields.datetime('Create datetime'),
+        'datetime': fields.datetime('Exported datetime'),
+        'daylight': fields.char('Exported datetime daylight',size=1),
+        'ae': fields.float('Exported energy (kWh)')
+    }
+
     def search(self, cursor, uid, args, offset=0, limit=0, order=None,
                context=None, count=False):
         '''Exact match for name.
@@ -292,13 +301,6 @@ class GenerationkwhProductionMeasurement(osv_mongodb.osv_mongodb):
                                   order=order, context=context,
                                   count=count)
 
-    _columns = {
-        'name': fields.integer('Plant identifier'), # NOTE: workaround due mongodb backend
-        'create_at': fields.datetime('Create datetime'),
-        'datetime': fields.datetime('Exported datetime'),
-        'daylight': fields.char('Exported datetime daylight',size=1),
-        'ae': fields.float('Exported energy (kWh)')
-    }
 GenerationkwhProductionMeasurement()
 
 # vim: ts=4 sw=4 et
