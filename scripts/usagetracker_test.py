@@ -24,6 +24,8 @@ class UsageTracker_Test(unittest.TestCase):
         self.member2 = 469
         self.partner2 = 550
         self.nonMemberPartner = 1 # SomEnergia
+        self.fareId = 1 # 2.0A
+        self.periodId = 1 # 2.0A P1
 
     def tearDown(self):
         self.clearData()
@@ -279,7 +281,7 @@ class UsageTracker_Test(unittest.TestCase):
 
         self.assertEqual(
             self.c.GenerationkwhDealer.use_kwh(
-                self.contract, '2015-08-01', '2015-09-01', '2.0A', 'P1', 10), [
+                self.contract, '2015-08-01', '2015-09-01', self.fareId, self.periodId, 10), [
                 dict(member_id=self.partner, kwh=3),
                 dict(member_id=self.partner2, kwh=7),
             ])
@@ -308,13 +310,13 @@ class UsageTracker_Test(unittest.TestCase):
 
         self.assertEqual(
             self.c.GenerationkwhDealer.use_kwh(
-                self.contract, '2015-08-01', '2015-09-01', '2.0A', 'P1', 10), [
+                self.contract, '2015-08-01', '2015-09-01', self.fareId, self.periodId, 10), [
                 dict(member_id=self.partner, kwh=10), # Here
             ])
 
         self.assertEqual(
             self.c.GenerationkwhDealer.refund_kwh(
-                self.contract, '2015-08-01', '2015-09-01', '2.0A', 'P1', 2, self.partner), # and Here
+                self.contract, '2015-08-01', '2015-09-01', self.fareId, self.periodId, 2, self.partner), # and Here
             2)
 
         self.assertEqual(
@@ -334,13 +336,13 @@ class UsageTracker_Test(unittest.TestCase):
 
         self.assertEqual(
             self.c.GenerationkwhDealer.use_kwh(
-                self.contract, '2015-08-01', '2015-09-01', '2.0A', 'P1', 10), [
+                self.contract, '2015-08-01', '2015-09-01', self.fareId, self.periodId, 10), [
                 dict(member_id=self.partner, kwh=10), # Here
             ])
 
         self.assertEqual(
             self.c.GenerationkwhDealer.refund_kwh(
-                self.contract, '2015-08-01', '2015-09-01', '2.0A', 'P1', 2, self.nonMemberPartner),
+                self.contract, '2015-08-01', '2015-09-01', self.fareId, self.periodId, 2, self.nonMemberPartner),
             0)
 
         self.assertEqual(
