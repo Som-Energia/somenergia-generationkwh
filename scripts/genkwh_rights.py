@@ -55,7 +55,7 @@ def parseArgumments():
             ),
         sub.add_argument(
             dest='production',
-            ngargs='*',
+            nargs='*',
             help="production"
             )
     for sub in listactive,:
