@@ -22,12 +22,6 @@ def usage_getter(member,start,stop):
     method=erp.GenerationkwhTesthelper.usage
     _getter(method,member,start,stop)
 
-def curver_getter(db,member,start,stop):
-    c= pymongo.Connection()
-    db = c[dbname]
-    p=MemberRightsUsage(db)
-    _getter(p,member,start,stop)
-
 def parseArguments():
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
@@ -52,7 +46,7 @@ def parseArguments():
 
 def main():
     args = parseArguments()
-    curver_getter(dbname,args.member,args.start,args.end)
+    usage_getter(args.member,args.start,args.end)
 
 if __name__ == '__main__':
     main()

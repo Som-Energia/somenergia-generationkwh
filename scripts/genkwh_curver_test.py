@@ -1,13 +1,15 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python
-from  genkwh_curver import usage_getter
+# -*- coding: utf-8 -*-
+#from  genkwh_curver import usage_getter
 import unittest
 import pymongo
 from generationkwh.memberrightsusage import MemberRightsUsage
 from generationkwh.isodates import isodate
 import erppeek
 import dbconfig
-
+import os
+from subprocess import call
+import sys
 class CurverGetter_Test(unittest.TestCase):
     def setUp(self):
         self.erp = erppeek.Client(**dbconfig.erppeek)
@@ -17,7 +19,10 @@ class CurverGetter_Test(unittest.TestCase):
         c.drop_database('generationkwh_test')
     
     def test_curverGetter_withNoUsage(self):
-        usage_getter('1','2015-08-16','2015-08-16')
+        call([os.path.dirname(os.path.abspath(__file__))+"/genkwh_curver.py",
+            "-s","2015-08-16",
+            "-e","2015-08-16", 
+            "1"])
         lines=open('test.csv', 'rb').readlines()
         self.assertEqual(
             [" ".join(map(str,range(1,26)))," ".join(map(str,[0]*25))],
@@ -29,7 +34,10 @@ class CurverGetter_Test(unittest.TestCase):
             '2015-08-15',
             range(1,25)+[0]
             )
-        usage_getter('1','2015-08-15','2015-08-15')
+        call([os.path.dirname(os.path.abspath(__file__))+"/genkwh_curver.py",
+            "-s","2015-08-15",
+            "-e","2015-08-15", 
+            "1"])
         lines=open('test.csv', 'rb').readlines()
         self.assertEqual(
             [" ".join(map(str,range(1,26)))," ".join(map(str,range(1,25)+[0]))],
