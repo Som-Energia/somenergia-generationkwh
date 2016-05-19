@@ -40,6 +40,16 @@ class GenerationkWhTestHelper(osv.osv):
         holidaysProvider = HolidaysProvider(self, cursor, uid, context)
         return holidaysProvider.get(start, stop)
 
+    def memberrightsusage_update(self, cursor, uid,
+            member,start,data,
+            context=None):
+        usage_provider = MemberRightsUsage(mdbpool.get_db())
+        usage_provider.updateUsage(
+            member=member,
+            start=isodate(start),
+            data=data
+            )
+
     def setup_rights_per_share(self, cursor, uid,
             nshares, startDate, data,
             context=None):

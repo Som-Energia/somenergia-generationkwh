@@ -6,16 +6,27 @@ from generationkwh.memberrightsusage import MemberRightsUsage
 import pymongo
 import csv
 from yamlns import namespace as ns
+import erppeek
+import dbconfig
+
 dbname='generationkwh_test'
-def curver_getter(dbname,member,start,stop):
-    c = pymongo.Connection()                                                                                       
-    db = c[dbname]
-    p=MemberRightsUsage(db)
-    curve=p.usage(member=member,start=isodate(start),stop=isodate(stop))
+def _getter(method,member,start,stop):
+    curve=method(member,start,stop)
     with open('test.csv', 'wb') as csvfile:
         spamwriter = csv.writer(csvfile, delimiter=' ', quoting=csv.QUOTE_MINIMAL)
         spamwriter.writerow(range(1,26)*((isodate(stop)-isodate(start)).days+1))
         spamwriter.writerow(curve)
+
+def usage_getter(member,start,stop):
+    erp=erppeek.Client(**dbconfig.erppeek)
+    method=erp.GenerationkwhTesthelper.usage
+    _getter(method,member,start,stop)
+
+def curver_getter(db,member,start,stop):
+    c= pymongo.Connection()
+    db = c[dbname]
+    p=MemberRightsUsage(db)
+    _getter(p,member,start,stop)
 
 def parseArguments():
     import argparse
