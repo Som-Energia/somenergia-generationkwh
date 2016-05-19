@@ -205,11 +205,13 @@ class GenerationkWhInvestment(osv.osv):
         if start: criteria.append(('purchase_date', '>=', str(start)))
 
         investments_id = self.search(cursor, uid, criteria, context=context)
-        investments = self.browse(cursor, uid, investments_id, context=context)
+        investments = self.read(
+            cursor, uid, investments_id, ['purchase_date'], context=context
+        )
 
         for investment in investments:
             first_effective_date = (
-                isodate(investment.purchase_date)
+                isodate(investment['purchase_date'])
                 +relativedelta(days=waitingDays))
             updateDict = dict(
                 first_effective_date=str(first_effective_date),
@@ -221,7 +223,9 @@ class GenerationkWhInvestment(osv.osv):
                 updateDict.update(
                     last_effective_date=str(last_effective_date),
                     )
-            self.write(cursor, uid, investment.id, updateDict, context=context)
+            self.write(
+                cursor, uid, investment['id'], updateDict, context=context
+            )
 
 class InvestmentProvider(ErpWrapper):
 
