@@ -22,7 +22,7 @@ def usage_getter(member,start,stop):
     method=erp.GenerationkwhTesthelper.usage
     _getter(method,member,start,stop)
 
-def available_getter(member,start,stop,fare, period):
+def available_getter(member,start,stop):
     erp=erppeek.Client(**dbconfig.erppeek)
     method=erp.GenerationkwhTesthelper.rights_kwh
     _getter(method,member,start,stop)
@@ -30,32 +30,37 @@ def available_getter(member,start,stop,fare, period):
 def parseArguments():
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
-    """subparsers = parser.add_subparsers(
+    subparsers = parser.add_subparsers(
         title="Subcommands",
         dest="subcommand",
-        )"""
-    
-    parser.add_argument(
-        '-s','--start',
-        type=str,
-        help="Start date",
         )
-    parser.add_argument(
-        '-e','--end',
-        type=str,
-        help="End date",
-        )
-    parser.add_argument(
-        'member',
-        type=str,
-        help="investor of Generation-kWh (see --partner and --number)",
-        )
+    available = subparsers.add_parser('available')
+    usage = subparsers.add_parser('usage')
+    for sub in available,usage:
+        sub.add_argument(
+            '-s','--start',
+            type=str,
+            help="Start date",
+            )
+        sub.add_argument(
+            '-e','--end',
+            type=str,
+            help="End date",
+            )
+        sub.add_argument(
+            'member',
+            type=str,
+            help="investor of Generation-kWh (see --partner and --number)",
+            )
 
     return parser.parse_args(namespace=ns())
 
 def main():
     args = parseArguments()
-    usage_getter(args.member,args.start,args.end)
+    if args.subcommand == "usage":
+        usage_getter(args.member,args.start,args.end)
+    else:
+        available_getter(args.member,args.start,args.end)
 
 if __name__ == '__main__':
     main()

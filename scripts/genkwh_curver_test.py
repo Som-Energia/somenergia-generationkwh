@@ -20,6 +20,7 @@ class CurverGetter_Test(unittest.TestCase):
     
     def test_usageGetter_withNoUsage(self):
         call([os.path.dirname(os.path.abspath(__file__))+"/genkwh_curver.py",
+            "usage",
             "-s","2016-08-17",
             "-e","2016-08-17", 
             "1"])
@@ -35,6 +36,7 @@ class CurverGetter_Test(unittest.TestCase):
             range(1,25)+[0]
             )
         call([os.path.dirname(os.path.abspath(__file__))+"/genkwh_curver.py",
+            "usage",
             "-s","2015-08-15",
             "-e","2015-08-15", 
             "1"])
@@ -44,7 +46,11 @@ class CurverGetter_Test(unittest.TestCase):
             map(str.rstrip,lines)
         )
     def test_availableGetter_method_withNoUsage(self):
-        available_getter("1",'2015-08-15','2015-08-15','2.0A','P1')
+        call([os.path.dirname(os.path.abspath(__file__))+"/genkwh_curver.py",
+            "available",
+            "-s","2015-08-15",
+            "-e","2015-08-15", 
+            "1"])
         lines=open('test.csv', 'rb').readlines()
         self.assertEqual(
             [" ".join(map(str,range(1,26)))," ".join(map(str,[0]*25))],
