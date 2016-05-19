@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#from  genkwh_curver import usage_getter
+from  genkwh_curver import available_getter
 import unittest
 import pymongo
 from generationkwh.memberrightsusage import MemberRightsUsage
@@ -18,17 +18,17 @@ class CurverGetter_Test(unittest.TestCase):
         c = pymongo.Connection()
         c.drop_database('generationkwh_test')
     
-    def test_curverGetter_withNoUsage(self):
+    def test_usageGetter_withNoUsage(self):
         call([os.path.dirname(os.path.abspath(__file__))+"/genkwh_curver.py",
-            "-s","2015-08-16",
-            "-e","2015-08-16", 
+            "-s","2016-08-17",
+            "-e","2016-08-17", 
             "1"])
         lines=open('test.csv', 'rb').readlines()
         self.assertEqual(
             [" ".join(map(str,range(1,26)))," ".join(map(str,[0]*25))],
             map(str.rstrip,lines)
         )
-    def test_curverGetter_withUsage(self):        
+    def test_usageGetter_withUsage(self):        
         p=self.erp.GenerationkwhTesthelper.memberrightsusage_update(
             "1",
             '2015-08-15',
@@ -41,6 +41,13 @@ class CurverGetter_Test(unittest.TestCase):
         lines=open('test.csv', 'rb').readlines()
         self.assertEqual(
             [" ".join(map(str,range(1,26)))," ".join(map(str,range(1,25)+[0]))],
+            map(str.rstrip,lines)
+        )
+    def test_availableGetter_method_withNoUsage(self):
+        available_getter("1",'2015-08-15','2015-08-15','2.0A','P1')
+        lines=open('test.csv', 'rb').readlines()
+        self.assertEqual(
+            [" ".join(map(str,range(1,26)))," ".join(map(str,[0]*25))],
             map(str.rstrip,lines)
         )
 

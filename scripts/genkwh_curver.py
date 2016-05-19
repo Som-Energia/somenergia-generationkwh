@@ -22,10 +22,19 @@ def usage_getter(member,start,stop):
     method=erp.GenerationkwhTesthelper.usage
     _getter(method,member,start,stop)
 
+def available_getter(member,start,stop,fare, period):
+    erp=erppeek.Client(**dbconfig.erppeek)
+    method=erp.GenerationkwhTesthelper.rights_kwh
+    _getter(method,member,start,stop)
+
 def parseArguments():
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
-
+    """subparsers = parser.add_subparsers(
+        title="Subcommands",
+        dest="subcommand",
+        )"""
+    
     parser.add_argument(
         '-s','--start',
         type=str,

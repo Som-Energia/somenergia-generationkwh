@@ -73,6 +73,22 @@ class GenerationkWhTestHelper(osv.osv):
         for collection in collections:
             mdbpool.get_db().drop_collection(collection)
 
+    def rights_kwh(self, cursor, uid, member, start, stop, context=None):
+        investment = InvestmentProvider(self, cursor, uid, context)
+        memberActiveShares = MemberSharesCurve(investment)
+        rightsPerShare = RightsPerShare(mdbpool.get_db())
+        remainders = RemainderProvider(self, cursor, uid, context)
+        generatedRights = MemberRightsCurve(
+            activeShares=memberActiveShares,
+            rightsPerShare=rightsPerShare,
+            remainders=remainders,
+            eager=True,
+            )
+        return [ int(num) for num in generatedRights.rights_kwh(member,
+            isodate(start),
+            isodate(stop),
+            )]
+
 
     def trace_rigths_compilation(self, cursor, uid,
             member, start, stop, fare, period,
