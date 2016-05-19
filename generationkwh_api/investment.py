@@ -155,7 +155,7 @@ class GenerationkWhInvestment(osv.osv):
                 move_line_id=line.id,
                 ))
 
-    def create_from_accounting(self, cursor, uid,
+    def _create_from_accounting(self, cursor, uid,
             start, stop, waitingDays, expirationYears,
             context=None):
         """
