@@ -132,7 +132,9 @@ class GenerationkWhInvestment(osv.osv):
                 domain = [('partner_id', '=', partnerid)]
 
             # partner to member conversion
-            memberid = Member.search(cursor, uid, domain)[0]
+            # ctx = dict(context)
+            # ctx.update({'active_test': False})
+            memberid = Member.search(cursor, uid, domain, context=context)[0]
 
             activation = None
             lastDateEffective = None
