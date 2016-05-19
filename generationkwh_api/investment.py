@@ -81,6 +81,65 @@ class GenerationkWhInvestment(osv.osv):
         provider = InvestmentProvider(self, cursor, uid, context)
         return provider.shareContracts(member, start, end)
 
+    def effective_for_member(self, cursor, uid,
+            member_id, first_date, last_date,
+            context=None):
+        return len(self.active_investments(cursor, uid, member_id, first_date, last_date, context))>0
+
+    def create_for_member(self, cursor, uid,
+            member_id, start, stop, waitingDays, expirationYears,
+            context=None):
+        Account = self.pool.get('account.account')
+        MoveLine = self.pool.get('account.move.line')
+        Member = self.pool.get('somenergia.soci')
+        generationAccountPrefix = '163500'
+
+        memberCode = Member.read(cursor, uid, member_id, ['ref'])
+        accountCode = generationAccountPrefix[:6] + memberCode['ref'][1:]
+
+        accountIds = Account.search(cursor, uid, [
+            ('code','=',accountCode),
+            ])
+
+        criteria = [('account_id','in',accountIds)]
+        if stop: criteria.append(('date_created', '<=', str(stop)))
+        if start: criteria.append(('date_created', '>=', str(start)))
+
+        movelinesids = MoveLine.search(
+            cursor, uid, criteria,
+            order='date_created asc, id asc',
+            context=context
+            )
+
+        for line in MoveLine.browse(cursor, uid, movelinesids, context):
+            # Filter out already converted move lines
+            if self.search(cursor, uid,
+                [('move_line_id','=',line.id)],
+                context=context,
+                ):
+                continue
+
+            activation = None
+            lastDateEffective = None
+            if waitingDays is not None:
+                activation = str(
+                    isodate(line.date_created)
+                    +relativedelta(days=waitingDays))
+
+                if expirationYears is not None:
+                    lastDateEffective = str(
+                        isodate(activation)
+                        +relativedelta(years=expirationYears))
+
+            self.create(cursor, uid, dict(
+                member_id=member_id,
+                nshares=(line.credit-line.debit)//100,
+                purchase_date=line.date_created,
+                first_effective_date=activation,
+                last_effective_date=lastDateEffective,
+                move_line_id=line.id,
+                ))
+
 
     def create_from_accounting(self, cursor, uid,
             start, stop, waitingDays, expirationYears,
@@ -287,6 +346,11 @@ class InvestmentProvider(ErpWrapper):
             for member, start, end, shares
             in self.shareContractsTuple(member, start, end)
         ]
+
+    def effectiveForMember(self, member, first_date, last_date):
+        Investment = self.erp.pool.get('generationkwh.investment')
+        print Investment
+        return Investment.effective_for_member(self.cursor, self.uid, member, first_date, last_date, self.context)
 
 
 GenerationkWhInvestment()

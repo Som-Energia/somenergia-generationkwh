@@ -28,6 +28,9 @@
     - Create default assignment
     - Send email explaining assignment
 
+- Rename assignment.isActive
+- Investment: review who uses `active_investments` and consider `effective_for_member` similar implementation
+- Investment: review dupliation among `create_from_account` and `create_for_member`
 
 
 

@@ -405,9 +405,10 @@ class GenerationkWhDealer(osv.osv):
 
     def _createDealer(self, cursor, uid, context):
 
+        investments = InvestmentProvider(self, cursor, uid, context)
         usageTracker = self._createTracker(cursor, uid, context)
         assignments = AssignmentProvider(self, cursor, uid, context)
-        return Dealer(usageTracker, assignments)
+        return Dealer(usageTracker, assignments, investments)
 
 GenerationkWhDealer()
 

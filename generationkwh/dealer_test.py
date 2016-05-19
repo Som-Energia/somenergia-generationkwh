@@ -38,6 +38,13 @@ class UsageTrackerMockup(object):
             )
         return self._results.pop(0)
 
+class InvestmentMockup(object):
+    def __init__(self, members):
+        self._activeMembers = members
+
+    def effectiveForMember(self, member_id, first_date, last_date):
+        return member_id in self._activeMembers
+
 
 class Dealer_Test(unittest.TestCase):
 
@@ -102,8 +109,8 @@ class Dealer_Test(unittest.TestCase):
         s = Dealer(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
-            start_date = isodate('2015-08-01'),
-            end_date = isodate('2015-09-01'),
+            first_date = isodate('2015-08-01'),
+            last_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
             kwh = 100,
@@ -125,8 +132,8 @@ class Dealer_Test(unittest.TestCase):
         s = Dealer(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
-            start_date = isodate('2015-08-01'),
-            end_date = isodate('2015-09-01'),
+            first_date = isodate('2015-08-01'),
+            last_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
             kwh = 100,
@@ -156,8 +163,8 @@ class Dealer_Test(unittest.TestCase):
         s = Dealer(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
-            start_date = isodate('2015-08-01'),
-            end_date = isodate('2015-09-01'),
+            first_date = isodate('2015-08-01'),
+            last_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
             kwh = 100,
@@ -185,8 +192,8 @@ class Dealer_Test(unittest.TestCase):
         s = Dealer(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
-            start_date = isodate('2015-08-01'),
-            end_date = isodate('2015-09-01'),
+            first_date = isodate('2015-08-01'),
+            last_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
             kwh = 100,
@@ -216,8 +223,8 @@ class Dealer_Test(unittest.TestCase):
         s = Dealer(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
-            start_date = isodate('2015-08-01'),
-            end_date = isodate('2015-09-01'),
+            first_date = isodate('2015-08-01'),
+            last_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
             kwh = 100,
@@ -255,8 +262,8 @@ class Dealer_Test(unittest.TestCase):
         s = Dealer(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
-            start_date = isodate('2015-08-01'),
-            end_date = isodate('2015-09-01'),
+            first_date = isodate('2015-08-01'),
+            last_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
             kwh = 20,
@@ -294,8 +301,8 @@ class Dealer_Test(unittest.TestCase):
         s = Dealer(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
-            start_date = isodate('2015-08-01'),
-            end_date = isodate('2015-09-01'),
+            first_date = isodate('2015-08-01'),
+            last_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
             kwh = 20,
@@ -333,8 +340,8 @@ class Dealer_Test(unittest.TestCase):
         s = Dealer(usageTracker=t, assignmentProvider=a)
         result = s.use_kwh(
             contract_id = 1,
-            start_date = isodate('2015-08-01'),
-            end_date = isodate('2015-09-01'),
+            first_date = isodate('2015-08-01'),
+            last_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
             kwh = 100,
@@ -363,8 +370,8 @@ class Dealer_Test(unittest.TestCase):
         s = Dealer(usageTracker=t, assignmentProvider=a)
         result = s.refund_kwh(
             contract_id = 1,
-            start_date = isodate('2015-08-01'),
-            end_date = isodate('2015-09-01'),
+            first_date = isodate('2015-08-01'),
+            last_date = isodate('2015-09-01'),
             fare = '2.0A',
             period = 'P1',
             kwh = 100,
@@ -381,7 +388,7 @@ class Dealer_Test(unittest.TestCase):
         self.assertEqual(result, 20)
         
         
-    def test_isactive_withAssignments(self):
+    def test_isactive_withAssignments_andInvesments(self):
         t = UsageTrackerMockup([20])
         a = AssignmentsMockup([
             ns(
@@ -389,24 +396,66 @@ class Dealer_Test(unittest.TestCase):
                 last_usable_date=isodate('2015-10-01'),
             ),
             ])
+        i = InvestmentMockup([
+            'member1'
+            ])
 
-        s = Dealer(usageTracker=t, assignmentProvider=a)
+        s = Dealer(usageTracker=t, assignmentProvider=a, investments=i)
         self.assertTrue(s.is_active(
             contract_id=1,
-            start_date=isodate('2015-10-01'),
-            end_date=isodate('2015-10-01'),
+            first_date=isodate('2015-10-01'),
+            last_date=isodate('2015-10-01'),
+            ))
+
+    def test_isactive_withAssignments_noEffectiveInvestment(self):
+        t = UsageTrackerMockup([])
+        a = AssignmentsMockup([
+            ns(
+                member_id='member1',
+                last_usable_date=isodate('2015-10-01'),
+            ),
+            ])
+        i = InvestmentMockup([])
+
+        s = Dealer(usageTracker=t, assignmentProvider=a, investments=i)
+        self.assertFalse(s.is_active(
+            contract_id=1,
+            first_date=isodate('2015-10-01'),
+            last_date=isodate('2015-10-01'),
+            ))
+
+
+    def test_isactive_manyAssigments_oneWithoutInvestment(self):
+        t = UsageTrackerMockup([])
+        a = AssignmentsMockup([
+            ns(
+                member_id='member1',
+                last_usable_date=isodate('2015-10-01'),
+            ),
+            ns(
+                member_id='member2',
+                last_usable_date=isodate('2015-10-01'),
+            ),
+            ])
+        i = InvestmentMockup(['member1'])
+
+        s = Dealer(usageTracker=t, assignmentProvider=a, investments=i)
+        self.assertTrue(s.is_active(
+            contract_id=1,
+            first_date=isodate('2015-10-01'),
+            last_date=isodate('2015-10-01'),
             ))
 
     def test_isactive_withoutAssignments(self):
-        t = UsageTrackerMockup([20])
+        t = UsageTrackerMockup([])
         a = AssignmentsMockup([
             ])
 
         s = Dealer(usageTracker=t, assignmentProvider=a)
         self.assertFalse(s.is_active(
             contract_id=1,
-            start_date=isodate('2015-10-01'),
-            end_date=isodate('2015-10-01'),
+            first_date=isodate('2015-10-01'),
+            last_date=isodate('2015-10-01'),
             ))
 
     def test_usekwh_assertsPositiveRequiredUse(self):
@@ -418,8 +467,8 @@ class Dealer_Test(unittest.TestCase):
         with self.assertRaises(AssertionError) as ctx:
             result = s.use_kwh(
                 contract_id = 1,
-                start_date = isodate('2015-08-01'),
-                end_date = isodate('2015-09-01'),
+                first_date = isodate('2015-08-01'),
+                last_date = isodate('2015-09-01'),
                 fare = '2.0A',
                 period = 'P1',
                 kwh = -20,
@@ -440,8 +489,8 @@ class Dealer_Test(unittest.TestCase):
         with self.assertRaises(AssertionError) as ctx:
             result = s.use_kwh(
                 contract_id = 1,
-                start_date = isodate('2015-08-01'),
-                end_date = isodate('2015-09-01'),
+                first_date = isodate('2015-08-01'),
+                last_date = isodate('2015-09-01'),
                 fare = '2.0A',
                 period = 'P1',
                 kwh = 20,
@@ -462,8 +511,8 @@ class Dealer_Test(unittest.TestCase):
         with self.assertRaises(AssertionError) as ctx:
             result = s.use_kwh(
                 contract_id = 1,
-                start_date = isodate('2015-08-01'),
-                end_date = isodate('2015-09-01'),
+                first_date = isodate('2015-08-01'),
+                last_date = isodate('2015-09-01'),
                 fare = '2.0A',
                 period = 'P1',
                 kwh = 10,
@@ -471,6 +520,7 @@ class Dealer_Test(unittest.TestCase):
         self.assertEqual(ctx.exception.args[0],
             "Genkwh Usage traker returned more (11) than required (10) "
             "for member member1")
+
 
 
 

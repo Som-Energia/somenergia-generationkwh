@@ -8,39 +8,47 @@ class Dealer(object):
         availability and investors criteria.
     """
 
-    def __init__(self, usageTracker, assignmentProvider):
+    def __init__(self, usageTracker, assignmentProvider, investments=None):
         self._tracker = usageTracker
         self._assignments = assignmentProvider
+        self._investments = investments
 
     
     def is_active(self,
-            contract_id, start_date, end_date):
+            contract_id, first_date, last_date):
         """ Returns True if contract_id has generation kwh activated
             during the period"""
-        return self._assignments.isActive(contract_id)
+        if not self._assignments.isActive(contract_id):
+            return False
+
+        for assigment in self._assignments.seek(contract_id):
+            if self._investments.effectiveForMember(
+                    assigment.member_id, first_date, last_date):
+                return True
+        return False
 
     # Do not use for invoicing, ONLY statistics
-    def get_available_kwh(self, contract_id, start_date, end_date, fare, period):
+    def get_available_kwh(self, contract_id, first_date, last_date, fare, period):
         """ Returns generationkwh [kWh] available for contract_id during the
             date interval, fare and period"""
         raise NotImplemented
 
-    def use_kwh(self, contract_id, start_date, end_date, fare, period, kwh):
+    def use_kwh(self, contract_id, first_date, last_date, fare, period, kwh):
         """
             Marks the indicated kwh as used, if available, for the contract,
             date interval, fare and period.
             Returns a list of dictionaries each with member_id and kwh
             effectively allocated.
         """
-        assert type(start_date) == datetime.date
-        assert type(end_date) == datetime.date
+        assert type(first_date) == datetime.date
+        assert type(last_date) == datetime.date
         assert kwh>=0, ("Negative use not allowed")
-        seek_start = start_date + relativedelta(years=-1)
+        seek_start = first_date + relativedelta(years=-1)
         assignments = self._assignments.seek(contract_id)
         used = 0
         result = []
         for asig in assignments:
-            seek_end = min(end_date,asig.last_usable_date)
+            seek_end = min(last_date,asig.last_usable_date)
             if seek_end<seek_start: continue
             memberUse = self._tracker.use_kwh(
                     asig.member_id,
@@ -60,18 +68,18 @@ class Dealer(object):
 
         return result
 
-    def refund_kwh(self, contract_id, start_date, end_date, fare, period, kwh,
+    def refund_kwh(self, contract_id, first_date, last_date, fare, period, kwh,
             member_id):
         """
             Refunds the indicated kwh, marking them as available again,
             for the contract, date interval, fare and period and
             returns the kwh efectively refunded.
         """
-        assert type(start_date) == datetime.date
-        assert type(end_date) == datetime.date
-        seek_start = start_date + relativedelta(years=-1)
+        assert type(first_date) == datetime.date
+        assert type(last_date) == datetime.date
+        seek_start = first_date + relativedelta(years=-1)
         return self._tracker.refund_kwh(member_id,
-            seek_start, end_date,
+            seek_start, last_date,
             fare, period, kwh)
 
 

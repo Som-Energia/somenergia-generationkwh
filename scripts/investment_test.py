@@ -12,10 +12,12 @@ except ImportError:
     pass
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
+@unittest.skip("Slow")
 class Investment_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
+        self.Investments = c.GenerationkwhInvestment
 
     def test_clean(self):
         clear()
@@ -138,4 +140,30 @@ class Investment_Test(unittest.TestCase):
         activate(stop="2015-06-30", waitingDays=0, expirationYears=1)
         data = listactive(csv=True)
         self.assertB2BEqual(data)
+
+class Investment_FAST_Test(unittest.TestCase):
+    def setUp(self):
+        self.maxDiff=None
+        self.b2bdatapath="b2bdata"
+        self.Investments = c.GenerationkwhInvestment
+
+    def test_effectiveForMember_whenNoAssigments(self):
+        clear()
+        self.assertFalse(
+            self.Investments.effective_for_member(1,'2015-01-01','2015-01-01'))
+
+
+    def test_effectiveForMember_insideDates(self):
+        clear()
+        self.Investments.create_for_member(1,'2010-01-01', '2015-07-03',
+            1, None)
+        self.assertTrue(
+            self.Investments.effective_for_member(1,'2015-07-01','2015-07-01'))
+
+
+
+
+
+
+
 
