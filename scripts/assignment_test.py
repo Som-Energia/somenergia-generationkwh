@@ -44,8 +44,7 @@ class Assignment_Test(unittest.TestCase):
 
 
     def assertAllAssignmentsEqual(self, expectation):
-        result = self.Assignment.browse([
-            ])
+        result = self.Assignment.browse([])
         self.assertEqual( [
                 (
                     r.contract_id.id,

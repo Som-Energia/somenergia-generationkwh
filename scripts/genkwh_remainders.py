@@ -15,7 +15,7 @@ def parseArgumments():
         title="Subcommands",
         dest='subcommand',
         )
-    listactive = subparsers.add_parser('listactive',
+    list = subparsers.add_parser('list',
         help="list remainders",
         )
     init = subparsers.add_parser('init',

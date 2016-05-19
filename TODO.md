@@ -2,17 +2,21 @@
 
 ## Inmediate TODO's
 
-- Invoice visual design implementation [gisce]
+- Cas: Factura contracte amb assignacions de membres que no tenen inversions effectives, no hauria de sortir linia generation
+- Assignment: Wizard per canviar flag active des del tree [gisce]
+- Annual use (see card board)
++ Invoice visual design implementation [gisce]
++ Compose default assignation mail
++ Mako implementation for default assignation mail
 - Assignment: Send an activation mail explaining default assignment
 - Investment: Add list tests for inactivated investment
 - Rename `generationkwh_api` -> `som_generationkwh`
 - Rename `plantmeter_api` -> `som_plantmeter`
 - Assignment: update priority overwritting write?? (Low)
-- Assignment: log in soci observations
-- Investment: optimize with sql
 - Investment: Script: create should return the ids of the resulting investments to pass them to the Assignments script
 - Assignment: Script: default should return the created assignments to pass them to the mail creation
-- Script to feed testing (and real?) production
+- Investment: create by member
++ Script to feed testing (and real?) production
 - Init:
     - Setup plants
     - First remainder
@@ -25,8 +29,11 @@
     - Send email explaining assignment
 
 
+
+
 ## Unscheduled TODO's
 
+- Assignment: log in soci observations
 - `genkwh_assigment`default --all: consider active flag and other states
 - Filter invoices by having generation or not
 - ProductionLoader use dates
@@ -52,12 +59,14 @@
 
 ## Postponed for Next Iteration
 
+- Investment: optimize with sql
 - Invert the investment creation flux: webform -> draft investment -> payment -> active investment
 - Assignment: Given a contract that can consume rights from several members, define the order in which it should consume them.
     - Right now is an arbitrary order, not bad
     - Rare case, low priority, wait for actual cases
 - WebForms: Create the soci
 - WebForms: Create the investments form webforms
+- Use xml for the mail template so we can reference model data id instead of id number
 
 
 ## DONE

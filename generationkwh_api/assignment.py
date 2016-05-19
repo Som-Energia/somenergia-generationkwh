@@ -251,8 +251,10 @@ class AssignmentProvider(ErpWrapper):
         return len(Assignment.search(
             self.cursor,
             self.uid,
-            [('contract_id','=',contract_id),('end_date','=',False)],
-            context=self.context
+            [
+                ('contract_id','=',contract_id),
+                ('end_date','=',False),
+            ], context=self.context
             ))>=1
 
 

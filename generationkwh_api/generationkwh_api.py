@@ -143,13 +143,13 @@ class GenerationkWhTestHelper(osv.osv):
             )
 
     def usage(self, cursor, uid,
-            member_id, start_date, stop_date,
+            member_id, first_date, last_date,
             context=None):
         rightsUsage = MemberRightsUsage(mdbpool.get_db())
         result = list(int(i) for i in rightsUsage.usage(
             member_id,
-            isodate(start_date),
-            isodate(stop_date)
+            isodate(first_date),
+            isodate(last_date)
             ))
         return result
 
@@ -245,17 +245,17 @@ class GenerationkWhDealer(osv.osv):
     _auto = False
 
     def is_active(self, cursor, uid,
-                  contract_id, start_date, end_date,
+                  contract_id, first_date, last_date,
                   context=None):
         """ Returns True if contract_id has generation kwh activated
             during the period"""
         dealer = self._createDealer(cursor, uid, context)
 
         return dealer.is_active(
-            contract_id, start_date, end_date)
+            contract_id, first_date, last_date)
 
     def _get_available_kwh(self, cursor, uid,
-                          contract_id, start_date, end_date, fare_id, period_id,
+                          contract_id, first_date, last_date, fare_id, period_id,
                           context=None):
         """ Returns generationkwh [kWh] available for contract_id during the
             date interval, fare and period"""
@@ -264,7 +264,7 @@ class GenerationkWhDealer(osv.osv):
         fare, period = self.get_fare_name_by_id(cursor, uid, fare_id, period_id)
 
         return dealer.get_available_kwh(
-            contract_id, start_date, end_date, fare, period)
+            contract_id, first_date, last_date, fare, period)
 
     def get_members_by_partners(self, cursor, uid, partner_ids, context=None):
         Soci = self.pool.get('somenergia.soci')
@@ -304,7 +304,7 @@ class GenerationkWhDealer(osv.osv):
         )
 
     def use_kwh(self, cursor, uid,
-                contract_id, start_date, end_date, fare_id, period_id, kwh,
+                contract_id, first_date, last_date, fare_id, period_id, kwh,
                 context=None):
         """Marks the indicated kwh as used, if available, for the contract,
            date interval, fare and period and returns the ones efectively used.
@@ -317,7 +317,7 @@ class GenerationkWhDealer(osv.osv):
         fare, period = self.get_fare_name_by_id(cursor, uid, fare_id, period_id)
 
         res = dealer.use_kwh(
-            contract_id, isodate(start_date), isodate(end_date), fare, period, kwh)
+            contract_id, isodate(first_date), isodate(last_date), fare, period, kwh)
 
         socis = [ line['member_id'] for line in res ]
         members2partners = dict(self.get_partners_by_members(cursor, uid, socis, context=context))
@@ -332,8 +332,8 @@ class GenerationkWhDealer(osv.osv):
                     member=line['member_id'],
                     contract=contract_id,
                     period=period,
-                    start=start_date,
-                    end=end_date,
+                    start=first_date,
+                    end=last_date,
             )
             logger.notifyChannel('gkwh_dealer USE', netsvc.LOG_INFO, txt)
 
@@ -347,7 +347,7 @@ class GenerationkWhDealer(osv.osv):
 
 
     def refund_kwh(self, cursor, uid,
-                   contract_id, start_date, end_date, fare_id, period_id, kwh,
+                   contract_id, first_date, last_date, fare_id, period_id, kwh,
                    partner_id, context=None):
         """Refunds the indicated kwh, marking them as available again, for the
            contract, date interval, fare and period and returns the ones
@@ -361,8 +361,8 @@ class GenerationkWhDealer(osv.osv):
                u'for period {period} between {start} and {end}').format(
              contract=contract_id,
              period=period,
-             start=start_date,
-             end=end_date,
+             start=first_date,
+             end=last_date,
              member=partner_id,
              kwh=kwh
         )
@@ -377,8 +377,8 @@ class GenerationkWhDealer(osv.osv):
         dealer = self._createDealer(cursor, uid, context)
         res = dealer.refund_kwh(
             contract_id,
-            isodate(start_date),
-            isodate(end_date),
+            isodate(first_date),
+            isodate(last_date),
             fare, period, kwh, member_id)
         return int(res)
 
