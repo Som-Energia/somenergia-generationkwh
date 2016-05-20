@@ -3,7 +3,6 @@
 import datetime
 from genkwh_investments import (
     clear as investmentClear,
-    create as investmentCreate,
     )
 import unittest
 
@@ -27,6 +26,11 @@ class UsageTracker_Test(unittest.TestCase):
         self.fareId = 1 # 2.0A
         self.periodId = 1 # 2.0A P1
 
+    def createInvestments(self, start=None, stop=None, waitingDays=None, expirationYears=None):
+        Investment = self.c.GenerationkwhInvestment
+        member = [self.member, self.member2]
+        Investment.create_from_accounting(member, start, stop, waitingDays, expirationYears)
+
     def tearDown(self):
         self.clearData()
 
@@ -45,7 +49,7 @@ class UsageTracker_Test(unittest.TestCase):
                 4, '2016-08-01', '2016-09-01', '2.0A', 'P1'),
             0)
     def test_available_kwh_rightsAndInvestments(self):
-        investmentCreate(stop="2015-06-30", waitingDays=0)
+        self.createInvestments(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [3]*2*binsPerDay)
 
@@ -55,7 +59,7 @@ class UsageTracker_Test(unittest.TestCase):
             3*2*24)
 
     def test_available_kwh_noRights(self):
-        investmentCreate(stop="2015-06-30", waitingDays=0)
+        self.createInvestments(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             20, '2015-08-01', [2]*2*binsPerDay)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
@@ -68,7 +72,7 @@ class UsageTracker_Test(unittest.TestCase):
 
 
     def test_available_kwh_rightsForOne(self):
-        investmentCreate(stop="2015-06-30", waitingDays=0)
+        self.createInvestments(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             1, '2015-08-01', [2]*2*binsPerDay)
 
@@ -80,7 +84,7 @@ class UsageTracker_Test(unittest.TestCase):
         # TODO: assert remainder has been added
 
     def test_use_kwh_exhaustingAvailable(self):
-        investmentCreate(stop="2015-06-30", waitingDays=0)
+        self.createInvestments(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [3]*2*binsPerDay)
 
@@ -98,7 +102,7 @@ class UsageTracker_Test(unittest.TestCase):
 
 
     def test_use_kwh__notExhaustingAvailable(self):
-        investmentCreate(stop="2015-06-30", waitingDays=0)
+        self.createInvestments(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [3]*2*binsPerDay)
 
@@ -115,7 +119,7 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
     def test_use_kwh__consumingOnConsumedDays(self):
-        investmentCreate(stop="2015-06-30", waitingDays=0)
+        self.createInvestments(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [3]*2*binsPerDay)
 
@@ -137,7 +141,7 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
     def test_refund_kwh(self):
-        investmentCreate(stop="2015-06-30", waitingDays=0)
+        self.createInvestments(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [3]*2*binsPerDay)
 
@@ -160,7 +164,7 @@ class UsageTracker_Test(unittest.TestCase):
 
 
     def test_dealer__use_kwh(self):
-        investmentCreate(stop="2015-06-30", waitingDays=0)
+        self.createInvestments(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [0,3,0,0,0])
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
@@ -196,7 +200,7 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
     def test_dealer__refund_kwh(self):
-        investmentCreate(stop="2015-06-30", waitingDays=0)
+        self.createInvestments(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [3]*2*binsPerDay)
 
@@ -264,7 +268,7 @@ class UsageTracker_Test(unittest.TestCase):
 
     def test_dealerApi__use_kwh__turnsPartnersIds(self):
         # Investments
-        investmentCreate(stop="2015-06-30", waitingDays=0)
+        self.createInvestments(stop="2015-06-30", waitingDays=0)
         # Production
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [0,3,0,0,0])
@@ -301,7 +305,7 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
     def test_dealerApi__refund_kwh__turnsPartnerIds(self):
-        investmentCreate(stop="2015-06-30", waitingDays=0)
+        self.createInvestments(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [3]*2*binsPerDay)
 
@@ -327,7 +331,7 @@ class UsageTracker_Test(unittest.TestCase):
             )
 
     def test_dealerApi__refund_kwh__withNonMemberPartner_doNotRefund(self):
-        investmentCreate(stop="2015-06-30", waitingDays=0)
+        self.createInvestments(stop="2015-06-30", waitingDays=0)
         self.c.GenerationkwhTesthelper.setup_rights_per_share(
             25, '2015-08-01', [3]*2*binsPerDay)
 
