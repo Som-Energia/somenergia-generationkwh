@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from genkwh_investments import (
-    clear as investmentClear,
-    )
 import unittest
 
 binsPerDay = 25
@@ -39,7 +36,7 @@ class UsageTracker_Test(unittest.TestCase):
             'rightspershare',
             'memberrightusage',
             ])
-        investmentClear()
+        self.c.GenerationkwhInvestment.dropAll()
         self.c.GenerationkwhAssignment.dropAll()
         self.c.GenerationkwhRemainderTesthelper.clean()
 

@@ -306,6 +306,14 @@ class GenerationkWhInvestment(osv.osv):
                 ), context=context
             )
 
+    def dropAll(self, cursor, uid, context=None):
+        """
+            Remove all investment. Use just for testing.
+        """
+        ids = self.search(cursor, uid, [],
+            context=dict(context or {}, active_test=False))
+        self.unlink(cursor,uid,ids,context)
+
 
 class InvestmentProvider(ErpWrapper):
 
