@@ -244,6 +244,22 @@ class Investment_Test(unittest.TestCase):
                 [38, '2015-10-20', False, -1],
             ])
 
+    def test__create_for_member__severalMembersArray_reorderbyPurchase(self):
+        clear()
+        self.Investments.create_for_member([1,38], None, '2015-11-20', 0, None)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, None),
+            [
+                [38, '2015-06-30', False, 3],
+                [1, '2015-06-30', False, 15],
+                [1, '2015-06-30', False, 10],
+                [1, '2015-07-29', False,  1],
+                [38, '2015-10-13', False, 1],
+                [38, '2015-10-20', False, -1],
+                [1, '2015-11-20', False, 30],
+                [1, '2015-11-20', False, 30],
+            ])
+
     def test__create_for_member__ignoresExisting(self):
         clear()
         self.Investments.create_for_member(1, None, '2015-06-30', None, None)
@@ -273,41 +289,77 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-11-20', False, 30],
             ])
 
-    def test__effective_investments_tuple__filtersByFirst_removesExpiredAndUnstarted(self):
+    def test__effective_investments_tuple__filtersByFirst_removesUnstarted(self):
         clear()
         self.Investments.create_for_member(1, None, '2015-06-30', None, None)
-        self.Investments.create_for_member(38, None, '2015-06-30', 0, 2)
-        self.Investments.create_for_member(1, None, '2015-07-29', 0, None)
-        self.Investments.create_for_member(1, None, '2015-11-20', 0, 2)
         self.assertEqual(
-            self.Investments.effective_investments_tuple(None, '2017-07-01', None),
+            self.Investments.effective_investments_tuple(None, '2017-07-20', None),
             [
                 #[1, False, False, 15], # Unstarted
                 #[1, False, False, 10], # Unstarted
-                #[38, '2015-06-30', '2017-06-30', 3], # Expired
-                [1, '2015-07-29', False, 1], # Never expires
-                [1, '2015-11-20', '2017-11-20', 30], # Not yet expired
-                [1, '2015-11-20', '2017-11-20', 30], # Not yet expired
+            ])
+
+    def test__effective_investments_tuple__filtersByFirst_keepsUnexpiredWhicheverTheDate(self):
+        clear()
+        self.Investments.create_for_member(1, None, '2015-06-30', 0, None)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, '4017-07-20', None),
+            [
+                [1, '2015-06-30', False, 15],
+                [1, '2015-06-30', False, 10],
+            ])
+
+    def test__effective_investments_tuple__filtersByFirst_passesNotYetExpired(self):
+        clear()
+        self.Investments.create_for_member(1, None, '2015-06-30', 0, 2)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, '2017-06-30', None),
+            [
+                [1, '2015-06-30', '2017-06-30', 15],
+                [1, '2015-06-30', '2017-06-30', 10],
 
             ])
 
-    def test__effective_investments_tuple__filtersByLast_removesUnstartedAndLater(self):
+    def test__effective_investments_tuple__filtersByFirst_removesExpired(self):
+        clear()
+        self.Investments.create_for_member(1, None, '2015-06-30', 0, 2)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, '2017-07-01', None),
+            [
+                #[1, '2015-06-30', '2017-06-30', 15],
+                #[1, '2015-06-30', '2017-06-30', 10],
+
+            ])
+
+    def test__effective_investments_tuple__filtersByLast_removesUnstarted(self):
         clear()
         self.Investments.create_for_member(1, None, '2015-06-30', None, None)
-        self.Investments.create_for_member(38, None, '2015-06-30', 0, 2)
-        self.Investments.create_for_member(1, None, '2015-07-29', 0, None)
-        self.Investments.create_for_member(1, None, '2015-11-20', 0, 2)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, None, '2015-11-19'),
             [
-                #[1, False, False, 15], # Never started
-                #[1, False, False, 10], # Never started
-                [38, '2015-06-30', '2017-06-30', 3], # Started
-                [1, '2015-07-29', False, 1], # Started
-                #[1, '2015-11-20', '2017-11-20', 30], # Not yet started
-                #[1, '2015-11-20', '2017-11-20', 30], # Not yet started
+                #[1, False, False, 15], # Unstarted
+                #[1, False, False, 10], # Unstarted
             ])
 
+    def test__effective_investments_tuple__filtersByLast_includesStarted(self):
+        clear()
+        self.Investments.create_for_member(1, None, '2015-06-30', 0, None)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, '2015-06-30'),
+            [
+                [1, '2015-06-30', False, 15],
+                [1, '2015-06-30', False, 10],
+            ])
+
+    def test__effective_investments_tuple__filtersByLast_excludesStartedLater(self):
+        clear()
+        self.Investments.create_for_member(1, None, '2015-06-30', 0, None)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, '2015-06-29'),
+            [
+                #[1, '2015-06-30', False, 15], # Not yet started
+                #[1, '2015-06-30', False, 10], # Not yet started
+            ])
 
 
     # TODO test__create_for_member__unactiveNotRecreated

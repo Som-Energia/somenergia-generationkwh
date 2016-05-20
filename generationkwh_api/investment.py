@@ -151,12 +151,16 @@ class GenerationkWhInvestment(osv.osv):
         MoveLine = self.pool.get('account.move.line')
         Member = self.pool.get('somenergia.soci')
         generationAccountPrefix = '163500'
+        member_ids = [member_id] if type(member_id) is int else member_id
 
-        memberCode = Member.read(cursor, uid, member_id, ['ref'])
-        accountCode = generationAccountPrefix + memberCode['ref'][1:]
+        memberCodes = Member.read(cursor, uid, member_ids, ['ref'])
+        accountCodes = [
+            generationAccountPrefix + memberCode['ref'][1:]
+            for memberCode in memberCodes
+            ]
 
         accountIds = Account.search(cursor, uid, [
-            ('code','=',accountCode),
+            ('code','in',accountCodes),
             ])
 
         criteria = [('account_id','in',accountIds)]
@@ -188,6 +192,19 @@ class GenerationkWhInvestment(osv.osv):
                     lastDateEffective = str(
                         isodate(activation)
                         +relativedelta(years=expirationYears))
+
+            partnerid = line.partner_id.id
+            if not partnerid:
+                # Handle cases with no partner_id
+                membercode = int(line.account_id.code[4:])
+                domain = [('ref', 'ilike', '%'+str(membercode).zfill(6))]
+            else:
+                domain = [('partner_id', '=', partnerid)]
+
+            # partner to member conversion
+            # ctx = dict(context)
+            # ctx.update({'active_test': False})
+            member_id = Member.search(cursor, uid, domain, context=context)[0]
 
             self.create(cursor, uid, dict(
                 member_id=member_id,
