@@ -12,7 +12,7 @@ except ImportError:
     pass
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
-class Investment_Test(unittest.TestCase):
+class InvestmentCommand_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
@@ -140,7 +140,7 @@ class Investment_Test(unittest.TestCase):
         data = listactive(csv=True)
         self.assertB2BEqual(data)
 
-class Investment_Model_Test(unittest.TestCase):
+class Investment_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
@@ -308,7 +308,7 @@ class Investment_Model_Test(unittest.TestCase):
                 #[1, '2015-11-20', '2017-11-20', 30], # Not yet started
             ])
 
-    
+
 
     # TODO test__create_for_member__unactiveNotRecreated
     # TODO test__effective_investments_tuple__unactivate
