@@ -113,13 +113,13 @@ class GenerationkWhInvestment(osv.osv):
             for c in sorted(contracts, key=lambda x: x['id'] )
         ]
 
-    def active_investments_tuple(self, cursor, uid,
+    def effective_investments_tuple(self, cursor, uid,
             member, start, end,
             context=None):
 
         return self.effectiveInvestmentsTuple(cursor, uid, member, start, end, context)
 
-    def active_investments(self, cursor, uid,
+    def effective_investments(self, cursor, uid,
             member, start, end,
             context=None):
 
@@ -138,19 +138,28 @@ class GenerationkWhInvestment(osv.osv):
             member_id, first_date, last_date,
             context=None):
 
-        return len(self.active_investments_tuple(cursor, uid,
+        return len(self.effective_investments_tuple(cursor, uid,
             member_id, first_date, last_date, context))>0
 
     def create_for_member(self, cursor, uid,
             member_id, start, stop, waitingDays, expirationYears,
             context=None):
+        """
+            Takes accounting information and generates GenkWh investments
+            purchased among start and stop dates for the indicated member.
+            If waitingDays is not None, activation date is set those
+            days after the purchase date.
+            If expirationYears is not None, expiration date is set, those
+            years after the activation date.
+        """
+
         Account = self.pool.get('account.account')
         MoveLine = self.pool.get('account.move.line')
         Member = self.pool.get('somenergia.soci')
         generationAccountPrefix = '163500'
 
         memberCode = Member.read(cursor, uid, member_id, ['ref'])
-        accountCode = generationAccountPrefix[:6] + memberCode['ref'][1:]
+        accountCode = generationAccountPrefix + memberCode['ref'][1:]
 
         accountIds = Account.search(cursor, uid, [
             ('code','=',accountCode),
@@ -347,7 +356,7 @@ class InvestmentProvider(ErpWrapper):
 
     def effectiveInvestments(self, member=None, start=None, end=None):
         Investment = self.erp.pool.get('generationkwh.investment')
-        return Investment.active_investments( self.cursor, self.uid,
+        return Investment.effective_investments( self.cursor, self.uid,
                 member, start, end, self.context)
 
     def effectiveForMember(self, member, first_date, last_date):

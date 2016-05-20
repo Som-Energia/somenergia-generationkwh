@@ -140,11 +140,116 @@ class Investment_Test(unittest.TestCase):
         data = listactive(csv=True)
         self.assertB2BEqual(data)
 
-class Investment_FAST_Test(unittest.TestCase):
+class Investment_Model_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
         self.Investments = c.GenerationkwhInvestment
+
+    def test__create_for_member__all(self):
+        clear()
+        self.Investments.create_for_member(1, None, '2015-11-20', 0, None)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, None),
+            [
+                [1, '2015-06-30', False, 15],
+                [1, '2015-06-30', False, 10],
+                [1, '2015-07-29', False,  1],
+                [1, '2015-11-20', False, 30],
+                [1, '2015-11-20', False, 30],
+            ])
+
+    def test__create_for_member__restrictingFirst(self):
+        clear()
+        self.Investments.create_for_member(1, '2015-07-01', '2015-11-20', 0, None)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, None),
+            [
+                [1, '2015-07-29', False,  1],
+                [1, '2015-11-20', False, 30],
+                [1, '2015-11-20', False, 30],
+            ])
+
+    def test__create_for_member__restrictingLast(self):
+        clear()
+        self.Investments.create_for_member(1, None, '2015-11-19', 0, None)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, None),
+            [
+                [1, '2015-06-30', False, 15],
+                [1, '2015-06-30', False, 10],
+                [1, '2015-07-29', False,  1],
+            ])
+
+    def test__create_for_member__noWaitingDays(self):
+        clear()
+        self.Investments.create_for_member(1, None, '2015-11-20', None, None)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, None),
+            [
+                [1, False, False, 15],
+                [1, False, False, 10],
+                [1, False, False,  1],
+                [1, False, False, 30],
+                [1, False, False, 30],
+            ])
+
+    def test__create_for_member__nonZeroWaitingDays(self):
+        clear()
+        self.Investments.create_for_member(1, None, '2015-11-20', 1, None)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, None),
+            [
+                [1, '2015-07-01', False, 15],
+                [1, '2015-07-01', False, 10],
+                [1, '2015-07-30', False,  1],
+                [1, '2015-11-21', False, 30],
+                [1, '2015-11-21', False, 30],
+            ])
+
+    def test__create_for_member__nonZeroExpireYears(self):
+        clear()
+        self.Investments.create_for_member(1, None, '2015-11-20', 1, 2)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, None),
+            [
+                [1, '2015-07-01', '2017-07-01', 15],
+                [1, '2015-07-01', '2017-07-01', 10],
+                [1, '2015-07-30', '2017-07-30',  1],
+                [1, '2015-11-21', '2017-11-21', 30],
+                [1, '2015-11-21', '2017-11-21', 30],
+            ])
+
+    def test__create_for_member__severalMembers(self):
+        clear()
+        self.Investments.create_for_member(1, None, '2015-11-20', 0, None)
+        self.Investments.create_for_member(38, None, '2015-11-20', 0, None)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, None),
+            [
+                [1, '2015-06-30', False, 15],
+                [1, '2015-06-30', False, 10],
+                [1, '2015-07-29', False,  1],
+                [1, '2015-11-20', False, 30],
+                [1, '2015-11-20', False, 30],
+                [38, '2015-06-30', False, 3],
+                [38, '2015-10-13', False, 1],
+                [38, '2015-10-20', False, -1],
+            ])
+
+    def test__effective_investments_tuple__filtersByMember(self):
+        clear()
+        self.Investments.create_for_member(1, None, '2015-11-20', 0, None)
+        self.Investments.create_for_member(38, None, '2015-11-20', 0, None)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(1, None, None),
+            [
+                [1, '2015-06-30', False, 15],
+                [1, '2015-06-30', False, 10],
+                [1, '2015-07-29', False,  1],
+                [1, '2015-11-20', False, 30],
+                [1, '2015-11-20', False, 30],
+            ])
 
     def test_effectiveForMember_whenNoAssigments(self):
         clear()

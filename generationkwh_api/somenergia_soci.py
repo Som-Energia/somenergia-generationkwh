@@ -47,7 +47,7 @@ class SomenergiaSoci(osv.osv):
             res[k] = init_dict.copy()
 
         for member_id in ids:
-            investments = invest_obj.active_investments(
+            investments = invest_obj.effective_investments(
                 cursor, uid, member_id, None, None, context=context
             )
             member_data = res[member_id]
@@ -57,7 +57,7 @@ class SomenergiaSoci(osv.osv):
             total_fields = ['active_shares', 'estimated_anual_kwh']
             if set(total_fields).intersection(field_names):
                 today = date.today().strftime('%Y-%m-%d')
-                current_investments = invest_obj.active_investments(
+                current_investments = invest_obj.effective_investments(
                     cursor, uid, member_id, today, today, context=context
                 )
                 total_investments = sum([i.shares for i in current_investments])

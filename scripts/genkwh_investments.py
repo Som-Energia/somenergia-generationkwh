@@ -100,7 +100,7 @@ def listactive(member=None, start=None, stop=None, csv=False):
                 ))+'\n'
             for line in data))
 
-    csvdata = buildcsv(c.GenerationkwhInvestment.active_investments_tuple(
+    csvdata = buildcsv(c.GenerationkwhInvestment.effective_investments_tuple(
             member, start and str(start), stop and str(stop)))
     if csv: return csvdata
     print csvdata
