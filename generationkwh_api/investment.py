@@ -139,18 +139,14 @@ class GenerationkWhInvestment(osv.osv):
         if waitingDays is None:
             return None, None
 
-        activation = (
-            purchaseDate
-            +relativedelta(days=waitingDays))
+        firstEffective = purchaseDate +relativedelta(days=waitingDays)
 
         if expirationYears is None:
-            return activation, None
+            return firstEffective, None
 
-        lastDateEffective = (
-            activation
-            +relativedelta(years=expirationYears))
+        lastEffective = firstEffective+relativedelta(years=expirationYears)
 
-        return activation, lastDateEffective
+        return firstEffective, lastEffective
 
     def create_from_accounting(self, cursor, uid,
             member_id, start, stop, waitingDays, expirationYears,
@@ -291,21 +287,18 @@ class GenerationkWhInvestment(osv.osv):
         )
 
         for investment in investments:
-            first_effective_date = (
-                isodate(investment['purchase_date'])
-                +relativedelta(days=waitingDays))
-            updateDict = dict(
-                first_effective_date=str(first_effective_date),
-                )
-            if expirationYears:
-                last_effective_date = (
-                    first_effective_date
-                    +relativedelta(years=expirationYears))
-                updateDict.update(
-                    last_effective_date=str(last_effective_date),
-                    )
+            (
+                first_effective_date,
+                last_effective_date,
+            ) = self._effectivePeriod(
+                isodate(investment['purchase_date']),
+                waitingDays, expirationYears)
+
             self.write(
-                cursor, uid, investment['id'], updateDict, context=context
+                cursor, uid, investment['id'], dict(
+                    first_effective_date = first_effective_date,
+                    last_effective_date = last_effective_date,
+                ), context=context
             )
 
 class InvestmentProvider(ErpWrapper):
