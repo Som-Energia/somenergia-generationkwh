@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from  genkwh_curver import available_getter
+from  genkwh_curver import curver_getter
 import unittest
 import pymongo
 from generationkwh.memberrightsusage import MemberRightsUsage
@@ -23,8 +23,9 @@ class CurverGetter_Test(unittest.TestCase):
             "usage",
             "-s","2016-08-17",
             "-e","2016-08-17", 
+            "-f","prueba.csv",
             "1"])
-        lines=open('test.csv', 'rb').readlines()
+        lines=open('prueba.csv', 'rb').readlines()
         self.assertEqual(
             [" ".join(map(str,range(1,26)))," ".join(map(str,[0]*25))],
             map(str.rstrip,lines)
@@ -39,19 +40,21 @@ class CurverGetter_Test(unittest.TestCase):
             "usage",
             "-s","2015-08-15",
             "-e","2015-08-15", 
+            "-f","prueba.csv",
             "1"])
-        lines=open('test.csv', 'rb').readlines()
+        lines=open('prueba.csv', 'rb').readlines()
         self.assertEqual(
             [" ".join(map(str,range(1,26)))," ".join(map(str,range(1,25)+[0]))],
             map(str.rstrip,lines)
         )
     def test_availableGetter_method_withNoUsage(self):
         call([os.path.dirname(os.path.abspath(__file__))+"/genkwh_curver.py",
-            "available",
+            "curver",
             "-s","2015-08-15",
             "-e","2015-08-15", 
+            "-f","prueba.csv",
             "1"])
-        lines=open('test.csv', 'rb').readlines()
+        lines=open('prueba.csv', 'rb').readlines()
         self.assertEqual(
             [" ".join(map(str,range(1,26)))," ".join(map(str,[0]*25))],
             map(str.rstrip,lines)
