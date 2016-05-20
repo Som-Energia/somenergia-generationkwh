@@ -67,7 +67,7 @@ class GenerationkWhInvestment(osv.osv):
         active=lambda *a: True,
     )
 
-    def effectiveInvestmentsTuple(self, cursor, uid,
+    def effective_investments_tuple(self, cursor, uid,
             member=None, start=None, end=None,
             context=None):
         """
@@ -113,12 +113,6 @@ class GenerationkWhInvestment(osv.osv):
             for c in sorted(contracts, key=lambda x: x['id'] )
         ]
 
-    def effective_investments_tuple(self, cursor, uid,
-            member, start, end,
-            context=None):
-
-        return self.effectiveInvestmentsTuple(cursor, uid, member, start, end, context)
-
     def effective_investments(self, cursor, uid,
             member, start, end,
             context=None):
@@ -131,7 +125,7 @@ class GenerationkWhInvestment(osv.osv):
                 shares=shares,
             )
             for member, first, last, shares
-            in self.effectiveInvestmentsTuple(cursor, uid, member, start, end)
+            in self.effective_investments_tuple(cursor, uid, member, start, end, context)
         ]
 
     def effective_for_member(self, cursor, uid,
