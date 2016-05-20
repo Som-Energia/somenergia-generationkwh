@@ -8,7 +8,7 @@ from yamlns import namespace as ns
 from .isodates import isodate
 
 class InvestmentProvider_MockUp(object):
-    def __init__(self, shareContracts):
+    def __init__(self, effectiveInvestments):
         self._contracts = [
             ns(
                 member=member,
@@ -16,10 +16,10 @@ class InvestmentProvider_MockUp(object):
                 lastEffectiveDate=isodate(end),
                 shares=shares,
                 )
-            for member, start, end, shares in shareContracts
+            for member, start, end, shares in effectiveInvestments
             ]
 
-    def shareContracts(self):
+    def effectiveInvestments(self):
         return self._contracts
 
 class MemberSharesCurve_Test(unittest.TestCase):

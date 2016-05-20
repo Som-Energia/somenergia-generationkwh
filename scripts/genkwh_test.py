@@ -11,7 +11,7 @@ from dealer_test import *
 from remainder_test import *
 from holidaysprovider_test import *
 from investment_test import *
-#from usagetracker_test import *
+from usagetracker_test import *
 from assignment_test import *
 #from productionloader_test import *
 from yamlns import namespace as ns

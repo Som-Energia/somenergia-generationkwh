@@ -12,7 +12,6 @@ except ImportError:
     pass
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
-@unittest.skip("Slow")
 class Investment_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None

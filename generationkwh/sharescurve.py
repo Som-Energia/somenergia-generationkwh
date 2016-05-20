@@ -18,7 +18,7 @@ class MemberSharesCurve(object):
 
         return sum(
             investment.shares
-            for investment in self._provider.shareContracts()
+            for investment in self._provider.effectiveInvestments()
             if (member is None or investment.member == member)
             and investment.lastEffectiveDate >= day
             and investment.firstEffectiveDate <= day
@@ -34,7 +34,7 @@ class MemberSharesCurve(object):
         nDays=(end-start).days+1 # To Review
         result = numpy.zeros(nDays*hoursADay, dtype=numpy.int)
 
-        for investment in self._provider.shareContracts():
+        for investment in self._provider.effectiveInvestments():
             if member is not None:
                 if investment.member != member:
                     continue

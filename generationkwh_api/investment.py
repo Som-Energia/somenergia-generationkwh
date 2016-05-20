@@ -67,24 +67,79 @@ class GenerationkWhInvestment(osv.osv):
         active=lambda *a: True,
     )
 
+    def effectiveInvestmentsTuple(self, cursor, uid,
+            member=None, start=None, end=None,
+            context=None):
+        """
+            List active investments between start and end, both included,
+            for the member of for any member if member is None.
+            If start is not specified, it lists activated before end.
+            If end is not specified, it list activated and not deactivated
+            before start.
+            If neither start or end are specified all investments are listed
+            active or not.
+        """
+        filters = []
+        if member: filters.append( ('member_id','=',member) )
+        if end: filters += [
+            ('first_effective_date','<=',end), # No activation also filtered
+            ]
+        if start: filters += [
+            '&',
+            ('first_effective_date','!=',False),
+            '|',
+            ('last_effective_date','>=',start),
+            ('last_effective_date','=',False),
+            ]
+
+        ids = self.search(cursor, uid, filters)
+        contracts = self.read(cursor, uid, ids)
+
+        def membertopartner(member_id):
+            Member = self.pool.get('somenergia.soci')
+
+            partner_id = Member.read(
+                cursor, uid, member_id, ['partner_id']
+            )['partner_id'][0]
+            return partner_id
+
+        return [
+            (
+                c['member_id'][0],
+                c['first_effective_date'] and str(c['first_effective_date']),
+                c['last_effective_date'] and str(c['last_effective_date']),
+                c['nshares'],
+            )
+            for c in sorted(contracts, key=lambda x: x['id'] )
+        ]
+
     def active_investments_tuple(self, cursor, uid,
             member, start, end,
             context=None):
 
-        provider = InvestmentProvider(self, cursor, uid, context)
-        return provider.shareContractsTuple(member, start, end)
+        return self.effectiveInvestmentsTuple(cursor, uid, member, start, end, context)
 
     def active_investments(self, cursor, uid,
             member, start, end,
             context=None):
 
-        provider = InvestmentProvider(self, cursor, uid, context)
-        return provider.shareContracts(member, start, end)
+        return [
+            ns(
+                member=member,
+                firstEffectiveDate=first and isodate(first),
+                lastEffectiveDate=last and isodate(last),
+                shares=shares,
+            )
+            for member, first, last, shares
+            in self.effectiveInvestmentsTuple(cursor, uid, member, start, end)
+        ]
 
     def effective_for_member(self, cursor, uid,
             member_id, first_date, last_date,
             context=None):
-        return len(self.active_investments(cursor, uid, member_id, first_date, last_date, context))>0
+
+        return len(self.active_investments_tuple(cursor, uid,
+            member_id, first_date, last_date, context))>0
 
     def create_for_member(self, cursor, uid,
             member_id, start, stop, waitingDays, expirationYears,
@@ -290,67 +345,15 @@ class GenerationkWhInvestment(osv.osv):
 
 class InvestmentProvider(ErpWrapper):
 
-    def shareContractsTuple(self, member=None, start=None, end=None):
-        """
-            List active investments between start and end, both included,
-            for the member of for any member if member is None.
-            If start is not specified, it lists activated before end.
-            If end is not specified, it list activated and not deactivated
-            before start.
-            If neither start or end are specified all investments are listed
-            active or not.
-        """
-        filters = []
-        if member: filters.append( ('member_id','=',member) )
-        if end: filters += [
-            ('first_effective_date','<=',end), # No activation also filtered
-            ]
-        if start: filters += [
-            '&',
-            ('first_effective_date','!=',False),
-            '|',
-            ('last_effective_date','>=',start),
-            ('last_effective_date','=',False),
-            ]
-
+    def effectiveInvestments(self, member=None, start=None, end=None):
         Investment = self.erp.pool.get('generationkwh.investment')
-        ids = Investment.search(self.cursor, self.uid, filters)
-        contracts = Investment.read(self.cursor, self.uid, ids)
-
-        def membertopartner(member_id):
-            Member = self.erp.pool.get('somenergia.soci')
-
-            partner_id = Member.read(
-                self.cursor, self.uid, member_id, ['partner_id']
-            )['partner_id'][0]
-            return partner_id
-
-        return [
-            (
-                c['member_id'][0],
-                c['first_effective_date'] and str(c['first_effective_date']),
-                c['last_effective_date'] and str(c['last_effective_date']),
-                c['nshares'],
-            )
-            for c in sorted(contracts, key=lambda x: x['id'] )
-        ]
-
-    def shareContracts(self, member=None, start=None, end=None):
-        return [
-            ns(
-                member=member,
-                firstEffectiveDate=start and isodate(start),
-                lastEffectiveDate=end and isodate(end),
-                shares=shares,
-            )
-            for member, start, end, shares
-            in self.shareContractsTuple(member, start, end)
-        ]
+        return Investment.active_investments( self.cursor, self.uid,
+                member, start, end, self.context)
 
     def effectiveForMember(self, member, first_date, last_date):
         Investment = self.erp.pool.get('generationkwh.investment')
-        print Investment
-        return Investment.effective_for_member(self.cursor, self.uid, member, first_date, last_date, self.context)
+        return Investment.effective_for_member(self.cursor, self.uid,
+            member, first_date, last_date, self.context)
 
 
 GenerationkWhInvestment()
