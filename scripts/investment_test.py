@@ -144,17 +144,19 @@ class Investment_Test(unittest.TestCase):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
         self.Investments = c.GenerationkwhInvestment
+        clear()
+
+    def tearDown(self):
+        clear()
 
     def test__effective_investments_tuple__noInvestments(self):
-        clear()
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, None, None),
             [])
 
-    def test__create_for_member__all(self):
+    def test__create_from_accounting__all(self):
         # Should fail whenever Gijsbert makes further investments
-        clear()
-        self.Investments.create_for_member(1, None, None, 0, None)
+        self.Investments.create_from_accounting(1, None, None, 0, None)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, None, None),
             [
@@ -165,9 +167,8 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-11-20', False, 30],
             ])
 
-    def test__create_for_member__restrictingFirst(self):
-        clear()
-        self.Investments.create_for_member(1, '2015-07-01', '2015-11-20', 0, None)
+    def test__create_from_accounting__restrictingFirst(self):
+        self.Investments.create_from_accounting(1, '2015-07-01', '2015-11-20', 0, None)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, None, None),
             [
@@ -176,9 +177,8 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-11-20', False, 30],
             ])
 
-    def test__create_for_member__restrictingLast(self):
-        clear()
-        self.Investments.create_for_member(1, None, '2015-11-19', 0, None)
+    def test__create_from_accounting__restrictingLast(self):
+        self.Investments.create_from_accounting(1, None, '2015-11-19', 0, None)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, None, None),
             [
@@ -187,9 +187,8 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-07-29', False,  1],
             ])
 
-    def test__create_for_member__noWaitingDays(self):
-        clear()
-        self.Investments.create_for_member(1, None, '2015-11-20', None, None)
+    def test__create_from_accounting__noWaitingDays(self):
+        self.Investments.create_from_accounting(1, None, '2015-11-20', None, None)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, None, None),
             [
@@ -200,9 +199,8 @@ class Investment_Test(unittest.TestCase):
                 [1, False, False, 30],
             ])
 
-    def test__create_for_member__nonZeroWaitingDays(self):
-        clear()
-        self.Investments.create_for_member(1, None, '2015-11-20', 1, None)
+    def test__create_from_accounting__nonZeroWaitingDays(self):
+        self.Investments.create_from_accounting(1, None, '2015-11-20', 1, None)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, None, None),
             [
@@ -213,9 +211,8 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-11-21', False, 30],
             ])
 
-    def test__create_for_member__nonZeroExpireYears(self):
-        clear()
-        self.Investments.create_for_member(1, None, '2015-11-20', 1, 2)
+    def test__create_from_accounting__nonZeroExpireYears(self):
+        self.Investments.create_from_accounting(1, None, '2015-11-20', 1, 2)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, None, None),
             [
@@ -226,10 +223,9 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-11-21', '2017-11-21', 30],
             ])
 
-    def test__create_for_member__severalMembers(self):
-        clear()
-        self.Investments.create_for_member(1, None, '2015-11-20', 0, None)
-        self.Investments.create_for_member(38, None, '2015-11-20', 0, None)
+    def test__create_from_accounting__severalMembers(self):
+        self.Investments.create_from_accounting(1, None, '2015-11-20', 0, None)
+        self.Investments.create_from_accounting(38, None, '2015-11-20', 0, None)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, None, None),
             [
@@ -243,9 +239,8 @@ class Investment_Test(unittest.TestCase):
                 [38, '2015-10-20', False, -1],
             ])
 
-    def test__create_for_member__severalMembersArray_reorderbyPurchase(self):
-        clear()
-        self.Investments.create_for_member([1,38], None, '2015-11-20', 0, None)
+    def test__create_from_accounting__severalMembersArray_reorderbyPurchase(self):
+        self.Investments.create_from_accounting([1,38], None, '2015-11-20', 0, None)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, None, None),
             [
@@ -259,9 +254,8 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-11-20', False, 30],
             ])
 
-    def test__create_for_member__noMemberTakesAll(self):
-        clear()
-        self.Investments.create_for_member(None, None, '2015-06-30', 0, None)
+    def test__create_from_accounting__noMemberTakesAll(self):
+        self.Investments.create_from_accounting(None, None, '2015-06-30', 0, None)
         self.assertEqual(
             self.Investments.effective_investments_tuple(1, None, None),
             [
@@ -274,11 +268,10 @@ class Investment_Test(unittest.TestCase):
                 [38, '2015-06-30', False, 3],
             ])
 
-    def test__create_for_member__ignoresExisting(self):
-        clear()
-        self.Investments.create_for_member(1, None, '2015-06-30', None, None)
-        self.Investments.create_for_member(1, None, '2015-07-29', 0, None)
-        self.Investments.create_for_member(1, None, '2015-11-20', 0, 2)
+    def test__create_from_accounting__ignoresExisting(self):
+        self.Investments.create_from_accounting(1, None, '2015-06-30', None, None)
+        self.Investments.create_from_accounting(1, None, '2015-07-29', 0, None)
+        self.Investments.create_from_accounting(1, None, '2015-11-20', 0, 2)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, None, None),
             [
@@ -290,9 +283,8 @@ class Investment_Test(unittest.TestCase):
             ])
 
     def test__effective_investments_tuple__filtersByMember(self):
-        clear()
-        self.Investments.create_for_member(1, None, '2015-11-20', 0, None)
-        self.Investments.create_for_member(38, None, '2015-11-20', 0, None)
+        self.Investments.create_from_accounting(1, None, '2015-11-20', 0, None)
+        self.Investments.create_from_accounting(38, None, '2015-11-20', 0, None)
         self.assertEqual(
             self.Investments.effective_investments_tuple(1, None, None),
             [
@@ -304,8 +296,7 @@ class Investment_Test(unittest.TestCase):
             ])
 
     def test__effective_investments_tuple__filtersByFirst_removesUnstarted(self):
-        clear()
-        self.Investments.create_for_member(1, None, '2015-06-30', None, None)
+        self.Investments.create_from_accounting(1, None, '2015-06-30', None, None)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, '2017-07-20', None),
             [
@@ -314,8 +305,7 @@ class Investment_Test(unittest.TestCase):
             ])
 
     def test__effective_investments_tuple__filtersByFirst_keepsUnexpiredWhicheverTheDate(self):
-        clear()
-        self.Investments.create_for_member(1, None, '2015-06-30', 0, None)
+        self.Investments.create_from_accounting(1, None, '2015-06-30', 0, None)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, '4017-07-20', None),
             [
@@ -324,8 +314,7 @@ class Investment_Test(unittest.TestCase):
             ])
 
     def test__effective_investments_tuple__filtersByFirst_passesNotYetExpired(self):
-        clear()
-        self.Investments.create_for_member(1, None, '2015-06-30', 0, 2)
+        self.Investments.create_from_accounting(1, None, '2015-06-30', 0, 2)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, '2017-06-30', None),
             [
@@ -335,8 +324,7 @@ class Investment_Test(unittest.TestCase):
             ])
 
     def test__effective_investments_tuple__filtersByFirst_removesExpired(self):
-        clear()
-        self.Investments.create_for_member(1, None, '2015-06-30', 0, 2)
+        self.Investments.create_from_accounting(1, None, '2015-06-30', 0, 2)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, '2017-07-01', None),
             [
@@ -346,8 +334,7 @@ class Investment_Test(unittest.TestCase):
             ])
 
     def test__effective_investments_tuple__filtersByLast_removesUnstarted(self):
-        clear()
-        self.Investments.create_for_member(1, None, '2015-06-30', None, None)
+        self.Investments.create_from_accounting(1, None, '2015-06-30', None, None)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, None, '2015-11-19'),
             [
@@ -356,8 +343,7 @@ class Investment_Test(unittest.TestCase):
             ])
 
     def test__effective_investments_tuple__filtersByLast_includesStarted(self):
-        clear()
-        self.Investments.create_for_member(1, None, '2015-06-30', 0, None)
+        self.Investments.create_from_accounting(1, None, '2015-06-30', 0, None)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, None, '2015-06-30'),
             [
@@ -366,8 +352,7 @@ class Investment_Test(unittest.TestCase):
             ])
 
     def test__effective_investments_tuple__filtersByLast_excludesStartedLater(self):
-        clear()
-        self.Investments.create_for_member(1, None, '2015-06-30', 0, None)
+        self.Investments.create_from_accounting(1, None, '2015-06-30', 0, None)
         self.assertEqual(
             self.Investments.effective_investments_tuple(None, None, '2015-06-29'),
             [
@@ -375,21 +360,49 @@ class Investment_Test(unittest.TestCase):
                 #[1, '2015-06-30', False, 10], # Not yet started
             ])
 
+    def test__effective_investments_tuple__deactivatedNotShown(self):
+        self.Investments.create_from_accounting(1, None, '2015-11-19', 0, None)
+        toBeDeactivated=self.Investments.search([
+            ('member_id','=',1),
+            ('nshares','=',10),
+            ])[0]
+        self.Investments.write(toBeDeactivated, dict(active=False))
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, None),
+            [
+                [1, '2015-06-30', False, 15],
+                #[1, '2015-06-30', False, 10], # deactivated
+                [1, '2015-07-29', False,  1],
+            ])
 
-    # TODO test__create_for_member__unactiveNotRecreated
-    # TODO test__effective_investments_tuple__unactivate
-    # TODO test__setEffectiveDate
-    # TODO test__setExpirationTime
+    def test__create_from_accounting__unactiveNotRecreated(self):
+        self.Investments.create_from_accounting(1, None, '2015-11-19', 0, None)
+        toBeDeactivated=self.Investments.search([
+            ('member_id','=',1),
+            ('nshares','=',10),
+            ])[0]
+        self.Investments.write(toBeDeactivated, dict(active=False))
+        self.Investments.create_from_accounting(1, None, '2015-11-19', 0, None)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, None),
+            [
+                [1, '2015-06-30', False, 15],
+                #[1, '2015-06-30', False, 10], # still deactivated
+                [1, '2015-07-29', False,  1],
+            ])
+        
+
+
+    # TODO test__setEffective
+    # TODO test__setExpiration
 
     def test__effective_for_member__noInvestments(self):
-        clear()
         self.assertFalse(
             self.Investments.effective_for_member(None, None, None))
 
 
-    def test_effectiveForMember_insideDates(self):
-        clear()
-        self.Investments.create_for_member(1,'2010-01-01', '2015-07-03',
+    def test__effectiveForMember__insideDates(self):
+        self.Investments.create_from_accounting(1,'2010-01-01', '2015-07-03',
             1, None)
         self.assertTrue(
             self.Investments.effective_for_member(1,'2015-07-01','2015-07-01'))

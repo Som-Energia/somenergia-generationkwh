@@ -15,7 +15,8 @@
 - Assignment: update priority overwritting write?? (Low)
 - Investment: Script: create should return the ids of the resulting investments to pass them to the Assignments script
 - Assignment: Script: default should return the created assignments to pass them to the mail creation
-- Investment: create by member
++ Investment: create by member
++ Investment: properly test active flag
 + Script to feed testing (and real?) production
 - Init:
     - Setup plants
@@ -30,9 +31,11 @@
     - Send email explaining assignment
 
 - Rename assignment.isActive
-- Investment: review who uses `active_investments` and consider `effective_for_member` similar implementation
-- Investment: review dupliation among `create_from_account` and `create_for_member`
++ Investment: review who uses `active_investments` and consider `effective_for_member` similar implementation
++ Investment: review dupliation among `create_from_account` and `create_for_member`
 
+- Soci entries are not available until socis script runs and investment creation fails for those (worked around by ignoring them until next run but synchronous soci creation would be better solution)
+- Turn warning on investment creation with no member available into a logged one
 
 
 ## Unscheduled TODO's

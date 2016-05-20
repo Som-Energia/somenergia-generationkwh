@@ -80,8 +80,9 @@ def parseArgumments():
     return parser.parse_args(namespace=ns())
 
 def clear(**args):
-    allinvestments = c.search('generationkwh.investment')
-    c.unlink('generationkwh.investment', allinvestments)
+    ids = c.search('generationkwh.investment', [],
+        context=dict(active_test=False))
+    c.unlink('generationkwh.investment', ids)
 
 def listactive(member=None, start=None, stop=None, csv=False):
     """

@@ -135,7 +135,24 @@ class GenerationkWhInvestment(osv.osv):
         return len(self.effective_investments_tuple(cursor, uid,
             member_id, first_date, last_date, context))>0
 
-    def create_for_member(self, cursor, uid,
+    def _effectivePeriod(self, purchaseDate, waitingDays, expirationYears):
+        if waitingDays is None:
+            return None, None
+
+        activation = (
+            purchaseDate
+            +relativedelta(days=waitingDays))
+
+        if expirationYears is None:
+            return activation, None
+
+        lastDateEffective = (
+            activation
+            +relativedelta(years=expirationYears))
+
+        return activation, lastDateEffective
+
+    def create_from_accounting(self, cursor, uid,
             member_id, start, stop, waitingDays, expirationYears,
             context=None):
         """
@@ -179,21 +196,9 @@ class GenerationkWhInvestment(osv.osv):
             # Filter out already converted move lines
             if self.search(cursor, uid,
                 [('move_line_id','=',line.id)],
-#                context=context and dict(context,active_test=True),
-                ):
+                context=dict(context or {}, active_test=False),
+            ):
                 continue
-
-            activation = None
-            lastDateEffective = None
-            if waitingDays is not None:
-                activation = str(
-                    isodate(line.date_created)
-                    +relativedelta(days=waitingDays))
-
-                if expirationYears is not None:
-                    lastDateEffective = str(
-                        isodate(activation)
-                        +relativedelta(years=expirationYears))
 
             partnerid = line.partner_id.id
             if not partnerid:
@@ -216,6 +221,10 @@ class GenerationkWhInvestment(osv.osv):
 
             member_id = members[0]
 
+            activation, lastDateEffective = self._effectivePeriod(
+                isodate(line.date_created),
+                waitingDays, expirationYears)
+
             self.create(cursor, uid, dict(
                 member_id=member_id,
                 nshares=(line.credit-line.debit)//100,
@@ -226,24 +235,8 @@ class GenerationkWhInvestment(osv.osv):
                 ))
 
 
-    def create_from_accounting(self, cursor, uid,
-            member, start, stop, waitingDays, expirationYears,
-            context=None):
-        """
-            Takes accounting information and generates GenkWh investments
-            purchased among start and stop dates.
-            If waitingDays is not None, activation date is set those
-            days after the purchase date.
-            If expirationYears is not None, expiration date is set, those
-            years after the activation date.
-            TODO: Confirm that the expiration is relative to the activation
-            instead the purchase.
-        """
-
-        return self.create_for_member(cursor, uid,
-            member, start, stop, waitingDays, expirationYears, context)
-
     def _disabled_create_from_accounting(self, cursor, uid,
+            # TODO: member
             start, stop, waitingDays, expirationYears,
             context=None):
         """
