@@ -50,8 +50,8 @@ class CurverGetter_Test(unittest.TestCase):
     def test_availableGetter_method_withNoUsage(self):
         call([os.path.dirname(os.path.abspath(__file__))+"/genkwh_curver.py",
             "curver",
-            "-s","2015-08-15",
-            "-e","2015-08-15", 
+            "-s","2014-08-15",
+            "-e","2014-08-15", 
             "-f","prueba.csv",
             "1"])
         lines=open('prueba.csv', 'rb').readlines()
