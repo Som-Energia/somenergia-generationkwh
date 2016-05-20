@@ -48,13 +48,13 @@ def parseArgumments():
             )
     for sub in activate,create,clear,listactive: 
         sub.add_argument(
-            '--start',
+            '--start','--from','-f',
             type=isodate,
             metavar='ISODATE',
             help="first purchase date to be considered",
             )
         sub.add_argument(
-            '--stop',
+            '--stop','--to','-t',
             type=isodate,
             metavar='ISODATE',
             help="last purchase date to be considered",
@@ -112,6 +112,7 @@ def create(start=None, stop=None,
         **_):
     if force: clear()
     c.GenerationkwhInvestment.create_from_accounting(
+        None, # member
         start and str(start),
         stop and str(stop),
         waitingDays,

@@ -16,7 +16,6 @@ class InvestmentCommand_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
-        self.Investments = c.GenerationkwhInvestment
 
     def test_clean(self):
         clear()
@@ -258,6 +257,21 @@ class Investment_Test(unittest.TestCase):
                 [38, '2015-10-20', False, -1],
                 [1, '2015-11-20', False, 30],
                 [1, '2015-11-20', False, 30],
+            ])
+
+    def test__create_for_member__noMemberTakesAll(self):
+        clear()
+        self.Investments.create_for_member(None, None, '2015-06-30', 0, None)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(1, None, None),
+            [
+                [1, '2015-06-30', False, 15],
+                [1, '2015-06-30', False, 10],
+            ])
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(38, None, None),
+            [
+                [38, '2015-06-30', False, 3],
             ])
 
     def test__create_for_member__ignoresExisting(self):

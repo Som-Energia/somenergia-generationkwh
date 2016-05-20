@@ -24,6 +24,7 @@
         - Reminder Migration: a reminder for known to be used n-shares (optional)
     - Run Nightly script for existing investments
 - Nightly:
+    - Create members from partners becoming members, lately
     - Turn move lines into investments
     - Create default assignment
     - Send email explaining assignment

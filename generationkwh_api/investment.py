@@ -151,17 +151,19 @@ class GenerationkWhInvestment(osv.osv):
         MoveLine = self.pool.get('account.move.line')
         Member = self.pool.get('somenergia.soci')
         generationAccountPrefix = '163500'
-        member_ids = [member_id] if type(member_id) is int else member_id
 
-        memberCodes = Member.read(cursor, uid, member_ids, ['ref'])
-        accountCodes = [
-            generationAccountPrefix + memberCode['ref'][1:]
-            for memberCode in memberCodes
-            ]
+        if member_id is None:
+            accountDomain = [('code','ilike',generationAccountPrefix+'%')]
+        else:
+            member_ids = [member_id] if type(member_id) is int else member_id
+            memberCodes = Member.read(cursor, uid, member_ids, ['ref'])
+            accountCodes = [
+                generationAccountPrefix + memberCode['ref'][1:]
+                for memberCode in memberCodes
+                ]
 
-        accountIds = Account.search(cursor, uid, [
-            ('code','in',accountCodes),
-            ])
+            accountDomain = [ ('code','in',accountCodes)]
+        accountIds = Account.search(cursor, uid, accountDomain)
 
         criteria = [('account_id','in',accountIds)]
         if stop: criteria.append(('date_created', '<=', str(stop)))
@@ -177,7 +179,7 @@ class GenerationkWhInvestment(osv.osv):
             # Filter out already converted move lines
             if self.search(cursor, uid,
                 [('move_line_id','=',line.id)],
-                context=context,
+#                context=context and dict(context,active_test=True),
                 ):
                 continue
 
@@ -204,7 +206,15 @@ class GenerationkWhInvestment(osv.osv):
             # partner to member conversion
             # ctx = dict(context)
             # ctx.update({'active_test': False})
-            member_id = Member.search(cursor, uid, domain, context=context)[0]
+            
+            members = Member.search(cursor, uid, domain, context)
+            if not members:
+                print (
+                    "No existeix el soci de la linia comptable {}, {}"
+                    .format(line, domain))
+                continue
+
+            member_id = members[0]
 
             self.create(cursor, uid, dict(
                 member_id=member_id,
@@ -217,7 +227,7 @@ class GenerationkWhInvestment(osv.osv):
 
 
     def create_from_accounting(self, cursor, uid,
-            start, stop, waitingDays, expirationYears,
+            member, start, stop, waitingDays, expirationYears,
             context=None):
         """
             Takes accounting information and generates GenkWh investments
@@ -230,68 +240,10 @@ class GenerationkWhInvestment(osv.osv):
             instead the purchase.
         """
 
-        Account = self.pool.get('account.account')
-        MoveLine = self.pool.get('account.move.line')
-        Member = self.pool.get('somenergia.soci')
-        generationAccountPrefix = '163500%'
+        return self.create_for_member(cursor, uid,
+            member, start, stop, waitingDays, expirationYears, context)
 
-        accountIds = Account.search(cursor, uid, [
-            ('code','ilike',generationAccountPrefix),
-            ])
-
-        criteria = [('account_id','in',accountIds)]
-        if stop: criteria.append(('date_created', '<=', str(stop)))
-        if start: criteria.append(('date_created', '>=', str(start)))
-
-        movelinesids = MoveLine.search(
-            cursor, uid, criteria,
-            order='date_created asc, id asc',
-            context=context
-            )
-
-        for line in MoveLine.browse(cursor, uid, movelinesids, context):
-            # Filter out already converted move lines
-            if self.search(cursor, uid,
-                [('move_line_id','=',line.id)],
-                context=context,
-                ):
-                continue
-
-            partnerid = line.partner_id.id
-            if not partnerid:
-                # Handle cases with no partner_id
-                membercode = int(line.account_id.code[4:])
-                domain = [('ref', 'ilike', '%'+str(membercode).zfill(6))]
-            else:
-                domain = [('partner_id', '=', partnerid)]
-
-            # partner to member conversion
-            # ctx = dict(context)
-            # ctx.update({'active_test': False})
-            memberid = Member.search(cursor, uid, domain, context=context)[0]
-
-            activation = None
-            lastDateEffective = None
-            if waitingDays is not None:
-                activation = str(
-                    isodate(line.date_created)
-                    +relativedelta(days=waitingDays))
-
-                if expirationYears is not None:
-                    lastDateEffective = str(
-                        isodate(activation)
-                        +relativedelta(years=expirationYears))
-
-            self.create(cursor, uid, dict(
-                member_id=memberid,
-                nshares=(line.credit-line.debit)//100,
-                purchase_date=line.date_created,
-                first_effective_date=activation,
-                last_effective_date=lastDateEffective,
-                move_line_id=line.id,
-                ))
-
-    def _create_from_accounting(self, cursor, uid,
+    def _disabled_create_from_accounting(self, cursor, uid,
             start, stop, waitingDays, expirationYears,
             context=None):
         """
