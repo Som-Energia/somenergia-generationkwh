@@ -19,7 +19,7 @@ def parseArgumments():
         help="list rights per share",
         )
     init = subparsers.add_parser('init',
-        help="init rights per sahare",
+        help="init rights per share",
         )
     clear = subparsers.add_parser('clear',
         help="clear rights per share",

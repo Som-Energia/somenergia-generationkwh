@@ -2,9 +2,9 @@
 
 import unittest
 import datetime
-dbconfig = None
 from yamlns import namespace as ns
 from generationkwh.isodates import isodate
+dbconfig = None
 try:
     import dbconfig
     import erppeek

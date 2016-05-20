@@ -3,15 +3,73 @@
 import datetime
 import unittest
 
+dbconfig = None
+try:
+    import dbconfig
+    import erppeek
+except ImportError:
+    pass
+
 binsPerDay = 25
 
+@unittest.skipIf(not dbconfig, "depends on ERP")
+class IdMappers_Test(unittest.TestCase):
+    def setUp(self):
+        self.maxDiff=None
+        self.c = erppeek.Client(**dbconfig.erppeek)
 
+    def test_map_member_by_partners_all_in(self):
+        map={
+            5:4,
+            61:54,
+            120:107,
+            400:351,
+            629:537,
+            }
+        result=self.c.GenerationkwhDealer.get_members_by_partners(
+            map.keys()
+            )
+        self.assertEqual(map,dict(result))
+
+    def test_map_member_by_partners_not_all_in(self):
+        result=self.c.GenerationkwhDealer.get_contracts_by_ref('1')
+        self.assertEqual({'1':1},dict(result))
+
+    def test_map_member_by_partners_not_all_in(self):
+        map={629:537, 5:4, 120:107, 61:54, 400:351}
+
+        result=self.c.GenerationkwhDealer.get_members_by_partners(
+            list(map.keys())+[999999]
+            )
+        self.assertEqual(map,dict(result))
+
+
+    def test_map_partners_by_members_all_in(self):
+        map={537:629, 4:5, 107:120, 54:61, 351:400,}
+        result=self.c.GenerationkwhDealer.get_partners_by_members(
+            list(map.keys())
+            )
+        self.assertEqual(map,dict(result))
+
+    def test_map_partners_by_members_not_all_in(self):
+        map={537:629, 4:5, 107:120, 54:61, 351:400,}
+        result=self.c.GenerationkwhDealer.get_partners_by_members(
+            list(map.keys())+[999999]
+            )
+        self.assertEqual(map,dict(result))
+
+    def test_getMembersByCode(self):
+        map={1620:1911}
+        result=self.c.GenerationkwhDealer.get_members_by_codes(
+            list(map.keys())
+            )
+        self.assertEqual({"S001620":1585},dict(result))
+
+@unittest.skipIf(not dbconfig, "depends on ERP")
 class UsageTracker_Test(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff=None
-        import erppeek
-        import dbconfig
         self.c = erppeek.Client(**dbconfig.erppeek)
         self.clearData()
         self.contract = 4
@@ -222,46 +280,6 @@ class UsageTracker_Test(unittest.TestCase):
             +25*[0]
             )
 
-    def test_map_member_by_partners_all_in(self):
-        map={629:537, 5:4, 120:107, 61:54, 400:351}
-        result=self.c.GenerationkwhDealer.get_members_by_partners(
-            map.keys()
-            )
-        self.assertEqual(map,dict(result))
-
-    def test_map_member_by_partners_not_all_in(self):
-        result=self.c.GenerationkwhDealer.get_contracts_by_ref('1')
-        self.assertEqual({'1':1},dict(result))
-
-    def test_map_member_by_partners_not_all_in(self):
-        map={629:537, 5:4, 120:107, 61:54, 400:351}
-
-        result=self.c.GenerationkwhDealer.get_members_by_partners(
-            list(map.keys())+[999999]
-            )
-        self.assertEqual(map,dict(result))
-
-
-    def test_map_partners_by_members_all_in(self):
-        map={537:629, 4:5, 107:120, 54:61, 351:400,}
-        result=self.c.GenerationkwhDealer.get_partners_by_members(
-            list(map.keys())
-            )
-        self.assertEqual(map,dict(result))
-
-    def test_map_partners_by_members_not_all_in(self):
-        map={537:629, 4:5, 107:120, 54:61, 351:400,}
-        result=self.c.GenerationkwhDealer.get_partners_by_members(
-            list(map.keys())+[999999]
-            )
-        self.assertEqual(map,dict(result))
-
-    def test_getMembersByCode(self):
-        map={1620:1911}
-        result=self.c.GenerationkwhDealer.get_members_by_codes(
-            list(map.keys())
-            )
-        self.assertEqual({"S001620":1585},dict(result))
 
     def test_dealerApi__use_kwh__turnsPartnersIds(self):
         # Investments
