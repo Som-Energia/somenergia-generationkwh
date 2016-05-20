@@ -56,7 +56,7 @@ def parseArguments():
             )
         sub.add_argument(
             'member',
-            type=str,
+            type=int,
             help="investor of Generation-kWh (see --partner and --number)",
             )
         sub.add_argument(
@@ -86,12 +86,12 @@ def preprocessMembers(erp,members=None,idmode=None, all=None):
         return c.GenerationkwhAssignment.unassignedInvestors()
 
     if idmode=="partner":
-        idmap = dict(erp.GenerationkwhDealer.get_members_by_partners(map(int,members)))
-        return map(str,idmap.values())
+        idmap = dict(erp.GenerationkwhDealer.get_members_by_partners(members))
+        return idmap.values()
 
     if idmode=="code":
-        idmap = dict(erp.GenerationkwhDealer.get_members_by_codes(map(int,members)))
-        return map(str,idmap.values())
+        idmap = dict(erp.GenerationkwhDealer.get_members_by_codes(members))
+        return idmap.values()
 
     return members
 

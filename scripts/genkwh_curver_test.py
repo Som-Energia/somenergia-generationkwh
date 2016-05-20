@@ -32,7 +32,7 @@ class CurverGetter_Test(unittest.TestCase):
         )
     def test_usageGetter_withUsage(self):        
         p=self.erp.GenerationkwhTesthelper.memberrightsusage_update(
-            "1",
+            1,
             '2015-08-15',
             range(1,25)+[0]
             )
@@ -50,7 +50,7 @@ class CurverGetter_Test(unittest.TestCase):
 
     def test_usageGetter_withUsage_partnerId(self):        
         p=self.erp.GenerationkwhTesthelper.memberrightsusage_update(
-            "1",
+            1,
             '2015-08-15',
             range(1,25)+[0]
             )
@@ -69,7 +69,7 @@ class CurverGetter_Test(unittest.TestCase):
 
     def test_usageGetter_withUsage_code(self):        
         p=self.erp.GenerationkwhTesthelper.memberrightsusage_update(
-            "1",
+            1,
             '2015-08-15',
             range(1,25)+[0]
             )
