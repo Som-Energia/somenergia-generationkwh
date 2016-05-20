@@ -128,7 +128,7 @@ class GenerationkWhInvestment(osv.osv):
             in self.effective_investments_tuple(cursor, uid, member, start, end, context)
         ]
 
-    def effective_for_member(self, cursor, uid,
+    def member_has_effective(self, cursor, uid,
             member_id, first_date, last_date,
             context=None):
 
@@ -273,9 +273,16 @@ class GenerationkWhInvestment(osv.osv):
                 move_line_id=move_line_id,
                 ))
 
-    def activate(self, cursor, uid,
+    def set_effective(self, cursor, uid,
             start, stop, waitingDays, expirationYears, force,
             context=None):
+        """
+            Makes effective the investments purchased between start and stop
+            included for the period waitingDays from the purchase date
+            for expirationYears.
+            If force is not active, already effective investments are
+            ignored.
+        """
         criteria = []
         if not force: criteria.append(('first_effective_date', '=', False))
         if stop: criteria.append(('purchase_date', '<=', str(stop)))
@@ -287,19 +294,18 @@ class GenerationkWhInvestment(osv.osv):
         )
 
         for investment in investments:
-            (
-                first_effective_date,
-                last_effective_date,
-            ) = self._effectivePeriod(
+
+            first,last = self._effectivePeriod(
                 isodate(investment['purchase_date']),
                 waitingDays, expirationYears)
 
             self.write(
                 cursor, uid, investment['id'], dict(
-                    first_effective_date = first_effective_date,
-                    last_effective_date = last_effective_date,
+                    first_effective_date = first,
+                    last_effective_date = last,
                 ), context=context
             )
+
 
 class InvestmentProvider(ErpWrapper):
 
@@ -310,7 +316,7 @@ class InvestmentProvider(ErpWrapper):
 
     def effectiveForMember(self, member, first_date, last_date):
         Investment = self.erp.pool.get('generationkwh.investment')
-        return Investment.effective_for_member(self.cursor, self.uid,
+        return Investment.member_has_effective(self.cursor, self.uid,
             member, first_date, last_date, self.context)
 
 

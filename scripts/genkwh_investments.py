@@ -24,8 +24,8 @@ def parseArgumments():
     create = subparsers.add_parser('create',
         help="create investments objects from accounting information",
         )
-    activate = subparsers.add_parser('activate',
-        help="activate the investments",
+    effective = subparsers.add_parser('effective',
+        help="turn investment effective",
         )
     clear = subparsers.add_parser('clear',
         help="clear investments objects",
@@ -33,7 +33,7 @@ def parseArgumments():
     extend = subparsers.add_parser('extend',
         help="extend the expiration date of a set of investments",
         )
-    for sub in activate,create: 
+    for sub in effective,create: 
         sub.add_argument(
             '--force',
             action='store_true',
@@ -46,7 +46,7 @@ def parseArgumments():
             metavar='MEMBERID',
             help="filter by member",
             )
-    for sub in activate,create,clear,listactive: 
+    for sub in effective,create,clear,listactive: 
         sub.add_argument(
             '--start','--from','-f',
             type=isodate,
@@ -59,7 +59,7 @@ def parseArgumments():
             metavar='ISODATE',
             help="last purchase date to be considered",
             )
-    for sub in activate,create: 
+    for sub in effective,create: 
         sub.add_argument(
             '--wait',
             '-w',
@@ -120,14 +120,14 @@ def create(start=None, stop=None,
         expirationYears,
         )
 
-def activate(
+def effective(
         waitingDays,
         start=None, stop=None,
         expirationYears=None,
         force=False,
         **_):
 
-    return c.GenerationkwhInvestment.activate(
+    return c.GenerationkwhInvestment.set_effective(
         start, stop, waitingDays, expirationYears, force)
 
 c = erppeek.Client(**dbconfig.erppeek)

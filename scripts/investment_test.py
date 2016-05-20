@@ -121,21 +121,21 @@ class InvestmentCommand_Test(unittest.TestCase):
     def test_activate_withStop(self):
         clear()
         create(stop="2015-07-03")
-        activate(stop="2015-06-30", waitingDays=0)
+        effective(stop="2015-06-30", waitingDays=0)
         data = listactive(csv=True)
         self.assertB2BEqual(data)
 
     def test_activate_withStart(self):
         clear()
         create(stop="2015-07-03")
-        activate(start="2015-07-02", waitingDays=0)
+        effective(start="2015-07-02", waitingDays=0)
         data = listactive(csv=True)
         self.assertB2BEqual(data)
 
     def test_activate_withExpiration(self):
         clear()
         create(stop="2015-07-03")
-        activate(stop="2015-06-30", waitingDays=0, expirationYears=1)
+        effective(stop="2015-06-30", waitingDays=0, expirationYears=1)
         data = listactive(csv=True)
         self.assertB2BEqual(data)
 
@@ -390,22 +390,86 @@ class Investment_Test(unittest.TestCase):
                 #[1, '2015-06-30', False, 10], # still deactivated
                 [1, '2015-07-29', False,  1],
             ])
-        
+
+    def test__set_effective__wait(self):
+        self.Investments.create_from_accounting(1, None, '2015-11-19', None, None)
+        self.Investments.set_effective(None, None, 1, None, False)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, None),
+            [
+                [1, '2015-07-01', False, 15],
+                [1, '2015-07-01', False, 10],
+                [1, '2015-07-30', False,  1],
+            ])
+
+    def test__set_effective__waitAndExpire(self):
+        self.Investments.create_from_accounting(1, None, '2015-11-19', None, None)
+        self.Investments.set_effective(None, None, 1, 2, False)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, None),
+            [
+                [1, '2015-07-01', '2017-07-01', 15],
+                [1, '2015-07-01', '2017-07-01', 10],
+                [1, '2015-07-30', '2017-07-30',  1],
+            ])
+
+    def test__set_effective__purchasedEarlierIgnored(self):
+        self.Investments.create_from_accounting(1, None, '2015-11-19', None, None)
+        self.Investments.set_effective('2015-07-01', None, 1, 2, False)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, None),
+            [
+                [1, False, False, 15],
+                [1, False, False, 10],
+                [1, '2015-07-30', '2017-07-30',  1],
+            ])
+
+    def test__set_effective__purchasedLaterIgnored(self):
+        self.Investments.create_from_accounting(1, None, '2015-11-19', None, None)
+        self.Investments.set_effective(None, '2015-06-30', 1, 2, False)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, None),
+            [
+                [1, '2015-07-01', '2017-07-01', 15],
+                [1, '2015-07-01', '2017-07-01', 10],
+                [1, False, False,  1],
+            ])
+
+    def test__set_effective__alreadySetIgnored(self):
+        self.Investments.create_from_accounting(1, None, '2015-11-19', None, None)
+        self.Investments.set_effective(None, '2015-06-30', 1, 2, False)
+        self.Investments.set_effective(None, None, 10, 4, False)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, None),
+            [
+                [1, '2015-07-01', '2017-07-01', 15],
+                [1, '2015-07-01', '2017-07-01', 10],
+                [1, '2015-08-08', '2019-08-08',  1],
+            ])
+
+    def test__set_effective__alreadySetForced(self):
+        self.Investments.create_from_accounting(1, None, '2015-11-19', None, None)
+        self.Investments.set_effective(None, '2015-06-30', 1, 2, False)
+        self.Investments.set_effective(None, None, 10, 4, True)
+        self.assertEqual(
+            self.Investments.effective_investments_tuple(None, None, None),
+            [
+                [1, '2015-07-10', '2019-07-10', 15],
+                [1, '2015-07-10', '2019-07-10', 10],
+                [1, '2015-08-08', '2019-08-08',  1],
+            ])
 
 
-    # TODO test__setEffective
-    # TODO test__setExpiration
-
-    def test__effective_for_member__noInvestments(self):
+    def test__member_has_effective__noInvestments(self):
         self.assertFalse(
-            self.Investments.effective_for_member(None, None, None))
+            self.Investments.member_has_effective(None, None, None))
 
 
-    def test__effectiveForMember__insideDates(self):
+    def test__member_has_effective__insideDates(self):
         self.Investments.create_from_accounting(1,'2010-01-01', '2015-07-03',
             1, None)
         self.assertTrue(
-            self.Investments.effective_for_member(1,'2015-07-01','2015-07-01'))
+            self.Investments.member_has_effective(1,'2015-07-01','2015-07-01'))
 
 
 
