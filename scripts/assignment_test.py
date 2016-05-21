@@ -442,6 +442,10 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.assertEqual([tuple(r) for r in result], expectation) 
 
 
+    def test_sortedDefaultContractsForMember_noMembersSpecified(self):
+        self.assertContractForMember([], [
+            ])
+
     def test_sortedDefaultContractsForMember_withoutContracts(self):
         self.assertContractForMember(self.member_noContracts, [
             ])

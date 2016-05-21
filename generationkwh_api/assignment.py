@@ -154,6 +154,7 @@ class GenerationkWhAssignment(osv.osv):
             - Within both groups the ones with more anual use first.
             - If all criteria match, use contract creation order
         """
+        if not member_ids: return []
         sql = _sqlfromfile('default_contracts_to_assign')
         cr.execute(sql, dict(socis=tuple(member_ids)))
         return [
