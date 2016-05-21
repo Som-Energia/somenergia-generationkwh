@@ -10,24 +10,25 @@ import erppeek
 import dbconfig
 
 dbname='generationkwh_test'
-def _getter(method,member,start,stop,file):
-    curve=method(member,start,stop)
+
+def writeCurve(file, curve, start, stop):
     with open(file, 'wb') as csvfile:
+        ndays = (stop-start).days+1
         spamwriter = csv.writer(csvfile, delimiter=' ', quoting=csv.QUOTE_MINIMAL)
-        spamwriter.writerow(range(1,26)*((isodate(stop)-isodate(start)).days+1))
+        spamwriter.writerow(range(1,26)*ndays)
         spamwriter.writerow(curve)
 
 def usage_getter(member,start,stop,file,idmode):
     erp=erppeek.Client(**dbconfig.erppeek)
-    method=erp.GenerationkwhTesthelper.usage
     member= preprocessMembers(erp,[member], idmode=idmode)[0]
-    _getter(method,member,start,stop,file)
+    curve=erp.GenerationkwhTesthelper.usage(member,str(start),str(stop))
+    writeCurve(file, curve, start, stop)
 
 def curver_getter(member,start,stop,file,idmode):
     erp=erppeek.Client(**dbconfig.erppeek)
-    method=erp.GenerationkwhTesthelper.rights_kwh
     member= preprocessMembers(erp,[member], idmode=idmode)[0]
-    _getter(method,member,start,stop,file)
+    curve=erp.GenerationkwhTesthelper.rights_kwh(member,str(start),str(stop))
+    writeCurve(file, curve, start, stop)
 
 def parseArguments():
     import argparse
@@ -41,12 +42,12 @@ def parseArguments():
     for sub in curver,usage:
         sub.add_argument(
             '-s','--start',
-            type=str,
+            type=isodate,
             help="Start date",
             )
         sub.add_argument(
             '-e','--end',
-            type=str,
+            type=isodate,
             help="End date",
             )
         sub.add_argument(

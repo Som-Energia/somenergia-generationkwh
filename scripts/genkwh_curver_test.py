@@ -4,12 +4,12 @@ from  genkwh_curver import curver_getter
 import unittest
 import pymongo
 from generationkwh.memberrightsusage import MemberRightsUsage
-from generationkwh.isodates import isodate
 import erppeek
 import dbconfig
 import os
 from subprocess import call
 import sys
+
 class CurverGetter_Test(unittest.TestCase):
     def setUp(self):
         self.erp = erppeek.Client(**dbconfig.erppeek)
@@ -30,6 +30,7 @@ class CurverGetter_Test(unittest.TestCase):
             [" ".join(map(str,range(1,26)))," ".join(map(str,[0]*25))],
             map(str.rstrip,lines)
         )
+
     def test_usageGetter_withUsage(self):        
         p=self.erp.GenerationkwhTesthelper.memberrightsusage_update(
             1,
@@ -101,6 +102,6 @@ class CurverGetter_Test(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-    
+
 
 
