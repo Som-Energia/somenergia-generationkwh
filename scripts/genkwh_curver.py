@@ -132,6 +132,29 @@ def parseArguments():
         )
     plot = subparsers.add_parser('plot',
         help="shows curves in a plot window")
+    init = subparsers.add_parser('init',
+        help="clears and initializes curves and remainders")
+    for sub in init,:
+        sub.add_argument(
+            'first',
+            metavar='FIRSTDATE',
+            type=isodate,
+            help="First production date (iso format)",
+            )
+        sub.add_argument(
+            'totalshares',
+            metavar='BUILTSHARES',
+            type=int,
+            help="Initial number of built shares",
+            )
+        sub.add_argument(
+            '--shares',
+            type=sequence,
+            help="besides 1-share curve, init others n-shares"
+                "values separated with commas. "
+                "You can use hyphen to indicate a range. "
+                "Example: 1-3,9 is 1,2,3,9.",
+            )
     for sub in dump,plot,:
         sub.add_argument(
             'member',
@@ -141,12 +164,12 @@ def parseArguments():
         sub.add_argument(
             'first',
             type=isodate,
-            help="Start date",
+            help="Start date (isoformat)",
             )
         sub.add_argument(
             'last',
             type=isodate,
-            help="End date",
+            help="End date (isoformat)",
             )
         sub.add_argument(
             '--output', '-o',
@@ -183,7 +206,7 @@ def parseArguments():
             '--membershares',
             dest='dumpMemberShares',
             action='store_true',
-            help="do not append member usage column. ",
+            help="append member usage column. ",
             )
         sub.add_argument(
             '--nousage',
