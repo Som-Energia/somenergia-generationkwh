@@ -191,8 +191,14 @@ class GenerationkWhAssignment(osv.osv):
             a.unlink()
 
     def isActive(self, cursor, uid, contract_id, context=None):
-        assignmentProvider = AssignmentProvider(self, cursor, uid, context)
-        return assignmentProvider.isActive(contract_id)
+        return len(self.search(
+            cursor,
+            uid,
+            [
+                ('contract_id','=',contract_id),
+                ('end_date','=',False),
+            ], context=context
+            ))>=1
 
     def contractSources(self, cursor, uid, contract_id, context=None):
         sql = _sqlfromfile('right_sources_for_contract')
@@ -251,14 +257,11 @@ class AssignmentProvider(ErpWrapper):
 
     def isActive(self, contract_id):
         Assignment = self.erp.pool.get('generationkwh.assignment')
-        return len(Assignment.search(
-            self.cursor,
-            self.uid,
-            [
-                ('contract_id','=',contract_id),
-                ('end_date','=',False),
-            ], context=self.context
-            ))>=1
+        return Assignment.isActive(
+            self.cursor, self.uid,
+            contract_id,
+            context=self.context,
+            )
 
 class Generationkwh_Assignment_TestHelper(osv.osv):
     _name = 'generationkwh.assignment.testhelper'
