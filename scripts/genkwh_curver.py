@@ -6,29 +6,119 @@ from generationkwh.memberrightsusage import MemberRightsUsage
 import pymongo
 import csv
 from yamlns import namespace as ns
+from sequence import sequence
+import datetime
 import erppeek
 import dbconfig
 
 dbname='generationkwh_test'
 
-def writeCurve(file, curve, start, stop):
-    with open(file, 'wb') as csvfile:
-        ndays = (stop-start).days+1
-        spamwriter = csv.writer(csvfile, delimiter=' ', quoting=csv.QUOTE_MINIMAL)
-        spamwriter.writerow(range(1,26)*ndays)
-        spamwriter.writerow(curve)
+def doPlot(columns, first, last):
+    from pyqtgraph.Qt import QtGui, QtCore
+    import numpy as np
+    import pyqtgraph as pg
+    import pyqtgraph.exporters
+    import itertools
 
-def usage_getter(member,start,stop,file,idmode):
-    erp=erppeek.Client(**dbconfig.erppeek)
-    member= preprocessMembers(erp,[member], idmode=idmode)[0]
-    curve=erp.GenerationkwhTesthelper.usage(member,str(start),str(stop))
-    writeCurve(file, curve, start, stop)
+    pg.setConfigOptions(
+        antialias=True,
+        background='w',
+        foreground='k',
+        )
+    app = QtGui.QApplication([])
 
-def curver_getter(member,start,stop,file,idmode):
-    erp=erppeek.Client(**dbconfig.erppeek)
-    member= preprocessMembers(erp,[member], idmode=idmode)[0]
-    curve=erp.GenerationkwhTesthelper.rights_kwh(member,str(start),str(stop))
-    writeCurve(file, curve, start, stop)
+    win = pg.GraphicsWindow(title="Curve plotter")
+    win.setWindowTitle('Curve plotter')
+
+    plot = win.addPlot(title="Rights and Usage")
+    ndays=(last-first).days+1
+    timeAxis = plot.getAxis('bottom')
+    timeAxis.setTicks([[
+        (i*25, first+datetime.timedelta(days=i))
+        for i in xrange(ndays)
+        ],[
+        (i, i%25)
+        for i in xrange(25*ndays)
+        ]])
+    timeAxis.setStyle(
+        tickTextHeight=390,
+        )
+    timeAxis.setGrid(100)
+     
+    plot.addLegend()
+    for i,column in enumerate(columns):
+        plot.plot(np.array(column[1:]),
+            pen=pg.intColor(i),
+            name=column[0],
+            symbol='o',
+            symbolBrush=pg.intColor(i),
+            )
+
+    win.show()
+    app.exec_()
+
+def compute(member, first, last, output=None, idmode='memberid', shares=None, show=False, **args):
+    erp = erppeek.Client(**dbconfig.erppeek)
+    member = preprocessMembers(erp,[member], idmode=idmode)[0]
+    first, last = str(first), str(last)
+    columns=[]
+    if args.get('dumpMemberShares',False):
+        columns.append(['memberShares']+
+            erp.GenerationkwhTesthelper.member_shares(
+                member, first, last))
+    if args.get('dumpRights',True):
+        columns.append(['rights']+
+            erp.GenerationkwhTesthelper.rights_kwh(
+                member, first, last))
+    if args.get('dumpUsage',True):
+        columns.append(['usage']+
+            erp.GenerationkwhTesthelper.usage(
+                member, first, last))
+    if shares:
+        for n in shares:
+            columns.append(['{}share'.format(n)]+
+                erp.GenerationkwhTesthelper.rights_per_share(
+                    n, first, last))
+
+    return columns
+
+
+def plot(member, first, last,
+        output=None, idmode='memberid', shares=None, show=False, **args):
+
+    columns = compute(
+        member, first, last,
+        output, idmode, shares, show,
+        **args)
+
+    doPlot(columns, first, last)
+
+def dump(member, first, last,
+        output=None, idmode='memberid', shares=None, show=False, **args):
+
+    columns = compute(
+        member, first, last,
+        output, idmode, shares, show,
+        **args)
+
+    if show: doPlot(columns, first, last)
+
+    csv = "\n".join((
+        '\t'.join(str(item) for item in row)
+        for row in zip(*columns)
+        ))
+
+    if args.get('returnCsv', False):
+        return csv
+
+    if output is None:
+        print csv
+    else:
+        with open(output,'w') as f:
+            f.write(csv)
+
+
+
 
 def parseArguments():
     import argparse
@@ -37,34 +127,38 @@ def parseArguments():
         title="Subcommands",
         dest="subcommand",
         )
-    curver = subparsers.add_parser('curver')
-    usage = subparsers.add_parser('usage')
-    for sub in curver,usage:
-        sub.add_argument(
-            '-s','--start',
-            type=isodate,
-            help="Start date",
-            )
-        sub.add_argument(
-            '-e','--end',
-            type=isodate,
-            help="End date",
-            )
-        sub.add_argument(
-            '-f','--file',
-            type=str,
-            help="Output file",
-            )
+    dump = subparsers.add_parser('dump',
+        help="dumps the curves as csv"
+        )
+    plot = subparsers.add_parser('plot',
+        help="shows curves in a plot window")
+    for sub in dump,plot,:
         sub.add_argument(
             'member',
             type=int,
             help="investor of Generation-kWh (see --partner and --number)",
             )
         sub.add_argument(
+            'first',
+            type=isodate,
+            help="Start date",
+            )
+        sub.add_argument(
+            'last',
+            type=isodate,
+            help="End date",
+            )
+        sub.add_argument(
+            '--output', '-o',
+            type=str,
+            help="Output file",
+            )
+        sub.add_argument(
             '-p','--partner',
             dest='idmode',
             action='store_const',
             const='partner',
+            default='memberid',
             help="select members by its partner database id, "
                 "instead of member database id",
             )
@@ -77,6 +171,33 @@ def parseArguments():
             help="select members by its member code number, "
                 "instead of member database id",
             )
+        sub.add_argument(
+            '--shares',
+            type=sequence,
+            help="adds columns with rights for specified share numbers. "
+                "values separated with commas. "
+                "You can use hyphen to indicate a range. "
+                "Example: 1-3,9 is 1,2,3,9.",
+            )
+        sub.add_argument(
+            '--membershares',
+            dest='dumpMemberShares',
+            action='store_true',
+            help="do not append member usage column. ",
+            )
+        sub.add_argument(
+            '--nousage',
+            dest='dumpUsage',
+            action='store_false',
+            help="do not append member usage column. ",
+            )
+        sub.add_argument(
+            '--norights',
+            dest='dumpRights',
+            action='store_false',
+            help="do not append member rights column. ",
+            )
+            
 
     return parser.parse_args(namespace=ns())
 
@@ -98,10 +219,8 @@ def preprocessMembers(erp,members=None,idmode=None, all=None):
 
 def main():
     args = parseArguments()
-    if args.subcommand == "usage":
-        usage_getter(args.member,args.start,args.end,args.file,args.idmode)
-    else:
-        curver_getter(args.member,args.start,args.end,args.file,args.idmode)
+    print ns(args).dump()
+    globals()[args.subcommand](**args)
 
 if __name__ == '__main__':
     main()

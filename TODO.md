@@ -18,6 +18,17 @@
 + Investment: create by member
 + Investment: properly test active flag
 + Script to feed testing (and real?) production
+- Manual testing scripts
+    + Create investments
+    + Create assignments
+    - Init: remainder 0shares, first date
+    - Init total shares
+    - Init remainders n
+    - Add production
+        - Flat profile for several days
+        - Clon realistic profile (csv) for several days
+    - Show rights
+
 - Init:
     - Setup plants
     - First remainder

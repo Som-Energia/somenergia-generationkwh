@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from  genkwh_curver import curver_getter
 import unittest
 import pymongo
 from generationkwh.memberrightsusage import MemberRightsUsage
@@ -9,96 +8,140 @@ import dbconfig
 import os
 from subprocess import call
 import sys
+import genkwh_curver 
 
-class CurverGetter_Test(unittest.TestCase):
+class CurveExporter_Test(unittest.TestCase):
     def setUp(self):
+        self.maxDiff = None
         self.erp = erppeek.Client(**dbconfig.erppeek)
+        self.Investment = self.erp.GenerationkwhInvestment
+        self.clear()
+        self.member = 1
+        self.shares = 26
+        self.summerUp = range(1,25)+[0]
+        self.summerDown = range(24,0,-1)+[0]
+
+        self.Investment.create_from_accounting(
+            self.member, None, '2015-11-19', 0, None)
 
     def tearDown(self):
-        c = pymongo.Connection()
-        c.drop_database('generationkwh_test')
-    
-    def test_usageGetter_withNoUsage(self):
-        call([os.path.dirname(os.path.abspath(__file__))+"/genkwh_curver.py",
-            "usage",
-            "-s","2016-08-17",
-            "-e","2016-08-17", 
-            "-f","prueba.csv",
-            "1"])
-        lines=open('prueba.csv', 'rb').readlines()
-        self.assertEqual(
-            [" ".join(map(str,range(1,26)))," ".join(map(str,[0]*25))],
-            map(str.rstrip,lines)
-        )
+        self.clear()
 
-    def test_usageGetter_withUsage(self):        
-        p=self.erp.GenerationkwhTesthelper.memberrightsusage_update(
-            1,
-            '2015-08-15',
-            range(1,25)+[0]
+    def clear(self):
+        self.Investment.dropAll()
+        self.erp.GenerationkwhTesthelper.clear_mongo_collections([
+            'rightspershare',
+            'memberrightusage',
+            ])
+
+    def assertCsvByColumnEqual(self, csv, columns):
+        self.assertMultiLineEqual(
+            csv,
+            '\n'.join(
+                '\t'.join( str(v) for v in row)
+                for row in zip(*columns)
+                )
             )
-        call([os.path.dirname(os.path.abspath(__file__))+"/genkwh_curver.py",
-            "usage",
-            "-s","2015-08-15",
-            "-e","2015-08-15", 
-            "-f","prueba2.csv",
-            "1"])
-        lines=open('prueba2.csv', 'rb').readlines()
-        self.assertEqual(
-            [" ".join(map(str,range(1,26)))," ".join(map(str,range(1,25)+[0]))],
-            map(str.rstrip,lines)
-        )
 
-    def test_usageGetter_withUsage_partnerId(self):        
-        p=self.erp.GenerationkwhTesthelper.memberrightsusage_update(
-            1,
-            '2015-08-15',
-            range(1,25)+[0]
+    def setupRights(self, shares, firstDate, data):
+        self.erp.GenerationkwhTesthelper.setup_rights_per_share(
+            shares, firstDate, data)
+
+    def setupUsage(self, member, firstDate, data):
+        self.erp.GenerationkwhTesthelper.memberrightsusage_update(
+            member, firstDate, data)
+
+    def test_dump(self):
+
+        usage = self.summerUp + self.summerDown
+        rights = self.summerDown + self.summerUp
+
+        self.setupRights(self.shares, '2015-08-15', rights)
+        self.setupUsage(self.member, '2015-08-15', usage)
+
+        csv = genkwh_curver.dump(
+            member=self.member,
+            first=genkwh_curver.isodate('2015-08-15'),
+            last =genkwh_curver.isodate('2015-08-17'),
+            returnCsv=True,
+#            show=True,
             )
-        call([os.path.dirname(os.path.abspath(__file__))+"/genkwh_curver.py",
-            "usage",
-            "-s","2015-08-15",
-            "-e","2015-08-15", 
-            "-f","prueba3.csv",
-            "--partner",
-            "2"])
-        lines=open('prueba3.csv', 'rb').readlines()
-        self.assertEqual(
-            [" ".join(map(str,range(1,26)))," ".join(map(str,range(1,25)+[0]))],
-            map(str.rstrip,lines)
-        )
+        self.assertCsvByColumnEqual(csv, [
+                ['rights']+ rights+25*[0],
+                ['usage'] + usage+25*[0],
+            ])
 
-    def test_usageGetter_withUsage_code(self):        
-        p=self.erp.GenerationkwhTesthelper.memberrightsusage_update(
-            1,
-            '2015-08-15',
-            range(1,25)+[0]
+    def test_dump_withMemberShares(self):
+
+        usage = range(24,0,-1)+[0]
+        rights = range(1,25)+[0]
+
+        self.setupRights(self.shares, '2015-08-15', rights)
+        self.setupUsage(self.member, '2015-08-15', usage)
+
+        csv = genkwh_curver.dump(
+            member=self.member,
+            first=genkwh_curver.isodate('2015-08-15'),
+            last =genkwh_curver.isodate('2015-08-15'),
+            returnCsv=True,
+            dumpMemberShares=True,
+#            show=True,
             )
-        call([os.path.dirname(os.path.abspath(__file__))+"/genkwh_curver.py",
-            "usage",
-            "-s","2015-08-15",
-            "-e","2015-08-15", 
-            "-f","prueba4.csv",
-            "--number",
-            "1"])
-        lines=open('prueba4.csv', 'rb').readlines()
-        self.assertEqual(
-            [" ".join(map(str,range(1,26)))," ".join(map(str,range(1,25)+[0]))],
-            map(str.rstrip,lines)
-        )
+        self.assertCsvByColumnEqual(csv, [
+                ['memberShares']+ 25*[self.shares],
+                ['rights']+ rights,
+                ['usage'] + usage,
+            ])
 
-    def test_availableGetter_method_withNoUsage(self):
-        call([os.path.dirname(os.path.abspath(__file__))+"/genkwh_curver.py",
-            "curver",
-            "-s","2014-08-15",
-            "-e","2014-08-15", 
-            "-f","prueba5.csv",
-            "1"])
-        lines=open('prueba5.csv', 'rb').readlines()
-        self.assertEqual(
-            [" ".join(map(str,range(1,26)))," ".join(map(str,[0]*25))],
-            map(str.rstrip,lines)
-        )
+
+    def test_dump_withMemberShares_changing(self):
+
+        usage = self.summerUp + self.summerDown
+        rights = self.summerDown + self.summerUp
+        zeroday = 25*[0]
+
+        self.setupRights(self.shares, '2015-07-28', rights)
+        self.setupUsage(self.member, '2015-07-28', usage)
+
+        csv = genkwh_curver.dump(
+            member=self.member,
+            first=genkwh_curver.isodate('2015-07-27'),
+            last =genkwh_curver.isodate('2015-07-30'),
+            returnCsv=True,
+            dumpMemberShares=True,
+#            show=True,
+            )
+        self.assertCsvByColumnEqual(csv, [
+                ['memberShares']+ 2*25*[self.shares-1]+2*25*[self.shares],
+                ['rights']+ 2*zeroday + rights[25:] + zeroday,
+                ['usage'] + zeroday + usage + zeroday,
+            ])
+
+    def test_dump_withMemberShares_changingAndRights(self):
+
+        usage = self.summerUp + self.summerDown
+        rights = self.summerDown + self.summerUp
+        zeroday = 25*[0]
+
+        self.setupRights(self.shares, '2015-07-28', rights)
+        self.setupRights(self.shares-1, '2015-07-28', 25*[4])
+        self.setupUsage(self.member, '2015-07-28', usage)
+
+        csv = genkwh_curver.dump(
+            member=self.member,
+            first=genkwh_curver.isodate('2015-07-27'),
+            last =genkwh_curver.isodate('2015-07-30'),
+            returnCsv=True,
+            dumpMemberShares=True,
+#            show=True,
+            )
+        self.assertCsvByColumnEqual(csv, [
+                ['memberShares']+ 2*25*[self.shares-1]+2*25*[self.shares],
+                ['rights']+ zeroday + 24*[4]+[0]+ rights[25:] + zeroday,
+                ['usage'] + zeroday + usage + zeroday,
+            ])
+
+
 
 if __name__ == '__main__':
     unittest.main()
