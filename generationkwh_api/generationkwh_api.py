@@ -51,23 +51,24 @@ class GenerationkWhTestHelper(osv.osv):
             )
 
     def setup_rights_per_share(self, cursor, uid,
-            nshares, startDate, data,
+            nshares, firstDate, data,
             context=None):
         rightsPerShare = RightsPerShare(mdbpool.get_db())
-        rightsPerShare.updateRightsPerShare(nshares, isodate(startDate), data)
+        rightsPerShare.updateRightsPerShare(nshares, isodate(firstDate), data)
         remainders = RemainderProvider(self, cursor, uid, context)
-        endDate = isodate(startDate) + datetime.timedelta(days=(len(data)+24)%25)
+        lastDate = isodate(firstDate) + datetime.timedelta(days=(len(data)+24)%25)
         remainders.updateRemainders([
-            (nshares, endDate, 0),
+            (nshares, lastDate, 0),
             ])
 
     def rights_per_share(self, cursor, uid,
-            nshares, startDate, stopDate,
+            nshares, firstDate, lastDate,
             context=None):
         rights = RightsPerShare(mdbpool.get_db())
         return list(int(i) for i in rights.rightsPerShare(nshares,
-                isodate(startDate),
-                isodate(stopDate)))
+                isodate(firstDate),
+                isodate(lastDate)
+                ))
 
     def clear_mongo_collections(self, cursor, uid, collections, context=None):
         for collection in collections:
@@ -88,6 +89,16 @@ class GenerationkWhTestHelper(osv.osv):
             isodate(start),
             isodate(stop),
             )]
+
+    def member_shares(self, cursor, uid, member, start, stop, context=None):
+        investment = InvestmentProvider(self, cursor, uid, context)
+        memberActiveShares = MemberSharesCurve(investment)
+        return [ int(num) for num in memberActiveShares.hourly(
+            isodate(start),
+            isodate(stop),
+            member,
+            )]
+        
 
 
     def trace_rigths_compilation(self, cursor, uid,
