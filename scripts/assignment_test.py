@@ -38,12 +38,8 @@ class Assignment_Test(unittest.TestCase):
                 member_id = member,
                 priority = priority,
                 ))
-        return
-        self.Assignment.add(assignments)
-        
 
-
-    def assertAllAssignmentsEqual(self, expectation):
+    def assertAssignmentsEqual(self, expectation):
         result = self.Assignment.browse([])
         self.assertEqual( [
                 (
@@ -54,27 +50,6 @@ class Assignment_Test(unittest.TestCase):
                 )
                 for r in result
             ],expectation)
-
-    def assertAssignmentsEqual(self, expectation):
-        result = self.Assignment.browse([])
-        self.assertEqual([
-            (
-                r.contract_id.id,
-                r.member_id.id,
-                r.priority,
-            ) for r in result],
-            expectation)
-
-    def assertAssignmentsExpiredEqual(self, expectation):
-        result = self.Assignment.browse([])
-        self.assertEqual([
-            (
-                r.contract_id.id,
-                r.member_id.id,
-                r.priority,
-                r.end_date
-            ) for r in result],
-            expectation)
 
     def tearDown(self):
         self.Assignment.dropAll()
@@ -89,7 +64,7 @@ class Assignment_Test(unittest.TestCase):
             contract_id = self.contract,
             priority = 0,
             ))
-        self.assertAllAssignmentsEqual([
+        self.assertAssignmentsEqual([
             (self.contract, self.member, 0, False),
             ])
 
@@ -134,7 +109,7 @@ class Assignment_Test(unittest.TestCase):
             (self.contract,self.member,1),
             ])
         self.assertAssignmentsEqual([
-            (self.contract,self.member,1),
+            (self.contract,self.member,1,False),
             ])
 
     def test_no_duplication(self):
@@ -142,7 +117,7 @@ class Assignment_Test(unittest.TestCase):
             (self.contract, self.member, 1),
             (self.contract, self.member, 1),
             ])
-        self.assertAllAssignmentsEqual([
+        self.assertAssignmentsEqual([
             (self.contract, self.member, 1, self.today),
             (self.contract, self.member, 1, False),
             ])
@@ -152,7 +127,7 @@ class Assignment_Test(unittest.TestCase):
             (self.contract,self.member,1),
             (self.contract,self.member,2),
             ])
-        self.assertAllAssignmentsEqual([
+        self.assertAssignmentsEqual([
             (self.contract, self.member, 1, self.today),
             (self.contract,self.member,2, False),
             ])
@@ -166,9 +141,9 @@ class Assignment_Test(unittest.TestCase):
             (self.contract3,self.member3,1),
             ])
         self.assertAssignmentsEqual([
-            (self.contract, self.member, 1),
-            (self.contract2,self.member2,1),
-            (self.contract3,self.member3,1),
+            (self.contract, self.member, 1,False),
+            (self.contract2,self.member2,1,False),
+            (self.contract3,self.member3,1,False),
             ])
 
     def test_three_member_one_polissa(self):
@@ -179,9 +154,9 @@ class Assignment_Test(unittest.TestCase):
             (self.contract,self.member3,1),
             ])
         self.assertAssignmentsEqual([
-            (self.contract,self.member, 1),
-            (self.contract,self.member2,1),
-            (self.contract,self.member3,1),
+            (self.contract,self.member, 1,False),
+            (self.contract,self.member2,1,False),
+            (self.contract,self.member3,1,False),
             ])
 
     def test_one_member_three_polissas(self):
@@ -192,9 +167,9 @@ class Assignment_Test(unittest.TestCase):
             (self.contract3, self.member,1),
             ])
         self.assertAssignmentsEqual([
-            (self.contract , self.member,1),
-            (self.contract2, self.member,1),
-            (self.contract3, self.member,1),
+            (self.contract , self.member,1,False),
+            (self.contract2, self.member,1,False),
+            (self.contract3, self.member,1,False),
             ])
 
     def test_expire_one_member_one_polissa(self):
@@ -202,7 +177,7 @@ class Assignment_Test(unittest.TestCase):
             (self.contract, self.member,1),
             ])
         self.Assignment.expire(self.contract, self.member)
-        self.assertAssignmentsExpiredEqual([
+        self.assertAssignmentsEqual([
             (self.contract, self.member,1,self.today),
             ])
 
@@ -212,7 +187,7 @@ class Assignment_Test(unittest.TestCase):
             (self.contract2, self.member,1),
             ])
         self.Assignment.expire(self.contract, self.member)
-        self.assertAssignmentsExpiredEqual([
+        self.assertAssignmentsEqual([
             (self.contract, self.member,1,self.today),
             (self.contract2, self.member,1,False),
             ])
@@ -223,7 +198,7 @@ class Assignment_Test(unittest.TestCase):
             (self.contract, self.member,1),
             ])
         self.Assignment.expire(self.contract, self.member)
-        self.assertAssignmentsExpiredEqual([
+        self.assertAssignmentsEqual([
             (self.contract, self.member,1,self.today),
             (self.contract, self.member,1,self.today),
             ])
@@ -234,7 +209,7 @@ class AssignmentProvider_Test(unittest.TestCase):
     def setUp(self):
         self.erp = erppeek.Client(**dbconfig.erppeek)
         self.Assignment = self.erp.GenerationkwhAssignment
-        #self.Generationkwhtesthelper = self.erp.GenerationkwhTesthelper
+        self.AssignmentTestHelper = self.erp.GenerationkwhAssignmentTesthelper
         self.Assignment.dropAll()
 
         self.member, self.member2 = [
@@ -250,7 +225,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.contract2 = contract2.id
         self.contractLastInvoicedDate = contract.data_ultima_lectura
         self.contract2LastInvoicedDate = contract2.data_ultima_lectura
-        self.today = datetime.date.today()
+        self.today = str(datetime.date.today())
 
         newContract, = self.erp.GiscedataPolissa.browse(
                 [('data_ultima_lectura','=',False),
@@ -282,12 +257,20 @@ class AssignmentProvider_Test(unittest.TestCase):
                 ))
 
     def assertAssignmentsSeekEqual(self, contract_id, expectation):
-        result = self.Assignment.availableAssigmentsForContract(contract_id)
+        result = self.Assignment.contractSources(contract_id)
+        self.assertEqual([
+            (member_id, last_usable_date)
+            for member_id, last_usable_date in expectation
+            ], [
+            (member_id, last_usable_date)
+            for member_id, last_usable_date in result
+            ])
+
+        result = self.AssignmentTestHelper.contractSources(contract_id)
         self.assertEqual([
             dict(
                 member_id=member_id,
-                # TODO: compare strings at the end
-                last_usable_date=str(last_usable_date),
+                last_usable_date=last_usable_date,
             )
             for member_id, last_usable_date in expectation
             ], result)
@@ -296,11 +279,11 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.Assignment.dropAll()
 
 
-    def test_seek_noAssignment(self):
+    def test_contractSources_noAssignment(self):
         self.setupAssignments([])
         self.assertAssignmentsSeekEqual(self.contract, [])
 
-    def test_seek_oneAssignment_noCompetitors(self):
+    def test_contractSources_oneAssignment_noCompetitors(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
             ])
@@ -308,7 +291,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.member, self.today),
             ])
 
-    def test_seek_expiredAssignment_notRetrieved(self):
+    def test_contractSources_expiredAssignment_notRetrieved(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
             ])
@@ -316,14 +299,14 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.assertAssignmentsSeekEqual(self.contract, [
             ])
 
-    def test_seek_assigmentsForOtherContracts_ignored(self):
+    def test_contractSources_assigmentsForOtherContracts_ignored(self):
         self.setupAssignments([
             (self.contract2, self.member, 1),
             ])
         self.assertAssignmentsSeekEqual(self.contract, [
         ])
 
-    def test_seek_manyAssignments_noCompetitors(self):
+    def test_contractSources_manyAssignments_noCompetitors(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
             (self.contract, self.member2, 0),
@@ -333,7 +316,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.member2, self.today),
             ])
 
-    def test_seek_competitorWithoutInvoices_takesActivationDate(self):
+    def test_contractSources_competitorWithoutInvoices_takesActivationDate(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
             (self.newContract, self.member, 0),
@@ -342,7 +325,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.member, self.newContractActivationDate),
             ])
 
-    def test_seek_competitorWithInvoices_takesLastInvoicedDate(self):
+    def test_contractSources_competitorWithInvoices_takesLastInvoicedDate(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
             (self.contract2, self.member, 0),
@@ -351,7 +334,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.member, self.contract2LastInvoicedDate),
             ])
 
-    def test_seek_competitor_expired_ignored(self):
+    def test_contractSources_competitor_expired_ignored(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
             (self.contract2, self.member, 0),
@@ -361,7 +344,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.member, self.today),
             ])
 
-    def test_seek_competitorWithEqualOrLowerPriority_ignored(self):
+    def test_contractSources_competitorWithEqualOrLowerPriority_ignored(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
             (self.contract2, self.member, 1), # equal
@@ -371,7 +354,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.member, self.today),
             ])
 
-    def test_seek_manyCompetitors_earlierLastInvoicedPrevails(self):
+    def test_contractSources_manyCompetitors_earlierLastInvoicedPrevails(self):
         self.setupAssignments([
             (self.newContract,self.member,1),
             (self.contract,self.member,0),
@@ -384,7 +367,7 @@ class AssignmentProvider_Test(unittest.TestCase):
                 )),
             ])
 
-    def assertAllAssignmentsEqual(self,expectation):
+    def assertAssignmentsEqual(self,expectation):
         self.assertEqual([
             (record.contract_id.id, record.member_id.id, record.priority) 
             for record in self.Assignment.browse([], order='id')
@@ -394,14 +377,14 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.Assignment.createOnePrioritaryAndManySecondaries([
             (self.contract, self.member),
             ])
-        self.assertAllAssignmentsEqual([
+        self.assertAssignmentsEqual([
             (self.contract, self.member, 0),
             ])
 
     def test_createOnePrioritaryAndManySecondaries_noAssignment(self):
         self.Assignment.createOnePrioritaryAndManySecondaries([
             ])
-        self.assertAllAssignmentsEqual([
+        self.assertAssignmentsEqual([
             ])
 
     def test_createOnePrioritaryAndManySecondaries_clearPrevious(self):
@@ -411,7 +394,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.Assignment.createOnePrioritaryAndManySecondaries([
             (self.contract, self.member),
             ])
-        self.assertAllAssignmentsEqual([
+        self.assertAssignmentsEqual([
             (self.contract, self.member, 0),
             ])
 
@@ -422,7 +405,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.Assignment.createOnePrioritaryAndManySecondaries([
             (self.contract,self.member),
             ])
-        self.assertAllAssignmentsEqual([
+        self.assertAssignmentsEqual([
             (self.contract2, self.member2, 1),
             (self.contract, self.member, 0),
             ])
@@ -432,7 +415,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.contract,self.member),
             (self.contract2,self.member2),
             ])
-        self.assertAllAssignmentsEqual([
+        self.assertAssignmentsEqual([
             (self.contract, self.member, 0),
             (self.contract2, self.member2, 0),
             ])
@@ -442,7 +425,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.contract, self.member),
             (self.contract2, self.member),
             ])
-        self.assertAllAssignmentsEqual([
+        self.assertAssignmentsEqual([
             (self.contract, self.member, 0),
             (self.contract2, self.member, 1),
             ])

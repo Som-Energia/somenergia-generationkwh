@@ -104,13 +104,13 @@ class GenerationkWhAssignment(osv.osv):
         cups_direction=fields.function(
             _ff_contract, string='Direcció CUPS', readonly=True, type='char',
             method=True, multi='contract',
-            help="CUPS direction",
+            help="CUPS address",
             ),
         # Contract fields
         cups_anual_use=fields.function(
             _ff_contract, string='Consum anual', readonly=True, type='integer',
             method=True, multi='contract',
-            help="Anual CUPS energy use. May be stimated.",
+            help="Annual CUPS energy use. May be stimated.",
             ),
         )
 
@@ -194,14 +194,15 @@ class GenerationkWhAssignment(osv.osv):
         assignmentProvider = AssignmentProvider(self, cursor, uid, context)
         return assignmentProvider.isActive(contract_id)
 
-    def availableAssigmentsForContract(self, cursor, uid, contract_id, context=None):
-        # TODO Control inversion with AssignmentProvider.seek
-        assignmentProvider = AssignmentProvider(self, cursor, uid, context)
-        #Conversion of ns to dict in order to marshall to XML-RPC
-        return [dict(
-            member_id=assign.member_id,
-            last_usable_date=str(assign.last_usable_date),
-        ) for assign in assignmentProvider.seek(contract_id)]
+    def contractSources(self, cursor, uid, contract_id, context=None):
+        sql = _sqlfromfile('right_sources_for_contract')
+        cursor.execute(sql, dict(contract_id=contract_id))
+        return [
+            (member_id, last_usable_date)
+            for member_id, last_usable_date, _
+            in cursor.fetchall()
+            ]
+        
 
 
     def unassignedInvestors(self, cursor, uid, context=None):
@@ -230,20 +231,22 @@ GenerationkWhAssignment()
 
 class AssignmentProvider(ErpWrapper):
 
-    def seek(self, contract_id):
+    def contractSources(self, contract_id):
         """
             Returns the sources available GenkWh rights sources for a contract
             and the earliest date you can use rights from it.
         """
-        sql = _sqlfromfile('right_sources_for_contract')
-        self.cursor.execute(sql, dict(contract_id=contract_id))
+        Assignment = self.erp.pool.get('generationkwh.assignment')
         return [
             ns(
                 member_id=member_id,
                 last_usable_date=isodate(last_usable_date),
             )
-            for member_id, last_usable_date, _
-            in self.cursor.fetchall()
+            for member_id, last_usable_date
+            in Assignment.contractSources(
+                self.cursor, self.uid,
+                contract_id,
+                context=self.context)
             ]
 
     def isActive(self, contract_id):
@@ -256,5 +259,24 @@ class AssignmentProvider(ErpWrapper):
                 ('end_date','=',False),
             ], context=self.context
             ))>=1
+
+class Generationkwh_Assignment_TestHelper(osv.osv):
+    _name = 'generationkwh.assignment.testhelper'
+    _auto = False
+    
+    def contractSources(self, cursor, uid, contract_id, context=None):
+        provider = AssignmentProvider(self, cursor, uid, context)
+        return [
+            dict(
+                member_id=val.member_id,
+                last_usable_date=val.last_usable_date.isoformat(),
+                )
+            for val in provider.contractSources(contract_id)
+            ]
+
+Generationkwh_Assignment_TestHelper()
+
+
+
 
 

@@ -9,7 +9,7 @@ class AssignmentsMockup(object):
     def __init__(self, assignments):
         self._assignments = assignments
 
-    def seek(self, contract_id):
+    def contractSources(self, contract_id):
         return self._assignments
 
     def isActive(self, contract_id):

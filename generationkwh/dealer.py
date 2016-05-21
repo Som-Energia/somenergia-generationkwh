@@ -21,7 +21,7 @@ class Dealer(object):
         if not self._assignments.isActive(contract_id):
             return False
 
-        for assigment in self._assignments.seek(contract_id):
+        for assigment in self._assignments.contractSources(contract_id):
             if self._investments.effectiveForMember(
                     assigment.member_id, first_date, last_date):
                 return True
@@ -44,7 +44,7 @@ class Dealer(object):
         assert type(last_date) == datetime.date
         assert kwh>=0, ("Negative use not allowed")
         seek_start = first_date + relativedelta(years=-1)
-        assignments = self._assignments.seek(contract_id)
+        assignments = self._assignments.contractSources(contract_id)
         used = 0
         result = []
         for asig in assignments:
