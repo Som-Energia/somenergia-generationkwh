@@ -49,11 +49,14 @@ def sequence(string) :
 	>>> sequence("2-4-5,7")
 	Traceback (most recent call last):
 	...
-	ValueError: too many values to unpack (expected 2)
+	ValueError: more than two hyphen separated values
 	"""
 	def processItem(item):
 		if '-' not in item: return [int(item)]
-		a, b = item.split("-")
+		values = item.split("-")
+		if len(values) != 2:
+			raise ValueError("more than two hyphen separated values")
+		a,b = values
 		return list(range(int(a),int(b)+1))
 
 	return sorted(set(sum(
