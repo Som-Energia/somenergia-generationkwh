@@ -14,6 +14,7 @@ from investment_test import *
 from usagetracker_test import *
 from assignment_test import *
 from genkwh_curver_test import *
+from sequence import *
 #from productionloader_test import *
 from yamlns import namespace as ns
 
