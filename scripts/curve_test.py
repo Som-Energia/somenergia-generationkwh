@@ -59,10 +59,10 @@ class CurveExporter_Test(unittest.TestCase):
         self.setupRights(self.shares, '2015-08-15', rights)
         self.setupUsage(self.member, '2015-08-15', usage)
 
-        csv = genkwh_curver.dump(
+        csv = genkwh_curve.dump(
             member=self.member,
-            first=genkwh_curver.isodate('2015-08-15'),
-            last =genkwh_curver.isodate('2015-08-17'),
+            first=genkwh_curve.isodate('2015-08-15'),
+            last =genkwh_curve.isodate('2015-08-17'),
             returnCsv=True,
 #            show=True,
             )
@@ -79,10 +79,10 @@ class CurveExporter_Test(unittest.TestCase):
         self.setupRights(self.shares, '2015-08-15', rights)
         self.setupUsage(self.member, '2015-08-15', usage)
 
-        csv = genkwh_curver.dump(
+        csv = genkwh_curve.dump(
             member=self.member,
-            first=genkwh_curver.isodate('2015-08-15'),
-            last =genkwh_curver.isodate('2015-08-15'),
+            first=genkwh_curve.isodate('2015-08-15'),
+            last =genkwh_curve.isodate('2015-08-15'),
             returnCsv=True,
             dumpMemberShares=True,
 #            show=True,
@@ -103,13 +103,13 @@ class CurveExporter_Test(unittest.TestCase):
         self.setupRights(self.shares, '2015-07-28', rights)
         self.setupUsage(self.member, '2015-07-28', usage)
 
-        csv = genkwh_curver.dump(
+        csv = genkwh_curve.dump(
             member=self.member,
-            first=genkwh_curver.isodate('2015-07-27'),
-            last =genkwh_curver.isodate('2015-07-30'),
+            first=genkwh_curve.isodate('2015-07-27'),
+            last =genkwh_curve.isodate('2015-07-30'),
             returnCsv=True,
             dumpMemberShares=True,
-#            show=True,
+            show=True,
             )
         self.assertCsvByColumnEqual(csv, [
                 ['memberShares']+ 2*25*[self.shares-1]+2*25*[self.shares],
@@ -127,13 +127,13 @@ class CurveExporter_Test(unittest.TestCase):
         self.setupRights(self.shares-1, '2015-07-28', 25*[4])
         self.setupUsage(self.member, '2015-07-28', usage)
 
-        csv = genkwh_curver.dump(
+        csv = genkwh_curve.dump(
             member=self.member,
-            first=genkwh_curver.isodate('2015-07-27'),
-            last =genkwh_curver.isodate('2015-07-30'),
+            first=genkwh_curve.isodate('2015-07-27'),
+            last =genkwh_curve.isodate('2015-07-30'),
             returnCsv=True,
             dumpMemberShares=True,
-#            show=True,
+            show=True,
             )
         self.assertCsvByColumnEqual(csv, [
                 ['memberShares']+ 2*25*[self.shares-1]+2*25*[self.shares],
