@@ -9,7 +9,7 @@
     'base',
     'som_polissa_soci',
     'som_inversions',
-    'plantmeter_api',
+    'som_plantmeter',
     ],
   "init_xml": [],
   "demo_xml": [],
