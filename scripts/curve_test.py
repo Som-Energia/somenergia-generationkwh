@@ -8,7 +8,7 @@ import dbconfig
 import os
 from subprocess import call
 import sys
-import genkwh_curver 
+import genkwh_curve
 
 class CurveExporter_Test(unittest.TestCase):
     def setUp(self):
