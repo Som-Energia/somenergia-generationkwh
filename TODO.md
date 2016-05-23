@@ -3,6 +3,7 @@
 ## Inmediate TODO's
 
 - Cas: Factura contracte amb assignacions de membres que no tenen inversions effectives, no hauria de sortir linia generation
+- Include the member code into the mail template for default assignment
 - Assignment: Wizard per canviar flag active des del tree [gisce]
 - Annual use (see card board)
 + Invoice visual design implementation [gisce]
@@ -21,13 +22,12 @@
 - Manual testing scripts
     + Create investments
     + Create assignments
-    - Init: remainder 0shares, first date
-    - Init total shares
-    - Init remainders n
-    - Add production
+    - Init: initial date, 0shares remainder, total built shares
+    - Additional init for n-shares remainders
+    - Inject production (without plants)
         - Flat profile for several days
         - Clon realistic profile (csv) for several days
-    - Show rights
+    + Show rights and other curves
 
 - Init:
     - Setup plants
