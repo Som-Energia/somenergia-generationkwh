@@ -29,6 +29,8 @@ class CurveExporter_Test(unittest.TestCase):
 
     def clear(self):
         self.Investment.dropAll()
+        Remainder = self.erp.GenerationkwhRemainder
+        Remainder.clean()
         self.erp.GenerationkwhTesthelper.clear_mongo_collections([
             'rightspershare',
             'memberrightusage',
