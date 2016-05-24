@@ -77,6 +77,11 @@ class MonsolProvider(BaseProvider):
             return sio.read().splitlines()
 
     def get(self, start, end):
+        assert start is None or type(start)==datetime.date, (
+            "start date should be a date but is {}".format(start))
+        assert end is None or type(end)==datetime.date, (
+            "start date should be a date but is {}".format(end))
+
         if not end:
             end = toLocal(datetime.datetime.now()).date()
         return [self.extract(self.download(date), date) for date in daterange(start, end)]

@@ -5,17 +5,12 @@ from plantmeter.resource import *
 from plantmeter.isodates import localisodatetime,naiveisodatetime
 
 import pymongo
-from datetime import datetime
+from datetime import datetime, date
 
 import unittest
 
 def local_file(filename):
     return os.path.join(os.path.abspath(os.path.dirname(__file__)), filename)
-
-def localDate(y,m,d):
-    return tz.localize(datetime(y,m,d)).date()
-def localDateTime(y,m,d):
-    return tz.localize(datetime(y,m,d))
 
 class Resource_Test(unittest.TestCase):
 
@@ -49,8 +44,8 @@ class Resource_Test(unittest.TestCase):
 
         self.assertEqual(
             list(aggr.getWh(
-                localDateTime(2015,9,4),
-                localDateTime(2015,9,5))),
+                date(2015,9,4),
+                date(2015,9,5))),
                 2*25*[0] 
                 )
       
@@ -70,13 +65,13 @@ class Resource_Test(unittest.TestCase):
         aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
         aggr.plants.append(p)
         m.updateWh(
-            localDate(2015,9,4),
-            localDate(2015,9,5))
+            date(2015,9,4),
+            date(2015,9,5))
 
         self.assertEqual(
             list(aggr.getWh(
-                localDateTime(2015,9,4),
-                localDateTime(2015,9,5))),
+                date(2015,9,4),
+                date(2015,9,5))),
             [
                 0,0,0,0,0,0,0,0,3,6,5,4,8,17,34,12,12,5,3,1,0,0,0,0,0,
                 0,0,0,0,0,0,0,0,4,7,6,5,9,18,35,13,13,6,4,2,0,0,0,0,0,
@@ -106,13 +101,13 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m2)
         aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
         aggr.plants.append(p)
-        m1.updateWh(localDate(2015,9,4),localDate(2015,9,5))
-        m2.updateWh(localDate(2015,9,4),localDate(2015,9,5))
+        m1.updateWh(date(2015,9,4),date(2015,9,5))
+        m2.updateWh(date(2015,9,4),date(2015,9,5))
 
         self.assertEqual(
             list(aggr.getWh(
-                localDateTime(2015,9,4),
-                localDateTime(2015,9,5))),
+                date(2015,9,4),
+                date(2015,9,5))),
             [
                 0,0,0,0,0,0,0,0,6,12,10, 8,16,34,68,24,24,10,6,2,0,0,0,0,0,
                 0,0,0,0,0,0,0,0,8,14,12,10,18,36,70,26,26,12,8,4,0,0,0,0,0,
@@ -135,12 +130,12 @@ class Resource_Test(unittest.TestCase):
         aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
         aggr.plants.append(p1)
         aggr.plants.append(p2)
-        m1.updateWh(localDate(2015,9,4),localDate(2015,9,5))
+        m1.updateWh(date(2015,9,4),date(2015,9,5))
 
         self.assertEqual(
             list(aggr.getWh(
-                localDateTime(2015,9,4),
-                localDateTime(2015,9,5))),
+                date(2015,9,4),
+                date(2015,9,5))),
             [
                 0,0,0,0,0,0,0,0,3,6,5,4,8,17,34,12,12,5,3,1,0,0,0,0,0,
                 0,0,0,0,0,0,0,0,4,7,6,5,9,18,35,13,13,6,4,2,0,0,0,0,0,
@@ -172,13 +167,13 @@ class Resource_Test(unittest.TestCase):
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p1)
         aggr.plants.append(p2)
-        m1.updateWh(localDate(2015,9,4),localDate(2015,9,5))
-        m2.updateWh(localDate(2015,9,4),localDate(2015,9,5))
+        m1.updateWh(date(2015,9,4),date(2015,9,5))
+        m2.updateWh(date(2015,9,4),date(2015,9,5))
 
         self.assertEqual(
             list(aggr.getWh(
-                localDateTime(2015,9,4),
-                localDateTime(2015,9,5))),
+                date(2015,9,4),
+                date(2015,9,5))),
             [
                 0,0,0,0,0,0,0,0,6,12,10, 8,16,34,68,24,24,10,6,2,0,0,0,0,0,
                 0,0,0,0,0,0,0,0,8,14,12,10,18,36,70,26,26,12,8,4,0,0,0,0,0,
@@ -249,9 +244,9 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m)
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p)
-        m.updateWh(localDate(2015,9,4), localDate(2015,9,5))
+        m.updateWh(date(2015,9,4), date(2015,9,5))
 
-        self.assertEqual(aggr.lastMeasurementDate(), localDateTime(2015,9,5))
+        self.assertEqual(aggr.lastMeasurementDate(), date(2015,9,5))
 
     def test_firstDate_onePlantOneMeter(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -266,9 +261,9 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m)
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p)
-        m.updateWh(localDate(2015,9,4), localDate(2015,9,5))
+        m.updateWh(date(2015,9,4), date(2015,9,5))
 
-        self.assertEqual(aggr.firstMeasurementDate(), localDateTime(2015,9,4))
+        self.assertEqual(aggr.firstMeasurementDate(), date(2015,9,4))
 
     def test_lastDate_onePlantTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -293,10 +288,10 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m2)
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p)
-        m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
-        m2.updateWh(localDate(2015,8,4), localDate(2015,8,5))
+        m1.updateWh(date(2015,9,4), date(2015,9,5))
+        m2.updateWh(date(2015,8,4), date(2015,8,5))
 
-        self.assertEqual(aggr.lastMeasurementDate(), localDateTime(2015,9,5))
+        self.assertEqual(aggr.lastMeasurementDate(), date(2015,9,5))
 
     def test_firstDate_onePlantTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -321,10 +316,10 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m2)
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p)
-        m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
-        m2.updateWh(localDate(2015,8,4), localDate(2015,8,5))
+        m1.updateWh(date(2015,9,4), date(2015,9,5))
+        m2.updateWh(date(2015,8,4), date(2015,8,5))
 
-        self.assertEqual(aggr.firstMeasurementDate(), localDateTime(2015,8,4))
+        self.assertEqual(aggr.firstMeasurementDate(), date(2015,8,4))
 
     def test_lastDate_twoPlantsTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -351,10 +346,10 @@ class Resource_Test(unittest.TestCase):
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p1)
         aggr.plants.append(p2)
-        m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
-        m2.updateWh(localDate(2015,8,4), localDate(2015,8,5))
+        m1.updateWh(date(2015,9,4), date(2015,9,5))
+        m2.updateWh(date(2015,8,4), date(2015,8,5))
 
-        self.assertEqual(aggr.lastMeasurementDate(), localDateTime(2015,9,5))
+        self.assertEqual(aggr.lastMeasurementDate(), date(2015,9,5))
 
     def test_firstDate_twoPlantsTwoMeters(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
@@ -381,10 +376,10 @@ class Resource_Test(unittest.TestCase):
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p1)
         aggr.plants.append(p2)
-        m1.updateWh(localDate(2015,9,4), localDate(2015,9,5))
-        m2.updateWh(localDate(2015,8,4), localDate(2015,8,5))
+        m1.updateWh(date(2015,9,4), date(2015,9,5))
+        m2.updateWh(date(2015,8,4), date(2015,8,5))
 
-        self.assertEqual(aggr.firstMeasurementDate(), localDateTime(2015,8,4))
+        self.assertEqual(aggr.firstMeasurementDate(), date(2015,8,4))
 
 class Meter_Test(unittest.TestCase):
     def setUp(self):
@@ -411,8 +406,8 @@ class Meter_Test(unittest.TestCase):
 
         self.assertEqual(
             list(m.getWh(
-                localDateTime(2015,9,4),
-                localDateTime(2015,9,5))),
+                date(2015,9,4),
+                date(2015,9,5))),
             2*25*[0]
             )
 
@@ -424,12 +419,12 @@ class Meter_Test(unittest.TestCase):
             True,
             uri = self.uri,
             curveProvider = self.curveProvider)
-        m.updateWh(localDate(2015,9,4), localDate(2015,9,5))
+        m.updateWh(date(2015,9,4), date(2015,9,5))
 
         self.assertEqual(
             list(m.getWh(
-                localDateTime(2015,9,4),
-                localDateTime(2015,9,5))),
+                date(2015,9,4),
+                date(2015,9,5))),
             [
                 0,0,0,0,0,0,0,0,3,6,5,4,8,17,34,12,12,5,3,1,0,0,0,0,0,
                 0,0,0,0,0,0,0,0,4,7,6,5,9,18,35,13,13,6,4,2,0,0,0,0,0,
@@ -453,9 +448,9 @@ class Meter_Test(unittest.TestCase):
             True,
             uri = self.uri,
             curveProvider = self.curveProvider)
-        m.updateWh(localDate(2015,9,4), localDate(2015,9,5))
+        m.updateWh(date(2015,9,4), date(2015,9,5))
 
-        self.assertEqual(m.lastMeasurementDate(), localDateTime(2015,9,5))
+        self.assertEqual(m.lastMeasurementDate(), date(2015,9,5))
 
     def test_firstDate_empty(self):
         m = ProductionMeter(
@@ -475,8 +470,8 @@ class Meter_Test(unittest.TestCase):
             True,
             uri = self.uri,
             curveProvider = self.curveProvider)
-        m.updateWh(localDate(2015,9,4), localDate(2015,9,5))
-        self.assertEqual(m.firstMeasurementDate(), localDateTime(2015,9,4))
+        m.updateWh(date(2015,9,4), date(2015,9,5))
+        self.assertEqual(m.firstMeasurementDate(), date(2015,9,4))
 
 
 unittest.TestCase.__str__ = unittest.TestCase.id

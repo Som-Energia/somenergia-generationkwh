@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 from plantmeter.providers import get_provider
-from plantmeter.isodates import localisodate
+from plantmeter.isodates import localisodate, assertDateOrNone, assertDate, dateToLocal
 from plantmeter.mongotimecurve import addDays
 
 """
@@ -32,6 +32,10 @@ class ProductionAggregator(Resource):
         super(ProductionAggregator, self).__init__(*args, **kwargs)
 
     def getWh(self, start, end):
+
+        assertDate('start', start)
+        assertDate('end', end)
+
         return np.sum([
             plant.getWh(start, end)
             for plant in self.plants
@@ -39,6 +43,10 @@ class ProductionAggregator(Resource):
             ], axis=0)
     
     def updateWh(self, start=None, end=None, notifier=None):
+
+        assertDateOrNone('start', start)
+        assertDateOrNone('end', end)
+
         return [(plant.id, plant.updateWh(start, end, notifier)) for plant in self.plants]
 
     def firstMeasurementDate(self):
@@ -61,6 +69,9 @@ class ProductionPlant(Resource):
         super(ProductionPlant, self).__init__(*args, **kwargs)
 
     def getWh(self, start, end):
+        assertDate('start', start)
+        assertDate('end', end)
+
         return np.sum([
             meter.getWh(start, end)
             for meter in self.meters
@@ -68,6 +79,10 @@ class ProductionPlant(Resource):
             ], axis=0)
 
     def updateWh(self, start=None, end=None, notifier=None):
+
+        assertDateOrNone('start', start)
+        assertDateOrNone('end', end)
+
         return [(meter.id, meter.updateWh(start, end, notifier)) for meter in self.meters]
 
     def lastMeasurementDate(self):
@@ -94,10 +109,22 @@ class ProductionMeter(Resource):
         super(ProductionMeter, self).__init__(*args, **kwargs)
 
     def getWh(self, start, end):
-        return self.curveProvider.get(start, end, self.name, 'ae')
+
+        assertDate('start', start)
+        assertDate('end', end)
+
+        return self.curveProvider.get(
+            dateToLocal(start),
+            dateToLocal(end),
+            self.name,
+            'ae'
+            )
 
     def updateWh(self, start=None, end=None , notifier=None):
         import datetime
+
+        assertDateOrNone('start', start)
+        assertDateOrNone('end', end)
 
         if start is None:
             start = self.lastcommit
@@ -125,9 +152,11 @@ class ProductionMeter(Resource):
         return updated
 
     def lastMeasurementDate(self):
-        return self.curveProvider.lastFullDate(self.name)
+        result = self.curveProvider.lastFullDate(self.name)
+        return result and result.date()
     
     def firstMeasurementDate(self):
-        return self.curveProvider.firstFullDate(self.name)
+        result = self.curveProvider.firstFullDate(self.name)
+        return result and result.date()
 
 # vim: et ts=4 sw=4
