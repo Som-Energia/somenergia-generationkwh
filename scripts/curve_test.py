@@ -109,7 +109,7 @@ class CurveExporter_Test(unittest.TestCase):
             last =genkwh_curve.isodate('2015-07-30'),
             returnCsv=True,
             dumpMemberShares=True,
-            show=True,
+#            show=True,
             )
         self.assertCsvByColumnEqual(csv, [
                 ['memberShares']+ 2*25*[self.shares-1]+2*25*[self.shares],
@@ -133,7 +133,7 @@ class CurveExporter_Test(unittest.TestCase):
             last =genkwh_curve.isodate('2015-07-30'),
             returnCsv=True,
             dumpMemberShares=True,
-            show=True,
+#            show=True,
             )
         self.assertCsvByColumnEqual(csv, [
                 ['memberShares']+ 2*25*[self.shares-1]+2*25*[self.shares],
