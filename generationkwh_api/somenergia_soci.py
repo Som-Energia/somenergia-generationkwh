@@ -103,6 +103,16 @@ class SomenergiaSoci(osv.osv):
         self.write(cursor, uid, member_id, {'gkwh_comments': comments})
         return comment_txt
 
+    def poweremail_write_callback(self, cursor, uid, ids, vals, context=None):
+        """Hook que cridarà el poweremail quan es modifiqui un email
+        a partir d'un soci.
+        """
+        for member_id in ids:
+            member_vals = {'gkwh_assignment_notified': True}
+            self.write(cursor, uid, member_id, member_vals, context=context)
+
+        return True
+
     _columns = {
         'has_gkwh': fields.function(
             _ff_investments, string='Te drets GkWh', readonly=True,
@@ -127,7 +137,16 @@ class SomenergiaSoci(osv.osv):
         'assignment_ids': fields.one2many(
             'generationkwh.assignment', 'member_id', string="Assignacions"
         ),
+        'gkwh_assignment_notified': fields.boolean(
+            'Assignació per defecte notificada',
+            help=u"Indica que ja s'ha notificat l'assignació per defecte. "
+                 u"S'activa quan s'envia el mail"
+        ),
         'gkwh_comments': fields.text('Observacions'),
+    }
+
+    _defaults = {
+        'gkwh_assignment_notified': lambda *a: False,
     }
 
 SomenergiaSoci()

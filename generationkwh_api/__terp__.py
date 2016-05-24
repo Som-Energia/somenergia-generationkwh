@@ -7,6 +7,8 @@
   "category": "Master",
   "depends": [
     'base',
+    "poweremail",
+    "poweremail_references",
     'som_polissa_soci',
     'som_inversions',
     'som_plantmeter',
