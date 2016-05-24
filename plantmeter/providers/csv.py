@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
+
 from plantmeter.providers import BaseProvider, register, urlparse
 from plantmeter.utils import daterange
-from plantmeter.isodates import localisodatetime
+from plantmeter.isodates import localisodatetime, assertDateOrNone
 import datetime
 import csv
 from ..mongotimecurve import parseLocalTime, toLocal
@@ -17,6 +19,11 @@ class CSVProvider(BaseProvider):
         self.res = self.uri.split(':')[1]
 
     def get(self, start, end=None):
+        # TODO: Don't let this code survive!!
+
+        assertDateOrNone('start', start)
+        assertDateOrNone('end', end)
+
         def extract(line):
             items = line.rstrip().split(';')
             return {
@@ -26,18 +33,19 @@ class CSVProvider(BaseProvider):
 
         if not end:
             end = toLocal(datetime.datetime.now()).date()
-
         with open(self.res, 'rb') as csvfile:
             content = csvfile.readlines()
-            return [[
+            return [
+                [
                 measure
-                for date in daterange(start, end + datetime.timedelta(days=1))
                 for measure in (
                     extract(line)
                     for line in content[1:]
                     )
-                if measure['datetime'].date() == date
-                ]]
+                if measure['datetime'].date() == date # TODO: la mare dels ous
+                ]
+                for date in daterange(start, end + datetime.timedelta(days=1))
+            ]
 
     def disconnect(self):
         pass
@@ -49,3 +57,5 @@ class CSVProvider(BaseProvider):
         pass
 
 register("csv", CSVProvider)
+
+# vim: et ts=4 sw=4
