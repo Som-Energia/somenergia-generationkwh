@@ -5,18 +5,10 @@ import pytz
 from plantmeter.providers import BaseProvider, BaseProviderConnectionError, \
         BaseProviderDownloadError, BaseProviderSyntaxError, register, urlparse
 from plantmeter.utils import daterange
-from ..mongotimecurve import toLocal
+from ..mongotimecurve import toLocal, parseLocalTime as mtcParseLocalTime
 
-tz = pytz.timezone('Europe/Madrid')
-def parseLocalTime(string, isSummer=False):
-    naive = datetime.datetime.strptime(string,
-        "%Y%m%d%H%M%S")
-    localized = tz.localize(naive)
-    if not isSummer: return localized
-    if localized.dst(): return localized
-    onehour = datetime.timedelta(hours=1)
-    lesser = tz.normalize(localized-onehour)
-    return lesser if lesser.dst() else localized
+def parseLocalTime(string, isSummer):
+    return mtcParseLocalTime(string, isSummer, format="%Y%m%d%H%M%S")
 
 
 class MonsolProvider(BaseProvider):

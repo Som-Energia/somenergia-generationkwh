@@ -33,9 +33,8 @@ def toLocal(date):
         return tz.localize(date)
     return date.astimezone(tz)
 
-def parseLocalTime(string, isSummer=False):
-    naive = datetime.datetime.strptime(string,
-        "%Y-%m-%d %H:%M:%S")
+def parseLocalTime(string, isSummer=False, format="%Y-%m-%d %H:%M:%S"):
+    naive = datetime.datetime.strptime(string, format)
     localized = tz.localize(naive)
     if not isSummer: return localized
     if localized.dst(): return localized
