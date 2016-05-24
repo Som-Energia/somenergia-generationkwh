@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 import datetime
 from yamlns import namespace as ns
 from generationkwh.isodates import isodate, naiveisodate, naiveisodatetime
+from tools.translate import _
 
 # TODO: This function is duplicated in other sources
 def _sqlfromfile(sqlname):
@@ -306,6 +307,37 @@ class GenerationkWhInvestment(osv.osv):
                 ), context=context
             )
 
+    def _set_active(self, cursor, uid, inv_id, value, context=None):
+        """ Sets active in investement to (de)activate it
+        :param inv_id: investment_id
+        :param value: 1 to activate 0 to deactivate
+        :param context:
+        :return: setted value
+        """
+        actions = {
+            0: 'Desactivat',
+            1: 'Activat'
+        }
+        action_name = actions[value]
+        current_value = self.read(
+            cursor, uid, inv_id, ['active'], context
+        )['active']
+
+        if current_value != bool(value):
+            self.write(
+                cursor, uid, [inv_id], {'active': value}, context=context
+            )
+            txt = _("S'ha {0} la inversió {1}").format(action_name, inv_id)
+            self.log_action(cursor, uid, inv_id, txt, context=context)
+
+        return value
+
+    def activate(self, cursor, uid, inv_id, context=None):
+        return self._set_active(cursor, uid, inv_id, 1, context=None)
+
+    def deactivate(self, cursor, uid, inv_id, context=None):
+        return self._set_active(cursor, uid, inv_id, 0, context=None)
+
     def dropAll(self, cursor, uid, context=None):
         """
             Remove all investment. Use just for testing.
@@ -313,6 +345,18 @@ class GenerationkWhInvestment(osv.osv):
         ids = self.search(cursor, uid, [],
             context=dict(context or {}, active_test=False))
         self.unlink(cursor,uid,ids,context)
+
+    def log_action(self, cursor, uid, inv_id, text, context=None):
+        """
+        :param text: Text to log
+        :return: added text
+        """
+        Member = self.pool.get('somenergia.soci')
+
+        member_id = self.read(
+            cursor, uid, inv_id, ['member_id']
+        )['member_id'][0]
+        return Member.add_gkwh_comment(cursor, uid, member_id, text)
 
 
 class InvestmentProvider(ErpWrapper):

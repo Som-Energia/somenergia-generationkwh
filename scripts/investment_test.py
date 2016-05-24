@@ -240,7 +240,7 @@ class Investment_Test(unittest.TestCase):
             ('member_id','=',1),
             ('nshares','=',10),
             ])[0]
-        self.Investment.write(toBeDeactivated, dict(active=False))
+        self.Investment.deactivate(toBeDeactivated)
         self.assertEqual(
             self.Investment.effective_investments_tuple(None, None, None),
             [
@@ -255,7 +255,7 @@ class Investment_Test(unittest.TestCase):
             ('member_id','=',1),
             ('nshares','=',10),
             ])[0]
-        self.Investment.write(toBeDeactivated, dict(active=False))
+        self.Investment.deactivate(toBeDeactivated)
         self.Investment.create_from_accounting(1, None, '2015-11-19', 0, None)
         self.assertEqual(
             self.Investment.effective_investments_tuple(None, None, None),

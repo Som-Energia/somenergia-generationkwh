@@ -10,6 +10,33 @@ class WizardInvestmentActivation(osv.osv):
 
     _name = 'wizard.generationkwh.investment.activation'
 
+    def do_action(self, cursor, uid, ids, context=None):
+        """ Do selected action"""
+        if context is None:
+            context = {}
+
+        Investment = self.pool.get('generationkwh.investment')
+        Member = self.pool.get('somenergia.soci')
+
+        wiz = self.browse(cursor, uid, ids[0], context=context)
+
+        action = wiz.action
+        action_name = (action == 'activate' and _('Activat') or _('Desactivat'))
+
+        inv_ids = context.get('active_ids', [])
+
+        for inv_id in inv_ids:
+            if action == 'activate':
+                Investment.activate(cursor, uid, inv_id, context)
+            else:
+                Investment.deactivate(cursor, uid, inv_id, context)
+
+        txt = _("S'han {0} {1} inversions").format(
+            action_name, len(inv_ids)
+        )
+
+        wiz.write({'info': txt}, context=context)
+
     def _default_action(self, cursor, uid, context=None):
         """Gets wizard action from context"""
         if context is None:

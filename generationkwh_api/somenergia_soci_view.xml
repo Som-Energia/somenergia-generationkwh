@@ -31,7 +31,6 @@
             <field name="arch" type="xml">
                 <field name="partner_id" position="after">
                     <field name="has_gkwh"/>
-                    <field name="gkwh_comments"/>
                 </field>
             </field>
         </record>

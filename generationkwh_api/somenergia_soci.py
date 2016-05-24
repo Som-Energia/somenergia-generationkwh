@@ -81,6 +81,28 @@ class SomenergiaSoci(osv.osv):
 
         return [('id', 'in', vals)]
 
+    def add_gkwh_comment(self, cursor, uid, member_id, text, context=None):
+        """ Adds register logs in gkwh_comments"""
+        Users = self.pool.get('res.users')
+
+        member_vals = self.read(cursor, uid, member_id, ['gkwh_comments'])
+
+        user_vals = Users.read(cursor, uid, uid, ['name', 'login'])
+
+        header_tmpl = (
+            u"\n----- {0} - {1} ({2}) -------------------------------\n"
+        )
+        header = header_tmpl.format(
+            datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            user_vals['name'],
+            user_vals['login']
+        )
+        comment_txt = "{0}{1}\n".format(header, text)
+        comments = comment_txt + (member_vals['gkwh_comments'] or '')
+
+        self.write(cursor, uid, member_id, {'gkwh_comments': comments})
+        return comment_txt
+
     _columns = {
         'has_gkwh': fields.function(
             _ff_investments, string='Te drets GkWh', readonly=True,
