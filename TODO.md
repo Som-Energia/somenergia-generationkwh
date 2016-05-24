@@ -5,15 +5,15 @@
 
 - Cas: Factura contracte amb assignacions de membres que no tenen inversions effectives, no hauria de sortir linia generation
 - Include the member code into the mail template for default assignment
-- Assignment: Wizard per canviar flag active des del tree [gisce]
-- Annual use (see card board)
++ Assignment: Wizard per canviar flag active des del tree [gisce]
++ Annual use (see card board)
 + Invoice visual design implementation [gisce]
 + Compose default assignation mail
 + Mako implementation for default assignation mail
 - Assignment: Send an activation mail explaining default assignment
 - Investment: Add list tests for inactivated investment
-- Rename `generationkwh_api` -> `som_generationkwh`
-- Rename `plantmeter_api` -> `som_plantmeter`
++ Rename `generationkwh_api` -> `som_generationkwh`
++ Rename `plantmeter_api` -> `som_plantmeter`
 - Assignment: update priority overwritting write?? (Low)
 - Investment: Script: create should return the ids of the resulting investments to pass them to the Assignments script
 - Assignment: Script: default should return the created assignments to pass them to the mail creation
@@ -32,6 +32,8 @@
     - Afegir lectures (a ma)
     - Generar factures (a ma)
     + Show rights and other curves
++ ProductionLoader tests working again
++ ProductionLoader use dates
 
 - Init:
     - Setup plants
@@ -59,7 +61,6 @@
 - Assignment: log in soci observations
 - `genkwh_assigment`default --all: consider active flag and other states
 - Filter invoices by having generation or not
-- ProductionLoader use dates
 - ProductionToRightsPerShare naive: Protect againts divby0 when total active actions is zero
 - Investment: ondelete -> member
 - Investment: Janitoring: mode lines without partner

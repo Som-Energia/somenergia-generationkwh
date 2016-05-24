@@ -10,6 +10,7 @@ class Dealer_test(unittest.TestCase):
         import erppeek
         import dbconfig
         self.c = erppeek.Client(**dbconfig.erppeek)
+        self.helper = self.c.GenerationkwhTesthelper
         self.clearData()
         self.contract, self.contract2 = self.c.GiscedataPolissa.search([], limit=2)
         self.member = 1 # has 25 shares at the first investment wave
@@ -22,22 +23,53 @@ class Dealer_test(unittest.TestCase):
 
     def clearData(self):
         self.c.GenerationkwhAssignment.dropAll()
+        self.c.GenerationkwhInvestment.dropAll()
     
-    def test_isActive_withBadContract(self):
-        result = self.c.GenerationkwhDealer.is_active(99999999,False, False)
-        self.assertEqual(result,False)
-    
+    def assertContractActive(self, expectation, contract, first, last):
+        result = self.helper.dealer_is_active(contract, first, last)
+        self.assertEqual(result,expectation)
 
+    def _test_isActive_withBadContract(self):
+        self.assertContractActive(False,
+            999999999,'2016-08-15','2016-08-15')
+    
     def test_isActive_withoutAssignments(self):
-        result = self.c.GenerationkwhDealer.is_active(self.contract,False, False)
-        self.assertEqual(result,False)
+        self.assertContractActive(False,
+            self.contract,'2016-08-15','2016-08-15')
 
-    @unittest.skip("While implementing Dealer.isActive")
-    def test_isActive_withAssignments(self):
+    def test_isActive_withAssignments_andActiveInvestments(self):
+        self.c.GenerationkwhInvestment.create_from_accounting(self.member,None,None,1,None)
         self.c.GenerationkwhAssignment.create(
             dict(contract_id=self.contract, member_id=self.member, priority=1))
-        result = self.c.GenerationkwhDealer.is_active(self.contract,False, False)
-        self.assertEqual(result,True)
+        self.assertContractActive(True,
+            self.contract,'2016-08-15','2016-08-15')
+
+    def test_isActive_withAssignments_butNoInvestments(self):
+        self.c.GenerationkwhAssignment.create(
+            dict(contract_id=self.contract, member_id=self.member, priority=1))
+        self.assertContractActive(False,
+            self.contract,'2016-08-15','2016-08-15')
+
+    def test_isActive_withAssignments_andIneffectiveInvestments(self):
+        self.c.GenerationkwhInvestment.create_from_accounting(self.member,None,None,None,None)
+        self.c.GenerationkwhAssignment.create(
+            dict(contract_id=self.contract, member_id=self.member, priority=1))
+        self.assertContractActive(False,
+            self.contract,'2016-08-15','2016-08-15')
+
+    def test_isActive_withAssignments_andNotYetActiveInvestments(self):
+        self.c.GenerationkwhInvestment.create_from_accounting(self.member,None,None,1,3)
+        self.c.GenerationkwhAssignment.create(
+            dict(contract_id=self.contract, member_id=self.member, priority=1))
+        self.assertContractActive(False,
+            self.contract,'2014-08-15','2014-08-15')
+
+    def test_isActive_withAssignments_andExpiredInvestments(self):
+        self.c.GenerationkwhInvestment.create_from_accounting(self.member,None,None,1,1)
+        self.c.GenerationkwhAssignment.create(
+            dict(contract_id=self.contract, member_id=self.member, priority=1))
+        self.assertContractActive(False,
+            self.contract,'2046-08-15','2046-08-15')
 
 if __name__ == '__main__':
     unittest.main()

@@ -71,7 +71,9 @@ class ProductionLoader(object):
 
         nDays = (lastDateToCompute-firstDateToCompute).days+1
 
-        assert nDays > 0, "Empty interval"
+        assert nDays > 0, (
+            "Empty interval starting at {} and ending at {}"
+                .format(firstDateToCompute, lastDateToCompute))
         assert 25*nDays<=len(production), (
             "Not enough production data to compute such date interval")
         assert 25*nDays<=len(plantshares), (
@@ -99,10 +101,10 @@ class ProductionLoader(object):
             self._appendRightsPerShare(
                 nshares=n,
                 firstDateToCompute = date,
+                lastDateToCompute = recomputeStop,
                 lastRemainder = remainder,
                 production = numpy.asarray(aggregatedProduction),
                 plantshares = plantShareCurve,
-                lastDateToCompute = recomputeStop,
                 )
 
     def retrieveMeasuresFromPlants(self, start, end):
