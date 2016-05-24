@@ -22,15 +22,17 @@ TODO:
 """
 
 from plantmeter.mongotimecurve import addDays, assertLocalDateTime, toLocal
+from plantmeter.isodates import assertDate
 from .productiontorightspershare import ProductionToRightsPerShare
-from .isodates import dateToLocal
 
 import datetime
 import numpy
 
 
 class ProductionLoader(object):
-    def __init__(self, productionAggregator=None, plantShareCurver=None, rightsPerShare=None, remainders=None):
+    def __init__(self,
+            productionAggregator=None, plantShareCurver=None,
+            rightsPerShare=None, remainders=None):
         self.productionAggregator = productionAggregator
         self.plantShareCurver = plantShareCurver
         self.rightsPerShare = rightsPerShare
@@ -40,7 +42,7 @@ class ProductionLoader(object):
         if not remainders:
             return startDateOfProduction
         return min(
-            dateToLocal(date)
+            date
             for shares, date, remainderwh in remainders
             )
     
@@ -64,10 +66,10 @@ class ProductionLoader(object):
             nshares, firstDateToCompute, lastRemainder,
             production, plantshares, lastDateToCompute):
 
-        assertLocalDateTime("firstDateToCompute", firstDateToCompute)
-        assertLocalDateTime("lastDateToCompute", lastDateToCompute)
+        assertDate("firstDateToCompute", firstDateToCompute)
+        assertDate("lastDateToCompute", lastDateToCompute)
 
-        nDays = (lastDateToCompute.date()-firstDateToCompute.date()).days+1
+        nDays = (lastDateToCompute-firstDateToCompute).days+1
 
         assert nDays > 0, "Empty interval"
         assert 25*nDays<=len(production), (
@@ -79,10 +81,12 @@ class ProductionLoader(object):
 
         userRights, newRemainder = ProductionToRightsPerShare().computeRights(
                 production[startIndex:], plantshares[startIndex:], nshares, lastRemainder)
-        self.remainders.updateRemainders([
-                [nshares, addDays(lastDateToCompute,1).date(), newRemainder]])
-        self.rightsPerShare.updateRightsPerShare(
-                nshares, lastDateToCompute.date(), userRights)
+        if self.remainders:
+            self.remainders.updateRemainders([
+                    [nshares, lastDateToCompute+datetime.timedelta(days=1), newRemainder]])
+        if self.rightsPerShare:
+            self.rightsPerShare.updateRightsPerShare(
+                    nshares, lastDateToCompute, userRights)
 
 
 
@@ -94,7 +98,7 @@ class ProductionLoader(object):
         for n, date, remainder in remainders:
             self._appendRightsPerShare(
                 nshares=n,
-                firstDateToCompute = dateToLocal(date),
+                firstDateToCompute = date,
                 lastRemainder = remainder,
                 production = numpy.asarray(aggregatedProduction),
                 plantshares = plantShareCurve,

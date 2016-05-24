@@ -7,7 +7,7 @@ import pymongo
 from .rightspershare import RightsPerShare
 import numpy
 
-from .isodates import localisodate, isodate
+from .isodates import  isodate, localisodate
 
 class ProductionAggregatorMockUp(object):
 
@@ -68,13 +68,26 @@ class rightsPerShareProviderMockup(object):
 
 class ProductionLoaderTest(unittest.TestCase):
 
+    def setUp(self):
+        self.maxDiff = None
+        self.databasename = 'generationkwh_test'
+        
+        c = pymongo.Connection()
+        c.drop_database(self.databasename)
+        self.db = c[self.databasename]
+        
+    def tearDown(self):
+        c = pymongo.Connection()
+        c.drop_database(self.databasename)
+
+
     def assertStartPointEqual(self, firstProductionDate, remainders, expected):
         l = ProductionLoader()
-        date = l.startPoint(localisodate(firstProductionDate),[
+        date = l.startPoint(isodate(firstProductionDate),[
             (shares, isodate(date), remainderwh)
             for shares, date, remainderwh in remainders
             ])
-        self.assertEqual(str(date.date()), expected)
+        self.assertEqual(str(date), expected)
     
     def test_startPoint_withNoremainders(self):
         self.assertStartPointEqual('2000-01-01',[
@@ -110,12 +123,12 @@ class ProductionLoaderTest(unittest.TestCase):
 
     def assertDatePairEqual(self, expected, result):
         e1,e2 = expected
-        self.assertEqual((localisodate(e1),localisodate(e2)), result)
+        self.assertEqual((isodate(e1),isodate(e2)), result)
 
     def test_getRecomputationInterval_withNoremainders_takesFirstMeassure(self):
         p = ProductionAggregatorMockUp(
-                first=localisodate('2000-01-01'),
-                last=localisodate('2006-01-01'),
+                first=isodate('2000-01-01'),
+                last=isodate('2006-01-01'),
                 )
         l = ProductionLoader(productionAggregator=p)
         interval = l._recomputationInterval([])
@@ -123,8 +136,8 @@ class ProductionLoaderTest(unittest.TestCase):
     
     def test_getRecomputationInterval_withSingleRemainders_takesIt(self):
         p = ProductionAggregatorMockUp(
-                first=localisodate('2000-01-01'),
-                last=localisodate('2006-01-01'),
+                first=isodate('2000-01-01'),
+                last=isodate('2006-01-01'),
                 )
         l = ProductionLoader(productionAggregator=p)
         interval = l._recomputationInterval([
@@ -134,8 +147,8 @@ class ProductionLoaderTest(unittest.TestCase):
 
     def test_getRecomputationInterval_withManyRemainders_takesEarlier(self):
         p = ProductionAggregatorMockUp(
-                first=localisodate('2000-01-01'),
-                last=localisodate('2006-01-01'),
+                first=isodate('2000-01-01'),
+                last=isodate('2006-01-01'),
                 )
         l = ProductionLoader(productionAggregator=p)
         interval = l._recomputationInterval([
@@ -147,8 +160,8 @@ class ProductionLoaderTest(unittest.TestCase):
     @unittest.skip("Failing case!!")
     def test_getRecomputationInterval_withRemaindersSameTarget_takesLater(self):
         p = ProductionAggregatorMockUp(
-                first=localisodate('2000-01-01'),
-                last=localisodate('2006-01-01'),
+                first=isodate('2000-01-01'),
+                last=isodate('2006-01-01'),
                 )
         l = ProductionLoader(productionAggregator=p)
         interval = l._recomputationInterval([
@@ -159,27 +172,14 @@ class ProductionLoaderTest(unittest.TestCase):
             ('2002-01-01','2006-01-01'),
             interval)
 
-    def setUp(self):
-        self.maxDiff = None
-        self.databasename = 'generationkwh_test'
-        
-        c = pymongo.Connection()
-        c.drop_database(self.databasename)
-        self.db = c[self.databasename]
-        
-    def tearDown(self):
-        c = pymongo.Connection()
-        c.drop_database('generationkwh_test')
-
-
     def test_appendRightsPerShare_singleDay(self):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([])
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
         l._appendRightsPerShare(
             nshares=1,
-            firstDateToCompute=localisodate('2015-08-16'),
-            lastDateToCompute=localisodate('2015-08-16'),
+            firstDateToCompute=isodate('2015-08-16'),
+            lastDateToCompute=isodate('2015-08-16'),
             lastRemainder=0,
             production=numpy.array(+10*[0]+[1000]+14*[0]),
             plantshares=numpy.array(25*[1]),
@@ -199,8 +199,8 @@ class ProductionLoaderTest(unittest.TestCase):
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
         l._appendRightsPerShare(
             nshares=1,
-            firstDateToCompute=localisodate('2015-08-16'),
-            lastDateToCompute=localisodate('2015-08-16'),
+            firstDateToCompute=isodate('2015-08-16'),
+            lastDateToCompute=isodate('2015-08-16'),
             lastRemainder=0,
             production=numpy.array(+10*[0]+[20000]+14*[0]),
             plantshares=numpy.array(25*[4]), # here
@@ -220,8 +220,8 @@ class ProductionLoaderTest(unittest.TestCase):
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
         l._appendRightsPerShare(
             nshares=2, # here
-            firstDateToCompute=localisodate('2015-08-16'),
-            lastDateToCompute=localisodate('2015-08-16'),
+            firstDateToCompute=isodate('2015-08-16'),
+            lastDateToCompute=isodate('2015-08-16'),
             lastRemainder=0,
             production=numpy.array(+10*[0]+[1000]+14*[0]),
             plantshares=numpy.array(25*[1]),
@@ -241,8 +241,8 @@ class ProductionLoaderTest(unittest.TestCase):
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
         l._appendRightsPerShare(
             nshares=1,
-            firstDateToCompute=localisodate('2015-08-16'),
-            lastDateToCompute=localisodate('2015-08-16'),
+            firstDateToCompute=isodate('2015-08-16'),
+            lastDateToCompute=isodate('2015-08-16'),
             lastRemainder=0,
             production=numpy.array(100*[0]+10*[0]+[1000]+14*[0]),
             plantshares=numpy.array(100*[0]+25*[1]),
@@ -261,30 +261,32 @@ class ProductionLoaderTest(unittest.TestCase):
         with self.assertRaises(AssertionError) as ctx:
             l._appendRightsPerShare(
                 nshares=1,
-                firstDateToCompute=localisodate('2015-08-16').date(),
-                lastDateToCompute=localisodate('2015-08-16'),
+                firstDateToCompute=localisodate('2015-08-16'), # here
+                lastDateToCompute=isodate('2015-08-16'),
                 lastRemainder=0,
                 production=numpy.array(25*[1]),
                 plantshares=numpy.array(25*[1]),
                 )
         # also non CEST/CET, and naive, using assertLocalDateTime
         self.assertEqual(ctx.exception.args[0],
-            "firstDateToCompute should be a datetime")
+            "firstDateToCompute should be a datetime.date but it is "
+            "2015-08-16 00:00:00+02:00")
 
     def test_appendRightsPerShare_lastDateToCompute_isProtected(self):
         l = ProductionLoader()
         with self.assertRaises(AssertionError) as ctx:
             l._appendRightsPerShare(
                 nshares=1,
-                firstDateToCompute=localisodate('2015-08-16'),
-                lastDateToCompute=localisodate('2015-08-16').date(), # here
+                firstDateToCompute=isodate('2015-08-16'),
+                lastDateToCompute=localisodate('2015-08-16'), # here
                 lastRemainder=0,
                 production=numpy.array(25*[1]),
                 plantshares=numpy.array(25*[1]),
                 )
         # also non CEST/CET, and naive, using assertLocalDateTime
         self.assertEqual(ctx.exception.args[0],
-            "lastDateToCompute should be a datetime")
+            "lastDateToCompute should be a datetime.date but it is "
+            "2015-08-16 00:00:00+02:00")
 
     def test_appendRightsPerShare_tooSmallProductionArray(self):
         rights = RightsPerShare(self.db)
@@ -293,8 +295,8 @@ class ProductionLoaderTest(unittest.TestCase):
         with self.assertRaises(AssertionError) as ctx:
             l._appendRightsPerShare(
                 nshares=1,
-                firstDateToCompute=localisodate('2015-08-16'),
-                lastDateToCompute=localisodate('2015-08-17'),
+                firstDateToCompute=isodate('2015-08-16'),
+                lastDateToCompute=isodate('2015-08-17'),
                 lastRemainder=0,
                 production=numpy.array(49*[1]),
                 plantshares=numpy.array(50*[1]),
@@ -309,8 +311,8 @@ class ProductionLoaderTest(unittest.TestCase):
         with self.assertRaises(AssertionError) as ctx:
             l._appendRightsPerShare(
                 nshares=1,
-                firstDateToCompute=localisodate('2015-08-16'),
-                lastDateToCompute=localisodate('2015-08-17'),
+                firstDateToCompute=isodate('2015-08-16'),
+                lastDateToCompute=isodate('2015-08-17'),
                 lastRemainder=0,
                 production=numpy.array(50*[1]),
                 plantshares=numpy.array(49*[1]),
@@ -325,8 +327,8 @@ class ProductionLoaderTest(unittest.TestCase):
         with self.assertRaises(AssertionError) as ctx:
             l._appendRightsPerShare(
                 nshares=1,
-                firstDateToCompute=localisodate('2015-08-16'),
-                lastDateToCompute=localisodate('2015-08-15'),
+                firstDateToCompute=isodate('2015-08-16'),
+                lastDateToCompute=isodate('2015-08-15'),
                 lastRemainder=0,
                 production=numpy.array(50*[1]),
                 plantshares=numpy.array(50*[1]),
@@ -340,8 +342,8 @@ class ProductionLoaderTest(unittest.TestCase):
             (1, isodate('2015-08-16'), 0),
             ])
         production = ProductionAggregatorMockUp(
-                first=localisodate('2015-08-16'),
-                last=localisodate('2015-08-16'),
+                first=isodate('2015-08-16'),
+                last=isodate('2015-08-16'),
                 data=numpy.array(+10*[0]+[1000]+14*[0]))
         plantShare = PlantShareCurverMockup(
                 data=numpy.array(25*[1]))
@@ -365,8 +367,8 @@ class ProductionLoaderTest(unittest.TestCase):
             (1, isodate('2015-08-16'), 0),
             ])
         production = ProductionAggregatorMockUp(
-                first=localisodate('2015-08-16'),
-                last=localisodate('2015-08-16'),
+                first=isodate('2015-08-16'),
+                last=isodate('2015-08-16'),
                 data=numpy.array(+10*[0]+[20000]+14*[0]))
         plantShare = PlantShareCurverMockup(
                 data=numpy.array(25*[4]))
@@ -391,8 +393,8 @@ class ProductionLoaderTest(unittest.TestCase):
             (2, isodate('2015-08-16'), 0),
             ])
         production = ProductionAggregatorMockUp(
-                first=localisodate('2015-08-16'),
-                last=localisodate('2015-08-16'),
+                first=isodate('2015-08-16'),
+                last=isodate('2015-08-16'),
                 data=numpy.array(+10*[0]+[1000]+14*[0]))
         plantShare = PlantShareCurverMockup(
                 data=numpy.array(25*[1]))
@@ -417,8 +419,8 @@ class ProductionLoaderTest(unittest.TestCase):
             (1, isodate('2015-08-16'), 0),
             ])
         production = ProductionAggregatorMockUp(
-                first=localisodate('2015-08-16'),
-                last=localisodate('2015-08-16'),
+                first=isodate('2015-08-16'),
+                last=isodate('2015-08-16'),
                 data=numpy.array(100*[0]+10*[0]+[1000]+14*[0]))
         plantShare = PlantShareCurverMockup(
                 data=numpy.array(100*[0]+25*[1]))
