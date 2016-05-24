@@ -368,22 +368,22 @@ class GenerationkWhDealer(osv.osv):
 
         fare, period = self.get_fare_name_by_id(cursor, uid, fare_id, period_id)
 
+        partner2member = dict(self.get_members_by_partners(cursor, uid, [partner_id], context=context))
+        try:
+            member_id = partner2member[partner_id]
+        except KeyError:
+            return 0
+
         txt = (u'{kwh} Generation kwh of member {member} to {contract} '
                u'for period {period} between {start} and {end}').format(
              contract=contract_id,
              period=period,
              start=first_date,
              end=last_date,
-             member=partner_id,
+             member=member_id,
              kwh=kwh
         )
         logger.notifyChannel('gkwh_dealer REFUND', netsvc.LOG_INFO, txt)
-
-        partner2member = dict(self.get_members_by_partners(cursor, uid, [partner_id], context=context))
-        try:
-            member_id = partner2member[partner_id]
-        except KeyError:
-            return 0
 
         dealer = self._createDealer(cursor, uid, context)
         res = dealer.refund_kwh(
