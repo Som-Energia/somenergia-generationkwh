@@ -31,8 +31,8 @@ class LocalTime_Test(unittest.TestCase):
 
     def test_localTime_fullyWinter(self):
         self.assertEqual(
-            str(localTime("2016-01-01 02:00:00")),
-            "2016-01-01 02:00:00+01:00")
+            str(localTime("2016-01-01 02:10:00")),
+            "2016-01-01 02:10:00+01:00")
 
     def test_localTime_badTz_ignored(self):
         self.assertEqual(
