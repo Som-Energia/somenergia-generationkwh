@@ -21,7 +21,7 @@ def _sqlfromfile(sqlname):
     from tools import config
     import os
     sqlfile = os.path.join(
-        config['addons_path'], 'generationkwh_api',
+        config['addons_path'], 'som_generationkwh',
             'sql', sqlname+'.sql')
     with open(sqlfile) as f:
         return f.read()

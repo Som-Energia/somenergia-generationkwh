@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import generationkwh_api
+import som_generationkwh
 import giscedata_facturacio
 import giscedata_polissa
 import somenergia_soci
