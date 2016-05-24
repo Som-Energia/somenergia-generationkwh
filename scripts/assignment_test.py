@@ -505,33 +505,33 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.ownerContracts[0], self.member_manyAsPayerAndManyAsOwner),
             (self.ownerContracts[1], self.member_manyAsPayerAndManyAsOwner),
             ])
-    def test_isActive_noActiveContracts(self):
-        result = self.Assignment.isActive(99999999)
+    def test_anyForContract_noActiveContracts(self):
+        result = self.Assignment.anyForContract(99999999)
         self.assertEqual(result,False)
     
-    def test_isActive_ActiveOtherContract(self):
+    def test_anyForContract_ActiveOtherContract(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
             ])
-        result = self.Assignment.isActive(99999999)
+        result = self.Assignment.anyForContract(99999999)
         self.assertEqual(result,False)
 
-    def test_isActive_ActiveOneContract(self):
+    def test_anyForContract_ActiveOneContract(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
             ])
-        result = self.Assignment.isActive(self.contract)
+        result = self.Assignment.anyForContract(self.contract)
         self.assertEqual(result,True)
 
-    def test_isActive_ExpiredContract(self):
+    def test_anyForContract_ExpiredContract(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
             ])
         self.Assignment.expire(self.contract,self.member)
-        result = self.Assignment.isActive(self.contract)
+        result = self.Assignment.anyForContract(self.contract)
         self.assertEqual(result,False)
         
-    def test_isActive_ExpiredAndActiveContract(self):
+    def test_anyForContract_ExpiredAndActiveContract(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
             ])
@@ -540,25 +540,25 @@ class AssignmentProvider_Test(unittest.TestCase):
             'member_id':self.member,
             'priority': 1
             })
-        result = self.Assignment.isActive(self.contract)
+        result = self.Assignment.anyForContract(self.contract)
         self.assertEqual(result,True)
 
-    def test_isActive_OtherExpiredActiveContract(self):
+    def test_anyForContract_OtherExpiredActiveContract(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
             (self.contract2, self.member2, 1),
             ])
         self.Assignment.expire(self.contract,self.member)
-        result = self.Assignment.isActive(self.contract2)
+        result = self.Assignment.anyForContract(self.contract2)
         self.assertEqual(result,True)
         
-    def test_isActive_OtherActiveExpiredContract(self):
+    def test_anyForContract_OtherActiveExpiredContract(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
             (self.contract2, self.member2, 1),
             ])
         self.Assignment.expire(self.contract,self.member)
-        result = self.Assignment.isActive(self.contract)
+        result = self.Assignment.anyForContract(self.contract)
         self.assertEqual(result,False)
 
 if __name__ == '__main__':

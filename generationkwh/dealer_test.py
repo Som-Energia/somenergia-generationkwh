@@ -12,7 +12,7 @@ class AssignmentsMockup(object):
     def contractSources(self, contract_id):
         return self._assignments
 
-    def isActive(self, contract_id):
+    def anyForContract(self, contract_id):
         return not not self._assignments
 
 

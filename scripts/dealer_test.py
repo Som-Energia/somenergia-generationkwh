@@ -29,42 +29,42 @@ class Dealer_test(unittest.TestCase):
         result = self.helper.dealer_is_active(contract, first, last)
         self.assertEqual(result,expectation)
 
-    def _test_isActive_withBadContract(self):
+    def _test__is_active__withBadContract(self):
         self.assertContractActive(False,
             999999999,'2016-08-15','2016-08-15')
     
-    def test_isActive_withoutAssignments(self):
+    def test__is_active__withoutAssignments(self):
         self.assertContractActive(False,
             self.contract,'2016-08-15','2016-08-15')
 
-    def test_isActive_withAssignments_andActiveInvestments(self):
+    def test__is_active__withAssignments_andActiveInvestments(self):
         self.c.GenerationkwhInvestment.create_from_accounting(self.member,None,None,1,None)
         self.c.GenerationkwhAssignment.create(
             dict(contract_id=self.contract, member_id=self.member, priority=1))
         self.assertContractActive(True,
             self.contract,'2016-08-15','2016-08-15')
 
-    def test_isActive_withAssignments_butNoInvestments(self):
+    def test__is_active__withAssignments_butNoInvestments(self):
         self.c.GenerationkwhAssignment.create(
             dict(contract_id=self.contract, member_id=self.member, priority=1))
         self.assertContractActive(False,
             self.contract,'2016-08-15','2016-08-15')
 
-    def test_isActive_withAssignments_andIneffectiveInvestments(self):
+    def test__is_active__withAssignments_andIneffectiveInvestments(self):
         self.c.GenerationkwhInvestment.create_from_accounting(self.member,None,None,None,None)
         self.c.GenerationkwhAssignment.create(
             dict(contract_id=self.contract, member_id=self.member, priority=1))
         self.assertContractActive(False,
             self.contract,'2016-08-15','2016-08-15')
 
-    def test_isActive_withAssignments_andNotYetActiveInvestments(self):
+    def test__is_active__withAssignments_andNotYetActiveInvestments(self):
         self.c.GenerationkwhInvestment.create_from_accounting(self.member,None,None,1,3)
         self.c.GenerationkwhAssignment.create(
             dict(contract_id=self.contract, member_id=self.member, priority=1))
         self.assertContractActive(False,
             self.contract,'2014-08-15','2014-08-15')
 
-    def test_isActive_withAssignments_andExpiredInvestments(self):
+    def test__is_active__withAssignments_andExpiredInvestments(self):
         self.c.GenerationkwhInvestment.create_from_accounting(self.member,None,None,1,1)
         self.c.GenerationkwhAssignment.create(
             dict(contract_id=self.contract, member_id=self.member, priority=1))

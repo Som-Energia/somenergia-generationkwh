@@ -21,7 +21,7 @@ class Dealer(object):
             during the period"""
         assertDateOrNone('first_date', first_date)
         assertDateOrNone('last_date', last_date)
-        if not self._assignments.isActive(contract_id):
+        if not self._assignments.anyForContract(contract_id):
             return False
 
         for assigment in self._assignments.contractSources(contract_id):

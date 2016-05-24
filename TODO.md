@@ -3,23 +3,15 @@
 ## Inmediate TODO's
 
 
-- Cas: Factura contracte amb assignacions de membres que no tenen inversions effectives, no hauria de sortir linia generation
 - Include the member code into the mail template for default assignment
-+ Assignment: Wizard per canviar flag active des del tree [gisce]
-+ Annual use (see card board)
-+ Invoice visual design implementation [gisce]
-+ Compose default assignation mail
-+ Mako implementation for default assignation mail
 - Assignment: Send an activation mail explaining default assignment
+- Member flag: whether the default assigment mail has been sent
+    + Adding it to the model
+    - Mail Callback sets it
 - Investment: Add list tests for inactivated investment
-+ Rename `generationkwh_api` -> `som_generationkwh`
-+ Rename `plantmeter_api` -> `som_plantmeter`
 - Assignment: update priority overwritting write?? (Low)
 - Investment: Script: create should return the ids of the resulting investments to pass them to the Assignments script
-- Assignment: Script: default should return the created assignments to pass them to the mail creation
-+ Investment: create by member
-+ Investment: properly test active flag
-+ Script to feed testing (and real?) production
+- Assignment: Script: default should return the created assignments to pass them to the mail creation (Investment should be enough)
 - Manual testing scripts
     + Create investments
     + Create assignments
@@ -32,8 +24,6 @@
     - Afegir lectures (a ma)
     - Generar factures (a ma)
     + Show rights and other curves
-+ ProductionLoader tests working again
-+ ProductionLoader use dates
 
 - Init:
     - Setup plants
@@ -48,9 +38,7 @@
     - Create default assignment
     - Send email explaining assignment
 
-- Rename assignment.isActive
-+ Investment: review who uses `active_investments` and consider `effective_for_member` similar implementation
-+ Investment: review dupliation among `create_from_account` and `create_for_member`
++ Rename assignment.isActive -> assignment.anyForContract
 
 - Soci entries are not available until socis script runs and investment creation fails for those (worked around by ignoring them until next run but synchronous soci creation would be better solution)
 - Turn warning on investment creation with no member available into a logged one
@@ -95,6 +83,21 @@
 
 ## DONE
 
++ Investment: review who uses `active_investments` and consider `effective_for_member` similar implementation
++ Investment: review dupliation among `create_from_account` and `create_for_member`
++ Rename `generationkwh_api` -> `som_generationkwh`
++ Rename `plantmeter_api` -> `som_plantmeter`
++ Investment: create by member
++ Investment: properly test active flag
++ Script to feed testing (and real?) production
++ ProductionLoader tests working again
++ ProductionLoader use dates
++ Cas: Factura contracte amb assignacions de membres que no tenen inversions effectives, no hauria de sortir linia generation
++ Assignment: Wizard per canviar flag active des del tree [gisce]
++ Annual use (see card board)
++ Invoice visual design implementation [gisce]
++ Compose default assignation mail
++ Mako implementation for default assignation mail
 + Invoice visual design wireframe
 + Assignment: Script: --all flag for default
 + Investment: test activate and move it from erppeek to erp
