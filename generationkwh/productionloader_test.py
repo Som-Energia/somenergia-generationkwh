@@ -334,7 +334,7 @@ class ProductionLoaderTest(unittest.TestCase):
                 plantshares=numpy.array(50*[1]),
                 )
         self.assertEqual(ctx.exception.args[0],
-            "Empty interval")
+            "Empty interval starting at 2015-08-16 and ending at 2015-08-15")
 
     def test_computeAvailableRights_singleDay(self):
         rights = RightsPerShare(self.db)
