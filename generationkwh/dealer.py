@@ -2,6 +2,7 @@
 
 from dateutil.relativedelta import relativedelta
 import datetime
+from plantmeter.isodates import assertDateOrNone, assertDate
 
 class Dealer(object):
     """ It deals investors Generation kWh use rights to contracts according its
@@ -18,6 +19,8 @@ class Dealer(object):
             contract_id, first_date, last_date):
         """ Returns True if contract_id has generation kwh activated
             during the period"""
+        assertDateOrNone('first_date', first_date)
+        assertDateOrNone('last_date', last_date)
         if not self._assignments.isActive(contract_id):
             return False
 
@@ -40,8 +43,8 @@ class Dealer(object):
             Returns a list of dictionaries each with member_id and kwh
             effectively allocated.
         """
-        assert type(first_date) == datetime.date
-        assert type(last_date) == datetime.date
+        assertDate('first_date', first_date)
+        assertDate('last_date', last_date)
         assert kwh>=0, ("Negative use not allowed")
         seek_start = first_date + relativedelta(years=-1)
         assignments = self._assignments.contractSources(contract_id)
