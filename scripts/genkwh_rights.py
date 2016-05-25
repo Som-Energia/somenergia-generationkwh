@@ -3,9 +3,19 @@ description = """
 Generates rights per shares
 """
 
+import datetime
 import erppeek
 import dbconfig
 from yamlns import namespace as ns
+
+from generationkwh.isodates import isodate
+import numpy as np
+
+def datespan(startDate, endDate, delta=datetime.timedelta(days=1)):
+    currentDate = startDate
+    while currentDate < endDate:
+        yield currentDate
+        currentDate += delta
 
 def parseArgumments():
     import argparse
@@ -54,9 +64,9 @@ def parseArgumments():
             help="number of shares"
             ),
         sub.add_argument(
-            dest='production',
+            dest='rights',
             nargs='*',
-            help="production"
+            help="rights"
             )
     for sub in listactive,:
         sub.add_argument(
@@ -83,22 +93,24 @@ def parseArgumments():
     return parser.parse_args(namespace=ns())
 
 def listactive(nshares=None,start=None,end=None):
-    genkwh_obj = c.GenerationkwhTestHelper
-    for rights,start,date in genkwh_obj.rights_per_share(
-            nshares,
-            start,
-            end):
-        print nshares,start,end
+    genkwh_obj = c.model('generationkwh.testhelper')
+    rights = genkwh_obj.rights_per_share(nshares, start, end)
+    start=isodate(start)
+    end=isodate(end)
+    ndays=(end-start).days+1
+    rights=np.reshape(rights,(ndays,25))
+    dates=datespan(start,end)
+    for _date,_rights in zip(dates,rights):
+        print _date,_rights
 
-def init(production=None,activeshares=None,start=None,ndays=None,nshares=None):
-    production=np.tile(np.array(production), ndays)
-    for nshare in range(nshares):
-        rights_per_share=production*nshares/activeshares
-        c.GenerationkwhTesthelper.setup_rights_per_share(
-            nshare, start, rights_per_share.tolist())
+def init(rights=None,activeshares=None,start=None,ndays=None,nshares=None):
+    rights=[int(r) for r in rights]
+    rights=np.tile(np.array(rights), ndays)
+    c.GenerationkwhTesthelper.setup_rights_per_share(
+        nshares, start, rights.tolist())
 
 def clear():
-    genkwh_obj = c.GenerationkwhTestHelper
+    genkwh_obj = c.model('generationkwh.testhelper')
     genkwh_obj.clear_mongo_collections(['rightspershare'])
  
 c = erppeek.Client(**dbconfig.erppeek)
