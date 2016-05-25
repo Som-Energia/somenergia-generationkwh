@@ -143,6 +143,32 @@ class Remainder_Test(unittest.TestCase):
             (6,'2016-02-25',0),
             ])
 
+    def assertFilledEqual(self, expectation):
+        result = self.Remainder.filled()
+        self.assertEqual(expectation, result)
+
+    def test_filled_oneReminder_returnsNothing(self):
+        self.setupProvider([
+            (1,'2016-02-25',3),
+            ])
+        self.assertFilledEqual([
+            ])
+
+    def test_filled_twoReminder_thatReminder(self):
+        self.setupProvider([
+            (1,'2016-02-25',3),
+            (1,'2016-02-26',2),
+            ])
+        self.assertFilledEqual([1])
+
+    def test_filled_twoReminder_differentNShares(self):
+        self.setupProvider([
+            (1,'2016-02-25',3),
+            (2,'2016-02-25',3),
+            ])
+        self.assertFilledEqual([])
+
+
 if __name__ == '__main__':
     unittest.main()
 
