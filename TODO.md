@@ -3,6 +3,29 @@
 ## Inmediate TODO's
 
 
+
+
+- Posar un flag a les factures per detectar ràpidament que es generation i que es vegi a la llista de factures, i poder-les filtrar.
+- Al soci de GkWh: posar un flag "Mail ass. per defecte enviat" per quan enviem els correus amb l'assignació per defecte.
+- En el wizard que crees una nova assignació en una fitxa de soci, el membre per defecte que d'aparèixer és el soci en qüestió i que aquest no es pugui canviar.
+- A Inversions de GKWH: Posar un flag " Assignacions per defecte" on es posi true o false per saber si ja li hem generat les assignacions. --> No cal!!! ja que quan intentem fer una assignació per defecte de les inversions d'un soci, si aquesta ja té "Mail ass. per defecte enviat" = True, no farem re llavors.
+
+- Mail assignaciosn per defecte: incluoure el número de soci/DNI/nom sencer/id de tal manera que el podem detectar rapidament per la gestió
+- Mail assignacions per defecte: Pujar-lo a producció i veure que funciona correctament
+- Donar permisos de genertion a tots els usuaris de l'ERP
+- Reflexionar si necessitem el "expeiration date" a les assignacions, o senzillament les eliminem. Això si, si les eliminem ha de quedar registrat en el historial de generation kWh del soci en qüestió.
+- Quan modifiquem una assignació, que quedi registrat a l'historial del generation.
+- Quan s'escrigui al generation del soci, sempre lo més nou és el que s'escriu primer.
+- Assignacions des de la llista general: si faig una nova asisgnació, que només apareguin socis amb drets de generation kWh.
+- Traduir el modul Assigment, està tot en anglés.
+- Creació assignacions des de inversions. Fer un wizard/acció (que tingui en compte si ja s'ha fet l'assignació per defecte en aquell soci)
+- Fer que les inversions es crein directe des de la pàgina web
+- Canvia el nom de la llista "Informació GKWH del soci" per "Socis amb generation kWh"
+- Reflexionar quan enviar el mail d'assignacions, per exemple onze mesos després de la primera inversió.
+- En la pestanya de generation kWh posa "precisio" i ha de posar "previsió"
+
+
+
 - Include the member code into the mail template for default assignment
 - Member flag: whether the default assigment mail has been sent
     + Adding it to the model [gisce]

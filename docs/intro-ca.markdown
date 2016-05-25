@@ -7,18 +7,17 @@
 donar-te dret a un interés et dona dret a consumir els
 kWh que produeixen les plantes a preu de cost.
 
-- Detalls:
-	- El preu de cost és més barat; no pateix la bufada de la subasta del mercat elèctric
+- Sobre els preus de l'energia:
+	- Aquest preu dels kWh Generation es fixarà cada any a l'assemblea segons els costos reals de manteniment que preveiem
+	- És un preu que normalment és més barat; no pateix la bufada de la subasta del mercat elèctric
     - TODO: Quina es la diferència estimada:
-        - impacte en el preu sense peatges,
-        - impacte en el preu de la energia,
-        - impacte a una factura mitjana
-	- Aquest preu es fixarà cada any a l'assemblea segons els costos reals de manteniment que preveiem
-
+        - impacte en el preu sense peatges (de mercat),
+        - impacte en el preu de la part d'energia (amb peatges),
+        - impacte a una factura amb consum i potència típiques
 
 ## Com funciona la inversió
 
-- És una inversió a 25 anys, un any de carència i 24 efectius.
+- És una inversió a 25 anys: un any de carència i 24 efectius.
 - El primer any de carència serveix per donar temps a que es construeixin plantes noves amb aquests diners.
 - Passat l'any de carència, es comencen a generar drets a kWh
 - També passat aquest any de carència es comença a tornar el prèstec (la veinticuatrena part cada any, sense interessos)
@@ -54,6 +53,13 @@ TODO: ficar pantalladas
 ## Com veig les assignacións a l'ERP
 
 TODO: ficar pantallades
+
+## Cosetes que ens trobarem
+
+- En esborrar una factura i tornar-la a generar, hi ha una petita possibilitat que l 'import no coincideixi si els kWh Generation disponibles son diferents, p entremig altres contractes assignats pel soci fan factures.
+- Els kWh s'agafen al mateix període que es produeixen, és normal que un contracte 2.0DH no tingui generation a P2 mentres tinguem nomes fotovoltaica.
+
+
 
 
 
