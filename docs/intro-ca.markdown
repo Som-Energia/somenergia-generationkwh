@@ -9,6 +9,10 @@ kWh que produeixen les plantes a preu de cost.
 
 - Detalls:
 	- El preu de cost és més barat; no pateix la bufada de la subasta del mercat elèctric
+    - TODO: Quina es la diferència estimada:
+        - impacte en el preu sense peatges,
+        - impacte en el preu de la energia,
+        - impacte a una factura mitjana
 	- Aquest preu es fixarà cada any a l'assemblea segons els costos reals de manteniment que preveiem
 
 
