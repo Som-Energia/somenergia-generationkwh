@@ -32,12 +32,15 @@ class Remainder_Mockup(object):
     def lastRemainders(self):
         return self._remainders
 
+    def filled(self):
+        return [nsh for nsh, date, rem in self._remainders]
 
     def init(self, nshares):
         self._initedNShares |= set(nshares)
 
     def initedRemainders(self):
         return self._initedNShares
+
 
 
 class MemberRightsCurve_Test(unittest.TestCase):

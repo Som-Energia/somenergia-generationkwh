@@ -56,22 +56,23 @@ class MemberRightsCurve(object):
 
         shares = self._activeShares.hourly(start, end, member)
         choiceset = list(sorted(set(shares)))
-        remainders = set([
-            nshares
-            for nshares, date, wh
-            in self._remainders.lastRemainders()
-            ])
+        filledRemainders = set(self._remainders.filled())
         choices = [
             None
             if nshares not in choiceset else
             self._rightsPerShare.rightsPerShare(nshares, start, end)
-            if nshares in remainders else
+            if nshares in filledRemainders else
             self._rightsPerShare.rightsPerShare(1, start, end) * nshares
             for nshares in xrange(max(choiceset)+1)
             ]
+        initedRemainders = set([
+            nshares
+            for nshares, date, wh
+            in self._remainders.lastRemainders()
+            ])
         self._remainders.init([
             n for n in choiceset
-            if n not in remainders
+            if n not in initedRemainders
             ])
         return numpy.choose(shares, choices)
 
