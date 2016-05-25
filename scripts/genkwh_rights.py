@@ -36,13 +36,6 @@ def parseArgumments():
         )
     for sub in init,:
         sub.add_argument(
-            '--activeshares',
-            dest='activeshares',
-            type=int,
-            metavar='ACTIVESHARES',
-            help="number of active shares"
-            ),
-        sub.add_argument(
             '--start',
             dest='start',
             type=str,
@@ -103,7 +96,7 @@ def listactive(nshares=None,start=None,end=None):
     for _date,_rights in zip(dates,rights):
         print _date,_rights
 
-def init(rights=None,activeshares=None,start=None,ndays=None,nshares=None):
+def init(rights=None,start=None,ndays=None,nshares=None):
     rights=[int(r) for r in rights]
     rights=np.tile(np.array(rights), ndays)
     c.GenerationkwhTesthelper.setup_rights_per_share(
