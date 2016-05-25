@@ -11,6 +11,7 @@ class Dealer_test(unittest.TestCase):
         import dbconfig
         self.c = erppeek.Client(**dbconfig.erppeek)
         self.helper = self.c.GenerationkwhTesthelper
+        self.DealerApi = self.c.GenerationkwhDealer
         self.clearData()
         self.contract, self.contract2 = self.c.GiscedataPolissa.search([], limit=2)
         self.member = 1 # has 25 shares at the first investment wave
@@ -27,6 +28,8 @@ class Dealer_test(unittest.TestCase):
     
     def assertContractActive(self, expectation, contract, first, last):
         result = self.helper.dealer_is_active(contract, first, last)
+        self.assertEqual(result,expectation)
+        result = self.DealerApi.is_active(contract, first, last)
         self.assertEqual(result,expectation)
 
     def _test__is_active__withBadContract(self):
