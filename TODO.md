@@ -5,8 +5,8 @@
 
 - Include the member code into the mail template for default assignment
 - Member flag: whether the default assigment mail has been sent
-    + Adding it to the model
-    - Mail Callback sets it
+    + Adding it to the model [gisce]
+    - Mail Callback sets it [gisce]
 - Investment: Add list tests for inactivated investment
 - Assignment: update priority overwritting write?? (Low)
 - Investment: Script: create should return the ids of the resulting investments to pass them to the Assignments script
