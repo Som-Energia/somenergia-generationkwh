@@ -7,6 +7,7 @@ import datetime
 import erppeek
 import dbconfig
 from yamlns import namespace as ns
+from sequence import sequence
 
 from generationkwh.isodates import isodate
 import numpy as np
@@ -34,14 +35,32 @@ def parseArgumments():
     clear = subparsers.add_parser('clear',
         help="clear rights per share",
         )
-    for sub in init,:
+    for sub in init, listactive,:
+        sub.add_argument(
+            '--nshares',
+            dest='nshares',
+            type=sequence,
+            metavar='NSHARES',
+            required=True,
+            help="number of shares"
+            ),
         sub.add_argument(
             '--start',
             dest='start',
             type=str,
             metavar='START',
+            required=True,
             help="start date"
             ),
+    for sub in listactive,:
+        sub.add_argument(
+            '--end',
+            dest='end',
+            type=str,
+            metavar='END',
+            help="end date"
+            )
+    for sub in init,:
         sub.add_argument(
             '--ndays',
             dest='ndays',
@@ -50,38 +69,9 @@ def parseArgumments():
             help="number of days"
             ),
         sub.add_argument(
-            '--nshares',
-            dest='nshares',
-            type=int,
-            metavar='NSHARES',
-            help="number of shares"
-            ),
-        sub.add_argument(
             dest='rights',
-            nargs='*',
+            nargs='+',
             help="rights"
-            )
-    for sub in listactive,:
-        sub.add_argument(
-            '--nshares',
-            dest='nshares',
-            type=int,
-            metavar='NSHARES',
-            help="number of shares"
-            ),
-        sub.add_argument(
-            '--start',
-            dest='start',
-            type=str,
-            metavar='START',
-            help="start date"
-            ),
-        sub.add_argument(
-            '--end',
-            dest='end',
-            type=str,
-            metavar='END',
-            help="end date"
             )
     return parser.parse_args(namespace=ns())
 
