@@ -4,7 +4,6 @@
 
 
 - Include the member code into the mail template for default assignment
-- Assignment: Send an activation mail explaining default assignment
 - Member flag: whether the default assigment mail has been sent
     + Adding it to the model
     - Mail Callback sets it
@@ -40,7 +39,7 @@
 
 + Rename assignment.isActive -> assignment.anyForContract
 
-- Soci entries are not available until socis script runs and investment creation fails for those (worked around by ignoring them until next run but synchronous soci creation would be better solution)
+- Soci entries are not available until socis script runs. Consequence: investment creation fails for those members (worked around by ignoring them until next run but synchronous soci creation would be better solution)
 - Turn warning on investment creation with no member available into a logged one
 
 
@@ -53,7 +52,7 @@
 - Investment: ondelete -> member
 - Investment: Janitoring: mode lines without partner
 - Investment: Janitoring: mode lines without dates
-- Investment: negative move line: activation date should be the same or inmediate?
++ Investment: negative move line: activation date should be the same or inmediate? -> They are deactivated by hand
 - Investment: constant for the account root for generationkwh accounts
 - Investment: constant for the number of digits for the soci code in accounts
     - Can be found at `ir_secuence.code="socis"`
