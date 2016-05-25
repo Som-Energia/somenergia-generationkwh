@@ -54,10 +54,11 @@ TODO: ficar pantalladas
 
 TODO: ficar pantallades
 
-## Cosetes que ens trobarem
+## Cosetes extranyes/noves que ens trobarem
 
-- En esborrar una factura i tornar-la a generar, hi ha una petita possibilitat que l 'import no coincideixi si els kWh Generation disponibles son diferents, p entremig altres contractes assignats pel soci fan factures.
-- Els kWh s'agafen al mateix període que es produeixen, és normal que un contracte 2.0DH no tingui generation a P2 mentres tinguem nomes fotovoltaica.
+- Els kwh Gkwh que entren en una factura depenen de la disponibilitat dels drets, una mateixa factura Gkwh pot tenir diversos imports si es torna a generar
+- Els esborranys de factura reserven drets, intenteu no deixar-ne factures en esborrany penjades
+- Els kWh s'agafen al mateix període que es produeixen, per exemple, és normal que un contracte 2.0DH no tingui generation a P2 mentres tinguem nomes fotovoltaica.
 
 
 
