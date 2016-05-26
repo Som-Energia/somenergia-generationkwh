@@ -35,7 +35,7 @@ def parseArgumments():
         help="clear investments objects",
         )
 
-    for sub in default, expire, assign:
+    for sub in default, expire, assign, list,:
         sub.add_argument(
             '-p','--partner',
             dest='idmode',
@@ -69,10 +69,24 @@ def parseArgumments():
             action='store_true',
             help='apply it to all members with investments',
             )
+    for sub in default,list,:
         sub.add_argument(
             dest='members',
+            type=int,
             nargs='*',
             help='investors of Generation-kWh (see --partner and --number)',
+            )
+    for sub in default,:
+        sub.add_argument(
+            '--before',
+            type=isodate,
+            metavar='YYYY-MM-DD',
+            help='filter investments not effective before the indicated ISO format date',
+            )
+        sub.add_argument(
+            '--mail',
+            action='store_true',
+            help='send notification email',
             )
     for sub in expire, assign,:
         sub.add_argument(
@@ -95,11 +109,11 @@ def parseArgumments():
 
     return parser.parse_args(namespace=ns())
 
-def preprocessMembers(members=None,idmode=None, all=None):
+def preprocessMembers(members=None,idmode=None, all=None, before=None):
     """Turns members in which ever format to the ones required by commands"""
 
-    if all:
-        return c.GenerationkwhAssignment.unassignedInvestors()
+    if all or before:
+        return c.GenerationkwhAssignment.unassignedInvestors(before and str(before))
 
     if idmode=="partner":
         idmap = dict(c.GenerationkwhDealer.get_members_by_partners(members))
@@ -124,10 +138,17 @@ def preprocessContracts(contracts=None,contractMode=None):
 def clear(**args):
     c.GenerationkwhAssignment.dropAll()
 
-def list(csv=False,**args):
+def list(csv=False,members=None,idmode=None,**args):
     """
         List existing assignments.
     """
+    members=preprocessMembers(members, idmode)
+    assigments = []
+    if members:
+        assigments = c.GenerationkwhAssignment.search(
+            [ ('member_id', 'in', members) ],)
+        if not assigments: assigments = [-1]
+
     def buildcsv(data):
         return u''.join((
             u"\t".join((
@@ -150,7 +171,7 @@ def list(csv=False,**args):
             r['contract_id'][1],
             r['member_id'][1],
             r['end_date']
-        ) for r in c.GenerationkwhAssignment.read([],[
+        ) for r in c.GenerationkwhAssignment.read(assigments,[
             'member_id',
             'contract_id',
             'priority',
@@ -176,11 +197,17 @@ def default(
         force=False,
         idmode=None,
         all=None,
+        mail=False,
+        before=None,
         **_):
-    members=preprocessMembers(members, idmode, all)
+    members=preprocessMembers(members, idmode, all, before)
     step("Generating default assignments for members: {}".format(
         ','.join(str(i) for i in members)))
     c.GenerationkwhAssignment.createDefaultForMembers(members)
+    if mail:
+        step("Sending notification mails for members: {}".format(
+            ','.join(str(i) for i in members)))
+        c.GenerationkwhAssignment.notifyAssigmnentByMail(members)
     success("Done.")
 
 def assign(member=None,contract=None,priority=None, idmode=None):

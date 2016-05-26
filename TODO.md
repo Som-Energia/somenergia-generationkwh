@@ -2,7 +2,7 @@
 
 ## Inmediate TODO's
 
-- Assignments Script: `--effectiveat date` filters out members with no investment effective that date
+- Assignments Script: `--until date` filters out members with no investment effective that date
 - Assignments Script: filter members with 'mail already sent' flag, unles `--insist` flag is enabled
 - Assignments Script: filter members already with assignments unless `--force` option
 - Assignments Script: `--mail` sends mail option
@@ -23,7 +23,7 @@
     - Afegir lectures (a ma)
     - Generar factures (a ma)
     + Show rights and other curves
-
+- Testing invocing
 - Init:
     - Setup plants
     - First remainder

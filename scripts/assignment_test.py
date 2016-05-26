@@ -561,6 +561,10 @@ class AssignmentProvider_Test(unittest.TestCase):
         result = self.Assignment.anyForContract(self.contract)
         self.assertEqual(result,False)
 
+
+
+
+
 if __name__ == '__main__':
     unittest.main()
 
