@@ -2,46 +2,23 @@
 
 ## Inmediate TODO's
 
-
-
-
-- Posar un flag a les factures per detectar ràpidament que es generation i que es vegi a la llista de factures, i poder-les filtrar.
-- Al soci de GkWh: posar un flag "Mail ass. per defecte enviat" per quan enviem els correus amb l'assignació per defecte.
-- En el wizard que crees una nova assignació en una fitxa de soci, el membre per defecte que d'aparèixer és el soci en qüestió i que aquest no es pugui canviar.
-- A Inversions de GKWH: Posar un flag " Assignacions per defecte" on es posi true o false per saber si ja li hem generat les assignacions. --> No cal!!! ja que quan intentem fer una assignació per defecte de les inversions d'un soci, si aquesta ja té "Mail ass. per defecte enviat" = True, no farem re llavors.
-
-- Mail assignaciosn per defecte: incluoure el número de soci/DNI/nom sencer/id de tal manera que el podem detectar rapidament per la gestió
-- Mail assignacions per defecte: Pujar-lo a producció i veure que funciona correctament
-- Donar permisos de genertion a tots els usuaris de l'ERP
-- Reflexionar si necessitem el "expeiration date" a les assignacions, o senzillament les eliminem. Això si, si les eliminem ha de quedar registrat en el historial de generation kWh del soci en qüestió.
-- Quan modifiquem una assignació, que quedi registrat a l'historial del generation.
-- Quan s'escrigui al generation del soci, sempre lo més nou és el que s'escriu primer.
-- Assignacions des de la llista general: si faig una nova asisgnació, que només apareguin socis amb drets de generation kWh.
-- Traduir el modul Assigment, està tot en anglés.
-- Creació assignacions des de inversions. Fer un wizard/acció (que tingui en compte si ja s'ha fet l'assignació per defecte en aquell soci)
-- Fer que les inversions es crein directe des de la pàgina web
-- Canvia el nom de la llista "Informació GKWH del soci" per "Socis amb generation kWh"
-- Reflexionar quan enviar el mail d'assignacions, per exemple onze mesos després de la primera inversió.
-- En la pestanya de generation kWh posa "precisio" i ha de posar "previsió"
-
-
-
-- Include the member code into the mail template for default assignment
-- Member flag: whether the default assigment mail has been sent
-    + Adding it to the model [gisce]
-    - Mail Callback sets it [gisce]
-- Investment: Add list tests for inactivated investment
-- Assignment: update priority overwritting write?? (Low)
-- Investment: Script: create should return the ids of the resulting investments to pass them to the Assignments script
-- Assignment: Script: default should return the created assignments to pass them to the mail creation (Investment should be enough)
+- Assignments Script: `--effectiveat date` filters out members with no investment effective that date
+- Assignments Script: filter members with 'mail already sent' flag, unles `--insist` flag is enabled
+- Assignments Script: filter members already with assignments unless `--force` option
+- Assignments Script: `--mail` sends mail option
+- Generate the first investment batch at production
+- Accounting: review desinvestments and returned payments on first batch
+- Include the member code into the mail template for default assignment (Wait until investments have effective date in the future)
+- Investment: Add test on list for inactivated investment
+- Assignments: Add test for observations log
 - Manual testing scripts
     + Create investments
     + Create assignments
-    - Init: initial date, 1-shares remainder
-    - Additional init for n-shares remainders
-    - Inject production (without plants)
-        - Flat profile for several days
-        - Clon realistic profile (csv) for several days
+    + Init: initial date, 1-shares remainder
+    + Additional init for n-shares remainders
+    + Inject production (without plants)
+        + Flat profile for several days
+        + Clon realistic profile (csv) for several days
     - Inicialitzar preus per a proves (a ma)
     - Afegir lectures (a ma)
     - Generar factures (a ma)
@@ -52,7 +29,7 @@
     - First remainder
         - Reminder Migration: a reminder for 1-shares curve
         - Reminder Migration: a reminder for known to be used n-shares (optional)
-    - Inicialitzar preus per a proves (a ma)
+    - Inicialitzar preus Genkwh (a ma)
     - Run Nightly script for existing investments
 - Nightly:
     - Create members from partners becoming members, lately
@@ -60,15 +37,14 @@
     - Create default assignment
     - Send email explaining assignment
 
-+ Rename assignment.isActive -> assignment.anyForContract
-
 - Soci entries are not available until socis script runs. Consequence: investment creation fails for those members (worked around by ignoring them until next run but synchronous soci creation would be better solution)
 - Turn warning on investment creation with no member available into a logged one
 
 
 ## Unscheduled TODO's
 
-- Assignment: log in soci observations
+- Modify invoicing mail to warn about having Genkwh active
+- Investment created by webforms and then payment orders are created on them.
 - `genkwh_assigment`default --all: consider active flag and other states
 - Filter invoices by having generation or not
 - ProductionToRightsPerShare naive: Protect againts divby0 when total active actions is zero
@@ -83,7 +59,7 @@
 - Assignment: ondelete -> polissa
 - Assignment: ondelete -> member
 - Make assignation test resilent to changes on contract annual use
-- Assignment: Change priority expires assigments and creates new
+- Assignment: having a log, expiration is no longer needed, just delete instead
 
 
 - BUG: Mongodb erp integration: reconnections do not refresh connection attr
@@ -105,6 +81,22 @@
 
 ## DONE
 
++ Rename assignment.isActive -> assignment.anyForContract
++ Catalan translation of Assignment model strings
++ Default assignment mail: include the member id on subject to easy support tasks when receiving answers
++ Default assignment mail: upload to production and tests
++ Assignment: log modifications into soci observations
++ Access to new models to all ERP users
++ Generation flag column at invoice tree to display whether has generation enabled
++ Member tree: include the 'Default assignment mail sent' flag
++ En el wizard que crees una nova assignació en una fitxa de soci, el membre per defecte que d'aparèixer és el soci en qüestió i que aquest no es pugui canviar.
++ Member flag: whether the default assigment mail has been sent
+    + Adding it to the model [gisce]
+    + Mail Callback sets it [gisce]
++ Quan s'escrigui al generation del soci, sempre lo més nou és el que s'escriu primer.
++ Rename tree "Informació GKWH del soci" to "Socis amb generation kWh"
++ Member Generation tab: "precisio" -> "previsió"
++ Assignment: update priority overwritting write?? -> No, use log
 + Investment: review who uses `active_investments` and consider `effective_for_member` similar implementation
 + Investment: review dupliation among `create_from_account` and `create_for_member`
 + Rename `generationkwh_api` -> `som_generationkwh`
