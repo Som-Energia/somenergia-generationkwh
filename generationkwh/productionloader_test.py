@@ -18,7 +18,7 @@ class ProductionAggregatorMockUp(object):
         self.updateStart = None
         self.updateEnd = None
 
-    def getWh(self, *args):
+    def get_kwh(self, *args):
         return self.data
 
     def getFirstMeasurementDate(self):
@@ -188,7 +188,7 @@ class ProductionLoaderTest(unittest.TestCase):
             isodate('2015-08-16'),
             isodate('2015-08-16'))
         self.assertEqual(list(result),
-            +10*[0]+[1]+14*[0])
+            +10*[0]+[1000]+14*[0])
         self.assertEqual(remainders.lastRemainders(), [
             (1, isodate('2015-08-17'), 0),
             ])
@@ -202,14 +202,14 @@ class ProductionLoaderTest(unittest.TestCase):
             firstDateToCompute=isodate('2015-08-16'),
             lastDateToCompute=isodate('2015-08-16'),
             lastRemainder=0,
-            production=numpy.array(+10*[0]+[20000]+14*[0]),
+            production=numpy.array(+10*[0]+[2000]+14*[0]),
             plantshares=numpy.array(25*[4]), # here
             )
         result = rights.rightsPerShare(1,
             isodate('2015-08-16'),
             isodate('2015-08-16'))
         self.assertEqual(list(result),
-            +10*[0]+[5]+14*[0])
+            +10*[0]+[500]+14*[0])
         self.assertEqual(remainders.lastRemainders(), [
             (1, isodate('2015-08-17'), 0),
             ])
@@ -230,7 +230,7 @@ class ProductionLoaderTest(unittest.TestCase):
             isodate('2015-08-16'),
             isodate('2015-08-16'))
         self.assertEqual(list(result),
-            +10*[0]+[2]+14*[0])
+            +10*[0]+[2000]+14*[0])
         self.assertEqual(remainders.lastRemainders(), [
             (2, isodate('2015-08-17'), 0),
             ])
@@ -251,7 +251,7 @@ class ProductionLoaderTest(unittest.TestCase):
             isodate('2015-08-16'),
             isodate('2015-08-16'))
         self.assertEqual(list(result),
-            +10*[0]+[1]+14*[0])
+            +10*[0]+[1000]+14*[0])
         self.assertEqual(remainders.lastRemainders(), [
             (1, isodate('2015-08-17'), 0),
             ])
@@ -356,7 +356,7 @@ class ProductionLoaderTest(unittest.TestCase):
             isodate('2015-08-16'),
             isodate('2015-08-16'))
         self.assertEqual(list(result),
-            +10*[0]+[1]+14*[0])
+            +10*[0]+[1000]+14*[0])
         self.assertEqual(remainders.lastRemainders(), [
             (1, isodate('2015-08-17'), 0),
             ])
@@ -381,7 +381,7 @@ class ProductionLoaderTest(unittest.TestCase):
             isodate('2015-08-16'),
             isodate('2015-08-16'))
         self.assertEqual(list(result),
-            +10*[0]+[5]+14*[0])
+            +10*[0]+[5000]+14*[0])
         self.assertEqual(remainders.lastRemainders(), [
             (1, isodate('2015-08-17'), 0),
             ])
@@ -395,7 +395,7 @@ class ProductionLoaderTest(unittest.TestCase):
         production = ProductionAggregatorMockUp(
                 first=isodate('2015-08-16'),
                 last=isodate('2015-08-16'),
-                data=numpy.array(+10*[0]+[1000]+14*[0]))
+                data=numpy.array(+10*[0]+[1]+14*[0]))
         plantShare = PlantShareCurverMockup(
                 data=numpy.array(25*[1]))
         l = ProductionLoader(productionAggregator=production,
@@ -433,7 +433,7 @@ class ProductionLoaderTest(unittest.TestCase):
             isodate('2015-08-16'),
             isodate('2015-08-16'))
         self.assertEqual(list(result),
-            +10*[0]+[1]+14*[0])
+            +10*[0]+[1000]+14*[0])
         self.assertEqual(remainders.lastRemainders(), [
             (1, isodate('2015-08-17'), 0),
             ])

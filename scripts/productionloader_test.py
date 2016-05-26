@@ -116,7 +116,7 @@ class ProductionLoader_Test(unittest.TestCase):
 
     def getProduction(self, aggr_id, start, end):
         aggr_obj = self.erp.model('generationkwh.production.aggregator.testhelper')
-        return aggr_obj.getWh(aggr_id, start, end)
+        return aggr_obj.get_kwh(aggr_id, start, end)
 
     def test_retrieveMeasuresFromPlants_withNoPoints(self):
         aggr_id = self.setupAggregator(
@@ -165,7 +165,7 @@ class ProductionLoader_Test(unittest.TestCase):
  
     def getRightsPerShare(self, aggr_id, start, end):
         aggr_obj = self.erp.model('generationkwh.production.aggregator')
-        return aggr_obj.getWh(aggr_id, start, end)
+        return aggr_obj.get_kwh(aggr_id, start, end)
 
     def test_computeAvailableRights_singleDay(self):
         aggr_id = self.setupAggregator(
@@ -182,7 +182,7 @@ class ProductionLoader_Test(unittest.TestCase):
         self.ProductionLoader.computeAvailableRights(aggr_id)
 
         result = self.TestHelper.rights_per_share(1, '2015-08-16', '2015-08-16')
-        self.assertEqual(result, +10*[0]+[1]+14*[0])
+        self.assertEqual(result, +10*[0]+[1000]+14*[0])
         self.assertEqual(remainder.lastRemainders(), [
             [1, '2015-08-17', 0],
             ])
@@ -202,7 +202,7 @@ class ProductionLoader_Test(unittest.TestCase):
         self.ProductionLoader.computeAvailableRights(aggr_id)
 
         result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-16')
-        self.assertEqual(result, +10*[0]+[5]+14*[0])
+        self.assertEqual(result, +10*[0]+[5000]+14*[0])
         self.assertEqual(remainder.lastRemainders(), [
             [1, '2015-08-17', 0],
             ])
@@ -222,7 +222,7 @@ class ProductionLoader_Test(unittest.TestCase):
         self.ProductionLoader.computeAvailableRights(aggr_id)
 
         result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-17')
-        self.assertEqual(result, 2*(10*[0]+[5]+14*[0]))
+        self.assertEqual(result, 2*(10*[0]+[5000]+14*[0]))
         self.assertEqual(remainder.lastRemainders(), [
             [1, '2015-08-18', 0],
             ])

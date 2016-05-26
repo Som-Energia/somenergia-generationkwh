@@ -19,7 +19,7 @@ class ProductionToRightsPerShare_Test(unittest.TestCase):
         nShares,
         expected,
         expectedRemainder=0,
-        remainder = 0,
+        remainder_wh = 0,
         ):
 
         curve = ProductionToRightsPerShare()
@@ -27,7 +27,7 @@ class ProductionToRightsPerShare_Test(unittest.TestCase):
             production=numpy.array(production),
             activeShares = numpy.array(activeShares),
             nshares=nShares,
-            remainder = remainder,
+            remainder_wh = remainder_wh,
             )
         self.assertEqual(list(result), expected)
         self.assertEqual(resultingRemainder, expectedRemainder)
@@ -45,7 +45,7 @@ class ProductionToRightsPerShare_Test(unittest.TestCase):
             production = 25*[2000],
             activeShares = 25*[1],
             nShares=1,
-            expected = 25*[2],
+            expected = 25*[2000],
             )
 
     def test_computeRights_sharedProduction(self):
@@ -53,7 +53,7 @@ class ProductionToRightsPerShare_Test(unittest.TestCase):
             production = 25*[2000],
             activeShares = 25*[2],
             nShares=1,
-            expected = 25*[1],
+            expected = 25*[1000],
             )
 
     def test_computeRights_withManyShares(self):
@@ -61,13 +61,13 @@ class ProductionToRightsPerShare_Test(unittest.TestCase):
             production = 25*[2000],
             activeShares = 25*[2],
             nShares=2,
-            expected = 25*[2],
+            expected = 25*[2000],
             )
 
     def test_computeRights_withInnerRemainder(self):
         self.assertComputeEquals(
             production = 24*[1000]+[0],
-            activeShares = 25*[2],
+            activeShares = 25*[2000],
             nShares=1,
             expected = 12*[0,1]+[0],
             )
@@ -77,25 +77,25 @@ class ProductionToRightsPerShare_Test(unittest.TestCase):
             production = 25*[1000],
             activeShares = 10*[0] + 15*[1],
             nShares=1,
-            expected = 10*[0]+15*[1],
+            expected = 10*[0]+15*[1000],
             )
 
     def test_computeRights_creatingRemainder(self):
         self.assertComputeEquals(
             production = 25*[500],
-            activeShares = 25*[1],
+            activeShares = 25*[8],
             nShares=1,
-            expected = 12*[0,1]+[0],
+            expected = 12*[62,63]+[62],
             expectedRemainder = 500,
             )
 
     def test_computeRights_takingRemainder(self):
         self.assertComputeEquals(
-            remainder = 500.0,
+            remainder_wh = 500.0,
             production = 25*[500],
-            activeShares = 25*[1],
+            activeShares = 25*[8],
             nShares=1,
-            expected = 12*[1,0]+[1],
+            expected = 12*[63,62]+[63],
             expectedRemainder = 0,
             )
 
@@ -106,7 +106,7 @@ class ProductionToRightsPerShare_Test(unittest.TestCase):
                 production = numpy.array([3.2]),
                 activeShares  = numpy.array([3]),
                 nshares=1,
-                remainder = 0,
+                remainder_wh = 0,
                 )
         self.assertEqual(failure.exception.args[0],
             "Production base type is not integer")
@@ -118,7 +118,7 @@ class ProductionToRightsPerShare_Test(unittest.TestCase):
                 production = numpy.array([3]),
                 activeShares  = numpy.array([3.2]),
                 nshares = 1,
-                remainder = 0,
+                remainder_wh = 0,
                 )
         self.assertEqual(failure.exception.args[0],
             "ActiveShares base type is not integer")

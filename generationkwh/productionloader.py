@@ -95,7 +95,7 @@ class ProductionLoader(object):
     def computeAvailableRights(self):
         remainders = self.remainders.lastRemainders()
         recomputeStart, recomputeStop = self._recomputationInterval(remainders)
-        aggregatedProduction = self.productionAggregator.getWh(recomputeStart, recomputeStop)
+        aggregatedProduction = self.productionAggregator.get_kwh(recomputeStart, recomputeStop)
         plantShareCurve = self.plantShareCurver.hourly(recomputeStart, recomputeStop)
         for n, date, remainder in remainders:
             self._appendRightsPerShare(
@@ -108,6 +108,6 @@ class ProductionLoader(object):
                 )
 
     def retrieveMeasuresFromPlants(self, start, end):
-        return self.productionAggregator.updateWh(start, end)
+        return self.productionAggregator.update_kwh(start, end)
 
 # vim: ts=4 sw=4 et

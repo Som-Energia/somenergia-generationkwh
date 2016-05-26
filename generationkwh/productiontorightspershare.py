@@ -12,7 +12,7 @@ class ProductionToRightsPerShare(object):
         with a given number of shares.
     """
 
-    def computeRights(self, production, activeShares, nshares=1, remainder=0):
+    def computeRights(self, production, activeShares, nshares=1, remainder_wh=0):
 
         assert numpy.issubdtype(production.dtype, int), (
             "Production base type is not integer")
@@ -20,14 +20,14 @@ class ProductionToRightsPerShare(object):
             "ActiveShares base type is not integer")
 
         with numpy.errstate(divide='ignore'):
-            fraction = production*nshares/activeShares
-        fraction = numpy.concatenate( ([remainder],fraction) )
+            fraction = production*1000*nshares/activeShares
+        fraction = numpy.concatenate( ([remainder_wh],fraction) )
         integral = fraction.cumsum()
 
         result = numpy.diff(integral//1000)
-        remainder = integral[-1]%1000
+        remainder_wh = integral[-1]%1000
 
-        return result, remainder
+        return result, remainder_wh
 
 
 
