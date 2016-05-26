@@ -29,7 +29,7 @@ def parseArgumments():
         help="expire assignments",
         )
     default = subparsers.add_parser('default',
-        help="create contract assignations following the by default criteria",
+        help="create contract assignations using by default criteria",
         )
     clear = subparsers.add_parser('clear',
         help="clear investments objects",
