@@ -206,6 +206,13 @@ class Assignment_Test(unittest.TestCase):
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class AssignmentProvider_Test(unittest.TestCase):
 
+    def orderContractsByConany(self,contract_ids):
+        unorderedContracts = self.erp.GiscedataPolissa.browse(contract_ids)
+        unorderedCups_ids = [pol.cups.id for pol in unorderedContracts if pol.cups.active]
+        orderedCups_ids = self.erp.GiscedataCupsPs.search([('id','in', unorderedCups_ids)],order='conany_kwh DESC')
+        orderedCups = self.erp.GiscedataCupsPs.browse(orderedCups_ids)
+        return tuple([cups.polissa_polissa.id for cups in orderedCups])
+
     def setUp(self):
         self.erp = erppeek.Client(**dbconfig.erppeek)
         self.Assignment = self.erp.GenerationkwhAssignment
@@ -245,8 +252,23 @@ class AssignmentProvider_Test(unittest.TestCase):
         # Sorted contracts for member_manyAsPayerAndManyAsOwner
         # TODO: Sort them by annual use programatically, if not is fragile,
         # since annual use depends on the database snapshot
-        self.payerContracts= 44944,26010,3662
-        self.ownerContracts= 149,150,
+        manyAsPayerAndManyAsOwner_partner_id = self.erp.SomenergiaSoci.get(self.member_manyAsPayerAndManyAsOwner).partner_id.id
+        manyAsPayerAndManyAsOwner_payerContract_unorderedContract_ids = self.erp.GiscedataPolissa.search(
+            [
+             ('pagador','=',manyAsPayerAndManyAsOwner_partner_id),
+             ('state','=','activa'),
+             ('active','=',True),
+            ])
+        manyAsPayerAndManyAsOwner_ownerContract_unorderedContract_ids = self.erp.GiscedataPolissa.search(
+            ['&',
+                 ('titular','=', manyAsPayerAndManyAsOwner_partner_id),
+                 ('pagador', '!=', manyAsPayerAndManyAsOwner_partner_id),
+             ('state','=','activa'),
+             ('active','=',True),
+            ])
+
+        self.payerContracts = self.orderContractsByConany(manyAsPayerAndManyAsOwner_payerContract_unorderedContract_ids)
+        self.ownerContracts = self.orderContractsByConany(manyAsPayerAndManyAsOwner_ownerContract_unorderedContract_ids)
 
     def setupAssignments(self, assignments):
         for contract, member, priority in assignments:
@@ -472,11 +494,20 @@ class AssignmentProvider_Test(unittest.TestCase):
             ])
 
     def test_sortedDefaultContractsForMember_manyAsPayer_biggerFirst(self):
+        member_manyAsPayer_partnerId = self.erp.SomenergiaSoci.get(self.member_manyAsPayer).partner_id.id
+        member_manyAsPayer_unorderedContractIds = self.erp.GiscedataPolissa.search([
+            ('pagador', '=', member_manyAsPayer_partnerId),
+            ('state','=','activa'),
+            ('active','=',True)]
+        )
+        member_manyAsPayer_expectedContracts = self.orderContractsByConany(
+            member_manyAsPayer_unorderedContractIds
+        )
         self.assertContractForMember([
             self.member_manyAsPayer,
-            ], [
-            (929, self.member_manyAsPayer), # payer bigger
-            (21,  self.member_manyAsPayer), # payer smaller
+            ], [ (contract_id, self.member_manyAsPayer)
+                for contract_id in
+                    member_manyAsPayer_expectedContracts
             ])
 
     def test_sortedDefaultContractsForMember_manyAsPayerAndManyAsOwner(self):
@@ -493,12 +524,21 @@ class AssignmentProvider_Test(unittest.TestCase):
 
     def test_sortedDefaultContractsForMember_severalMembers_doNotBlend(self):
         # TODO: Check the order is right
+        member_manyAsPayer_partnerId = self.erp.SomenergiaSoci.get(self.member_manyAsPayer).partner_id.id
+        member_manyAsPayer_unorderedContractIds = self.erp.GiscedataPolissa.search([
+            ('pagador', '=', member_manyAsPayer_partnerId),
+            ('state','=','activa'),
+            ('active','=',True)]
+        )
+        member_manyAsPayer_expectedContracts = self.orderContractsByConany(
+            member_manyAsPayer_unorderedContractIds
+        )
         self.assertContractForMember([
             self.member_manyAsPayer,
             self.member_manyAsPayerAndManyAsOwner,
             ], [
-            (929, self.member_manyAsPayer),
-            (21, self.member_manyAsPayer),
+            (member_manyAsPayer_expectedContracts[0], self.member_manyAsPayer),
+            (member_manyAsPayer_expectedContracts[1], self.member_manyAsPayer),
             (self.payerContracts[0], self.member_manyAsPayerAndManyAsOwner),
             (self.payerContracts[1], self.member_manyAsPayerAndManyAsOwner),
             (self.payerContracts[2], self.member_manyAsPayerAndManyAsOwner),
