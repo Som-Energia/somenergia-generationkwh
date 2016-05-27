@@ -13,10 +13,10 @@ en comptes donar-te dret a un interés,
 - Els socis fan **inversions** per construir plantes
 	- retornat en 25 anys
 	- sense interesos
-	- amb un any de caréncia
-- Un cop construïdes, la producció de les plantes esdevenen **drets** d'ús de kWh, proporcionals a la inversió de cadascú.
-- Aquests drets es reparteixen a diferents contractes segons les **assignacions** que hagi fet el soci.
-- A la factura d'aquest contractes, apareixerà una part de l'energia a **Preu Generation kWh** i una altra part a preu de mercat.
+	- amb un any de carència
+- Un cop construïdes, la producció de les plantes esdevé **drets** d'ús de kWh dels inversors, proporcionals a la seva inversió.
+- Aquests drets es reparteixen a diferents contractes segons les **assignacions** que hagi fet l'inversor.
+- A la factura d'aquests contractes, apareixerà una part de l'energia a **Preu Generation kWh** i una altra part a preu de mercat.
 
 
 ## Quin és el preu _Generation kWh_?
@@ -52,16 +52,16 @@ en comptes donar-te dret a un interés,
 		- el _valor total del Generation kWh_.
 - Els kWh s'acomulen en forma de **drets**
 	- puc fer-los servir durant tot un any abans que no caduquin.
+- Els drets tenen dia i hora de producció.
 - Una factura amb **discriminació horària** només pot gastar drets produïts al mateix període (P1, P2...) en el que es van generar.
 	- Per exemple, és normal que un contracte 2.0DHS no tingui Generation a P3 (nocturn) mentre tinguem només fotovoltàica.
-
 
 
 ## Quines dates defineixen la vida d'una inversió? (Dates efectives)
 
 - Cada inversió tè certes dates clau:
-	- **Data de comanda:** quan s'omple el formulari (**no la tenim en compte!**)
-	- **Data de compra:** quan es fa la remesa. S'hi considera que comencen els 25 anys.
+	- **Data de comanda:** quan s'omple el formulari. **No la tenim en compte!**
+	- **Data de compra:** quan es fa la remesa. Es considera que hi comencen els 25 anys.
 	- **Primera data efectiva:** a partir de quan comença a rebre la producció
 		- normalment 1 any despŕes de la compra
 		- mentre no posem cap valor, no serà efectiva
@@ -84,7 +84,9 @@ en comptes donar-te dret a un interés,
 ## Com veiem l'equip les inversions a l'ERP
 
 - Al menu `Generation kWh/Inversions Generation kWh` tenim la llista de totes les inversions
-	- Comptabilitat la fa servir per fer neteja (desactivar) les inversions que són desinversions, balanços, retorns de remeses...
+	- Comptabilitat la fa servir per fer neteja (desactivar) les inversions que no ho són.
+	Són desinversions, balanços, remeses retornades...
+	que no sabem identificar de forma automàtica i cal fer-ho a mà.
 - Generalment farem servir millor la pestanya `Generation kWh` del soci:
 	- Només apareix la pestanya si el soci té inversions
 	- La podem trobar a:
@@ -114,7 +116,17 @@ TODO: Explicar els altres camps del resum generation
 - La resta de contractes on el soci és pagador o titular es posen al següent nivell i agafaran tot el que el principal no agafi d'entrada.
 
 
-## Com poden canviar els inversors les seves assignacions?
+## Es pot controlar més com repartir els drets?
+
+- De moment no.
+- Hem optat començar per una opció molt simple d'implementar que permeti certa flexibilitat.
+- Les factures dels diferents contractes arriben sense cap ordre, es refacturen, s'anul·len...
+	- Tot això, fa que sigui costós de implementar i executar (lent) repartiments, que poden semblar senzills com ara percentatges.
+- Hi ha diverses possibles polítiques, encara hem de veure quina és la que interessa més als inversors.
+- Esperarem que passin uns mesos i veiem com es fa servir o a que hagi una certa demanda d'algun tipus de restricció per implementar-la.
+
+
+## Com poden els inversors canviar les seves assignacions?
 
 - De moment, poden demanar canvis per email a <generationkwh@somenergia.coop>
 - Nosaltres, en rebre els mails, haurem d'editar les assignacions amb l'ERP.
