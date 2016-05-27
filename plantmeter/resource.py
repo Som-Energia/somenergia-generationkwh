@@ -31,23 +31,23 @@ class ProductionAggregator(Resource):
         self.plants = kwargs.pop('plants') if 'plants' in kwargs else []
         super(ProductionAggregator, self).__init__(*args, **kwargs)
 
-    def getWh(self, start, end):
+    def get_kwh(self, start, end):
 
         assertDate('start', start)
         assertDate('end', end)
 
         return np.sum([
-            plant.getWh(start, end)
+            plant.get_kwh(start, end)
             for plant in self.plants
             if plant.enabled
             ], axis=0)
     
-    def updateWh(self, start=None, end=None, notifier=None):
+    def update_kwh(self, start=None, end=None, notifier=None):
 
         assertDateOrNone('start', start)
         assertDateOrNone('end', end)
 
-        return [(plant.id, plant.updateWh(start, end, notifier)) for plant in self.plants]
+        return [(plant.id, plant.update_kwh(start, end, notifier)) for plant in self.plants]
 
     def firstMeasurementDate(self):
         return min([
@@ -68,22 +68,22 @@ class ProductionPlant(Resource):
         self.meters = kwargs.pop('meters') if 'meters' in kwargs else []
         super(ProductionPlant, self).__init__(*args, **kwargs)
 
-    def getWh(self, start, end):
+    def get_kwh(self, start, end):
         assertDate('start', start)
         assertDate('end', end)
 
         return np.sum([
-            meter.getWh(start, end)
+            meter.get_kwh(start, end)
             for meter in self.meters
             if meter.enabled
             ], axis=0)
 
-    def updateWh(self, start=None, end=None, notifier=None):
+    def update_kwh(self, start=None, end=None, notifier=None):
 
         assertDateOrNone('start', start)
         assertDateOrNone('end', end)
 
-        return [(meter.id, meter.updateWh(start, end, notifier)) for meter in self.meters]
+        return [(meter.id, meter.update_kwh(start, end, notifier)) for meter in self.meters]
 
     def lastMeasurementDate(self):
         return max([
@@ -108,7 +108,7 @@ class ProductionMeter(Resource):
         self.curveProvider = kwargs.pop('curveProvider') if 'curveProvider' in kwargs else None
         super(ProductionMeter, self).__init__(*args, **kwargs)
 
-    def getWh(self, start, end):
+    def get_kwh(self, start, end):
 
         assertDate('start', start)
         assertDate('end', end)
@@ -120,7 +120,7 @@ class ProductionMeter(Resource):
             'ae'
             )
 
-    def updateWh(self, start=None, end=None , notifier=None):
+    def update_kwh(self, start=None, end=None , notifier=None):
         import datetime
 
         assertDateOrNone('start', start)

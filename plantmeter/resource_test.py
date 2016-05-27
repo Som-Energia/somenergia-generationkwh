@@ -43,7 +43,7 @@ class Resource_Test(unittest.TestCase):
         aggr.plants.append(p)
 
         self.assertEqual(
-            list(aggr.getWh(
+            list(aggr.get_kwh(
                 date(2015,9,4),
                 date(2015,9,5))),
                 2*25*[0] 
@@ -64,12 +64,12 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m)
         aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
         aggr.plants.append(p)
-        m.updateWh(
+        m.update_kwh(
             date(2015,9,4),
             date(2015,9,5))
 
         self.assertEqual(
-            list(aggr.getWh(
+            list(aggr.get_kwh(
                 date(2015,9,4),
                 date(2015,9,5))),
             [
@@ -101,11 +101,11 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m2)
         aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
         aggr.plants.append(p)
-        m1.updateWh(date(2015,9,4),date(2015,9,5))
-        m2.updateWh(date(2015,9,4),date(2015,9,5))
+        m1.update_kwh(date(2015,9,4),date(2015,9,5))
+        m2.update_kwh(date(2015,9,4),date(2015,9,5))
 
         self.assertEqual(
-            list(aggr.getWh(
+            list(aggr.get_kwh(
                 date(2015,9,4),
                 date(2015,9,5))),
             [
@@ -130,10 +130,10 @@ class Resource_Test(unittest.TestCase):
         aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
         aggr.plants.append(p1)
         aggr.plants.append(p2)
-        m1.updateWh(date(2015,9,4),date(2015,9,5))
+        m1.update_kwh(date(2015,9,4),date(2015,9,5))
 
         self.assertEqual(
-            list(aggr.getWh(
+            list(aggr.get_kwh(
                 date(2015,9,4),
                 date(2015,9,5))),
             [
@@ -167,11 +167,11 @@ class Resource_Test(unittest.TestCase):
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p1)
         aggr.plants.append(p2)
-        m1.updateWh(date(2015,9,4),date(2015,9,5))
-        m2.updateWh(date(2015,9,4),date(2015,9,5))
+        m1.update_kwh(date(2015,9,4),date(2015,9,5))
+        m2.update_kwh(date(2015,9,4),date(2015,9,5))
 
         self.assertEqual(
-            list(aggr.getWh(
+            list(aggr.get_kwh(
                 date(2015,9,4),
                 date(2015,9,5))),
             [
@@ -195,7 +195,7 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m)
         aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
         aggr.plants.append(p)
-        updated = aggr.updateWh()
+        updated = aggr.update_kwh()
         # Check single aggregator, with single plant and meter
         self.assertEqual(updated[0][1][0][1], localisodatetime('2015-09-05 23:00:00'))
 
@@ -244,7 +244,7 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m)
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p)
-        m.updateWh(date(2015,9,4), date(2015,9,5))
+        m.update_kwh(date(2015,9,4), date(2015,9,5))
 
         self.assertEqual(aggr.lastMeasurementDate(), date(2015,9,5))
 
@@ -261,7 +261,7 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m)
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p)
-        m.updateWh(date(2015,9,4), date(2015,9,5))
+        m.update_kwh(date(2015,9,4), date(2015,9,5))
 
         self.assertEqual(aggr.firstMeasurementDate(), date(2015,9,4))
 
@@ -288,8 +288,8 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m2)
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p)
-        m1.updateWh(date(2015,9,4), date(2015,9,5))
-        m2.updateWh(date(2015,8,4), date(2015,8,5))
+        m1.update_kwh(date(2015,9,4), date(2015,9,5))
+        m2.update_kwh(date(2015,8,4), date(2015,8,5))
 
         self.assertEqual(aggr.lastMeasurementDate(), date(2015,9,5))
 
@@ -316,8 +316,8 @@ class Resource_Test(unittest.TestCase):
         p.meters.append(m2)
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p)
-        m1.updateWh(date(2015,9,4), date(2015,9,5))
-        m2.updateWh(date(2015,8,4), date(2015,8,5))
+        m1.update_kwh(date(2015,9,4), date(2015,9,5))
+        m2.update_kwh(date(2015,8,4), date(2015,8,5))
 
         self.assertEqual(aggr.firstMeasurementDate(), date(2015,8,4))
 
@@ -346,8 +346,8 @@ class Resource_Test(unittest.TestCase):
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p1)
         aggr.plants.append(p2)
-        m1.updateWh(date(2015,9,4), date(2015,9,5))
-        m2.updateWh(date(2015,8,4), date(2015,8,5))
+        m1.update_kwh(date(2015,9,4), date(2015,9,5))
+        m2.update_kwh(date(2015,8,4), date(2015,8,5))
 
         self.assertEqual(aggr.lastMeasurementDate(), date(2015,9,5))
 
@@ -376,8 +376,8 @@ class Resource_Test(unittest.TestCase):
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
         aggr.plants.append(p1)
         aggr.plants.append(p2)
-        m1.updateWh(date(2015,9,4), date(2015,9,5))
-        m2.updateWh(date(2015,8,4), date(2015,8,5))
+        m1.update_kwh(date(2015,9,4), date(2015,9,5))
+        m2.update_kwh(date(2015,8,4), date(2015,8,5))
 
         self.assertEqual(aggr.firstMeasurementDate(), date(2015,8,4))
 
@@ -405,7 +405,7 @@ class Meter_Test(unittest.TestCase):
             curveProvider = self.curveProvider)
 
         self.assertEqual(
-            list(m.getWh(
+            list(m.get_kwh(
                 date(2015,9,4),
                 date(2015,9,5))),
             2*25*[0]
@@ -419,10 +419,10 @@ class Meter_Test(unittest.TestCase):
             True,
             uri = self.uri,
             curveProvider = self.curveProvider)
-        m.updateWh(date(2015,9,4), date(2015,9,5))
+        m.update_kwh(date(2015,9,4), date(2015,9,5))
 
         self.assertEqual(
-            list(m.getWh(
+            list(m.get_kwh(
                 date(2015,9,4),
                 date(2015,9,5))),
             [
@@ -448,7 +448,7 @@ class Meter_Test(unittest.TestCase):
             True,
             uri = self.uri,
             curveProvider = self.curveProvider)
-        m.updateWh(date(2015,9,4), date(2015,9,5))
+        m.update_kwh(date(2015,9,4), date(2015,9,5))
 
         self.assertEqual(m.lastMeasurementDate(), date(2015,9,5))
 
@@ -470,7 +470,7 @@ class Meter_Test(unittest.TestCase):
             True,
             uri = self.uri,
             curveProvider = self.curveProvider)
-        m.updateWh(date(2015,9,4), date(2015,9,5))
+        m.update_kwh(date(2015,9,4), date(2015,9,5))
         self.assertEqual(m.firstMeasurementDate(), date(2015,9,4))
 
 

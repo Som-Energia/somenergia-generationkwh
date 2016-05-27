@@ -24,10 +24,10 @@ class MonsolProvide_Test(unittest.TestCase):
         path = os.path.dirname(os.path.realpath(__file__)) + '/../data/monsol/' + filename
         return self.load_file(path)
 
-    def profileFromDate(self, start, hours, profile_kWh, daylight):
+    def profileFromDate(self, start, hours, profile_kwh, daylight):
         return [
             {
-            'ae': profile_kWh[idx],
+            'ae': profile_kwh[idx],
             'datetime': parseLocalTime(
                     start + str(hour).zfill(2) + '0000' , daylight[idx]=='S')
             } for idx, hour in enumerate(hours)]
