@@ -52,9 +52,6 @@ en comptes donar-te dret a un interès,
 		- el _valor total del Generation kWh_.
 - Els kWh s'acomulen en forma de **drets**
 	- es poden fer servir durant tot **un any** abans que no caduquin.
-- Els drets tenen dia i hora de producció
-	- Una factura amb **discriminació horària** només pot gastar drets produïts al mateix període (P1, P2...) en el que es van generar.
-		- Per exemple, és normal que un contracte 2.0DHS no tingui Generation a P3 (nocturn) mentre tinguem només fotovoltàica.
 
 
 ## Quines dates defineixen la vida d'una inversió? (Dates efectives)
@@ -105,16 +102,6 @@ TODO: Explicar els altres camps del resum generation
 - La resta de contractes on el soci és pagador o titular es posen al següent nivell i agafaran tot el que el principal no agafi d'entrada.
 
 
-### Es pot controlar més com repartir els drets?
-
-- De moment no.
-- Hem optat començar per una opció molt simple d'implementar que permeti certa flexibilitat.
-- Les factures dels diferents contractes arriben sense cap ordre, es refacturen, s'anul·len...
-	- Tot això, fa que sigui costós de implementar i executar (lent) repartiments, que poden semblar senzills com ara percentatges.
-- Hi ha diverses possibles polítiques, encara hem de veure quina és la que interessa més als inversors.
-- Esperarem que passin uns mesos i veiem com es fa servir o a que hagi una certa demanda d'algun tipus de restricció per implementar-la.
-
-
 ### Com poden els inversors canviar les seves assignacions?
 
 - De moment, poden demanar canvis per email a <generationkwh@somenergia.coop>
@@ -130,12 +117,6 @@ TODO: Explicar els altres camps del resum generation
 
 TODO: ficar pantallades
 
-
-### Les primeres inversions estan _premiades_. Què vol dir?
-
-- Hem decidit premiar als primers inversors avançant la data efectiva un mes.
-	- La planta d'Alcolea ja fa unes semanes que està produint.
-- Començaran a fer factures Generation quan estava previst, però tindran la producció d'aquest mes acomulada.
 
 
 ## Factures Generation
@@ -159,6 +140,14 @@ TODO: Pantallada del detall d'una factura
 
 ## Generation kWh Master
 
+
+### Les primeres inversions estan _premiades_. Què vol dir?
+
+- Hem decidit premiar als primers inversors avançant la data efectiva un mes.
+	- La planta d'Alcolea ja fa unes semanes que està produint.
+- Començaran a fer factures Generation quan estava previst, però tindran la producció d'aquest mes acomulada.
+
+
 ### Inversors que han fet succesives inversions
 
 - Si un inversor fa inversions en diferents dates, les dates efectives de cadascuna són independents.
@@ -176,12 +165,20 @@ TODO: Pantallada del detall d'una factura
 
 ### Contractes amb més d'una font de drets Generation
 
-- Un mateix contracte podria rebre drets de més d'un inversor, si així ho configuren
-- Cada font tindrà línies de factura 
+- Un mateix contracte podria rebre drets de més d'una persona inversora (**font**), si així ho configuren
+- Cada font tindrà línies de factura independents al detall de la factura
+- Cada línia de factura Generation indica el nom de la font
 - De moment no hi ha cap criteri per escollir d'on agafar primer els drets
 	- S'agafen tots els que drets d'una font arbitrària i si no hi ha prou, s'agafen de la següent
 
 TODO: Pantallada factura multi-font
+
+
+### Contractes amb discriminació horària
+
+- Els drets tenen dia i hora de producció
+- Una factura amb **discriminació horària** només pot gastar drets produïts al mateix període (P1, P2...) en el que es van generar.
+- Per exemple, és normal que un contracte 2.0DHS no tingui Generation a P3 (nocturn) mentre tinguem només fotovoltàica.
 
 
 ### Cancelant, abonant i rectificant factures Generation
@@ -202,6 +199,16 @@ TODO: Pantallada factura multi-font
 	- Es gasten sempre els drets més antics no caducats.
 	- Es retornen els drets usats més nous
 - Quan hi hagi drets a pocs mesos de caducar-se, enviarem un mail avisant a l'inversor per si vol fer una assignació addicional.
+
+### Es pot controlar més com repartir els drets a les assignacions?
+
+- De moment no.
+- Hem optat començar per una opció molt simple d'implementar que permeti certa flexibilitat.
+- Les factures dels diferents contractes arriben sense cap ordre, es refacturen, s'anul·len...
+	- Tot això, fa que sigui costós de implementar i executar (lent) repartiments, que poden semblar senzills com ara percentatges.
+- Hi ha diverses possibles polítiques, encara hem de veure quina és la que interessa més als inversors.
+- Esperarem que passin uns mesos i veiem com es fa servir o a que hagi una certa demanda d'algun tipus de restricció per implementar-la.
+
 
 
 
