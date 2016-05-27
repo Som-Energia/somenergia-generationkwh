@@ -86,16 +86,16 @@ def clear():
 def init(filename):
     if filename:
        aggr = setupAggregator(ns.load(filename))
-       aggr_obj.updateWh(aggr['id'])
+       aggr_obj.update_kwh(aggr['id'])
 
 @aggregator.command(
-        help="Update aggregator Wh")
+        help="Update aggregator kWh")
 @click.argument('filename')
-def updateWh(filename):
+def update_kwh(filename):
     if filename:
        aggr_name=ns.load(filename)['generationkwh']['name']
        aggr_id=getAggregator(aggr_name)
-       aggr_obj.updateWh(aggr_id)
+       aggr_obj.update_kwh(aggr_id)
 
 if __name__ == '__main__':
     aggregator(obj={})
