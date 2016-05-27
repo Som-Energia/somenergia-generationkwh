@@ -4,6 +4,7 @@ import numpy as np
 from plantmeter.providers import get_provider
 from plantmeter.isodates import localisodate, assertDateOrNone, assertDate, dateToLocal
 from plantmeter.mongotimecurve import addDays
+import datetime
 
 """
 TODOs
@@ -104,7 +105,7 @@ class ProductionMeter(Resource):
         self.uri = kwargs.pop('uri') if 'uri' in kwargs else None
         self.lastcommit = kwargs.pop('lastcommit') if 'lastcommit' in kwargs else None
         if self.lastcommit:
-            self.lastcommit = localisodate(self.lastcommit).date()
+            self.lastcommit = localisodate(self.lastcommit).date() + datetime.timedelta(days=1)
         self.curveProvider = kwargs.pop('curveProvider') if 'curveProvider' in kwargs else None
         super(ProductionMeter, self).__init__(*args, **kwargs)
 
@@ -130,7 +131,7 @@ class ProductionMeter(Resource):
             start = self.lastcommit
 
         provider = get_provider(self.uri)
-        updated = start
+        updated = None
         with provider(self.uri) as remote:
             status = 'done'
             message = None

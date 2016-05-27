@@ -199,6 +199,26 @@ class Resource_Test(unittest.TestCase):
         # Check single aggregator, with single plant and meter
         self.assertEqual(updated[0][1][0][1], localisodatetime('2015-09-05 23:00:00'))
 
+    def test_update_outofdate(self):
+        uri = 'csv:/' + local_file('data/manlleu_20150804.csv')
+        curveProvider = self.curveProvider
+        m = ProductionMeter(
+                1,
+                'meterName',
+                'meterDescription',
+                True,
+                uri=uri,
+                lastcommit='2015-09-04',
+                curveProvider = self.curveProvider)
+
+        p = ProductionPlant(1,'plantName','plantDescription',True)
+        p.meters.append(m)
+        aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
+        aggr.plants.append(p)
+        updated = aggr.update_kwh()
+        # Check single aggregator, with single plant and meter
+        self.assertEqual(updated[0][1][0][1], None)
+
     def test_lastDate_empty(self):
         uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
         m = ProductionMeter(
