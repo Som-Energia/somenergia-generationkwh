@@ -69,7 +69,7 @@ class MonsolProvider(BaseProvider):
                 client.cwd(self.res['path'])
                 client.retrbinary('RETR ' + filename, callback=sio.write)
             except Exception as e:
-                raise BaseProviderDownloadError()
+                raise BaseProviderDownloadError('Failed downloading %s' % filename)
             finally:
                 client.quit()
 
