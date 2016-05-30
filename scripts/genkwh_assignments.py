@@ -19,6 +19,9 @@ def parseArgumments():
         title="Subcommands",
         dest='subcommand',
         )
+    unassigned = subparsers.add_parser('unassigned',
+        help="list members with investments but no assigments",
+        )
     list = subparsers.add_parser('list',
         help="list assignments",
         )
@@ -74,15 +77,24 @@ def parseArgumments():
             dest='members',
             type=int,
             nargs='*',
-            help='investors of Generation-kWh (see --partner and --number)',
+            help="investors of Generation-kWh (see --partner and --number)",
             )
-    for sub in default,:
+    for sub in default, unassigned:
         sub.add_argument(
-            '--before',
+            '--effectiveon',
             type=isodate,
             metavar='YYYY-MM-DD',
-            help='filter investments not effective before the indicated ISO format date',
+            help="filter out investments still not effective at the indicated "
+                "ISO date",
             )
+        sub.add_argument(
+            '--purchaseduntil',
+            type=isodate,
+            metavar='YYYY-MM-DD',
+            help="filter out investments purchased after "
+                "the indicated ISO date",
+            )
+    for sub in default,:
         sub.add_argument(
             '--mail',
             action='store_true',
@@ -103,17 +115,21 @@ def parseArgumments():
         sub.add_argument(
             'priority',
             type=int,
-            help="a precedence number, ie. a contract with priority 2 has to wait "
-                " contracts with priority 1 to access new production.",
+            help="a precedence number, ie. a contract with priority 2 "
+                "has to wait contracts with priority 1 to access "
+                "new production.",
             )
 
     return parser.parse_args(namespace=ns())
 
-def preprocessMembers(members=None,idmode=None, all=None, before=None):
+def preprocessMembers(members=None,idmode=None, all=None, effectiveon=None, purchaseduntil=None):
     """Turns members in which ever format to the ones required by commands"""
 
-    if all or before:
-        return c.GenerationkwhAssignment.unassignedInvestors(before and str(before))
+    if all or effectiveon or purchaseduntil:
+        return c.GenerationkwhAssignment.unassignedInvestors(
+            effectiveon and str(effectiveon),
+            purchaseduntil and str(purchaseduntil),
+            )
 
     if idmode=="partner":
         idmap = dict(c.GenerationkwhDealer.get_members_by_partners(members))
@@ -198,27 +214,40 @@ def default(
         idmode=None,
         all=None,
         mail=False,
-        before=None,
+        effectiveon=None,
+        purchaseduntil=None,
         **_):
-    members=preprocessMembers(members, idmode, all, before)
+    members=preprocessMembers(members, idmode, all, effectiveon, purchaseduntil)
     step("Generating default assignments for members: {}".format(
         ','.join(str(i) for i in members)))
     c.GenerationkwhAssignment.createDefaultForMembers(members)
     if mail:
         step("Sending notification mails for members: {}".format(
             ','.join(str(i) for i in members)))
-        c.GenerationkwhAssignment.notifyAssigmnentByMail(members)
+        c.GenerationkwhAssignment.notifyAssignmentByMail(members)
     success("Done.")
 
-def assign(member=None,contract=None,priority=None, idmode=None):
+def assign(member=None,contract=None,priority=None, idmode=None, contractMode=None):
     member = preprocessMembers([member], idmode)[0]
+    contract = preprocessContracts([contract], contractMode)[0]
     expire(member=member,contract=contract)
+    step("Assigning contract {} to member {}"
+        .format(contract, member))
     c.GenerationkwhAssignment.create({
         'member_id': member,
         'contract_id': contract,
         'priority': priority
     })
 
+def unassigned(effectiveon=None, purchaseduntil=None):
+    members=preprocessMembers(
+        members=[],
+        idmode='memberid',
+        all=all,
+        effectiveon=effectiveon,
+        purchaseduntil=purchaseduntil,
+        )
+    print u'\n'.join(str(i) for i in members)
 
 c = erppeek.Client(**dbconfig.erppeek)
 
