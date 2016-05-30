@@ -126,7 +126,12 @@ def effective(
         **_):
 
     return c.GenerationkwhInvestment.set_effective(
-        start, stop, waitingDays, expirationYears, force)
+        start and str(start),
+        stop and str(stop),
+        waitingDays,
+        expirationYears,
+        force,
+        )
 
 c = erppeek.Client(**dbconfig.erppeek)
 
