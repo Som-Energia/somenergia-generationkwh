@@ -5,7 +5,7 @@
 
 - Una forma d'invertir en renovables que,
 en comptes donar-te dret a un interès,
-**et dona dret a fer servir els kWh que produeixen les plantes a preu de cost**.
+**et dóna dret a fer servir els kWh que produeixen les plantes a preu de cost**.
 
 
 ## Com funciona? (molt resumit)
@@ -16,26 +16,20 @@ en comptes donar-te dret a un interès,
 	- amb un any de carència
 - Un cop construïdes, els kWh que van produint les plantes esdevenen **drets** d'ús de kWh pels inversors, proporcionalment a la seva inversió.
 - Aquests drets es reparteixen a diferents contractes segons les **assignacions** que hagi definit l'inversor.
-- A la factura d'aquests contractes, apareixerà una part de l'energia a **Preu Generation kWh** i una altra part a preu de mercat.
+- A les factures d'aquests contractes, apareixerà una part de l'energia a **Preu Generation kWh** i una altra part a preu de mercat.
 
 
 ## Quin és el preu _Generation kWh_?
 
 - Aquest preu dels kWh Generation es fixarà cada any a l'assemblea segons els costos reals d'amortització i de manteniment que preveiem
 - És un preu que **esperem que sigui** més barat, donat que no pateix la bufada especulativa de la subasta del mercat elèctric
-- TODO: Quina és la diferència estimada aquest any:
-	- impacte en el preu de mercat (sense peatges)
-	- impacte en el preu de la part d'energia (amb peatges),
-	- impacte a una factura mitjana (comptant energia i potència mitjana)
-
 
 ## Com funciona la inversió? (Inversions)
 
 - Les inversions es fan en **accions** de 100€
 - És una inversió a 25 anys: un any de **carència** i 24 **efectius**.
 - El primer any de carència serveix per donar temps a que es construeixin plantes noves amb aquests diners.
-- Passat l'any de carència, es comencen a generar drets a kWh
-	- Són 24 anys beneficiant-se de la producció de les plantes
+- Passat l'any de carència, es comencen a generar drets a kWh durant els 24 anys que queden d'inversió.
 - També passat aquest any de carència es comença a tornar el prèstec
 	- El primer any, el de carència, no es torna res
 	- El segon any es torna el corresponent al primer any i al segon: 8€/acció
@@ -45,7 +39,7 @@ en comptes donar-te dret a un interès,
 
 ## Quants kWh li toquen a cada inversor? (Drets)
 
-- Cada nova planta **que es posa en marxa** afegeix el seu cost de construcció al _valor total del Generation kWh_.
+- Quan **es posa en marxa** cada nova planta, s'afegeix el seu cost de construcció al **valor total del _Generation kWh_**.
 - De la producció real que generin les plantes,
 	- ens correspondran els kWh proporcionals a la relació entre
 		- les nostres accions i,
@@ -54,17 +48,18 @@ en comptes donar-te dret a un interès,
 	- es poden fer servir durant tot **un any** abans que no caduquin.
 
 
-## Quines dates defineixen la vida d'una inversió? (Dates efectives)
+## Cicle de vida d'una inversió? (Dates efectives)
 
 - Cada inversió tè certes dates significatives:
 	- **Data de comanda:** quan s'omple el formulari. **No la tenim en compte!**
 	- **Data de compra:** quan es fa la remesa. Es considera que hi comencen els 25 anys.
-	- **Primera data efectiva:** a partir de quan comença a rebre la producció
-		- normalment 1 any despŕes de la compra
+	- **Primera data efectiva:** a partir de quan comença a rebre la producció en forma de drets
+		- normalment 1 any després de la compra
 		- mentre no posem cap valor a l'ERP, no serà efectiva mai
 	- **Darrera data efectiva:** la darrera data on es rep producció
 		- normalment 25 anys després de la compra
 		- mentre no posem cap valor a l'ERP, no deixarà de ser efectiva mai
+	- Els drets caduquen en un any, o sigui que és possible que encara es consumeixin kWh Generation un any després de la darrera data efectiva.
 
 ## Com veiem l'equip les inversions a l'ERP
 
@@ -138,15 +133,48 @@ TODO: Pantallada de la llista de factures
 TODO: Pantallada del detall d'una factura
 
 
-## Generation kWh Master
+## Procediments
+
+### Com funcionarem normalment
+
+- Els inversors omplen el formulari d'inversió
+- El sistema deixa una línia de pagament amb la remesa
+- Quan comptabilitat envia la remesa es genera un apunt comptable
+- Cada nit es revisen els nous apunts comptables, els que siguin de comptes generation generen una inversió pendent de revisar
+- Comptabilitat revisa les inversions i neteja les retornades, o els moviments de desinversió
+- Quan falta un més per la primera data efectiva, s'envia un correu a l'inversor amb una proposta d'assignació
+- Els inversors poden contestar per correu per modificar la proposta
+- Nosaltres aplicarem les modificacions amb el client ERP
+
+
+### Com funcionarem en el futur (alguns dels canvis previstos)
+
+- El camí Formulari -> Linia de pagament -> Apunt Comptable -> Inversió es tornarà Formulari -> Inversió Esborrany -> Linia de Pagament -> Apunt Comptable -> Inversió activa
+- La revisió de les devolucions es seguirà fent a mà, però, en el moment de la devolució.
+- Les modificacions de les assignacions es podran fer via l'Oficina virtual.
+- Incorporarem algun element més de control sobre les assignacions segons reaccionin els inversors.
 
 
 ### Les primeres inversions estan _premiades_. Què vol dir?
 
 - Hem decidit premiar als primers inversors avançant la data efectiva un mes.
-	- La planta d'Alcolea ja fa unes semanes que està produint.
+	- La planta d'Alcolea ja fa unes setmanes que està produint.
 - Començaran a fer factures Generation quan estava previst, però tindran la producció d'aquest mes acomulada.
 
+
+### Els primers dies del Generation
+
+- La primera remesa
+	- va ser el 2016-06-22,
+	- és de gaire be 400 persones, son bastantes
+	- enviarem les propostes d'assignació per aquestes 400 dilluns
+	- aquesta setmana veurem si podem gestionar els canvis
+	- si ho hem pogut fer a finals de setmana, activarem la facturació Generation per aquestes persones
+		- ho farem fixant la data efectiva aquell dia
+		- però la data efectiva serà el 2016-05-22
+
+
+## Generation kWh Master
 
 ### Inversors que han fet succesives inversions
 
@@ -157,11 +185,12 @@ TODO: Pantallada del detall d'una factura
 		- Inversió 2: 2000€ el 2015-02-01
 	- tindré:
 		- 0 accions efectives fins el 2015-12-31
-		- 10 accions efectives a partir del 2016-01-01 <- Inversió 1 efectiva
-		- 30 accions efectives a partir del 2016-02-01 <- Inversió 2 efectiva
-		- 20 accions efectives a partir del 2030-01-01 <- Inversió 1 deixa de ser efectiva
-		- 0 accions efectives a partir del 2030-02-01 <- Inversió 2 deixa de ser efectiva
-		- Encara podré estar gastant kWh acomulats fins el 2031-12-31
+		- 10 accions efectives a partir del 2016-01-01 <- Inversió 1 comença a generar drets
+		- 30 accions efectives a partir del 2016-02-01 <- Inversió 2 comença a generar drets
+		- 20 accions efectives a partir del 2030-01-01 <- Inversió 1 deixa de generar drets
+		- 0 accions efectives a partir del 2030-02-01 <- Inversió 2 deixa de generar drets
+		- Encara podré estar gastant kWh acomulats de la inversió 1 fins el 2031-12-31
+		- Encara podré estar gastant kWh acomulats de la Inversió 2 fins el 2031-01-31
 
 ### Contractes amb més d'una font de drets Generation
 
@@ -179,6 +208,7 @@ TODO: Pantallada factura multi-font
 - Els drets tenen dia i hora de producció
 - Una factura amb **discriminació horària** només pot gastar drets produïts al mateix període (P1, P2...) en el que es van generar.
 - Per exemple, és normal que un contracte 2.0DHS no tingui Generation a P3 (nocturn) mentre tinguem només fotovoltàica.
+- A la factura apareixen diferenciats els periodes Generation tot i que **el preu Generation és el mateix per tots els períodes**.
 
 
 ### Cancelant, abonant i rectificant factures Generation
@@ -194,22 +224,23 @@ TODO: Pantallada factura multi-font
 
 ### Com funciona la caducitat dels drets?
 
-- Quan es cerquen drets es considera una finestra que inclou el periode de facturació i un any enrera (un any i un mes)
+- Quan es cerquen els drets disponibles, es considera una finestra de temps que inclou el periode de facturació i un any enrera (un any i un mes)
 - Per evitar que es caduquin:
 	- Es gasten sempre els drets més antics no caducats.
 	- Es retornen els drets usats més nous
 - Quan hi hagi drets a pocs mesos de caducar-se, enviarem un mail avisant a l'inversor per si vol fer una assignació addicional.
 
+
 ### Es pot controlar més com repartir els drets a les assignacions?
 
 - De moment no.
 - Hem optat començar per una opció molt simple d'implementar que permeti certa flexibilitat.
-- Les factures dels diferents contractes arriben sense cap ordre, es refacturen, s'anul·len...
-	- Tot això, fa que sigui costós de implementar i executar (lent) repartiments, que poden semblar senzills com ara percentatges.
-- Hi ha diverses possibles polítiques, encara hem de veure quina és la que interessa més als inversors.
+- La complexitat d'implementar altres fórmules ve de que les factures dels diferents contractes:
+	- arriben sense cap ordre
+	- els periodes de facturació són diferents i canviants
+	- es refacturen, s'anul·len...
+- Es viable implementar altres però considerem que millor esperar el feedback dels inversors.
 - Esperarem que passin uns mesos i veiem com es fa servir o a que hagi una certa demanda d'algun tipus de restricció per implementar-la.
-
-
 
 
 ## Glossari
