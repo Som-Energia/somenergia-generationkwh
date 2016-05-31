@@ -5,7 +5,7 @@ readme = open("README.md").read()
 
 setup(
 	name = "somenergia-generationkwh",
-	version = "0.2",
+	version = "1.0",
 	description =
 		"OpenERP module and library to manage Som Energia's Generation kWh",
 	author = "Som Energia SCCL",
