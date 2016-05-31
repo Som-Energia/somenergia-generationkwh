@@ -2,13 +2,8 @@
 
 ## Inmediate TODO's
 
-- Assignments Script: `--until date` filters out members with no investment effective that date
-- Assignments Script: filter members with 'mail already sent' flag, unles `--insist` flag is enabled
-- Assignments Script: filter members already with assignments unless `--force` option
-- Assignments Script: `--mail` sends mail option
-- Generate the first investment batch at production
-- Accounting: review desinvestments and returned payments on first batch
-- Include the member code into the mail template for default assignment (Wait until investments have effective date in the future)
+- Testing invocing
+- Testing production import
 - Investment: Add test on list for inactivated investment
 - Assignments: Add test for observations log
 - Manual testing scripts
@@ -23,7 +18,6 @@
     - Afegir lectures (a ma)
     - Generar factures (a ma)
     + Show rights and other curves
-- Testing invocing
 - Init:
     - Setup plants
     - First remainder
@@ -34,8 +28,7 @@
 - Nightly:
     - Create members from partners becoming members, lately
     - Turn move lines into investments
-    - Create default assignment
-    - Send email explaining assignment
+    - Create default assignment for investment a month about becoming effective and send an email
 
 - Soci entries are not available until socis script runs. Consequence: investment creation fails for those members (worked around by ignoring them until next run but synchronous soci creation would be better solution)
 - Turn warning on investment creation with no member available into a logged one
@@ -51,7 +44,6 @@
 - Investment: ondelete -> member
 - Investment: Janitoring: mode lines without partner
 - Investment: Janitoring: mode lines without dates
-+ Investment: negative move line: activation date should be the same or inmediate? -> They are deactivated by hand
 - Investment: constant for the account root for generationkwh accounts
 - Investment: constant for the number of digits for the soci code in accounts
     - Can be found at `ir_secuence.code="socis"`
@@ -65,6 +57,8 @@
 - BUG: Mongodb erp integration: reconnections do not refresh connection attr
 - Security: add users to generationkwh group
 - Security: add users to plantmeter group
+- Assignments Script: filter members with 'mail already sent' flag, unles `--insist` flag is enabled
+- Assignments Script: filter members already with assignments unless `--force` option
 
 
 ## Postponed for Next Iteration
@@ -76,11 +70,26 @@
     - Rare case, low priority, wait for actual cases
 - WebForms: Create the soci
 - WebForms: Create the investments form webforms
-- Use xml for the mail template so we can reference model data id instead of id number
+- Investments: Desinvestment action
+    - Decide when apply 4%
+    - Warn when too many desinvestments for the year
+    - Decide policy with effective dates
+    - Decide policy with rigths caducity
+- Investments: Transfer action
+    - Decide policy with effective dates
+    - Decide policy with rights caducity
 
 
 ## DONE
 
++ Assignments Script: `--until date` filters out members with no investment effective that date
++ Assignments Script: `--mail` sends mail option
++ Generate the first investment batch at production
++ Accounting: review desinvestments and returned payments on first batch
++ Assignation proposal for the first investment batch and email sending
++ Include the member code into the mail template for default assignment
++ Investment: negative move line: activation date should be the same or inmediate? -> They are deactivated by hand
++ Use xml for the mail template so we can reference model data id instead of id number
 + Rename assignment.isActive -> assignment.anyForContract
 + Catalan translation of Assignment model strings
 + Default assignment mail: include the member id on subject to easy support tasks when receiving answers
