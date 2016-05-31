@@ -127,7 +127,7 @@ en comptes donar-te dret a un interès,
 
 - A la factura impresa s'identifica pel logo a la primera pàgina
 
-TODO: Pantallada de la capcelera amb el logo
+![Logoa a la factura](pantallades/factura-header.png)
 
 - A la llista de factures, un nou check indica si la factura té Generation.
 
@@ -135,7 +135,7 @@ TODO: Pantallada de la llista de factures
 
 - A les línies de detall de la factura apareixen línies generation que indiquen el soci que ha fet la inversió.
 
-TODO: Pantallada del detall d'una factura
+![Linieas de factura Generation](pantallades/factura-detall.png)
 
 
 ## Procediments
