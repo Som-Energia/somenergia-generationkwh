@@ -24,6 +24,7 @@ en comptes donar-te dret a un interès,
 - Aquest preu dels kWh Generation es fixarà cada any a l'assemblea segons els costos reals d'amortització i de manteniment que preveiem
 - És un preu que **esperem que sigui** més barat, donat que no pateix la bufada especulativa de la subasta del mercat elèctric
 
+
 ## Com funciona la inversió? (Inversions)
 
 - Les inversions es fan en **accions** de 100€
@@ -63,19 +64,24 @@ en comptes donar-te dret a un interès,
 
 ## Com veiem l'equip les inversions a l'ERP
 
+- Les opcions del Generation estan una mica amagades:
+
+![On trobar al menu les opcions del Generation kWh](pantallades/genkwh-menu.png)
+
 - Al menu `Generation kWh/Inversions Generation kWh` tenim la llista de totes les inversions
-	- Comptabilitat la fa servir per fer neteja (desactivar) les inversions que no ho són.
-	Són desinversions, balanços, remeses retornades...
-	que no sabem identificar de forma automàtica i cal fer-ho a mà.
+    - Veure les que han anat entrant
+    - Per localitzar i desactivar les que s'han desinvertit (Comptabilitat)
+    - (Futur) Botó per generar assignacions per defecte per les noves
+
+![Llistat d'inversions](pantallades/inversions.png)
+
 - Generalment farem servir millor la pestanya `Generation kWh` del soci:
 	- Només apareix la pestanya si el soci té inversions
 	- La podem trobar a:
 		- Menú `Generation kWh/Socis amb Generation kWh`
 		- Menú `Empreses/Socis`
 
-TODO: ficar pantallades
-
-TODO: Explicar els altres camps del resum generation
+![Pestaña Generation kWh del soci](pantallades/socis_form.png)
 
 
 ## Com es reparteixen els kwh que generen les inversions d'un soci? (Assignacions)
@@ -110,7 +116,6 @@ TODO: Explicar els altres camps del resum generation
 - Les assignacions es poden crear, eliminar o editar (la prioritat) com altres objectes de l'ERP (lectures...)
 - Totes les accions que fem amb les assignacions quedaran registrades a les observacions a la part inferior.
 
-TODO: ficar pantallades
 
 
 
