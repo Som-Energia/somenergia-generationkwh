@@ -117,8 +117,6 @@ en comptes donar-te dret a un interès,
 - Totes les accions que fem amb les assignacions quedaran registrades a les observacions a la part inferior.
 
 
-
-
 ## Factures Generation
 
 - Quan fem una factura, serà Generation:
@@ -127,11 +125,11 @@ en comptes donar-te dret a un interès,
 
 - A la factura impresa s'identifica pel logo a la primera pàgina
 
-![Logoa a la factura](pantallades/factura-header.png)
+![Logo a la factura](pantallades/factura-header.png)
 
 - A la llista de factures, un nou check indica si la factura té Generation.
 
-TODO: Pantallada de la llista de factures
+![Nova columna a la llista de factures](pantallades/llista-factures-tegeneration.png)
 
 - A les línies de detall de la factura apareixen línies generation que indiquen el soci que ha fet la inversió.
 
@@ -246,6 +244,13 @@ TODO: Pantallada factura multi-font
 	- es refacturen, s'anul·len...
 - Es viable implementar altres però considerem que millor esperar el feedback dels inversors.
 - Esperarem que passin uns mesos i veiem com es fa servir o a que hagi una certa demanda d'algun tipus de restricció per implementar-la.
+
+
+### Es pot assignar contractes en esborrany?
+
+- Sí, cap problema.
+- Els contractes en esborrany no afecten als altres fins que no s'activen.
+- Per exemple, si el posem com a prioritari, els menys prioritaris no s'esperen.
 
 
 ## Glossari
