@@ -193,6 +193,27 @@ class ProductionLoaderTest(unittest.TestCase):
             (1, isodate('2015-08-17'), 0),
             ])
 
+    def test_appendRightsPerShare_manyDays(self):
+        rights = RightsPerShare(self.db)
+        remainders = RemainderProviderMockup([])
+        l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
+        l._appendRightsPerShare(
+            nshares=1,
+            firstDateToCompute=isodate('2015-08-16'),
+            lastDateToCompute=isodate('2015-08-17'),
+            lastRemainder=0,
+            production=numpy.array((+10*[0]+[1000]+14*[0])*2),
+            plantshares=numpy.array(25*[1]*2),
+            )
+        result = rights.rightsPerShare(1,
+            isodate('2015-08-16'),
+            isodate('2015-08-17'))
+        self.assertEqual(list(result),
+            (+10*[0]+[1000]+14*[0])*2)
+        self.assertEqual(remainders.lastRemainders(), [
+            (1, isodate('2015-08-18'), 0),
+            ])
+
     def test_appendRightsPerShare_withManyPlantShares_divides(self):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([])

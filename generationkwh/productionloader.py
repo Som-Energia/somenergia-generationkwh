@@ -88,7 +88,7 @@ class ProductionLoader(object):
                     [nshares, lastDateToCompute+datetime.timedelta(days=1), newRemainder]])
         if self.rightsPerShare:
             self.rightsPerShare.updateRightsPerShare(
-                    nshares, lastDateToCompute, userRights)
+                    nshares, firstDateToCompute, userRights)
 
 
 
