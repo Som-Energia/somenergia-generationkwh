@@ -33,9 +33,8 @@ en comptes donar-te dret a un interès,
 - Passat l'any de carència, es comencen a generar drets a kWh durant els 24 anys que queden d'inversió.
 - També passat aquest any de carència es comença a tornar el prèstec
 	- El primer any, el de carència, no es torna res
-	- El segon any es torna el corresponent al primer any i al segon: 8€/acció
-	- Els 23 anys restants es tornen 4€/acció, fins tornar els 100€/acció
-	- TODO: Confirmar que el retorn de l'any de carència es fa l'any 2 i no el 25
+	- Els 23 anys anys següents es tornen 4€/acció
+	- El darrer any es tornen 8€/acció
 
 
 ## Quants kWh li toquen a cada inversor? (Drets)
