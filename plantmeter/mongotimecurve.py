@@ -128,7 +128,7 @@ class MongoTimeCurve(object):
         assert stop.tzinfo is not None, (
             "MongoTimeCurve.get called with naive (no timezone) stop date")
 
-        ndays = (stop-start).days+1
+        ndays = (stop.date()-start.date()).days+1
         data = numpy.zeros(ndays*hoursPerDay, numpy.int)
         if filling :
             filldata = numpy.zeros(ndays*hoursPerDay, numpy.bool)

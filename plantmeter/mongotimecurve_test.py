@@ -422,6 +422,23 @@ class MongoTimeCurve_Test(unittest.TestCase):
             list(curve),
             [0,1,2,3]+19*[0]+[4,0])
 
+    def test_get_twoDays_includingToSummerDaylight(self):
+        mtc = self.setupPoints([
+            ('2015-03-30 23:00:00', 'miplanta', 10),
+            ])
+
+        curve = mtc.get(
+            start=localisodate('2015-03-29'),
+            stop=localisodate('2015-03-30'),
+            filter='miplanta',
+            field='ae',
+            )
+        self.assertEqual(
+            list(curve),
+            +25*[0]
+            +23*[0]+[10,0]
+            )
+
     def test_get_dayligthIntoWinter(self):
         mtc = self.setupPoints([
             ('2015-10-25 00:00:00', 'miplanta', 1),
