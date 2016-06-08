@@ -2,44 +2,34 @@
 
 ## Inmediate TODO's
 
-- Testing invocing
-- Testing production import
-- Investment: Add test on list for inactivated investment
-- Assignments: Add test for observations log
-- Manual testing scripts
-    + Create investments
-    + Create assignments
-    + Init: initial date, 1-shares remainder
-    + Additional init for n-shares remainders
-    + Inject production (without plants)
-        + Flat profile for several days
-        + Clon realistic profile (csv) for several days
-    - Inicialitzar preus per a proves (a ma)
-    - Afegir lectures (a ma)
-    - Generar factures (a ma)
-    + Show rights and other curves
-- Init:
-    - Setup plants
-    - First remainder
-        - Reminder Migration: a reminder for 1-shares curve
-        - Reminder Migration: a reminder for known to be used n-shares (optional)
-    - Inicialitzar preus Genkwh (a ma)
-    - Run Nightly script for existing investments
-- Nightly:
-    - Create members from partners becoming members, lately
-    - Turn move lines into investments
-    - Create default assignment for investment a month about becoming effective and send an email
-
-- Soci entries are not available until socis script runs. Consequence: investment creation fails for those members (worked around by ignoring them until next run but synchronous soci creation would be better solution)
-- Turn warning on investment creation with no member available into a logged one
+- Traduir Mail Premi
+- Definir grups enviament segons data enviament vs data efectiva
+    - Grup 1: fins el dia que s'envii
+    - Grup 2: fins el 2016-04-26
+- Muntar template
+- Escriure script d'enviament
+- Redactar versio sense maquina del temps
+- Traduir sense maquina del temps
+- Posar la data efectiva de tots
+- Enviar correu primera tongada
+- Modificar template
+- Enviar segona tongada
+- Modificar el mail d'assignacio per que inclogui la data effectiva
+- Cron: Create default assignment for investment a month about becoming effective and send an email
+- Locate and fix the found problem in tested batch
 
 
 ## Unscheduled TODO's
 
+- Turn warning on investment creation with no member available into a logged one
+- Investment: Add test on list for inactivated investment
+- Assignments: Add test for observations log
+- Cron: Turn move lines into investments
+- Cron: Create members from partners becoming members
+- Manual testing scripts
+    - Afegir lectures (a ma)
+    - Generar factures (a ma)
 - Modify invoicing mail to warn about having Genkwh active
-- Investment created by webforms and then payment orders are created on them.
-- `genkwh_assigment`default --all: consider active flag and other states
-- Filter invoices by having generation or not
 - ProductionToRightsPerShare naive: Protect againts divby0 when total active actions is zero
 - Investment: ondelete -> member
 - Investment: Janitoring: mode lines without partner
@@ -47,24 +37,23 @@
 - Investment: constant for the account root for generationkwh accounts
 - Investment: constant for the number of digits for the soci code in accounts
     - Can be found at `ir_secuence.code="socis"`
-
 - Assignment: ondelete -> polissa
 - Assignment: ondelete -> member
-- Make assignation test resilent to changes on contract annual use
-- Assignment: having a log, expiration is no longer needed, just delete instead
-
-
+- Assignment: Having a log, remove expiration field, just delete the assigment
 - BUG: Mongodb erp integration: reconnections do not refresh connection attr
-- Security: add users to generationkwh group
-- Security: add users to plantmeter group
 - Assignments Script: filter members with 'mail already sent' flag, unles `--insist` flag is enabled
 - Assignments Script: filter members already with assignments unless `--force` option
 
 
-## Postponed for Next Iteration
+## Postponed for Next Iterations
 
-- Investment: optimize with sql
-- Invert the investment creation flux: webform -> draft investment -> payment -> active investment
+- Rights/Usage: Protect the system when Rights < Usage (because of recomputation of procduction, or any weir thing)
+- Rights/Usage: Regularize usage above member rights (because of recomputation of procduction, or any weir thing)
+- Investment: optimize investment creation with sql
+- Investment created by webforms and then payment orders are created on them.
+    - Webform -> draft investment 
+    - draft investment -> payment request -> active investment
+    - active investment -> payment rejected -> inactive invesment
 - Assignment: Given a contract that can consume rights from several members, define the order in which it should consume them.
     - Right now is an arbitrary order, not bad
     - Rare case, low priority, wait for actual cases
@@ -78,10 +67,38 @@
 - Investments: Transfer action
     - Decide policy with effective dates
     - Decide policy with rights caducity
+- Introduce new assignations constraints
+- OV: List investments
+- OV: List assignations
+- OV: Assignation editor
+- OV: Stats and graphs: accomulated, used (by X), and about to expire rights
+- OV: Sencondary market of shares
+- Invoice: Include more info
 
 
 ## DONE
 
++ Make assignation test resilent to changes on contract annual use [Cesar]
++ Filter invoices by having generation or not [Gisce]
++ Security: add users to generationkwh group
++ Security: add users to plantmeter group
++ Testing invocing
++ Testing production import
++ Init:
+    + Setup plants
+    + First remainder
+        + Reminder Migration: a reminder for 1-shares curve
+        + Reminder Migration: a reminder for known to be used n-shares (optional)
+    + Inicialitzar preus Genkwh (a ma)
++ Testing scripts: Create investments
++ Testing scripts: Create assignments
++ Testing scripts: Init: initial date, 1-shares remainder
++ Testing scripts: Additional init for n-shares remainders
++ Testing scripts: Inject flat production for several days (without plants)
++ Testing scripts: Inject csv production for several days (without plants)
++ Testing scripts: Inicialitzar preus per a proves (a ma)
++ Testing scripts: Show rights and other curves
++ `genkwh_assigment`default --all: consider active flag and other states
 + Assignments Script: `--until date` filters out members with no investment effective that date
 + Assignments Script: `--mail` sends mail option
 + Generate the first investment batch at production
