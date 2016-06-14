@@ -148,5 +148,40 @@ class MemberRightsCurve_Test(unittest.TestCase):
             eager = True,
             )
 
+    def test_eager_withMoreThan31Shares(self):
+
+        # This addresses a but regarding hardcoded limit of 32 in np.choose
+        self.assertRightsEqual(
+            member='member',
+            start='2015-01-21',
+            end='2015-01-22',
+            activeShares = 50*[33],
+            rightsPerShare = {
+                33: 50*[20],
+                },
+            expected = 50*[20],
+            eager = True
+            )
+
+    def test_eager_withMoreThan31DifferentShares(self):
+
+        # This addresses a but regarding hardcoded limit of 32 in np.choose
+        # Not addressed in this case, so we assert
+        with self.assertRaises(AssertionError) as ctx:
+            self.assertRightsEqual(
+                member='member',
+                start='2015-01-21',
+                end='2015-01-22',
+                activeShares = 16*[33]+list(xrange(34)),
+                rightsPerShare = dict([
+                    (i, 50*[20])
+                    for i in xrange(32)
+                    ]),
+                expected = 50*[20],
+                eager = True
+                )
+        self.assertEqual(ctx.exception.args[0],
+            "The member has too many different numbers of shares within the interval")
+
 
 # vim: ts=4 sw=4 et

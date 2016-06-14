@@ -50,9 +50,26 @@ class MemberRightsCurve(object):
                 start, end, member))
             )
 
+    def _choose(self, shares, choices):
+        compactChoices = []
+        keyMap={}
+        for share, choice in enumerate(choices):
+            if choice is None: continue
+            keyMap[share]=len(compactChoices)
+            compactChoices.append(choice)
+        assert len(compactChoices) <= 32, (
+            "The member has too many different numbers of shares "
+            "within the interval")
+
+        selectors = [ keyMap[share] for share in shares ]
+
+        return numpy.choose(selectors, compactChoices)
+
     def _get_eager(self, member, start, end):
         assert type(start) == datetime.date
         assert type(end) == datetime.date
+
+        # TODO: Make the matrix compact from scratch
 
         shares = self._activeShares.hourly(start, end, member)
         choiceset = list(sorted(set(shares)))
@@ -74,7 +91,7 @@ class MemberRightsCurve(object):
             n for n in choiceset
             if n not in initedRemainders
             ])
-        return numpy.choose(shares, choices)
+        return self._choose(shares, choices)
 
     def rights_kwh(self, member, start, end):
         if self._eager:
