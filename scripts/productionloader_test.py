@@ -6,11 +6,9 @@ dbconfig = None
 try:
     import dbconfig
     import erppeek
-    from plantmeter.mongotimecurve import addDays
 except ImportError:
     pass
-
-from generationkwh.isodates import localisodate
+from generationkwh.isodates import addDays, localisodate
 
 def datespan(startDate, endDate, delta=datetime.timedelta(hours=1)):
     currentDate = startDate

@@ -21,8 +21,7 @@ TODO:
 
 """
 
-from plantmeter.mongotimecurve import addDays, assertLocalDateTime, toLocal
-from plantmeter.isodates import assertDate
+from .isodates import assertDate
 from .productiontorightspershare import ProductionToRightsPerShare
 
 import datetime

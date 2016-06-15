@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from sharescurve import MemberSharesCurve, PlantSharesCurve
-from plantmeter.mongotimecurve import toLocal
 
 import unittest
 from yamlns import namespace as ns

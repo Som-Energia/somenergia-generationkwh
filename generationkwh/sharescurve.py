@@ -2,7 +2,6 @@
 
 import datetime
 import numpy
-from plantmeter.mongotimecurve import curveIndexToDate, dateToCurveIndex, toLocal
 
 class MemberSharesCurve(object):
     """ Provides the shares that are active at a give
