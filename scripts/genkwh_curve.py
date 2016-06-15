@@ -9,7 +9,6 @@ from yamlns import namespace as ns
 from sequence import sequence
 import datetime
 import erppeek
-import dbconfig
 
 dbname='generationkwh_test'
 
@@ -44,7 +43,7 @@ def doPlot(columns, first, last):
         tickTextHeight=390,
         )
     timeAxis.setGrid(100)
-     
+
     plot.addLegend()
     for i,column in enumerate(columns):
         plot.plot(np.array(column[1:]),
@@ -58,6 +57,13 @@ def doPlot(columns, first, last):
     app.exec_()
 
 def compute(member, first, last, output=None, idmode='memberid', shares=None, show=False, **args):
+    config = args.get('config',None)
+    if config:
+        import imp
+        dbconfig=imp.load_source('dbconfig',config)
+    else:
+        import dbconfig
+
     erp = erppeek.Client(**dbconfig.erppeek)
     member = preprocessMembers(erp,[member], idmode=idmode)[0]
     first, last = str(first), str(last)
@@ -155,6 +161,14 @@ def parseArguments():
                 "You can use hyphen to indicate a range. "
                 "Example: 1-3,9 is 1,2,3,9.",
             )
+    for sub in dump,plot,init,:
+        sub.add_argument(
+            '-C','--config',
+            dest='config',
+            metavar="DBCONFIG.py",
+            help="explicitly use config file instead dbconfig.py at the binary location",
+            )
+
     for sub in dump,plot,:
         sub.add_argument(
             'member',
