@@ -18,7 +18,7 @@ class Resource_Test(unittest.TestCase):
         self.databasename = 'generationkwh_test'
         self.collection = 'production'
 
-        self.connection = pymongo.Connection()
+        self.connection = pymongo.MongoClient()
         self.connection.drop_database(self.databasename)
         self.db = self.connection[self.databasename]
         self.curveProvider = MongoTimeCurve(self.db, self.collection)
@@ -406,7 +406,7 @@ class Meter_Test(unittest.TestCase):
         self.databasename = 'generationkwh_test'
         self.collection = 'production'
 
-        self.connection = pymongo.Connection()
+        self.connection = pymongo.MongoClient()
         self.connection.drop_database(self.databasename)
         self.db = self.connection[self.databasename]
         self.curveProvider = MongoTimeCurve(self.db, self.collection)

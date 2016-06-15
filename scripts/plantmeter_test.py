@@ -31,12 +31,12 @@ class PlantMeterApiTestBase(unittest.TestCase):
         import tempfile
 
         self.maxDiff = None
-        self.database = dbconfig.pymongo['database']
+        self.database = 'dummytest'
         self.collection = 'generationkwh.production.measurement'
 
         self.c = erppeek.Client(**dbconfig.erppeek)
         self.helper = self.c.GenerationkwhProductionAggregatorTesthelper
-        self.m = pymongo.Connection()
+        self.m = pymongo.MongoClient()
         self.mdb = self.m[self.database]
         self.mdc = self.mdb[self.collection]
         self.curveProvider = MongoTimeCurve(self.mdb, self.collection)

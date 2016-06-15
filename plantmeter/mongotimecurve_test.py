@@ -244,12 +244,12 @@ class MongoTimeCurve_Test(unittest.TestCase):
         self.databasename = 'generationkwh_test'
         self.collection = 'generation'
 
-        c = pymongo.Connection()
+        c = pymongo.MongoClient()
         c.drop_database(self.databasename)
         self.db = c[self.databasename]
 
     def tearDown(self):
-        c = pymongo.Connection()
+        c = pymongo.MongoClient()
         c.drop_database('generationkwh_test')
     
     def setupPoints(self, points):
