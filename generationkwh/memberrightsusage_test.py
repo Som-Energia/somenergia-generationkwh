@@ -10,12 +10,12 @@ class MemberRightsUsage_Test(unittest.TestCase):
     def setUp(self):
         self.databasename = 'generationkwh_test'
         
-        c = pymongo.Connection()
+        c = pymongo.MongoClient()
         c.drop_database(self.databasename)
         self.db = c[self.databasename]
         
     def tearDown(self):
-        c = pymongo.Connection()
+        c = pymongo.MongoClient()
         c.drop_database('generationkwh_test')
 
 
