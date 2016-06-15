@@ -4,3 +4,7 @@ numpy
 xlrd
 yamlns
 pytz
+erppeek
+consolemsg
+mock
+b2btest
