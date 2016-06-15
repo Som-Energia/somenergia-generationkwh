@@ -1,7 +1,7 @@
 import datetime
 from ..providers import BaseProviderConnectionError, \
         BaseProviderDownloadError, BaseProviderSyntaxError
-from .monsol import MonsolProvider , parseLocalTime
+from .monsol import MonsolProvider, parseLocalTime
 from ..isodates import isodate
 
 import unittest

@@ -5,7 +5,6 @@ Generates investments from the accounting logs.
 
 import erppeek
 import dbconfig
-import b2btest
 
 import glob
 import os

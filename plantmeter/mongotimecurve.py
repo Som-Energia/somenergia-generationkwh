@@ -4,7 +4,6 @@ import pymongo
 from yamlns import namespace as ns
 import numpy
 import datetime
-import pytz
 
 """
 + More than one meassure
@@ -20,36 +19,17 @@ import pytz
 
 """
 
-tz = pytz.timezone('Europe/Madrid')
+from .isodates import (
+    asUtc,
+    toLocal,
+    parseLocalTime,
+    assertLocalDateTime,
+    tz,
+    addDays,
+    )
+
+
 hoursPerDay=25
-
-def asUtc(date):
-    if date.tzinfo is None:
-        return pytz.utc.localize(date)
-    return date.astimezone(pytz.utc)
-
-def toLocal(date):
-    if date.tzinfo is None:
-        return tz.localize(date)
-    return date.astimezone(tz)
-
-def parseLocalTime(string, isSummer=False, format="%Y-%m-%d %H:%M:%S"):
-    naive = datetime.datetime.strptime(string, format)
-    localized = tz.localize(naive)
-    if not isSummer: return localized
-    if localized.dst(): return localized
-    onehour = datetime.timedelta(hours=1)
-    lesser = tz.normalize(localized-onehour)
-    return lesser if lesser.dst() else localized
-
-def assertLocalDateTime(name, value):
-    assert isinstance(value, datetime.datetime), (
-        "{} should be a datetime".format(name))
-    assert value.tzinfo, (
-        "{} should have timezone".format(name))
-    assert value.tzname() in ('CET','CEST'), (
-        "{} has {} timezone".format(name, value.tzname()))
-
 
 """
 - Spain daylight:
@@ -81,11 +61,6 @@ def dateToCurveIndex(start, localTime):
     ndays = (localTime.date()-start.date()).days
     winterOffset = 0 if localTime.dst() else 1
     return localTime.hour + hoursPerDay*ndays + winterOffset
-
-def addDays(date, ndays):
-    resultday = date.date() + datetime.timedelta(days=ndays)
-    naiveday = datetime.datetime.combine(resultday, datetime.time(0,0,0))
-    return toLocal(naiveday)
 
 
 def curveIndexToDate(start, index):
