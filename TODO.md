@@ -2,26 +2,30 @@
 
 ## Inmediate TODO's
 
-- Traduir Mail Premi
-- Definir grups enviament segons data enviament vs data efectiva
-    - Grup 1: fins el dia que s'envii
-    - Grup 2: fins el 2016-04-26
-- Muntar template
++ Locate and fix the found problem in tested batch
+    + Fix: 32 limit on choose
+    + Fix: 3.0 P4-P5-P6 not used in P1-P2-P3
++ Traduir Mail Premi
++ Definir grups enviament segons data enviament vs data efectiva
+    + Grup 1: fins el dia que s'envii
+    + Grup 2: fins el 2016-04-26
++ Muntar template
++ Redactar versio sense maquina del temps
++ Traduir sense maquina del temps
++ Posar la data efectiva de tots
+- Introduir els preus a produccio
 - Escriure script d'enviament
-- Redactar versio sense maquina del temps
-- Traduir sense maquina del temps
-- Posar la data efectiva de tots
-- Enviar correu primera tongada
-- Modificar template
-- Enviar segona tongada
+    - Seleccionar els socis que han invertit abans de 2016-04-26
+    - Enviar el correu
+- Enviar correu
 - Modificar el mail d'assignacio per que inclogui la data effectiva
+- Posar la data effectiva a totes les inversions comprovades
 - Cron: Create default assignment for investment a month about becoming effective and send an email
-- Locate and fix the found problem in tested batch
 
 
 ## Unscheduled TODO's
 
-- Turn warning on investment creation with no member available into a logged one
+- Turn warning on investment creation with no member available into a logged warning
 - Investment: Add test on list for inactivated investment
 - Assignments: Add test for observations log
 - Cron: Turn move lines into investments
