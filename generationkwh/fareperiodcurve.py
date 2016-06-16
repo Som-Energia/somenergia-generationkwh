@@ -34,7 +34,7 @@ class FarePeriodCurve(object):
         startMonth = begin.year*12 + begin.month-1
         endMonth = end.year*12 + end.month-1
         allDays = sum([
-            t.get_period_component(
+            t.get_period_component_aggregated(
                 datetime.date(month//12, month%12+1, 1),
                 period,
                 holidays=self.holidays.get(begin,end)
