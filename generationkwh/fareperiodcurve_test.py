@@ -48,6 +48,9 @@ class LibFacturacioAtr_Factory_Test(unittest.TestCase):
         with self.assertRaises(KeyError):
             tarifespool.TarifaPool.get_class_by_code("Bad")
 
+@unittest.skipIf(libfacturacioatr is None,
+    'non-free libfacturacioatr module is not installed' )
+
 class FarePeriodCurve_Test(unittest.TestCase):
 
     def setupCurve(self,start_date,end_date,fare,period,holidays=[]):
@@ -77,7 +80,6 @@ class FarePeriodCurve_Test(unittest.TestCase):
         p = FarePeriodCurve(holidays=HolidaysProvidersMockup())
 
         mask = self.setupCurve('2015-12-01', '2015-12-31', '3.1A', 'P1')
-        print mask
 
         self.assertArrayEqual(mask,
             + 4 * ( [0]*17 + [1]*6+ [0]*2 )
@@ -90,7 +92,6 @@ class FarePeriodCurve_Test(unittest.TestCase):
             + 2 * ( [0]*25 )
             + 4 * ( [0]*17 + [1]*6+ [0]*2 )
             )
-        print "done"
 
     def test_31A_P3_singleMonth(self):
         p = FarePeriodCurve(holidays=HolidaysProvidersMockup())
