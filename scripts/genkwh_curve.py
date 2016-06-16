@@ -12,6 +12,15 @@ import erppeek
 
 dbname='generationkwh_test'
 
+def config(filename):
+    if filename:
+        import imp
+        dbconfig = imp.load_source('config',filename)
+    else:
+        import dbconfig
+    return dbconfig
+
+
 def doPlot(columns, first, last):
     from pyqtgraph.Qt import QtGui, QtCore
     import numpy as np
@@ -57,13 +66,7 @@ def doPlot(columns, first, last):
     app.exec_()
 
 def compute(member, first, last, output=None, idmode='memberid', shares=None, show=False, **args):
-    config = args.get('config',None)
-    if config:
-        import imp
-        dbconfig=imp.load_source('dbconfig',config)
-    else:
-        import dbconfig
-
+    dbconfig = config(args.get('config', None))
     erp = erppeek.Client(**dbconfig.erppeek)
     member = preprocessMembers(erp,[member], idmode=idmode)[0]
     first, last = str(first), str(last)
