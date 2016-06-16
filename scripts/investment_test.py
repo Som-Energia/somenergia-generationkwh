@@ -17,7 +17,7 @@ class Investment_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
-        self.Investment = c.GenerationkwhInvestment
+        self.Investment = erp().GenerationkwhInvestment
         self.Investment.dropAll()
 
     def tearDown(self):

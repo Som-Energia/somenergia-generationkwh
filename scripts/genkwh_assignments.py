@@ -7,13 +7,20 @@ import erppeek
 import datetime
 from consolemsg import step, success
 from dateutil.relativedelta import relativedelta
-import dbconfig
 from yamlns import namespace as ns
 from generationkwh.isodates import isodate
 
 def parseArgumments():
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
+
+    parser.add_argument(
+        '-C', '--config',
+        dest='config',
+        metavar='DBCONFIG.py',
+        help="use that DBCONFIG.py as configuration file "
+            "instead of default dbconfig.py at script location.",
+        )
 
     subparsers = parser.add_subparsers(
         title="Subcommands",
@@ -37,8 +44,11 @@ def parseArgumments():
     clear = subparsers.add_parser('clear',
         help="clear assignment objects",
         )
+    price = subparsers.add_parser('price',
+        help="sends the price mail to the pioneers",
+        )
 
-    for sub in default, expire, assign, list,:
+    for sub in default, expire, assign, list, price:
         sub.add_argument(
             '-p','--partner',
             dest='idmode',
@@ -72,14 +82,14 @@ def parseArgumments():
             action='store_true',
             help='apply it to all members with investments',
             )
-    for sub in default,list,:
+    for sub in default,list,price:
         sub.add_argument(
             dest='members',
             type=int,
             nargs='*',
             help="investors of Generation-kWh (see --partner and --number)",
             )
-    for sub in default, unassigned:
+    for sub in default, unassigned, price:
         sub.add_argument(
             '--effectiveon',
             type=isodate,
@@ -93,6 +103,16 @@ def parseArgumments():
             metavar='YYYY-MM-DD',
             help="filter out investments purchased after "
                 "the indicated ISO date",
+            )
+        sub.add_argument(
+            '--force',
+            action='store_true',
+            help="even if an assigment already exists ",
+            )
+        sub.add_argument(
+            '--insist',
+            action='store_true',
+            help="even if the notification has been sent",
             )
     for sub in default,:
         sub.add_argument(
@@ -122,13 +142,15 @@ def parseArgumments():
 
     return parser.parse_args(namespace=ns())
 
-def preprocessMembers(members=None,idmode=None, all=None, effectiveon=None, purchaseduntil=None):
+def preprocessMembers(members=None,idmode=None, all=None, effectiveon=None, purchaseduntil=None, force=False, insist=False):
     """Turns members in which ever format to the ones required by commands"""
 
     if all or effectiveon or purchaseduntil:
         return c.GenerationkwhAssignment.unassignedInvestors(
             effectiveon and str(effectiveon),
             purchaseduntil and str(purchaseduntil),
+            force,
+            insist,
             )
 
     if idmode=="partner":
@@ -211,13 +233,14 @@ def expire(
 def default(
         members=None,
         force=False,
+        insist=False,
         idmode=None,
         all=None,
         mail=False,
         effectiveon=None,
         purchaseduntil=None,
         **_):
-    members=preprocessMembers(members, idmode, all, effectiveon, purchaseduntil)
+    members=preprocessMembers(members, idmode, all, effectiveon, purchaseduntil, force, insist)
     step("Generating default assignments for members: {}".format(
         ','.join(str(i) for i in members)))
     c.GenerationkwhAssignment.createDefaultForMembers(members)
@@ -239,23 +262,37 @@ def assign(member=None,contract=None,priority=None, idmode=None, contractMode=No
         'priority': priority
     })
 
-def unassigned(effectiveon=None, purchaseduntil=None):
+def unassigned(effectiveon=None, purchaseduntil=None, force=False, insist=False):
     members=preprocessMembers(
         members=[],
         idmode='memberid',
         all=all,
         effectiveon=effectiveon,
         purchaseduntil=purchaseduntil,
+        force=force,
+        insist=force,
         )
     print u'\n'.join(str(i) for i in members)
 
-c = erppeek.Client(**dbconfig.erppeek)
+c = None
 
 def main():
+    import sys
+    args = parseArgumments()
+    print >> sys.stderr, args.dump()
+
+    if args.config:
+        import imp
+        dbconfig = imp.load_source('config',args.config)
+    else:
+        import dbconfig
+    del args.config
+
+    global c
+    c = c or erppeek.Client(**dbconfig.erppeek)
+
     # Calls the function homonymous to the subcommand
     # with the options as paramteres
-    args = parseArgumments()
-    print args.dump()
     subcommand = args.subcommand
     del args.subcommand
     globals()[subcommand](**args)

@@ -6,13 +6,25 @@ Generates investments from the accounting logs.
 import erppeek
 import datetime
 from dateutil.relativedelta import relativedelta
-import dbconfig
 from yamlns import namespace as ns
 from generationkwh.isodates import isodate
+
+def erp():
+    global c
+    import dbconfig
+    return c or erppeek.Client(**dbconfig.erppeek)
 
 def parseArgumments():
     import argparse
     parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        '-C', '--config',
+        dest='config',
+        metavar='DBCONFIG.py',
+        help="use that DBCONFIG.py as configuration file "
+            "instead of default dbconfig.py at script location.",
+        )
 
     subparsers = parser.add_subparsers(
         title="Subcommands",
@@ -80,7 +92,7 @@ def parseArgumments():
     return parser.parse_args(namespace=ns())
 
 def clear(**args):
-    ids = c.GenerationkwhInvestment.dropAll()
+    ids = erp().GenerationkwhInvestment.dropAll()
 
 def listactive(member=None, start=None, stop=None, csv=False):
     """
@@ -99,7 +111,7 @@ def listactive(member=None, start=None, stop=None, csv=False):
                 ))+'\n'
             for line in data))
 
-    csvdata = buildcsv(c.GenerationkwhInvestment.effective_investments_tuple(
+    csvdata = buildcsv(erp().GenerationkwhInvestment.effective_investments_tuple(
             member, start and str(start), stop and str(stop)))
     if csv: return csvdata
     print csvdata
@@ -110,7 +122,7 @@ def create(start=None, stop=None,
         force=False,
         **_):
     if force: clear()
-    c.GenerationkwhInvestment.create_from_accounting(
+    erp().GenerationkwhInvestment.create_from_accounting(
         None, # member
         start and str(start),
         stop and str(stop),
@@ -125,7 +137,7 @@ def effective(
         force=False,
         **_):
 
-    return c.GenerationkwhInvestment.set_effective(
+    return erp().GenerationkwhInvestment.set_effective(
         start and str(start),
         stop and str(stop),
         waitingDays,
@@ -133,13 +145,24 @@ def effective(
         force,
         )
 
-c = erppeek.Client(**dbconfig.erppeek)
+c = None
 
 def main():
-    # Calls the function homonymous to the subcommand
-    # with the options as paramteres
     args = parseArgumments()
     print args.dump()
+
+    if args.config:
+        import imp
+        dbconfig = imp.load_source('config',args.config)
+    else:
+        import dbconfig
+
+    global c
+    c = c or erppeek.Client(**dbconfig.erppeek)
+    del args.config
+
+    # Calls the function homonymous to the subcommand
+    # with the options as paramteres
     subcommand = args.subcommand
     del args.subcommand
     globals()[subcommand](**args)
