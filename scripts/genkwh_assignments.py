@@ -114,7 +114,7 @@ def parseArgumments():
             action='store_true',
             help="even if the notification has been sent",
             )
-    for sub in default,:
+    for sub in default,price:
         sub.add_argument(
             '--mail',
             action='store_true',
@@ -228,6 +228,27 @@ def expire(
     step("Markin as expired assignation between contract {} and member {}"
         .format(contract, member))
     c.GenerationkwhAssignment.expire(contract, member)
+    success("Done.")
+
+def price(
+        members=None,
+        force=False,
+        insist=False,
+        idmode=None,
+        all=None,
+        mail=False,
+        effectiveon=None,
+        purchaseduntil=None,
+        **_):
+    members=preprocessMembers(members, idmode, all, effectiveon, purchaseduntil, force, insist)
+    if mail:
+        step("Sending advanced effectiveness notification for members: {}".format(
+            ','.join(str(i) for i in members)))
+        c.GenerationkwhAssignment.notifyAdvancedEffectiveDate(members)
+    else:
+        step("(Simulating) Sending advanced effectiveness notification for members: {}".format(
+            ','.join(str(i) for i in members)))
+        step("Use --mail to send")
     success("Done.")
 
 def default(
