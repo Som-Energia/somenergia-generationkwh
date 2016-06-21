@@ -13,10 +13,10 @@
 + Redactar versio sense maquina del temps
 + Traduir sense maquina del temps
 + Posar la data efectiva de tots
-- Introduir els preus a produccio
-- Escriure script d'enviament
-    - Seleccionar els socis que han invertit abans de 2016-04-26
-    - Enviar el correu
++ Introduir els preus a produccio
++ Escriure script d'enviament
+    + Seleccionar els socis que han invertit abans de 2016-04-26
+    + Funcio per enviar el correu
 - Enviar correu
 - Modificar el mail d'assignacio per que inclogui la data effectiva
 - Posar la data effectiva a totes les inversions comprovades
