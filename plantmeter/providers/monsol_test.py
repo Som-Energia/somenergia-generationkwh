@@ -72,7 +72,6 @@ class MonsolProvide_Test(unittest.TestCase):
             ns(data=[ns(a) for a in sorted(expected,key=lambda x:x['datetime'])]).dump(),
             )
 
-
     def test_extractFileWinter(self):
         content = self.getContent('20_20160326.csv')
         m = MonsolProvider('monsol://user:password@hostname/path')
@@ -91,8 +90,19 @@ class MonsolProvide_Test(unittest.TestCase):
         expected = self.profileFromDate(
                 '20160327',
                 [0,1]+range(3,24),
-                [0,0,0,0,0,0,0,9,15,20,27,29,31,31,30,26,11,8,0,0,0,0,0],
-                ['W']*2+['S']*21)
+                [0,1,2,3,4,5,6,9,15,20,27,29,31,31,30,26,11,8,0,0,0,0,0],
+                ['W']+['S']*22)
+        self.assertNsEqual(actual, expected)
+
+    def test_extractFileSummerToWinter(self):
+        content = self.getContent('20_20161030.csv')
+        m = MonsolProvider('monsol://user:password@hostname/path')
+        actual = m.extract(content, datetime.date(2016,10,30))
+        expected = self.profileFromDate(
+                '20161030',
+                [0,1,2,2]+range(3,24),
+                [0,1,2,3,4,5,6,7,8,9,15,20,27,29,31,31,30,26,11,8,0,0,0,0,0],
+                ['S']*3+['W']*22)
         self.assertNsEqual(actual, expected)
 
     def test_extractFileSummer(self):

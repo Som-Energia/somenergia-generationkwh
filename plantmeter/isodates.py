@@ -22,6 +22,10 @@ def parseLocalTime(string, isSummer=False, format="%Y-%m-%d %H:%M:%S"):
     lesser = tz.normalize(localized-onehour)
     return lesser if lesser.dst() else localized
 
+def addHours(normalized, hours):
+    hours = datetime.timedelta(hours=hours)
+    return tz.normalize(normalized + hours)
+
 def localisodate(string):
     return string and toLocal(datetime.datetime.strptime(string, "%Y-%m-%d"))
 

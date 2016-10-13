@@ -5,7 +5,7 @@ import pytz
 from plantmeter.providers import BaseProvider, BaseProviderConnectionError, \
         BaseProviderDownloadError, BaseProviderSyntaxError, register, urlparse
 from plantmeter.utils import daterange
-from ..mongotimecurve import toLocal, parseLocalTime as mtcParseLocalTime
+from ..mongotimecurve import toLocal, parseLocalTime as mtcParseLocalTime, addHours
 
 def parseLocalTime(string, isSummer):
     return mtcParseLocalTime(string, isSummer, format="%Y%m%d%H%M%S")
@@ -38,9 +38,9 @@ class MonsolProvider(BaseProvider):
 
             items = line.split(';')
             measureTime = parseLocalTime(items[0], items[3]=='S')
-            periodStart = measureTime - datetime.timedelta(hours=1)
+            periodStart = addHours(measureTime, hours=-1)
             return {
-                    'datetime': periodStart,#parseLocalTime(items[0], items[3]=='S'),
+                    'datetime': periodStart,
                     'ae': int(items[1])
                     }
 

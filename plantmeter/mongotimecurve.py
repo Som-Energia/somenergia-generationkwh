@@ -26,6 +26,7 @@ from .isodates import (
     assertLocalDateTime,
     tz,
     addDays,
+    addHours
     )
 
 
