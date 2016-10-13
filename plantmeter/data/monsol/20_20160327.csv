@@ -1,5 +1,6 @@
 Planta:;20
 Fecha:;Energía Exportada (kWh);Energía Importada (kWh);E
+20160328000000;0;0;S
 20160327230000;0;0;S
 20160327220000;0;0;S
 20160327210000;0;0;S
@@ -22,4 +23,3 @@ Fecha:;Energía Exportada (kWh);Energía Importada (kWh);E
 20160327040000;0;0;S
 20160327030000;0;0;S
 20160327010000;0;0;W
-20160327000000;0;0;W

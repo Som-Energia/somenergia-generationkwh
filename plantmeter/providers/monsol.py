@@ -37,8 +37,10 @@ class MonsolProvider(BaseProvider):
                 raise BaseProviderSyntaxError('Data not valid: %s' % line)
 
             items = line.split(';')
+            measureTime = parseLocalTime(items[0], items[3]=='S')
+            periodStart = measureTime - datetime.timedelta(hours=1)
             return {
-                    'datetime': parseLocalTime(items[0], items[3]=='S'),
+                    'datetime': periodStart,#parseLocalTime(items[0], items[3]=='S'),
                     'ae': int(items[1])
                     }
 

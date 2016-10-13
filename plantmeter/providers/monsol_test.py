@@ -10,6 +10,7 @@ from mock import patch
 class MonsolProvide_Test(unittest.TestCase):
     def setUp(self):
         ""
+        self.maxDiff = None
 
     def tearDown(self):
         ""
@@ -64,6 +65,14 @@ class MonsolProvide_Test(unittest.TestCase):
         measurements = m.extract(content, datetime.date(2015,9,4))
         self.assertEqual(measurements, [])
 
+    def assertNsEqual(self, result, expected):
+        from yamlns import namespace as ns
+        self.assertMultiLineEqual(
+            ns(data=[ns(a) for a in sorted(result,key=lambda x:x['datetime'])]).dump(),
+            ns(data=[ns(a) for a in sorted(expected,key=lambda x:x['datetime'])]).dump(),
+            )
+
+
     def test_extractFileWinter(self):
         content = self.getContent('20_20160326.csv')
         m = MonsolProvider('monsol://user:password@hostname/path')
@@ -71,9 +80,9 @@ class MonsolProvide_Test(unittest.TestCase):
         expected = self.profileFromDate(
                 '20160326',
                 range(0,24),
-                [0,0,0,0,0,0,0,0,0,7,14,21,29,24,26,26,28,23,16,6,0,0,0,0],
+                [0,0,0,0,0,0,0,0,7,14,21,29,24,26,26,28,23,16,6,0,0,0,0,0],
                 ['W']*24)
-        self.assertItemsEqual(actual, expected)
+        self.assertNsEqual(actual, expected)
 
     def test_extractFileWinterToSummer(self):
         content = self.getContent('20_20160327.csv')
@@ -82,9 +91,9 @@ class MonsolProvide_Test(unittest.TestCase):
         expected = self.profileFromDate(
                 '20160327',
                 [0,1]+range(3,24),
-                [0,0,0,0,0,0,0,0,9,15,20,27,29,31,31,30,26,11,8,0,0,0,0],
+                [0,0,0,0,0,0,0,9,15,20,27,29,31,31,30,26,11,8,0,0,0,0,0],
                 ['W']*2+['S']*21)
-        self.assertItemsEqual(actual, expected)
+        self.assertNsEqual(actual, expected)
 
     def test_extractFileSummer(self):
         content = self.getContent('20_20160328.csv')
@@ -93,9 +102,9 @@ class MonsolProvide_Test(unittest.TestCase):
         expected = self.profileFromDate(
                 '20160328',
                 range(0,24),
-                [0,0,0,0,0,0,0,0,0,10,11,22,26,31,30,30,29,25,12,9,0,0,0,0],
+                [0,0,0,0,0,0,0,0,10,11,22,26,31,30,30,29,25,12,9,0,0,0,0,0],
                 ['S']*24)
-        self.assertItemsEqual(actual, expected)
+        self.assertNsEqual(actual, expected)
 
     def test_wronglinesize(self):
         content = self.getContent('20_20160328_wrongLineSize.csv')
