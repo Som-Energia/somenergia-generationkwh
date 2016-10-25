@@ -59,8 +59,8 @@ class LocalTime_Test(unittest.TestCase):
             str(localTime("2016-10-30 03:00:00S")),
             "2016-10-30 03:00:00+01:00")
 
+    @unittest.skip('toreview: it should fail')
     def test_localTime_unexistingHour(self):
-        # TOREVIEW: should it fail
         self.assertEqual(
             str(localTime("2016-03-27 02:00:00")),
             "2016-03-27 02:00:00+01:00")
@@ -125,7 +125,7 @@ class CurveDatetimeMapper_Test(unittest.TestCase):
             dateToCurveIndex(
                 localisodate("2016-12-25"),
                 localTime("2016-12-25 00:00:00")
-                ), 1)
+                ), 0)
 
     def test_dateToCurveIndex_beforeSummerToWinterChange(self):
        self.assertEquals(
@@ -146,14 +146,14 @@ class CurveDatetimeMapper_Test(unittest.TestCase):
             dateToCurveIndex(
                 localisodate("2016-03-27"),
                 localTime("2016-03-27 01:00:00")
-                ), 2)
+                ), 1)
 
     def test_dateToCurveIndex_afterWinterToSummerChange(self):
        self.assertEquals(
             dateToCurveIndex(
                 localisodate("2016-03-27"),
                 localTime("2016-03-27 03:00:00")
-                ), 3)
+                ), 2)
 
     def test_curveIndexToDate_summer(self):
        self.assertDateEqual(
@@ -170,25 +170,27 @@ class CurveDatetimeMapper_Test(unittest.TestCase):
             curveIndexToDate(localisodate("2016-08-15"), 25),
             localTime("2016-08-16 00:00:00"))
 
-    def test_curveIndexToDate_summer_paddingReturnsNone(self):
+    @unittest.skip('Outdated test')
+    def test_curveIndexToDate_summer_returnsNone(self):
        self.assertDateEqual(
-            curveIndexToDate(localisodate("2016-08-15"), 24),
+            curveIndexToDate(localisodate("2016-08-15"), 25),
             None)
 
     def test_curveIndexToDate_winter(self):
        self.assertDateEqual(
             curveIndexToDate(localisodate("2016-12-25"), 1),
-            localTime("2016-12-25 00:00:00"))
+            localTime("2016-12-25 01:00:00"))
 
-    def test_curveIndexToDate_winter_paddingReturnsNone(self):
+    @unittest.skip('Outdated test')
+    def test_curveIndexToDate_winter_returnsNone(self):
        self.assertDateEqual(
-            curveIndexToDate(localisodate("2016-12-25"), 0),
+            curveIndexToDate(localisodate("2016-12-25"), 25),
             None)
 
     def test_curveIndexToDate_winter_nextDay(self):
        self.assertDateEqual(
             curveIndexToDate(localisodate("2016-12-25"), 26),
-            localTime("2016-12-26 00:00:00"))
+            localTime("2016-12-26 01:00:00"))
 
     
     def test_curveIndexToDate_beforeChanginToWinter(self):
@@ -196,20 +198,35 @@ class CurveDatetimeMapper_Test(unittest.TestCase):
             curveIndexToDate(localisodate("2016-10-30"), 2),
             localTime("2016-10-30 02:00:00S"))
 
-    def test_curveIndexToDate_afterChanginToWinter(self):
+    def test_curveIndexToDate_afterChanginToWinterFirst(self):
        self.assertDateEqual(
             curveIndexToDate(localisodate("2016-10-30"), 3),
             localTime("2016-10-30 02:00:00"))
 
-    def test_curveIndexToDate_afterChanginToWinter(self):
+    def test_curveIndexToDate_afterChanginToWinterSecond(self):
        self.assertDateEqual(
-            curveIndexToDate(localisodate("2016-10-30"), 3),
-            localTime("2016-10-30 02:00:00"))
+            curveIndexToDate(localisodate("2016-10-30"), 4),
+            localTime("2016-10-30 03:00:00"))
+
+    def test_curveIndexToDate_beforeChanginToSummer(self):
+       self.assertDateEqual(
+            curveIndexToDate(localisodate("2016-10-30"), 2),
+            localTime("2016-10-30 02:00:00S"))
+
+    def test_curveIndexToDate_afterChanginToSummerFirst(self):
+       self.assertDateEqual(
+            curveIndexToDate(localisodate("2016-03-27"), 2),
+            localTime("2016-03-27 03:00:00"))
+
+    def test_curveIndexToDate_afterChanginToSummerSecond(self):
+       self.assertDateEqual(
+            curveIndexToDate(localisodate("2016-03-27"), 3),
+            localTime("2016-03-27 04:00:00"))
 
     def test_curveIndexToDate_summerButStartIsWinter(self):
        self.assertDateEqual(
             curveIndexToDate(localisodate("2016-10-29"), 51),
-            localTime("2016-10-31 00:00:00"))
+            localTime("2016-10-31 01:00:00"))
 
     def test_curveIndexToDate_winterButStartIsSummer(self):
         self.assertDateEqual(
@@ -226,12 +243,12 @@ class CurveDatetimeMapper_Test(unittest.TestCase):
             curveIndexToDate(localisodate("2016-10-30"), 24),
             localTime("2016-10-30 23:00:00"))
 
-    def test_curveIndexToDate_paddingBeforeWinterToSummer(self):
+    def test_curveIndexToDate_nopaddingBeforeWinterToSummer(self):
         self.assertDateEqual(
             curveIndexToDate(localisodate("2016-03-27"), 0),
-            None)
+            localTime("2016-03-27 00:00:00"))
 
-    def test_curveIndexToDate_paddingAfterWinterToSummer(self):
+    def test_curveIndexToDate_nopaddingAfterWinterToSummer(self):
         self.assertDateEqual(
             curveIndexToDate(localisodate("2016-03-27"), 24),
             None)
@@ -289,7 +306,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             )
         self.assertEqual(
             list(curve),
-            [0]*24+[10])
+            [0]*23+[10,0])
 
     def test_get_twoDays(self):
         mtc = self.setupPoints([
@@ -305,7 +322,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
         self.assertEqual(
             list(curve),
             +25*[0]
-            +24*[0]+[10]
+            +23*[0]+[10,0]
             )
 
     def test_get_differentTime(self):
@@ -321,7 +338,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             )
         self.assertEqual(
             str(list(curve)),
-            str(+23*[0]+[10,0])
+            str(22*[0]+[10,0,0])
             )
 
     def test_get_withOutsideData(self):
@@ -353,7 +370,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             )
         self.assertEqual(
             list(curve),
-            [0,0,10]+21*[0]+[10])
+            [0,10]+21*[0]+[10,0])
 
     def test_get_differentNameIgnored(self):
         mtc = self.setupPoints([
@@ -385,9 +402,9 @@ class MongoTimeCurve_Test(unittest.TestCase):
             )
         self.assertEqual(
             list(curve),
-            +24*[0]+[30])
+            +23*[0]+[30,0])
 
-    def test_get_summerPointsPadsLeft(self):
+    def test_get_noSummerPointsPadsLeft(self):
         mtc = self.setupPoints([
             ('2015-08-01 0:00:00', 'miplanta', 20),
             ('2015-08-01 23:00:00', 'miplanta', 10),
@@ -420,7 +437,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             )
         self.assertEqual(
             list(curve),
-            [0,1,2,3]+19*[0]+[4,0])
+            [1,2,3]+19*[0]+[4,0,0])
 
     def test_get_twoDays_includingToSummerDaylight(self):
         mtc = self.setupPoints([
@@ -566,7 +583,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             )
         self.assertEqual(
             list(curve),
-            list([0]+range(1,25)))
+            list(range(1,25) + [0]))
 
     def test_lastFullDate_withNoPoints(self):
         mtc = self.setupDatePoints('2015-01-01', 'miplanta', [1]*24)

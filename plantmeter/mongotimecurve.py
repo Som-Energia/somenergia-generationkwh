@@ -60,8 +60,16 @@ def dateToCurveIndex(start, localTime):
         daylight saving shift.
     """
     ndays = (localTime.date()-start.date()).days
-    winterOffset = 0 if localTime.dst() else 1
-    return localTime.hour + hoursPerDay*ndays + winterOffset
+
+    sofDay = toLocal(datetime.datetime(localTime.year,
+                               localTime.month,
+                               localTime.day))
+    nextDay = tz.normalize(sofDay + datetime.timedelta(days=1))
+    toWinterDls = sofDay.dst() and not nextDay.dst()
+    toSummerDls = not sofDay.dst() and nextDay.dst()
+    offset = 1 if toWinterDls and not localTime.dst() else (
+             -1 if toSummerDls and localTime.dst() else 0)
+    return localTime.hour + hoursPerDay*ndays + offset
 
 
 def curveIndexToDate(start, index):
@@ -80,7 +88,6 @@ def curveIndexToDate(start, index):
     toWinterDls = localday.dst() and not nextDay.dst()
     toSummerDls = not localday.dst() and nextDay.dst()
 
-    if not localday.dst(): index-=1
     hours = index%hoursPerDay
     if hours == 24 and not toWinterDls: return None
     if hours == 23 and toSummerDls: return None
