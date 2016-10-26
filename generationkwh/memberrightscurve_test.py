@@ -12,7 +12,7 @@ class CurveProvider_MockUp(object):
     def rightsPerShare(self, n, start, end):
         nbins = dateToCurveIndex(
                 localisodate(str(start)),
-                localisodate(str(end))) +24
+                localisodate(str(end))) + 25
         return numpy.array(self._value[n]) if n in self._value else (
             numpy.zeros(nbins, dtype=numpy.int))
 
