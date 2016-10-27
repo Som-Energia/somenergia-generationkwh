@@ -174,7 +174,7 @@ class GenerationkwhProductionAggregator_Test(PlantMeterApiTestBase):
             ])
         production = self.helper.get_kwh(
                 aggr_id, '2015-03-16', '2015-03-16')
-        self.assertEqual(production, [0]+24*[10])
+        self.assertEqual(production, 24*[10]+[0])
 
     def test_get_kwh_onePlant_winterToSummer(self):
         aggr,meters = self.setupAggregator(
@@ -190,7 +190,7 @@ class GenerationkwhProductionAggregator_Test(PlantMeterApiTestBase):
             ])
         production = self.helper.get_kwh(
                 aggr_id, '2015-03-29', '2015-03-29')
-        self.assertEqual(production, [0,1,2,3]+19*[0]+[4,0])
+        self.assertEqual(production, [1,2,3]+19*[0]+[4,0,0])
 
     def test_get_kwh_onePlant_summer(self):
         aggr,meters = self.setupAggregator(
@@ -243,7 +243,7 @@ class GenerationkwhProductionAggregator_Test(PlantMeterApiTestBase):
             ])
         production = self.helper.get_kwh(
                 aggr_id, '2015-03-16', '2015-03-16')
-        self.assertEqual(production, [0]+24*[20])
+        self.assertEqual(production, 24*[20] + [0])
 
     def test_get_kwh_twoPlant_winterToSummer(self):
         aggr, meters = self.setupAggregator(
@@ -263,7 +263,7 @@ class GenerationkwhProductionAggregator_Test(PlantMeterApiTestBase):
             ])
         production = self.helper.get_kwh(
                 aggr_id, '2015-03-29', '2015-03-29')
-        self.assertEqual(production, [0,2,4,6]+19*[0]+[8,0])
+        self.assertEqual(production, [2,4,6]+19*[0]+[8,0,0])
 
     def test_get_kwh_twoPlant_summer(self):
         aggr,meters = self.setupAggregator(
@@ -310,7 +310,7 @@ class GenerationkwhProductionAggregator_Test(PlantMeterApiTestBase):
             ])
         production = self.helper.get_kwh(
                 aggr_id, '2015-03-16', '2015-03-17')
-        self.assertEqual(production, [0]+24*[10]+[0]+24*[10])
+        self.assertEqual(production, 24*[10]+[0]+24*[10]+[0])
 
     def test_update_kwh_withNoPoints(self):
             aggr,meters = self.setupAggregator(
