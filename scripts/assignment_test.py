@@ -115,11 +115,11 @@ class Assignment_Test(unittest.TestCase):
     def test_no_duplication(self):
         self.setupProvider([
             (self.contract, self.member, 1),
-            (self.contract, self.member, 1),
+            (self.contract, self.member, 2),
             ])
         self.assertAssignmentsEqual([
             (self.contract, self.member, 1, self.today),
-            (self.contract, self.member, 1, False),
+            (self.contract, self.member, 2, False),
             ])
     
     def test_change_priority(self):
