@@ -101,7 +101,7 @@ class MonsolProvide_Test(unittest.TestCase):
         expected = self.profileFromDate(
                 '20161030',
                 [0,1,2,2]+range(3,24),
-                [0,1,2,3,4,5,6,7,8,9,15,20,27,29,31,31,30,26,11,8,0,0,0,0,0],
+                range(1,26),
                 ['S']*3+['W']*22)
         self.assertNsEqual(actual, expected)
 
