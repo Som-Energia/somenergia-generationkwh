@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 description = """
 Calculate rights per share
