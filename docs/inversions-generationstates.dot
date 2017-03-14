@@ -1,0 +1,11 @@
+digraph G {
+rankdir=LR
+
+
+"" -> Draft [label=Application];
+Draft -> Waiting [label=Charge];
+Waiting -> Expired  [label=Divest];
+Waiting -> Activa [label="1 year"];
+Activa -> Expired [label="24 year"];
+Waiting -> Draft [label=Return];
+}
