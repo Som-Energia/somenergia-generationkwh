@@ -11,13 +11,6 @@
 
 ![Energetic Actions States](inversions-generationstates.png)
 
-- O -> _Application_ -> Draft 
-- Draft -> _Charge_ -> Waiting
-- Waiting -> _Divest_ -> Expired
-- Waiting -> _1 year_ -> Activa
-- Activa -> _24 year_ -> Expired
-- Waiting -> _Return_ -> Draft
-
 
 - 25 years loan 
 - No interest
