@@ -2,14 +2,17 @@ digraph G {
 rankdir=LR
 "" -> Draft [label=Form]
 Draft -> Waiting [label=Charge]
+Waiting -> Effective [label="1 year"]
+Effective -> Effective [label="Amortization"]
+Effective -> Expired [label="Expires 24y"]
+Effective -> Expired [label="Penalty Divest"]
+Waiting -> Expired  [label="Early Divestment"]
+
 Waiting -> Returned [label=Return]
 Returned -> Waiting [label=BankTranfer]
 Returned -> Draft [label=AskedToCharge]
-Returned -> Expired [label=Discarded]
-Draft -> Expired [label=Discarded]
-Waiting -> Expired  [label="Early Divestment"]
-Waiting -> Effective [label="1 year"]
-Effective -> Expired [label="Expires 24y"]
+Returned -> Discarded [label=Discard]
+Draft -> Discarded [label=Discard]
+
 "" -> Effective [label="Receive Transfer"]
-Effective -> Expired [label="Penalty Divest"]
 }

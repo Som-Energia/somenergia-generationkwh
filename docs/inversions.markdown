@@ -119,6 +119,13 @@
 - Expiration (different)
 
 
+## Ops with impact in accounting and finances
+
+
+
+
+
+
 ## Glossary
 
 - Interest payment: Liquidación de intereses
@@ -133,7 +140,6 @@
 - Waiting period: periodo de carencia
 - Amortization: Amortizacion, devolver el capital
 - Bank return: devolución bancaria
-
 
 
 
