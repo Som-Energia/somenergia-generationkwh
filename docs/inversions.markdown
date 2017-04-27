@@ -55,7 +55,8 @@
     - No penalties applied
 - Regular divestment
     - After the waiting period
-    - Penalties apply: 1% of the pending capital or 4€ if lower
+    - Penalties apply: 1%-4% of the pending capital or 4€ if lower
+        - (TODO: Contract says so but concrete conditions not clear)
 - Amortizations:
     - Every year at the aniversary of the purchase date
 
@@ -102,13 +103,20 @@
 - Quantized to 100€
 - Limit 100k€/member
 - Higher and fixed interest rate
-- Interest payment 30Jun, executed TODO
+- Interest payment 30Jun, executed first days of July
 - 10 years titles can divest after 5year with no penalty
-- Divest penalty: 12 months TODO
 - Capital is returned on expiration
+- Divest penalty: 12 months of interest taken from the returned capital
+    - Interest are paid as usual on June
+- TODO: How the variable interest rate affects to the penalty
 
 ### Operations
 
+- Invest
+- Divest
+- Inheritances
+- Interest payment
+- Expiration (different)
 
 
 ## Glossary
