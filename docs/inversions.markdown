@@ -9,7 +9,7 @@
 
 ## Accions energètiques (Generation kWh)
 
-![Energetic Actions States](inversions-generationstates.png)
+![Energetic Actions States](inversions-states-generation.png)
 
 
 - 25 years loan to the cooperative
@@ -64,16 +64,10 @@
 ## Aportaciones voluntarias
 
 
-
-- investment -> Draft
-- Draft -> payment -> Active
-- Active -> divestment -> Expired
-- Active -> return -> Draft
-
-
-![Voluntary Contribution States](inversions-voluntarystates.png)
+![Voluntary Contribution States](inversions-states-aportacions.png)
 
 - Do not expire
+- Has no amortization
 - Give moderate interests
 - You can invest and uninvest with no penalization
 - Limit 25k€/member
@@ -84,12 +78,10 @@
 
 ### Operations:
 
-
 - Invest
 - Divest
 - Inheritances
 - Interest payment
-- No amortization
 
 
 ## Títols participatius
@@ -97,23 +89,13 @@
 
 ### Current (5 years)
 
-- investment -> Draft
-- Draft -> payment -> Active
-- Active -> return -> Draft
-- Active -> divesment -> Expired
-- Active -> expires (5y) -> Expired
+
+![Participation Titles States](inversions-states-titols5.png)
+
 
 ### Legacy (10 years)
 
-- investment -> Draft
-- Draft -> payment -> Active
-- Active -> return -> Draft
-- Active -> divesment (<5years) -> Expired
-- Active -> divesment (>5years) -> Expired
-- Active -> expires (10y) -> Expired
-
-
-![Participating securities States](inversions-participatingsecuritiesstates.png)
+![Old participation Titles States](inversions-states-titols10.png)
 
 
 - They expire (first ones were 10years, later 5years)

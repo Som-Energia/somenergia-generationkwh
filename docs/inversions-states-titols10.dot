@@ -1,0 +1,13 @@
+digraph G {
+rankdir=LR
+"" -> Draft [label=Form]
+Draft -> Current [label=Charge]
+Current -> Returned [label=Return]
+Returned -> Current [label=BankTranfer]
+Returned -> Draft [label=AskedToCharge]
+Returned -> Expired [label=Discarded]
+Draft -> Expired [label=Discarded]
+Current -> Expired [label="Penalty Disvest <5y"]
+Current -> Expired [label="No penalty Disvest >5y"]
+Current -> Expired [label="Expires 10y"]
+}
