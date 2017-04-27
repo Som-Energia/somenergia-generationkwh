@@ -119,7 +119,7 @@
 - Expiration (different)
 
 
-## Ops with impact in accounting and finances
+## Accounting for Operations
 
 
 - Interest payment
@@ -149,6 +149,25 @@
     - <- compte d'inversió
     - -> bank
     - TODO: Despeses bancaries?
+
+- Transfer between members/investment modes
+
+    - <- compte d'inversió
+    - -> compte d'inversió
+
+
+## To discuss
+
+
+- Com es gestionen els retorns de les amortitzacions i els interessos??
+    - Els interessos es gestionen com una factura de proveidor, i les amortitzacions? rebut de liquidacio?
+    - Per evitar retorns de interessos o amortitzacions, avis de confirmar IBAN.
+- Permetem fer desinversions parcials? Com s'apliquen les penalitzacions? Com guardem la historia?
+- Com es relaciona el invesment amb una devolucio (de cobrament o de pagament d'interessos o amortitzacions)
+- Data de traspas: darrera de l'anterior o primera del seguent?
+
+
+
 
 
 ## Glossary
