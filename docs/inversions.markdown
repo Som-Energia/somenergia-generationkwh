@@ -122,8 +122,33 @@
 ## Ops with impact in accounting and finances
 
 
+- Interest payment
 
+    - <- proveidors (inversors) (associat a factura)
+    - -> Despeses interessos
+    - -> Retencions
 
+- Amortization
+
+    - <- compte d'inversió
+    - -> bank  (TODO: associat a rebut??)
+
+- Divestment
+
+    - <- compte d'inversió
+    - -> bank  (TODO: associat a rebut??)
+    - -> penalitzacions (si n'hi hagues)
+
+- Bank Charge / Bank Transfer
+
+    - <- bank
+    - -> compte d'inversió (TODO: associat a una remesa o payment line?)
+
+- Bank Return
+
+    - <- compte d'inversió
+    - -> bank
+    - TODO: Despeses bancaries?
 
 
 ## Glossary
