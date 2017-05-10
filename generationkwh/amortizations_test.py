@@ -62,7 +62,6 @@ class Amortization_Test(unittest.TestCase):
             )
         self.assertEqual(a, 10000)
 
-
     def test_pendingAmortization_atFirstAmortizationAlreadyPaid(self):
         a = pendingAmortization(
             purchase_date='2001-01-01',
@@ -72,6 +71,22 @@ class Amortization_Test(unittest.TestCase):
             )
         self.assertEqual(a, 0)
 
+    def test_pendingAmortization_allAmortizationAlreadyPaid(self):
+        a = pendingAmortization(
+            purchase_date='2001-01-01',
+            current_date='2026-01-01',
+            investment_amount=10000,
+            amortized_amount=10000,
+            )
+        self.assertEqual(a, 0)
 
+    def test_pendingAmortization_differentAmount(self):
+        a = pendingAmortization(
+            purchase_date='2001-01-01',
+            current_date='2003-01-01',
+            investment_amount=100000,
+            amortized_amount=0,
+            )
+        self.assertEqual(a, 4000)
 
 # vim: et ts=4 sw=4
