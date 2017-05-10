@@ -16,6 +16,7 @@ def pendingAmortization(purchase_date, current_date, investment_amount, amortize
     if years >= 25:
         return investment_amount - amortized_amount
 
-    return (years-1)*yearly_amortitzation - amortized_amount
+    toAmortize = (years-1)*yearly_amortitzation - amortized_amount
+    return max(0, toAmortize)
 
 # vim: et ts=4 sw=4

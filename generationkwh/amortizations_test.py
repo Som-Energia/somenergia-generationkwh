@@ -89,4 +89,13 @@ class Amortization_Test(unittest.TestCase):
             )
         self.assertEqual(a, 4000)
 
+    def test_pendingAmortization_advancedAmortizationPaid(self):
+        a = pendingAmortization(
+            purchase_date='2001-01-01',
+            current_date='2003-12-31',
+            investment_amount=10000,
+            amortized_amount=800,
+            )
+        self.assertEqual(a, 0)
+
 # vim: et ts=4 sw=4
