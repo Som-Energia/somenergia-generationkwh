@@ -4,9 +4,10 @@ def pendingAmortization(purchase_date, current_date, investment_amount, amortize
     from plantmeter.isodates import isodate
     from dateutil.relativedelta import relativedelta
 
-    current_date = isodate(current_date)
-    purchase_date = isodate(purchase_date)
-    years = relativedelta(current_date, purchase_date).years
+    years = relativedelta(
+        isodate(current_date),
+        isodate(purchase_date),
+        ).years
 
     yearly_amortitzation = investment_amount / 25
 
