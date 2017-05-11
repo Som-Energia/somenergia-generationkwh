@@ -29,12 +29,12 @@ def pendingAmortization(purchase_date, current_date, investment_amount, amortize
         isodate(purchase_date),
         ).years
 
-    yearly_amortitzation = investment_amount / 25
+    yearly_amortitzation = investment_amount / expirationYears
 
-    if years < 2:
+    if years <= waitYears:
         return 0
 
-    if years >= 25:
+    if years >= expirationYears:
         return investment_amount - amortized_amount
 
     toAmortize = (years-1)*yearly_amortitzation - amortized_amount
