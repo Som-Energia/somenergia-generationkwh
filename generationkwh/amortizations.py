@@ -7,10 +7,11 @@ def previousAmortizationDate(purchase_date, current_date):
 
     firstAmortization = isodate(purchase_date) + relativedelta(years = 2)
 
-    if isodate(current_date) >= firstAmortization:
-        return str(firstAmortization)
+    if isodate(current_date) < firstAmortization:
+        return None
 
-    return None
+    return str(firstAmortization)
+
 
 def pendingAmortization(purchase_date, current_date, investment_amount, amortized_amount):
 
