@@ -11,7 +11,7 @@ def previousAmortizationDate(purchase_date, current_date):
         ).years
 
 
-    firstAmortization = isodate(purchase_date) + relativedelta(years = 2)
+    firstAmortization = isodate(purchase_date) + relativedelta(years = years)
 
     if years < 2:
         return None
