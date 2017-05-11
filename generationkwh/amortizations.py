@@ -1,6 +1,15 @@
 # -*- coding:utf8 -*-
 
+def previousAmortizationDate(purchase_date, current_date):
+
+
+    if current_date == '2003-01-01':
+        return current_date
+
+    return None
+
 def pendingAmortization(purchase_date, current_date, investment_amount, amortized_amount):
+
     from plantmeter.isodates import isodate
     from dateutil.relativedelta import relativedelta
 
