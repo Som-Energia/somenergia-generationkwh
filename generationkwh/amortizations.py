@@ -1,5 +1,8 @@
 # -*- coding:utf8 -*-
 
+from plantmeter.isodates import isodate
+from dateutil.relativedelta import relativedelta
+
 def previousAmortizationDate(purchase_date, current_date):
 
 
@@ -10,8 +13,6 @@ def previousAmortizationDate(purchase_date, current_date):
 
 def pendingAmortization(purchase_date, current_date, investment_amount, amortized_amount):
 
-    from plantmeter.isodates import isodate
-    from dateutil.relativedelta import relativedelta
 
     years = relativedelta(
         isodate(current_date),
