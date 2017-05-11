@@ -3,21 +3,20 @@
 from plantmeter.isodates import isodate
 from dateutil.relativedelta import relativedelta
 
-def previousAmortizationDate(purchase_date, current_date):
+waitYears = 1
+expirationYears = 25
 
-    waitYears = 1
-    expirationYears = 25
+def previousAmortizationDate(purchase_date, current_date):
 
     years = relativedelta(
         isodate(current_date),
         isodate(purchase_date),
         ).years
 
-
-    firstAmortization = isodate(purchase_date) + relativedelta(years = min(years,expirationYears))
-
     if years <= waitYears:
         return None
+
+    firstAmortization = isodate(purchase_date) + relativedelta(years = min(years,expirationYears))
 
     return str(firstAmortization)
 
