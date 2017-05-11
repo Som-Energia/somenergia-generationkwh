@@ -134,4 +134,7 @@ class Amortization_Test(unittest.TestCase):
             current_date='2027-01-01',
             )
         self.assertEqual(d, '2026-01-01')
+
+
+
 # vim: et ts=4 sw=4
