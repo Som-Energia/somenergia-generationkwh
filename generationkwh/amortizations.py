@@ -6,8 +6,8 @@ from dateutil.relativedelta import relativedelta
 def previousAmortizationDate(purchase_date, current_date):
 
 
-    if isodate(current_date) == isodate('2003-01-01'):
-        return current_date
+    if isodate(current_date) >= isodate('2003-01-01'):
+        return '2003-01-01'
 
     return None
 
