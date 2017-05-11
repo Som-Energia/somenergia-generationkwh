@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 
 def previousAmortizationDate(purchase_date, current_date):
 
+    waitYears = 1
     years = relativedelta(
         isodate(current_date),
         isodate(purchase_date),
@@ -13,7 +14,7 @@ def previousAmortizationDate(purchase_date, current_date):
 
     firstAmortization = isodate(purchase_date) + relativedelta(years = years)
 
-    if years < 2:
+    if years <= waitYears:
         return None
 
     return str(firstAmortization)
