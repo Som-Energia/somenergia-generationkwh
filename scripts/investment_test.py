@@ -345,12 +345,46 @@ class Investment_Test(unittest.TestCase):
         self.assertFalse(
             self.Investment.member_has_effective(None, None, None))
 
-
     def test__member_has_effective__insideDates(self):
         self.Investment.create_from_accounting(1,'2010-01-01', '2015-07-03',
             1, None)
         self.assertTrue(
             self.Investment.member_has_effective(1,'2015-07-01','2015-07-01'))
+
+
+    def pendingAmortizations(self, currentDate):
+        result = self.Investment.pending_amortizations(currentDate)
+        return [x[1:] for x in result]
+
+    
+    def test__pending_amortitzations__noInvestments(self):
+        self.assertEqual(self.pendingAmortizations('2017-11-20'), [])
+        
+    def test__pending_amortitzations__withDueInvestments(self):
+        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
+        self.assertEqual(
+            self.pendingAmortizations('2017-11-20'),[
+            [1, '2017-07-29', 4 ],
+            [1, '2017-06-30', 60],
+            [1, '2017-06-30', 40],
+            ])
+
+    def test__pending_amortitzations__notDue(self):
+        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
+        self.assertEqual(
+            self.pendingAmortizations('2017-07-28'),[
+            [1, '2017-06-30', 60],
+            [1, '2017-06-30', 40],
+            ])
+
+
+
+    @unittest.skip("Not implemented YET")
+    def test__investment_amount(self):
+        self.Investment.create_from_accounting(38, None, '2015-06-30', 365, 25)
+        investment=self.Investment.search([('member_id','=',38)])[0]
+        self.assertEqual(30000,
+            self.Investment.investment_amount(38))
 
 
 
