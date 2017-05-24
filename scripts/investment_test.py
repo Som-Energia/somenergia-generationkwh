@@ -350,7 +350,8 @@ class Investment_Test(unittest.TestCase):
             1, None)
         self.assertTrue(
             self.Investment.member_has_effective(1,'2015-07-01','2015-07-01'))
-
+    
+    # Amortizations
 
     def pendingAmortizations(self, currentDate):
         result = self.Investment.pending_amortizations(currentDate)
@@ -364,27 +365,74 @@ class Investment_Test(unittest.TestCase):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.assertEqual(
             self.pendingAmortizations('2017-11-20'),[
-            [1, '2017-07-29', 4 ],
-            [1, '2017-06-30', 60],
-            [1, '2017-06-30', 40],
+            [1, '2017-07-29', 0, 4 ],
+            [1, '2017-06-30', 0, 60],
+            [1, '2017-06-30', 0, 40],
             ])
 
     def test__pending_amortitzations__notDue(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.assertEqual(
             self.pendingAmortizations('2017-07-28'),[
-            [1, '2017-06-30', 60],
-            [1, '2017-06-30', 40],
+            [1, '2017-06-30', 0, 60],
+            [1, '2017-06-30', 0, 40],
+            ])
+
+    def test__pending_amortitzations__whenPartiallyAmortized(self):
+        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
+        self.Investment.amortize('2017-11-20')
+        self.assertEqual(
+            self.pendingAmortizations('2018-11-20'),[
+            [1, '2018-07-29', 4,  4 ],
+            [1, '2018-06-30', 60, 60],
+            [1, '2018-06-30', 40, 40],
             ])
 
 
+    def test__amortized_amount__zeroByDefault(self):
+        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
+        investment_ids = self.Investment.search([])
+        investments = self.Investment.read(investment_ids,['amortized_amount'])
+        amortized_amounts = [
+            inv['amortized_amount'] 
+            for inv in investments
+            ]
+        self.assertEqual(amortized_amounts, [0.0,0.0,0.0])
 
-    @unittest.skip("Not implemented YET")
-    def test__investment_amount(self):
-        self.Investment.create_from_accounting(38, None, '2015-06-30', 365, 25)
-        investment=self.Investment.search([('member_id','=',38)])[0]
-        self.assertEqual(30000,
-            self.Investment.investment_amount(38))
+    def test__amortized_amount__afterAmortization(self):
+        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
+        self.Investment.amortize('2017-11-20')
+        investment_ids = self.Investment.search([])
+        investments = self.Investment.read(investment_ids,['amortized_amount'])
+        amortized_amounts = [
+            inv['amortized_amount'] 
+            for inv in investments
+            ]
+        self.assertEqual(amortized_amounts, [4.0,60.0,40.0])
+
+    def test__amortized_amount__afterAmortizationLimited(self):
+        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
+        self.Investment.amortize('2017-07-28')
+        investment_ids = self.Investment.search([])
+        investments = self.Investment.read(investment_ids,['amortized_amount'])
+        amortized_amounts = [
+            inv['amortized_amount'] 
+            for inv in investments
+            ]
+        self.assertEqual(amortized_amounts, [0.0,60.0,40.0])
+
+    def test__amortized_amount__secondAmortization(self):
+        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
+        self.Investment.amortize('2017-11-20')
+        self.Investment.amortize('2018-11-20')
+        investment_ids = self.Investment.search([])
+        investments = self.Investment.read(investment_ids,['amortized_amount'])
+        amortized_amounts = [
+            inv['amortized_amount'] 
+            for inv in investments
+            ]
+        self.assertEqual(amortized_amounts, [8.0,120.0,80.0])
+
 
 
 
