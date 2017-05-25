@@ -443,8 +443,7 @@ class Investment_Test(unittest.TestCase):
 
         self.Investment.migrate_created_from_accounting()
 
-        investment_ids = self.Investment.search([])
-        investment = self.Investment.read(investment_ids[0],['log'])
+        investment = self.Investment.read(investment_id,['log'])
         self.assertEqual(investment['log'], 
             u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
             u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
@@ -463,8 +462,8 @@ class Investment_Test(unittest.TestCase):
 
     def test__create_from_accounting__writes_log(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
-        investment_ids = self.Investment.search([])
-        investment = self.Investment.read(investment_ids[0],['log'])
+        investment_id = self.Investment.search([])[0]
+        investment = self.Investment.read(investment_id,['log'])
         self.assertEqual(investment['log'], 
             u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
             u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
@@ -474,8 +473,8 @@ class Investment_Test(unittest.TestCase):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.Investment.amortize('2017-11-20')
 
-        investment_ids = self.Investment.search([])
-        investment = self.Investment.read(investment_ids[0],['log'])
+        investment_id = self.Investment.search([])[0]
+        investment = self.Investment.read(investment_id,['log'])
         self.assertRegexpMatches(investment['log'].split('\n')[0],
             u'\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{5} '
                 u'David García Garzón\\] '
