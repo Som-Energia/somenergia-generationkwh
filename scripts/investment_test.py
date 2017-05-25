@@ -436,12 +436,12 @@ class Investment_Test(unittest.TestCase):
 
 
 
-    def test__migrate_logs__whenLogEmpty(self):
+    def test__migrate_created_from_accounting__whenLogEmpty(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         investment_id = self.Investment.search([])[0]
         self.Investment.write(investment_id, dict(log=''))
 
-        self.Investment.migrate_logs()
+        self.Investment.migrate_created_from_accounting()
 
         investment_ids = self.Investment.search([])
         investment = self.Investment.read(investment_ids[0],['log'])
@@ -450,12 +450,12 @@ class Investment_Test(unittest.TestCase):
             u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
             )
 
-    def test__migrate_logs__keepsPreviousContent(self):
+    def test__migrate_created_from_accounting__keepsPreviousContent(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         investment_id = self.Investment.search([])[0]
         self.Investment.write(investment_id, dict(log='previous content'))
 
-        self.Investment.migrate_logs()
+        self.Investment.migrate_created_from_accounting()
 
         investment = self.Investment.read(investment_id,['log'])
         self.assertEqual(investment['log'], 
