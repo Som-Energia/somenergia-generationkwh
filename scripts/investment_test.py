@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 from genkwh_investments import *
 
@@ -355,7 +356,7 @@ class Investment_Test(unittest.TestCase):
 
     def pendingAmortizations(self, currentDate):
         result = self.Investment.pending_amortizations(currentDate)
-        return [x[1:] for x in result]
+        return [x[1:-1] for x in result] # filter id and log
 
     
     def test__pending_amortitzations__noInvestments(self):
@@ -432,6 +433,59 @@ class Investment_Test(unittest.TestCase):
             for inv in investments
             ]
         self.assertEqual(amortized_amounts, [8.0,120.0,80.0])
+
+
+
+    def test__migrate_logs__whenLogEmpty(self):
+        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
+        investment_id = self.Investment.search([])[0]
+        self.Investment.write(investment_id, dict(log=''))
+
+        self.Investment.migrate_logs()
+
+        investment_ids = self.Investment.search([])
+        investment = self.Investment.read(investment_ids[0],['log'])
+        self.assertEqual(investment['log'], 
+            u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
+            u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
+            )
+
+    def test__migrate_logs__keepsPreviousContent(self):
+        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
+        investment_id = self.Investment.search([])[0]
+        self.Investment.write(investment_id, dict(log='previous content'))
+
+        self.Investment.migrate_logs()
+
+        investment = self.Investment.read(investment_id,['log'])
+        self.assertEqual(investment['log'], 
+            u'previous content')
+
+    def test__create_from_accounting__writes_log(self):
+        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
+        investment_ids = self.Investment.search([])
+        investment = self.Investment.read(investment_ids[0],['log'])
+        self.assertEqual(investment['log'], 
+            u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
+            u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
+            )
+
+    def test__amortize__writes_log(self):
+        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
+        self.Investment.amortize('2017-11-20')
+
+        investment_ids = self.Investment.search([])
+        investment = self.Investment.read(investment_ids[0],['log'])
+        self.assertRegexpMatches(investment['log'].split('\n')[0],
+            u'\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{5} '
+                u'David García Garzón\\] '
+                u'AMORTIZATION: Generada amortització de 4.00 € pel 2017-07-29'
+            )
+        self.assertEqual('\n'.join(investment['log'].split('\n')[1:]),
+            u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
+            u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
+            )
+
 
 
 
