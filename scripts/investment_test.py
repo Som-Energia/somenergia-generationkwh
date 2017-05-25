@@ -460,6 +460,19 @@ class Investment_Test(unittest.TestCase):
         self.assertEqual(investment['log'], 
             u'previous content')
 
+    def test__migrate_created_from_accounting__explicitIdForces(self):
+        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
+        investment_id = self.Investment.search([])[0]
+        self.Investment.write(investment_id, dict(log='previous content'))
+
+        self.Investment.migrate_created_from_accounting([investment_id])
+
+        investment = self.Investment.read(investment_id,['log'])
+        self.assertEqual(investment['log'], 
+            u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
+            u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
+            )
+
     def test__create_from_accounting__writes_log(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         investment_id = self.Investment.search([])[0]
