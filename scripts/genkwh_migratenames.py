@@ -9,9 +9,20 @@ def getOrderLines(db, order_id):
     with db.cursor() as cr:
         cr.execute("""\
             select
-                *
+                pl.*,
+                po.date_done as order_sent_date,
+                p.name as partner_name,
+                false
             from
                 payment_line as pl
+            left join
+                payment_order as po
+            on
+                po.id = pl.order_id
+            left join
+                res_partner as p
+            on
+               p.id = pl.partner_id
             where
                 pl.order_id = %(order_id)s
             order by pl.id
@@ -24,12 +35,17 @@ def getMoveLines(db, move_id):
     with db.cursor() as cr:
         cr.execute("""\
             select
-                ml.*
+                ml.*,
+                p.name as partner_name
             from
                 account_move_line as ml
             left join
                 account_account as ac
             on ac.id = ml.account_id
+            left join
+                res_partner as p
+            on
+               p.id = ml.partner_id
             where
                 ac.code ilike '1635%%' and
                 ml.move_id = %(move_id)s
@@ -46,7 +62,8 @@ def getActiveInvestments(db):
                 inv.*,
                 ml.name as mlname,
                 ml.date_created as move_date_created,
-                soci.partner_id
+                soci.partner_id,
+                p.name as partner_name
             from
                 generationkwh_investment as inv
             left join
@@ -57,6 +74,10 @@ def getActiveInvestments(db):
                 somenergia_soci as soci
             on
                 soci.id = inv.member_id
+            left join
+                res_partner as p
+            on
+                p.id = soci.partner_id
             where
                 inv.active and
                 true
@@ -138,8 +159,6 @@ def investmentOrderAndMovements(db, modeName='GENERATION kWh'):
         return dbutils.nsList(cr)
 
 
-
-
 def appendToKey(d, key, value):
     values = d.get(key, [])
     wasEmpty = bool(values)
@@ -160,7 +179,7 @@ with psycopg2.connect(**configdb.psycopg) as db:
 
     lastGeneratedMoveLine = lastInvestment(db)
 
-    solved = ns()
+    solvedMovelines = ns()
 
     for data in investmentOrderAndMovements(db):
         step("{move_create_date}".format(**data))
@@ -209,34 +228,49 @@ with psycopg2.connect(**configdb.psycopg) as db:
             key = (moveline.partner_id, moveline.credit)
             orderline = getAndRemoveFirst(orderLinesDict, key)
             if not orderline:
-                warn("Linia de Moviment sense parella")
-                print key
                 repesca.append(moveline)
                 continue
             False and success("{} {} {}".format(
                 moveline.id, orderline.name, orderline.create_date))
-            solved[moveline.id] = ns(
+            solvedMovelines[moveline.id] = ns(
                 ref=orderline.name,
                 order_date=orderline.create_date,
                 partner_id = orderline.partner_id,
                 )
 
+        movelinesByPartnerId = {}
+        for moveline in repesca:
+            appendToKey(movelinesByPartnerId, moveline.partner_id, moveline)
+
         for key, options in orderLinesDict.items():
-            for option in options:
-                warn("Linia de Remesa sense parella: {name} {create_date}"
-                    .format(**option))
-                print key
+            for orderline in options:
+                moveline = getAndRemoveFirst(movelinesByPartnerId, orderline.partner_id)
+                if not moveline:
+                    warn("Linia de Remesa sense parella: {name} id {id} {order_sent_date} {amount}€ {partner_name}"
+                        .format(**orderline))
+                    print key
+                    continue
+                success("Repescao {}".format( orderline.name))
+                solvedMovelines[moveline.id] = ns(
+                    ref=orderline.name,
+                    order_date=orderline.create_date,
+                    partner_id = orderline.partner_id,
+                    )
+
+        for partner_id, movelines in movelinesByPartnerId.items():
+            for moveline in movelines:
+                warn("Linia de Moviment sense parella id {id} {create_date} {credit}€ {partner_name}".format(**moveline))
 
     investments = getActiveInvestments(db)
 
 
-    unmatchedMoveLines = list(solved.keys())
+    unmatchedMoveLines = list(solvedMovelines.keys())
     unmatchedInvestments = []
 
     for inv in investments:
         moveline_id = inv.move_line_id
 
-        if moveline_id not in solved.keys():
+        if moveline_id not in solvedMovelines.keys():
             warn("Missing moveline {move_line_id} "
                 "for partner {partner_id} {nshares:03d} '{mlname}'"
                 .format(**inv))
@@ -245,7 +279,7 @@ with psycopg2.connect(**configdb.psycopg) as db:
         else:
             0 and success("{move_line_id} found".format(**inv))       
             if moveline_id not in  unmatchedMoveLines:
-                warn("Dupped moveline {}".format(moveline_id))
+                warn("Dupped moveline {move_line_id} {partner_name}".format(**inv))
             else:
                 unmatchedMoveLines.remove(moveline_id)
 
@@ -266,11 +300,10 @@ with psycopg2.connect(**configdb.psycopg) as db:
     print 'UNGENERATED MOVELINES', len(ungenerated), ungenerated
 
 
-
     orphanMoveLinesByPartner = {}
 
     for moveline_id in unmatchedMoveLines:
-        moveline = solved[moveline_id]
+        moveline = solvedMovelines[moveline_id]
 
         wasEmpty = appendToKey(orphanMoveLinesByPartner, moveline.partner_id, moveline)
         if wasEmpty:
@@ -283,7 +316,7 @@ with psycopg2.connect(**configdb.psycopg) as db:
         partner_id = inv.partner_id
         solution = getAndRemoveFirst(orphanMoveLinesByPartner, partner_id)
         if not solution:
-            warn("No trobada un moviment amb partner_id {}".format(partner_id))
+            warn("No trobada moveline {move_line_id} {partner_name}".format(**inv))
             continue
         success("HOLA "+solution.dump())
 
