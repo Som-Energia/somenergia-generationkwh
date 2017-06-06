@@ -125,7 +125,6 @@ def investmentOrderAndMovements(db, modeName='GENERATION kWh'):
 
 
 
-
 import configdb
 import psycopg2
 from consolemsg import step, warn, success
@@ -202,12 +201,27 @@ with psycopg2.connect(**configdb.psycopg) as db:
 
     investments = getActiveInvestments(db)
 
+    unmatchedMoveLines = list(solved.keys())
+    unmatchedInvestments = []
+
     for inv in investments:
         moveline_id = inv.move_line_id
 
         if moveline_id not in solved.keys():
-            warn("Missing moveline {move_line_id} for partner {member_id}"
+            warn("Missing moveline {move_line_id} "
+                "for partner {member_id} {nshares:03d} '{mlname}'"
                 .format(**inv))
+            #warn(inv.dump())
+            unmatchedInvestments.append(inv.id)
         else:
-            0 or success("{move_line_id} found".format(**inv))       
+            0 and success("{move_line_id} found".format(**inv))       
+
+        if moveline_id not in unmatchedMoveLines:
+            warn("already removed move line {}".format(moveline_id))
+        else:
+            unmatchedMoveLines.remove(moveline_id)
+
+    print unmatchedInvestments, len(unmatchedInvestments)
+    print unmatchedMoveLines, len(unmatchedMoveLines)
+
 
