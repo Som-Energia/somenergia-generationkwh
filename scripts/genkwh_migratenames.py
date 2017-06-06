@@ -78,8 +78,9 @@ def investmentOrderAndMovements(db, modeName='GENERATION kWh'):
                 on
                     pm.id = po.mode
                 where
-                    pm.name = 'GENERATION kWh' and
-                    true
+                    pm.name = 'GENERATION kWh' or
+                    po.id = 1389 or -- has mode 'ENGINYERS'
+                    false
             ) as o
             full outer join (
                 select
