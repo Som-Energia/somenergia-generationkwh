@@ -43,16 +43,27 @@ def getActiveInvestments(db):
     with db.cursor() as cr:
         cr.execute("""\
             select
-                *
+                inv.*,
+                ml.name as mlname,
+                ml.date_created as move_date_created
             from
                 generationkwh_investment as inv
+            left join
+                account_move_line as ml
+            on
+                inv.move_line_id = ml.id
+            left join
+                account_move as mv
+            on
+                ml.move_id = mv.id
             where
-                active=true and
+                inv.active and
                 true
             order by inv.id
         """, dict(
         ))
         return dbutils.nsList(cr)
+
 
 def investmentOrderAndMovements(db, modeName='GENERATION kWh'):
     with db.cursor() as cr:
