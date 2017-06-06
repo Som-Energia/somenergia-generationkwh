@@ -45,7 +45,8 @@ def getActiveInvestments(db):
             select
                 inv.*,
                 ml.name as mlname,
-                ml.date_created as move_date_created
+                ml.date_created as move_date_created,
+                soci.partner_id
             from
                 generationkwh_investment as inv
             left join
@@ -53,9 +54,9 @@ def getActiveInvestments(db):
             on
                 inv.move_line_id = ml.id
             left join
-                account_move as mv
+                somenergia_soci as soci
             on
-                ml.move_id = mv.id
+                soci.id = inv.member_id
             where
                 inv.active and
                 true
@@ -63,6 +64,21 @@ def getActiveInvestments(db):
         """, dict(
         ))
         return dbutils.nsList(cr)
+
+
+def lastInvestment(db):
+    with db.cursor() as cr:
+        cr.execute("""\
+            select
+                max(move_line_id)
+            from
+                generationkwh_investment as inv
+            where
+                inv.active and
+                true
+        """, dict(
+        ))
+        return dbutils.nsList(cr)[0].max
 
 
 def investmentOrderAndMovements(db, modeName='GENERATION kWh'):
@@ -124,12 +140,25 @@ def investmentOrderAndMovements(db, modeName='GENERATION kWh'):
 
 
 
+def appendToKey(d, key, value):
+    values = d.get(key, [])
+    wasEmpty = bool(values)
+    values.append(value)
+    d[key] = values
+    return wasEmpty
+
+def getAndRemoveFirst(d, key):
+    values = d.get(key, [])
+    if not values: return None
+    return values.pop(0)
 
 import configdb
 import psycopg2
 from consolemsg import step, warn, success
 
 with psycopg2.connect(**configdb.psycopg) as db:
+
+    lastGeneratedMoveLine = lastInvestment(db)
 
     solved = ns()
 
@@ -168,29 +197,28 @@ with psycopg2.connect(**configdb.psycopg) as db:
             warn("Got different number of lines {} than reported {} in Move"
                 .format(len(orderLines), data.order_nlines))
 
+
         orderLinesDict = ns()
         repesca = []
 
         for line in orderLines:
             key = (line.partner_id, -line.amount)
-            value = orderLinesDict.get(key, [])
-            value.append(line)
-            orderLinesDict[key] = value
+            appendToKey(orderLinesDict, key, line)
             
         for moveline in moveLines:
             key = (moveline.partner_id, moveline.credit)
-            options = orderLinesDict.get(key, [])
-            if not options:
+            orderline = getAndRemoveFirst(orderLinesDict, key)
+            if not orderline:
                 warn("Linia de Moviment sense parella")
                 print key
                 repesca.append(moveline)
                 continue
-            orderline = options.pop(0)
             False and success("{} {} {}".format(
                 moveline.id, orderline.name, orderline.create_date))
             solved[moveline.id] = ns(
                 ref=orderline.name,
                 order_date=orderline.create_date,
+                partner_id = orderline.partner_id,
                 )
 
         for key, options in orderLinesDict.items():
@@ -201,6 +229,7 @@ with psycopg2.connect(**configdb.psycopg) as db:
 
     investments = getActiveInvestments(db)
 
+
     unmatchedMoveLines = list(solved.keys())
     unmatchedInvestments = []
 
@@ -209,19 +238,64 @@ with psycopg2.connect(**configdb.psycopg) as db:
 
         if moveline_id not in solved.keys():
             warn("Missing moveline {move_line_id} "
-                "for partner {member_id} {nshares:03d} '{mlname}'"
+                "for partner {partner_id} {nshares:03d} '{mlname}'"
                 .format(**inv))
             #warn(inv.dump())
             unmatchedInvestments.append(inv.id)
         else:
             0 and success("{move_line_id} found".format(**inv))       
+            if moveline_id not in  unmatchedMoveLines:
+                warn("Dupped moveline {}".format(moveline_id))
+            else:
+                unmatchedMoveLines.remove(moveline_id)
 
-        if moveline_id not in unmatchedMoveLines:
-            warn("already removed move line {}".format(moveline_id))
-        else:
-            unmatchedMoveLines.remove(moveline_id)
+    ungenerated = [
+        line_id
+        for line_id in unmatchedMoveLines
+        if line_id > lastGeneratedMoveLine
+    ]
 
-    print unmatchedInvestments, len(unmatchedInvestments)
-    print unmatchedMoveLines, len(unmatchedMoveLines)
+    unmatchedMoveLines = [
+        line_id
+        for line_id in unmatchedMoveLines
+        if line_id <= lastGeneratedMoveLine
+    ]
+
+    print 'UNMATCHED INVESTMENTS', len(unmatchedInvestments), unmatchedInvestments
+    print 'UNMATCHED MOVELINES', len(unmatchedMoveLines), unmatchedMoveLines
+    print 'UNGENERATED MOVELINES', len(ungenerated), ungenerated
+
+
+
+    orphanMoveLinesByPartner = {}
+
+    for moveline_id in unmatchedMoveLines:
+        moveline = solved[moveline_id]
+
+        wasEmpty = appendToKey(orphanMoveLinesByPartner, moveline.partner_id, moveline)
+        if wasEmpty:
+            warn("partner with two pending movements {} {}".format(moveline.partner_id, moveline_id))
+
+    for inv in investments:
+        if inv.id not in unmatchedInvestments:
+            continue
+
+        partner_id = inv.partner_id
+        solution = getAndRemoveFirst(orphanMoveLinesByPartner, partner_id)
+        if not solution:
+            warn("No trobada un moviment amb partner_id {}".format(partner_id))
+            continue
+        success("HOLA "+solution.dump())
+
+
+
+
+    print ns(val=orphanMoveLinesByPartner).dump()
+
+
+
+
+
+
 
 
