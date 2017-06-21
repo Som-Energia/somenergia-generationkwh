@@ -5,6 +5,47 @@
 import dbutils
 from yamlns import namespace as ns
 
+
+
+def getGenerationMovelinesByPartner(db, partner_id):
+    with db.cursor() as cr:
+        cr.execute("""\
+            select
+                p.*
+            from
+                res_partner as p
+            where
+                p.id = %(partner_id)s
+            order by p.id
+        """, dict(
+            partner_id=partner_id,
+        ))
+        partner = dbutils.nsList(cr)[0]
+    partner.account = '1635{:08}'.format(int(partner.ref[1:]))
+    with db.cursor() as cr:
+        cr.execute("""\
+            select
+                %(partner_name)s as partner_name,
+                ml.*,
+                false
+            from
+                account_move_line as ml
+            left join
+                account_account as a
+            on
+                ml.account_id=a.id
+            where
+                a.code = %(account)s and
+                true
+            order by ml.id
+        """, dict(
+            partner_id = partner_id,
+            partner_name = partner.name,
+            account = partner.account,
+        ))
+        return dbutils.nsList(cr)
+
+
 def getOrderLines(db, order_id):
     with db.cursor() as cr:
         cr.execute("""\
@@ -171,18 +212,53 @@ def getAndRemoveFirst(d, key):
     if not values: return None
     return values.pop(0)
 
+def bindMoveLineAndPaymentLine(moveline, orderline):
+    True and success(
+        "Match ml-po ml-{moveline.id} {orderline.name} {orderline.create_date} {amount:=8}€ {moveline.partner_name}"
+        .format(**ns(
+            moveline=moveline,
+            orderline=orderline,
+            amount = moveline.credit-moveline.debit,
+            )))
+    solvedMovelines[moveline.id] = ns(
+        ref=orderline.name,
+        order_date=orderline.create_date,
+        partner_id = orderline.partner_id,
+        partner_name = orderline.partner_name,
+        )
+
+def bindInvestmentWithOrder(investment, moveline):
+    True and success(
+        "Match inv-od {investment.id} {moveline.ref} {moveline.order_date} {amount:=8}€ {moveline.partner_name}"
+        .format(**ns(
+            investment=investment,
+            moveline=moveline,
+            amount=investment.nshares*100.,
+            )))
+
+def displayPartnersMovements(db, partner_id):
+    movelines = getGenerationMovelinesByPartner(db,partner_id)
+    for m in movelines:
+        m.amount = m.credit -m.debit
+        error("    {date_created} {id} {partner_name} {amount} {name}"
+            .format(**m))
+
 import configdb
 import psycopg2
-from consolemsg import step, warn, success
+from consolemsg import step, warn, success, error
 
 with psycopg2.connect(**configdb.psycopg) as db:
 
-    lastGeneratedMoveLine = lastInvestment(db)
+    getGenerationMovelinesByPartner(db, 2)
 
     solvedMovelines = ns()
+    step("Pairing movelines and orderlines by order/move")
 
     for data in investmentOrderAndMovements(db):
-        step("{move_create_date}".format(**data))
+        step("Quadrant remesa feta el {move_create_date}".format(**data))
+
+
+        step(" Check that movement and order are paired")
 
         if not data.move_id:
             warn("{}: Order without movement. Id {}, with {} entries" .format(
@@ -217,52 +293,65 @@ with psycopg2.connect(**configdb.psycopg) as db:
                 .format(len(orderLines), data.order_nlines))
 
 
+        step(" Matching order lines and move lines by partner, amount and order")
         orderLinesDict = ns()
         repesca = []
 
+        #step("  Create a map partner,amount -> orderline")
         for line in orderLines:
             key = (line.partner_id, -line.amount)
             appendToKey(orderLinesDict, key, line)
-            
+
+        #step("  for each move line look up orderlines by partner,amount")
         for moveline in moveLines:
             key = (moveline.partner_id, moveline.credit)
             orderline = getAndRemoveFirst(orderLinesDict, key)
             if not orderline:
                 repesca.append(moveline)
                 continue
-            False and success("{} {} {}".format(
-                moveline.id, orderline.name, orderline.create_date))
-            solvedMovelines[moveline.id] = ns(
-                ref=orderline.name,
-                order_date=orderline.create_date,
-                partner_id = orderline.partner_id,
-                )
 
+            # orderline-movementline match found
+            bindMoveLineAndPaymentLine(moveline, orderline)
+
+        step(" Matching missed order lines just by partner")
+
+        #step("  Create a partner -> unpaired movelines map")
         movelinesByPartnerId = {}
         for moveline in repesca:
             appendToKey(movelinesByPartnerId, moveline.partner_id, moveline)
 
+        #step("  Lookup for each unpaired order")
         for key, options in orderLinesDict.items():
             for orderline in options:
                 moveline = getAndRemoveFirst(movelinesByPartnerId, orderline.partner_id)
                 if not moveline:
-                    warn("Linia de Remesa sense parella: {name} id {id} {order_sent_date} {amount}€ {partner_name}"
+                    error(
+                        "Linia de Remesa sense parella: "
+                        "{name} id {id} {order_sent_date} {amount}€ {partner_name}"
                         .format(**orderline))
                     print key
                     continue
-                success("Repescao {}".format( orderline.name))
-                solvedMovelines[moveline.id] = ns(
-                    ref=orderline.name,
-                    order_date=orderline.create_date,
-                    partner_id = orderline.partner_id,
-                    )
+                bindMoveLineAndPaymentLine(moveline, orderline)
+                warn(
+                    "Amount missmatch {orderline.name} "
+                    "order {orderline.amount}€ move {moveline.credit}"
+                    .format(**ns(
+                        orderline=orderline,
+                        moveline=moveline,
+                    )))
+                displayPartnersMovements(db, orderline.partner_id)
 
         for partner_id, movelines in movelinesByPartnerId.items():
             for moveline in movelines:
-                warn("Linia de Moviment sense parella id {id} {create_date} {credit}€ {partner_name}".format(**moveline))
+                error(
+                    "Linia de Moviment sense parella "
+                    "id {id} {create_date} {credit}€ {partner_name}"
+                    .format(**moveline))
+
+    step("Pairing investments")
+    step(" Pairing investments using existing relation")
 
     investments = getActiveInvestments(db)
-
 
     unmatchedMoveLines = list(solvedMovelines.keys())
     unmatchedInvestments = []
@@ -272,17 +361,20 @@ with psycopg2.connect(**configdb.psycopg) as db:
 
         if moveline_id not in solvedMovelines.keys():
             warn("Missing moveline {move_line_id} "
-                "for partner {partner_id} {nshares:03d} '{mlname}'"
+                "for partner {partner_name} {nshares}00€ '{mlname}'"
                 .format(**inv))
             #warn(inv.dump())
             unmatchedInvestments.append(inv.id)
         else:
-            0 and success("{move_line_id} found".format(**inv))       
+            bindInvestmentWithOrder(inv, solvedMovelines[moveline_id])
             if moveline_id not in  unmatchedMoveLines:
-                warn("Dupped moveline {move_line_id} {partner_name}".format(**inv))
+                error("Move line referenced twice {move_line_id} {partner_name}".format(**inv))
+                displayPartnersMovements(db, inv.partner_id)
             else:
                 unmatchedMoveLines.remove(moveline_id)
 
+
+    lastGeneratedMoveLine = lastInvestment(db)
     ungenerated = [
         line_id
         for line_id in unmatchedMoveLines
@@ -295,11 +387,7 @@ with psycopg2.connect(**configdb.psycopg) as db:
         if line_id <= lastGeneratedMoveLine
     ]
 
-    print 'UNMATCHED INVESTMENTS', len(unmatchedInvestments), unmatchedInvestments
-    print 'UNMATCHED MOVELINES', len(unmatchedMoveLines), unmatchedMoveLines
-    print 'UNGENERATED MOVELINES', len(ungenerated), ungenerated
-
-
+    step("Retry match investments just by partner")
     orphanMoveLinesByPartner = {}
 
     for moveline_id in unmatchedMoveLines:
@@ -307,7 +395,7 @@ with psycopg2.connect(**configdb.psycopg) as db:
 
         wasEmpty = appendToKey(orphanMoveLinesByPartner, moveline.partner_id, moveline)
         if wasEmpty:
-            warn("partner with two pending movements {} {}".format(moveline.partner_id, moveline_id))
+            warn("partner with two pending movements id {id} {partner_name}".format(id=moveline_id, **moveline))
 
     for inv in investments:
         if inv.id not in unmatchedInvestments:
@@ -316,16 +404,22 @@ with psycopg2.connect(**configdb.psycopg) as db:
         partner_id = inv.partner_id
         solution = getAndRemoveFirst(orphanMoveLinesByPartner, partner_id)
         if not solution:
-            warn("No trobada moveline {move_line_id} {partner_name}".format(**inv))
+            error("No name for Investment {move_line_id} {nshares:=5}00.00€ {partner_name}".format(**inv))
+            displayPartnersMovements(db, inv.partner_id)
             continue
-        success("HOLA "+solution.dump())
+        bindInvestmentWithOrder(inv, solution)
+
+    for orphanNames in orphanMoveLinesByPartner.values():
+        for orphanName in orphanNames:
+            error("Unassigned name {ref} {order_date} {partner_name}"
+                .format(**orphanName))
+            displayPartnersMovements(db, orphanName.partner_id)
 
 
-
-
-    print ns(val=orphanMoveLinesByPartner).dump()
-
-
+    for moveline_id in ungenerated:
+        moveline = solvedMovelines[moveline_id]
+        warn("Not yet generated investment {ref} {order_date} {partner_name}".format(**moveline))
+        
 
 
 
