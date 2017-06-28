@@ -18,6 +18,7 @@ class Investment_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
+        self.personalData = ns(dbconfig.personaldata)
         self.Investment = erp().GenerationkwhInvestment
         self.Investment.dropAll()
 
