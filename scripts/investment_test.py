@@ -12,6 +12,122 @@ try:
 except ImportError:
     pass
 
+@unittest.skipIf(not dbconfig, "depends on ERP")
+class InvestmentCommand_Test(unittest.TestCase):
+    def setUp(self):
+        self.maxDiff=None
+        self.b2bdatapath="b2bdata"
+        clear()
+
+    def tearDown(self):
+        clear()
+
+    def test_clean(self):
+        data = listactive(csv=True)
+        self.assertEqual(data,'')
+
+    def test_create_toEarly(self):
+        create(stop="2015-06-29")
+        data = listactive(csv=True)
+        self.assertEqual(data,'')
+
+    def test_create_onlyFirstBatch(self):
+        create(stop="2015-06-30")
+        data = listactive(csv=True)
+        self.assertB2BEqual(data)
+
+    def test_create_firstBatch_twice(self):
+        create(stop="2015-06-30")
+        create(stop="2015-06-30")
+        data = listactive(csv=True)
+        self.assertB2BEqual(data)
+
+    def test_create_firstAndSecondBatch(self):
+        create(stop="2015-07-03")
+        data = listactive(csv=True)
+        self.assertB2BEqual(data)
+
+    def test_create_justSecondBatch(self):
+        create(start='2015-07-02', stop="2015-07-03")
+        data = listactive(csv=True)
+        self.assertB2BEqual(data)
+
+    def test_create_waitTwoDays(self):
+        create(stop="2015-06-30", waitingDays=2)
+        data = listactive(csv=True)
+        self.assertB2BEqual(data)
+
+    def test_create_expireOneYear(self):
+        create(stop="2015-06-30", waitingDays=2, expirationYears=1)
+        data = listactive(csv=True)
+        self.assertB2BEqual(data)
+
+    def test_create_inTwoBatches(self):
+        create(stop="2015-06-30", waitingDays=0, expirationYears=1)
+        create(stop="2015-07-03")
+        data = listactive(csv=True)
+
+    def test_listactive_withMember(self):
+        create(stop="2015-06-30")
+        data = listactive(csv=True, member=469)
+        self.assertMultiLineEqual(data,
+            '469\tFalse\tFalse\t3\n'
+            '469\tFalse\tFalse\t2\n'
+        )
+
+    def test_listactive_withStop_shouldBeFirstBatch(self):
+        create(stop="2015-07-03", waitingDays=0, expirationYears=1)
+        data = listactive(csv=True, stop="2015-06-30")
+        self.assertB2BEqual(data)
+
+    def test_listactive_withStopAndNoActivatedInvestments_shouldBeFirstBatch(self):
+        # Second batch is not activated, and is not shown even if we extend stop
+        create(stop="2015-06-30", waitingDays=0, expirationYears=1)
+        create(start="2015-07-03", stop="2015-07-03")
+        data = listactive(csv=True, stop="2020-07-03")
+        self.assertB2BEqual(data)
+
+    def test_listactive_withStart_excludeExpired_shouldBeSecondBatch(self):
+        # Expired contracts do not show if start is specified and it is earlier
+        create(stop="2015-07-03", waitingDays=0, expirationYears=1)
+        data = listactive(csv=True, start="2016-07-01")
+        self.assertB2BEqual(data)
+
+    def test_listactive_withStartAndNoActivatedInvestments_shouldBeFirstBatch(self):
+        # Unactivated contracts are not listed if start is specified
+        create(stop="2015-06-30", waitingDays=0, expirationYears=1) # listed
+        create(start="2015-07-03", stop="2015-07-03") # unlisted
+        data = listactive(csv=True, start="2016-06-30")
+        self.assertB2BEqual(data)
+
+    def test_listactive_withStartAndNoExpirationRunForEver_shouldBeSecondBatch(self):
+        # Active with no deactivation keeps being active for ever
+        create(stop="2015-06-30", waitingDays=0, expirationYears=1) # unlisted
+        create(start="2015-07-03", stop="2015-07-03", waitingDays=0) # listed
+        data = listactive(csv=True, start="2036-06-30")
+        self.assertB2BEqual(data)
+
+
+    def test_activate_withStop(self):
+        create(stop="2015-07-03")
+        effective(stop="2015-06-30", waitingDays=0)
+        data = listactive(csv=True)
+        self.assertB2BEqual(data)
+
+    def test_activate_withStart(self):
+        create(stop="2015-07-03")
+        effective(start="2015-07-02", waitingDays=0)
+        data = listactive(csv=True)
+        self.assertB2BEqual(data)
+
+    def test_activate_withExpiration(self):
+        create(stop="2015-07-03")
+        effective(stop="2015-06-30", waitingDays=0, expirationYears=1)
+        data = listactive(csv=True)
+        self.assertB2BEqual(data)
+
+
+
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Investment_Test(unittest.TestCase):
@@ -511,121 +627,245 @@ class Investment_Test(unittest.TestCase):
         self.assertEqual(investment['order_date'], '2015-07-29')
 
 
-
-
-
 @unittest.skipIf(not dbconfig, "depends on ERP")
-class InvestmentCommand_Test(unittest.TestCase):
+class Investment_Amortization_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
-        clear()
+        self.personalData = ns(dbconfig.personaldata)
+        self.Investment = erp().GenerationkwhInvestment
+        self.Investment.dropAll()
 
     def tearDown(self):
-        clear()
-
-    def test_clean(self):
-        data = listactive(csv=True)
-        self.assertEqual(data,'')
-
-    def test_create_toEarly(self):
-        create(stop="2015-06-29")
-        data = listactive(csv=True)
-        self.assertEqual(data,'')
-
-    def test_create_onlyFirstBatch(self):
-        create(stop="2015-06-30")
-        data = listactive(csv=True)
-        self.assertB2BEqual(data)
-
-    def test_create_firstBatch_twice(self):
-        create(stop="2015-06-30")
-        create(stop="2015-06-30")
-        data = listactive(csv=True)
-        self.assertB2BEqual(data)
-
-    def test_create_firstAndSecondBatch(self):
-        create(stop="2015-07-03")
-        data = listactive(csv=True)
-        self.assertB2BEqual(data)
-
-    def test_create_justSecondBatch(self):
-        create(start='2015-07-02', stop="2015-07-03")
-        data = listactive(csv=True)
-        self.assertB2BEqual(data)
-
-    def test_create_waitTwoDays(self):
-        create(stop="2015-06-30", waitingDays=2)
-        data = listactive(csv=True)
-        self.assertB2BEqual(data)
-
-    def test_create_expireOneYear(self):
-        create(stop="2015-06-30", waitingDays=2, expirationYears=1)
-        data = listactive(csv=True)
-        self.assertB2BEqual(data)
-
-    def test_create_inTwoBatches(self):
-        create(stop="2015-06-30", waitingDays=0, expirationYears=1)
-        create(stop="2015-07-03")
-        data = listactive(csv=True)
-
-    def test_listactive_withMember(self):
-        create(stop="2015-06-30")
-        data = listactive(csv=True, member=469)
-        self.assertMultiLineEqual(data,
-            '469\tFalse\tFalse\t3\n'
-            '469\tFalse\tFalse\t2\n'
-        )
-
-    def test_listactive_withStop_shouldBeFirstBatch(self):
-        create(stop="2015-07-03", waitingDays=0, expirationYears=1)
-        data = listactive(csv=True, stop="2015-06-30")
-        self.assertB2BEqual(data)
-
-    def test_listactive_withStopAndNoActivatedInvestments_shouldBeFirstBatch(self):
-        # Second batch is not activated, and is not shown even if we extend stop
-        create(stop="2015-06-30", waitingDays=0, expirationYears=1)
-        create(start="2015-07-03", stop="2015-07-03")
-        data = listactive(csv=True, stop="2020-07-03")
-        self.assertB2BEqual(data)
-
-    def test_listactive_withStart_excludeExpired_shouldBeSecondBatch(self):
-        # Expired contracts do not show if start is specified and it is earlier
-        create(stop="2015-07-03", waitingDays=0, expirationYears=1)
-        data = listactive(csv=True, start="2016-07-01")
-        self.assertB2BEqual(data)
-
-    def test_listactive_withStartAndNoActivatedInvestments_shouldBeFirstBatch(self):
-        # Unactivated contracts are not listed if start is specified
-        create(stop="2015-06-30", waitingDays=0, expirationYears=1) # listed
-        create(start="2015-07-03", stop="2015-07-03") # unlisted
-        data = listactive(csv=True, start="2016-06-30")
-        self.assertB2BEqual(data)
-
-    def test_listactive_withStartAndNoExpirationRunForEver_shouldBeSecondBatch(self):
-        # Active with no deactivation keeps being active for ever
-        create(stop="2015-06-30", waitingDays=0, expirationYears=1) # unlisted
-        create(start="2015-07-03", stop="2015-07-03", waitingDays=0) # listed
-        data = listactive(csv=True, start="2036-06-30")
-        self.assertB2BEqual(data)
+        self.Investment.dropAll()
 
 
-    def test_activate_withStop(self):
-        create(stop="2015-07-03")
-        effective(stop="2015-06-30", waitingDays=0)
-        data = listactive(csv=True)
-        self.assertB2BEqual(data)
 
-    def test_activate_withStart(self):
-        create(stop="2015-07-03")
-        effective(start="2015-07-02", waitingDays=0)
-        data = listactive(csv=True)
-        self.assertB2BEqual(data)
+    def assertNsEqual(self, dict1, dict2):
+        def parseIfString(nsOrString):
+            if type(nsOrString) in (dict, ns):
+                return nsOrString
+            return ns.loads(nsOrString)
 
-    def test_activate_withExpiration(self):
-        create(stop="2015-07-03")
-        effective(stop="2015-06-30", waitingDays=0, expirationYears=1)
-        data = listactive(csv=True)
-        self.assertB2BEqual(data)
+        def sorteddict(d):
+            if type(d) not in (dict, ns):
+                return d
+            return ns(sorted(
+                (k, sorteddict(v))
+                for k,v in d.items()
+                ))
+        dict1 = sorteddict(parseIfString(dict1))
+        dict2 = sorteddict(parseIfString(dict2))
+
+        return self.assertMultiLineEqual(dict1.dump(), dict2.dump())
+
+    def assertLogEquals(self, log, expected):
+        for x in log.splitlines():
+            self.assertRegexpMatches(x,
+                u'\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d+ [^]]+\\] .*',
+                u"Linia de log con formato no estandard"
+            )
+            
+        logContent = ''.join(
+                x.split('] ')[1]+'\n'
+                for x in log.splitlines()
+                if u'] ' in x
+                )
+        self.assertMultiLineEqual(logContent, expected)
+        
+
+    def test__create_from_form__allOk(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.123',
+            )
+
+        self.assertTrue(id)
+
+        investment = ns(self.Investment.read(id, []))
+        log = investment.pop('log')
+        name = investment.pop('name')
+
+        self.Investment.unlink(id)
+
+        self.assertLogEquals(log,
+            u'ORDER: Formulari emplenat des de 10.10.23.123\n'
+            )
+        
+        self.assertRegexpMatches(name,r'^GKWH[0-9]{5}$')
+
+        self.assertNsEqual(investment, """
+            id: {id}
+            member_id:
+            - {member_id}
+            - {surname}, {name}
+            order_date: '2017-01-01'
+            purchase_date: false
+            first_effective_date: false
+            last_effective_date: false
+            nshares: 20
+            amortized_amount: 0.0
+            move_line_id: false
+            active: true
+            """.format(
+                id=id,
+                **self.personalData
+                ))
+            
+
+    @unittest.skip('Not implemented')
+    def test__create_from_form__whenBadOrderDate(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            'baddate', # order_date
+            2001,
+            '10.10.23.123',
+            )
+        self.assertFalse(id) # ??
+
+    @unittest.skip('Not implemented')
+    def test__create_from_form__whenNotAMember(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.123',
+            )
+        self.assertFalse(id) # ??
+
+    @unittest.skip('Not implemented')
+    def test__create_from_form__withNonDivisibleAmount(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2003,
+            '10.10.23.123',
+            )
+        self.assertFalse(id) # ??
+
+    def test__charge__singleInvestment(self):
+    
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.123',
+            )
+
+        self.Investment.charge([id], '2017-01-03')
+
+        investment = ns(self.Investment.read(id, []))
+        log = investment.pop('log')
+        name = investment.pop('name')
+
+        self.Investment.unlink(id)
+
+        self.assertLogEquals(log,
+            u'PAYED: Remesada al compte\n'
+            u'ORDER: Formulari emplenat des de 10.10.23.123\n'
+            )
+        
+        self.assertNsEqual(investment, """
+            id: {id}
+            member_id:
+            - {member_id}
+            - {surname}, {name}
+            order_date: '2017-01-01'
+            purchase_date: '2017-01-03' # Changed!
+            first_effective_date: false
+            last_effective_date: false
+            nshares: 20
+            amortized_amount: 0.0
+            move_line_id: false
+            active: true
+            """.format(
+                id=id,
+                **self.personalData
+                ))
+
+    def test__charge__samePurchaseDateSetToAll(self):
+    
+        id1 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.123',
+            )
+
+        id2 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-02', # order_date
+            2000,
+            '10.10.23.123',
+            )
+
+        self.Investment.charge([id1,id2], '2017-01-03')
+        
+        result = self.Investment.read([id1,id2], ['purchase_date'])
+        
+        self.assertNsEqual(ns(data=result), """\
+            data:
+            - 
+              purchase_date: '2017-01-03'
+              id: {id1}
+            -
+              purchase_date: '2017-01-03'
+              id: {id2}
+            """.format(id1=id1, id2=id2))
 
 
+    def test__charge__oldLogKept(self):
+    
+        id1 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            )
+
+        id2 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-02', # order_date
+            2000,
+            '10.10.23.2',
+            )
+
+        self.Investment.charge([id1,id2], '2017-01-03')
+        
+        result = self.Investment.read([id1,id2], ['log'])
+        
+        self.assertLogEquals(result[0]['log'],
+            u'PAYED: Remesada al compte\n'
+            u'ORDER: Formulari emplenat des de 10.10.23.1\n'
+            )
+        
+        self.assertLogEquals(result[1]['log'],
+            u'PAYED: Remesada al compte\n'
+            u'ORDER: Formulari emplenat des de 10.10.23.2\n'
+            )
+
+    def assertInvoiceInfoEqual(self, invoice_id, expected):
+        invoice = ns()
+        
+        self.assertNsEqual(invoice, expected)
+
+
+    def test__create_amortization_invoice(self):
+    
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            )
+
+        self.Investment.charge([id], '2017-01-03')
+        invoice_id = self.Investment.create_amortization_invoice(
+            id, '2018-01-30', 80)
+        
+        self.assertTrue(invoice_id)
+        
+        self.assertInvoiceInfoEqual(invoice_id, """\
+            """)
