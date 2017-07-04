@@ -850,11 +850,11 @@ class Investment_Amortization_Test(unittest.TestCase):
             )
 
     def assertInvoiceInfoEqual(self, invoice_id, expected):
-        print invoice_id
         def proccesLine(line):
             line = ns(line)
             line.product_id = line.product_id[1]
             line.account_id = line.account_id[1]
+            line.uos_id = line.uos_id[1]
             del line.id
             return line
 
@@ -901,9 +901,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             id: {id}
             invoice_line:
             - origin: false
-              uos_id:
-              - 1
-              - PCE
+              uos_id: PCE
               account_id: 163500000000 Otras deudas, con otras partes vinculadas
               name: 'Amortització fins a 30/01/2018 de GENKWH_666666666666 '
               invoice_id:
