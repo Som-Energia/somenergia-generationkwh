@@ -562,7 +562,7 @@ class Investment_Test(unittest.TestCase):
 
         investment = self.Investment.read(investment_id,['log'])
         self.assertEqual(investment['log'], 
-            u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
+            u'[2015-07-29 09:39:07.70812 Mónica Nuell] PAYMENT: Remesa efectuada\n'
             u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
             )
 
@@ -586,7 +586,7 @@ class Investment_Test(unittest.TestCase):
 
         investment = self.Investment.read(investment_id,['log'])
         self.assertEqual(investment['log'], 
-            u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
+            u'[2015-07-29 09:39:07.70812 Mónica Nuell] PAYMENT: Remesa efectuada\n'
             u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
             )
 
@@ -595,7 +595,7 @@ class Investment_Test(unittest.TestCase):
         investment_id = self.Investment.search([])[0]
         investment = self.Investment.read(investment_id,['log'])
         self.assertEqual(investment['log'], 
-            u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
+            u'[2015-07-29 09:39:07.70812 Mónica Nuell] PAYMENT: Remesa efectuada\n'
             u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
             )
 
@@ -611,7 +611,7 @@ class Investment_Test(unittest.TestCase):
                 u'AMORTIZATION: Generada amortització de 4.00 € pel 2017-07-29'
             )
         self.assertEqual('\n'.join(investment['log'].split('\n')[1:]),
-            u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
+            u'[2015-07-29 09:39:07.70812 Mónica Nuell] PAYMENT: Remesa efectuada\n'
             u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
             )
 
