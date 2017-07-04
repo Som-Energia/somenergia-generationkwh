@@ -629,16 +629,19 @@ class Investment_Test(unittest.TestCase):
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Investment_Amortization_Test(unittest.TestCase):
+
     def setUp(self):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
         self.personalData = ns(dbconfig.personaldata)
-        self.Investment = erp().GenerationkwhInvestment
+        self.erp = erp()
+        self.Invoice = self.erp.AccountInvoice
+        self.InvoiceLine = self.erp.AccountInvoiceLine
+        self.Investment = self.erp.GenerationkwhInvestment
         self.Investment.dropAll()
 
     def tearDown(self):
         self.Investment.dropAll()
-
 
 
     def assertNsEqual(self, dict1, dict2):
@@ -847,13 +850,36 @@ class Investment_Amortization_Test(unittest.TestCase):
             )
 
     def assertInvoiceInfoEqual(self, invoice_id, expected):
-        invoice = ns()
-        
+        print invoice_id
+        def proccesLine(line):
+            line = ns(line)
+            line.product_id = line.product_id[1]
+            line.account_id = line.account_id[1]
+            del line.id
+            return line
+
+        invoice = ns(self.Invoice.read(invoice_id, [
+            'partner_id',
+            'type',
+            'name',
+            'journal_id',
+            'account_id',
+            'partner_bank',
+            'payment_type',
+            'date_invoice',
+            'invoice_line',
+        ]))
+        invoice.journal_id = invoice.journal_id[1]
+        invoice.partner_bank = invoice.partner_bank[1]
+        invoice.invoice_line = [
+            proccesLine(line)
+            for line in self.InvoiceLine.read(invoice.invoice_line, [])
+            ]
         self.assertNsEqual(invoice, expected)
 
 
     def test__create_amortization_invoice(self):
-    
+
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
@@ -866,6 +892,49 @@ class Investment_Amortization_Test(unittest.TestCase):
             id, '2018-01-30', 80)
         
         self.assertTrue(invoice_id)
-        
+
         self.assertInvoiceInfoEqual(invoice_id, """\
-            """)
+            account_id:
+            - 2307
+            - 410000{nsoci:0>6s} {surname}, {name}
+            date_invoice: '{invoice_date}'
+            id: {id}
+            invoice_line:
+            - origin: false
+              uos_id:
+              - 1
+              - PCE
+              account_id: 163500000000 Otras deudas, con otras partes vinculadas
+              name: 'Amortització fins a 30/01/2018 de GENKWH_666666666666 '
+              invoice_id:
+              - {id}
+              - 'SI:  GENKWH_AMOR{year}S{nsoci:0>6s}'
+              price_unit: 80.0
+              price_subtotal: 80.0
+              invoice_line_tax_id: []
+              note: false
+              discount: 0.0
+              account_analytic_id: false
+              quantity: 1.0
+              product_id: '[GENKWH_AMOR] Amortització Generation kWh'
+            journal_id: Factures Amortitzacions GenerationkWh
+            name: GENKWH_AMOR{year}S{nsoci:0>6s}
+            partner_bank: {iban}
+            partner_id:
+            - {partnerid}
+            - {surname}, {name}
+            payment_type:
+            - 2
+            - Transferencia
+            type: in_invoice
+            """.format(
+                invoice_date = datetime.date.today(),
+                id = invoice_id,
+                iban = 'ES77 1234 1234 1612 3456 7890', # TODO: Should be set
+                year = 2018,
+                ** self.personalData
+            ))
+
+
+
+
