@@ -31,11 +31,16 @@ def getGenerationMovelinesByPartner(db, partner_id):
             from
                 account_move_line as ml
             left join
+                account_period as period
+            on
+                period.id = ml.period_id
+            left join
                 account_account as a
             on
                 ml.account_id=a.id
             where
                 a.code = %(account)s and
+                not period.special and
                 true
             order by ml.id
         """, dict(
