@@ -8,7 +8,6 @@ import unittest
 dbconfig = None
 try:
     import dbconfig
-    import erppeek
 except ImportError:
     pass
 
