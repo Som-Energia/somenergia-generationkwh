@@ -249,8 +249,6 @@ from consolemsg import step, warn, success, error
 
 with psycopg2.connect(**configdb.psycopg) as db:
 
-    getGenerationMovelinesByPartner(db, 2)
-
     solvedMovelines = ns()
     step("Pairing movelines and orderlines by order/move")
 
