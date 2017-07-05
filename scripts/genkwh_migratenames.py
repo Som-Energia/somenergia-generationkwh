@@ -407,7 +407,7 @@ with psycopg2.connect(**configdb.psycopg) as db:
         partner_id = inv.partner_id
         solution = getAndRemoveFirst(orphanMoveLinesByPartner, partner_id)
         if not solution:
-            error("No name for Investment {move_line_id} {nshares:=5}00.00€ {partner_name}".format(**inv))
+            error("No name for Investment {move_date_created} {move_line_id} {nshares:=5}00.00€ {partner_name}".format(**inv))
             displayPartnersMovements(db, inv.partner_id)
             continue
         bindInvestmentWithOrder(inv, solution)
