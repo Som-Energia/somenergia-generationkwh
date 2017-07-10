@@ -6,6 +6,54 @@ import dbutils
 from yamlns import namespace as ns
 
 
+def activeInvestmentRelatedToFiscalEndYear(db):
+    """Returns the list of active investment related to
+    movelines of a fiscal closure.
+    Investments of such movelines should be disabled."""
+    query = """\
+        select
+            inv.id as id
+        from
+            generationkwh_investment as inv
+        left join
+            account_move_line as ml
+        on
+            inv.move_line_id = ml.id
+        left join
+            account_period as p
+        on
+            p.id = ml.period_id
+        where
+            p.special and
+            inv.active
+        """
+    with db.cursor() as cr:
+        cr.execute(query)
+
+def deleteInactiveInvestmentRelatedToFiscalEndYear(db):
+    query = """\
+        delete
+        from generationkwh_investment
+        where id in (
+            select
+                inv.id as id
+            from
+                generationkwh_investment as inv
+            left join
+                account_move_line as ml
+            on
+                inv.move_line_id = ml.id
+            left join
+                account_period as p
+            on
+                p.id = ml.period_id
+            where
+                p.special and
+                not inv.active
+            )
+        """
+    with db.cursor() as cr:
+        cr.execute(query)
 
 def getGenerationMovelinesByPartner(db, partner_id):
     with db.cursor() as cr:
@@ -47,6 +95,42 @@ def getGenerationMovelinesByPartner(db, partner_id):
             partner_id = partner_id,
             partner_name = partner.name,
             account = partner.account,
+        ))
+        return dbutils.nsList(cr)
+
+def getInvestmentsByPartner(db, partner_id):
+    with db.cursor() as cr:
+        cr.execute("""\
+            select
+                p.*
+            from
+                res_partner as p
+            where
+                p.id = %(partner_id)s
+            order by p.id
+        """, dict(
+            partner_id=partner_id,
+        ))
+        partner = dbutils.nsList(cr)[0]
+    with db.cursor() as cr:
+        cr.execute("""\
+            select
+                %(partner_name)s as partner_name,
+                inv.*,
+                false
+            from
+                generationkwh_investment as inv
+            left join
+                somenergia_soci as member
+            on
+                member.id = inv.member_id
+            where
+                member.partner_id = %(partner_id)s and
+                true
+            order by inv.id
+        """, dict(
+            partner_id = partner_id,
+            partner_name = partner.name,
         ))
         return dbutils.nsList(cr)
 
@@ -230,9 +314,10 @@ def bindMoveLineAndPaymentLine(moveline, orderline):
         order_date=orderline.create_date,
         partner_id = orderline.partner_id,
         partner_name = orderline.partner_name,
+        amount = moveline.credit-moveline.debit,
         )
 
-def bindInvestmentWithOrder(investment, moveline):
+def bindInvestmentWithOrder(db, investment, moveline):
     True and success(
         "Match inv-od {investment.id} {moveline.ref} {moveline.order_date} {amount:=8}€ {moveline.partner_name}"
         .format(**ns(
@@ -241,18 +326,49 @@ def bindInvestmentWithOrder(investment, moveline):
             amount=investment.nshares*100.,
             )))
 
+    with db.cursor() as cr:
+        cr.execute("""\
+            UPDATE generationkwh_investment as inv
+            SET
+                name = %(name)s,
+                order_date = %(order_date)s
+            WHERE
+                inv.id = %(id)s
+            """, dict(
+                id = investment.id,
+                order_date = moveline.order_date,
+                name = moveline.ref,
+            ))
+
 def displayPartnersMovements(db, partner_id):
     movelines = getGenerationMovelinesByPartner(db,partner_id)
     for m in movelines:
         m.amount = m.credit -m.debit
-        error("    {date_created} {id} {partner_name} {amount} {name}"
+        error("    mov {date_created} {id} {partner_name} {amount} {name}"
             .format(**m))
+    investments = getInvestmentsByPartner(db, partner_id)
+    for inv in investments:
+        inv.amount = inv.nshares*100.
+        inv.active = 'y' if inv.active else 'n'
+        error("    inv {active} {order_date_or_not} {purchase_date_or_not} {first_effective_date_or_not} {last_effective_date_or_not} {id} {partner_name} {amount} {name}"
+            .format(
+            order_date_or_not = inv.order_date or '____-__-__',
+            purchase_date_or_not = inv.purchase_date or '____-__-__',
+            first_effective_date_or_not = inv.first_effective_date or '____-__-__',
+            last_effective_date_or_not = inv.last_effective_date or '____-__-__',
+            **inv))
 
 import configdb
 import psycopg2
-from consolemsg import step, warn, success, error
+from consolemsg import step, warn, success, error, fail
 
 with psycopg2.connect(**configdb.psycopg) as db:
+
+    step("Clean up cases")
+    fiscalEndYearInvestments = activeInvestmentRelatedToFiscalEndYear(db)
+    if fiscalEndYearInvestments:
+        fail("There are active investments which are related to fiscal end year")
+    print deleteInactiveInvestmentRelatedToFiscalEndYear(db)
 
     solvedMovelines = ns()
     step("Pairing movelines and orderlines by order/move")
@@ -363,18 +479,34 @@ with psycopg2.connect(**configdb.psycopg) as db:
         moveline_id = inv.move_line_id
 
         if moveline_id not in solvedMovelines.keys():
-            warn("Missing moveline {move_line_id} "
-                "for partner {partner_name} {nshares}00€ '{mlname}'"
+            warn("Moveline {move_line_id} refered by inv {id} not in a payment order: "
+                "partner {partner_name} {nshares}00€ '{mlname}'"
                 .format(**inv))
             #warn(inv.dump())
             unmatchedInvestments.append(inv.id)
+            continue
+        related_moveline = solvedMovelines[moveline_id]
+        if related_moveline.partner_id != inv.partner_id:
+            error("Moveline partner missmatch inv {partner_name} mov {mov_partner} {move_line_id} {nshares}00€ {mlname}".format(
+                mov_partner=related_moveline.partner_name,
+                **inv
+                ))
+            displayPartnersMovements(db, inv.partner_id)
+            displayPartnersMovements(db, related_moveline.partner_id)
+            unmatchedInvestments.append(inv.id)
+            continue
+        if related_moveline.amount != inv.nshares*100:
+            warn("Amount missmatch {partner_name} inv {nshares}00€ mov {mov_amount}€ {mlname}"
+                .format(
+                    mov_amount=related_moveline.amount,
+                    **inv))
+            displayPartnersMovements(db, inv.partner_id)
+        bindInvestmentWithOrder(db, inv, solvedMovelines[moveline_id])
+        if moveline_id not in  unmatchedMoveLines:
+            error("Move line referenced twice {move_line_id} {partner_name}".format(**inv))
+            displayPartnersMovements(db, inv.partner_id)
         else:
-            bindInvestmentWithOrder(inv, solvedMovelines[moveline_id])
-            if moveline_id not in  unmatchedMoveLines:
-                error("Move line referenced twice {move_line_id} {partner_name}".format(**inv))
-                displayPartnersMovements(db, inv.partner_id)
-            else:
-                unmatchedMoveLines.remove(moveline_id)
+            unmatchedMoveLines.remove(moveline_id)
 
 
     lastGeneratedMoveLine = lastInvestment(db)
@@ -410,7 +542,7 @@ with psycopg2.connect(**configdb.psycopg) as db:
             error("No name for Investment {move_date_created} {move_line_id} {nshares:=5}00.00€ {partner_name}".format(**inv))
             displayPartnersMovements(db, inv.partner_id)
             continue
-        bindInvestmentWithOrder(inv, solution)
+        bindInvestmentWithOrder(db, inv, solution)
 
     for orphanNames in orphanMoveLinesByPartner.values():
         for orphanName in orphanNames:
@@ -423,8 +555,6 @@ with psycopg2.connect(**configdb.psycopg) as db:
         moveline = solvedMovelines[moveline_id]
         warn("Not yet generated investment {ref} {order_date} {partner_name}".format(**moveline))
         
-
-
 
 
 
