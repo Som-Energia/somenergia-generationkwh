@@ -26,7 +26,6 @@ class Investment_Test(unittest.TestCase):
 
     def tearDown(self):
         self.erp.rollback()
-        self.erp.close()
 
     def test__effective_investments_tuple__noInvestments(self):
         self.assertEqual(
@@ -530,7 +529,6 @@ class Investment_Amortization_Test(unittest.TestCase):
 
     def tearDown(self):
         self.erp.rollback()
-        self.erp.close()
 
 
     def assertNsEqual(self, dict1, dict2):
@@ -748,6 +746,8 @@ class Investment_Amortization_Test(unittest.TestCase):
             return line
 
         invoice = ns(self.Invoice.read(invoice_id, [
+            'amount_total',
+            'amount_untaxed',
             'partner_id',
             'type',
             'name',
@@ -759,7 +759,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'invoice_line',
         ]))
         invoice.journal_id = invoice.journal_id[1]
-        invoice.partner_bank = invoice.partner_bank[1]
+        invoice.partner_bank = invoice.partner_bank[1] if invoice.partner_bank else "None"
         invoice.invoice_line = [
             proccesLine(line)
             for line in self.InvoiceLine.read(invoice.invoice_line, [])
@@ -779,23 +779,26 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.Investment.charge([id], '2017-01-03')
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80)
-        
         self.assertTrue(invoice_id)
+
+        investment = self.Investment.browse(id)
 
         self.assertInvoiceInfoEqual(invoice_id, """\
             account_id:
             - 2307
             - 410000{nsoci:0>6s} {surname}, {name}
+            amount_total: 80.0
+            amount_untaxed: 80.0
             date_invoice: '{invoice_date}'
             id: {id}
             invoice_line:
             - origin: false
               uos_id: PCE
               account_id: 163500000000 Otras deudas, con otras partes vinculadas
-              name: 'Amortització fins a 30/01/2018 de GENKWH_666666666666 '
+              name: 'Amortització fins a 30/01/2018 de {investment_name} '
               invoice_id:
               - {id}
-              - 'SI:  GENKWH_AMOR{year}S{nsoci:0>6s}'
+              - 'SI:  {investment_name}-AMOR{year}'
               price_unit: 80.0
               price_subtotal: 80.0
               invoice_line_tax_id: []
@@ -805,7 +808,7 @@ class Investment_Amortization_Test(unittest.TestCase):
               quantity: 1.0
               product_id: '[GENKWH_AMOR] Amortització Generation kWh'
             journal_id: Factures Amortitzacions GenerationkWh
-            name: GENKWH_AMOR{year}S{nsoci:0>6s}
+            name: {investment_name}-AMOR{year}
             partner_bank: {iban}
             partner_id:
             - {partnerid}
@@ -819,6 +822,7 @@ class Investment_Amortization_Test(unittest.TestCase):
                 id = invoice_id,
                 iban = 'ES77 1234 1234 1612 3456 7890', # TODO: Should be set
                 year = 2018,
+                investment_name = investment.name,
                 ** self.personalData
             ))
 
