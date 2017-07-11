@@ -13,13 +13,12 @@ from yamlns import namespace as ns
 import erppeek_wst
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
-@unittest.skip("Mooolt Lent")
 class Investment_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
         self.personalData = ns(dbconfig.personaldata)
-        self.erp = erppeek_wst.ClientWST(dbconfig.erppeek)
+        self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
         self.erp.begin()
         self.Investment = self.erp.GenerationkwhInvestment
         self.Investment.dropAll()
@@ -448,7 +447,7 @@ class Investment_Test(unittest.TestCase):
 
         investment = self.Investment.read(investment_id,['log'])
         self.assertEqual(investment['log'], 
-            u'[2015-07-29 09:39:07.70812 Mónica Nuell] PAYMENT: Remesa efectuada\n'
+            u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
             u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
             )
 
@@ -472,7 +471,7 @@ class Investment_Test(unittest.TestCase):
 
         investment = self.Investment.read(investment_id,['log'])
         self.assertEqual(investment['log'], 
-            u'[2015-07-29 09:39:07.70812 Mónica Nuell] PAYMENT: Remesa efectuada\n'
+            u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
             u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
             )
 
@@ -481,7 +480,7 @@ class Investment_Test(unittest.TestCase):
         investment_id = self.Investment.search([])[0]
         investment = self.Investment.read(investment_id,['log'])
         self.assertEqual(investment['log'], 
-            u'[2015-07-29 09:39:07.70812 Mónica Nuell] PAYMENT: Remesa efectuada\n'
+            u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
             u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
             )
 
@@ -497,7 +496,7 @@ class Investment_Test(unittest.TestCase):
                 u'AMORTIZATION: Generada amortització de 4.00 € pel 2017-07-29'
             )
         self.assertEqual('\n'.join(investment['log'].split('\n')[1:]),
-            u'[2015-07-29 09:39:07.70812 Mónica Nuell] PAYMENT: Remesa efectuada\n'
+            u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
             u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
             )
 
@@ -820,11 +819,12 @@ class Investment_Amortization_Test(unittest.TestCase):
             """.format(
                 invoice_date = datetime.date.today(),
                 id = invoice_id,
-                iban = 'ES77 1234 1234 1612 3456 7890', # TODO: Should be set
+                iban = None, # 'ES77 1234 1234 1612 3456 7890', # TODO: Should be set
                 year = 2018,
                 investment_name = investment.name,
                 ** self.personalData
             ))
+
 
 if __name__=='__main__':
     unittest.main()
