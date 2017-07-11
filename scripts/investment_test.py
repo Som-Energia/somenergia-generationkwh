@@ -19,11 +19,14 @@ class Investment_Test(unittest.TestCase):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
         self.personalData = ns(dbconfig.personaldata)
-        self.Investment = erp().GenerationkwhInvestment
+        self.erp = erppeek_wst.ClientWST(dbconfig.erppeek)
+        self.erp.begin()
+        self.Investment = self.erp.GenerationkwhInvestment
         self.Investment.dropAll()
 
     def tearDown(self):
-        self.Investment.dropAll()
+        self.erp.rollback()
+        self.erp.close()
 
     def test__effective_investments_tuple__noInvestments(self):
         self.assertEqual(
@@ -518,14 +521,16 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
         self.personalData = ns(dbconfig.personaldata)
-        self.erp = erp()
+        self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
+        self.erp.begin()
         self.Invoice = self.erp.AccountInvoice
         self.InvoiceLine = self.erp.AccountInvoiceLine
         self.Investment = self.erp.GenerationkwhInvestment
         self.Investment.dropAll()
 
     def tearDown(self):
-        self.Investment.dropAll()
+        self.erp.rollback()
+        self.erp.close()
 
 
     def assertNsEqual(self, dict1, dict2):
@@ -817,6 +822,7 @@ class Investment_Amortization_Test(unittest.TestCase):
                 ** self.personalData
             ))
 
+if __name__=='__main__':
+    unittest.main()
 
-
-
+# vim: et ts=4 sw=4

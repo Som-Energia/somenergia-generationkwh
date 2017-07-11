@@ -3,7 +3,7 @@ description = """
 Generates investments from the accounting logs.
 """
 
-import erppeek
+from erppeek_wst import ClientWST as ErpPeekClient
 import datetime
 from dateutil.relativedelta import relativedelta
 from yamlns import namespace as ns
@@ -12,7 +12,7 @@ from generationkwh.isodates import isodate
 def erp():
     global c
     import dbconfig
-    return c or erppeek.Client(**dbconfig.erppeek)
+    return c or ErpPeekClient(**dbconfig.erppeek)
 
 def parseArgumments():
     import argparse
@@ -158,7 +158,7 @@ def main():
         import dbconfig
 
     global c
-    c = c or erppeek.Client(**dbconfig.erppeek)
+    c = c or ErpPeekClient(**dbconfig.erppeek)
     del args.config
 
     # Calls the function homonymous to the subcommand
