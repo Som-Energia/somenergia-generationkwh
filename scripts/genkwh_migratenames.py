@@ -309,7 +309,7 @@ def bindMoveLineAndPaymentLine(moveline, orderline):
             orderline=orderline,
             amount = moveline.credit-moveline.debit,
             )))
-    solvedMovelines[moveline.id] = ns(
+    paymentMoveLines[moveline.id] = ns(
         ref=orderline.name,
         order_date=orderline.create_date,
         partner_id = orderline.partner_id,
@@ -368,27 +368,29 @@ with psycopg2.connect(**configdb.psycopg) as db:
     fiscalEndYearInvestments = activeInvestmentRelatedToFiscalEndYear(db)
     if fiscalEndYearInvestments:
         fail("There are active investments which are related to fiscal end year")
-    print deleteInactiveInvestmentRelatedToFiscalEndYear(db)
+    deleteInactiveInvestmentRelatedToFiscalEndYear(db)
 
-    solvedMovelines = ns()
-    step("Pairing movelines and orderlines by order/move")
+    # Movelines related to payment orders
+    paymentMoveLines = ns()
+
+    step("Emparellant moviments amb remeses")
 
     for data in investmentOrderAndMovements(db):
         step("Quadrant remesa feta el {move_create_date}".format(**data))
 
 
-        step(" Check that movement and order are paired")
+        step(" Emparellant les linies del moviment amb les de la remesa")
 
         if not data.move_id:
-            warn("{}: Order without movement. Id {}, with {} entries" .format(
+            warn("Remesa sense moviment. {}: Id {}, amb {} linies" .format(
                 data.order_sent_date or "not yet",
                 data.order_id,
                 data.order_nlines,
                 ))
             continue
         if not data.order_id:
-            warn("{}: Movement without order. Id {}, with {} entries".format(
-                data.move_create_date or "not yet",
+            warn("Moviment sense remesa. {}: Id {}, amb {} linies".format(
+                data.move_create_date or "sense data",
                 data.move_id,
                 data.move_nlines,
                 ))
@@ -472,20 +474,20 @@ with psycopg2.connect(**configdb.psycopg) as db:
 
     investments = getActiveInvestments(db)
 
-    unmatchedMoveLines = list(solvedMovelines.keys())
+    unmatchedMoveLines = list(paymentMoveLines.keys())
     unmatchedInvestments = []
 
     for inv in investments:
         moveline_id = inv.move_line_id
 
-        if moveline_id not in solvedMovelines.keys():
+        if moveline_id not in paymentMoveLines.keys():
             warn("Moveline {move_line_id} refered by inv {id} not in a payment order: "
                 "partner {partner_name} {nshares}00€ '{mlname}'"
                 .format(**inv))
             #warn(inv.dump())
             unmatchedInvestments.append(inv.id)
             continue
-        related_moveline = solvedMovelines[moveline_id]
+        related_moveline = paymentMoveLines[moveline_id]
         if related_moveline.partner_id != inv.partner_id:
             error("Moveline partner missmatch inv {partner_name} mov {mov_partner} {move_line_id} {nshares}00€ {mlname}".format(
                 mov_partner=related_moveline.partner_name,
@@ -501,7 +503,7 @@ with psycopg2.connect(**configdb.psycopg) as db:
                     mov_amount=related_moveline.amount,
                     **inv))
             displayPartnersMovements(db, inv.partner_id)
-        bindInvestmentWithOrder(db, inv, solvedMovelines[moveline_id])
+        bindInvestmentWithOrder(db, inv, paymentMoveLines[moveline_id])
         if moveline_id not in  unmatchedMoveLines:
             error("Move line referenced twice {move_line_id} {partner_name}".format(**inv))
             displayPartnersMovements(db, inv.partner_id)
@@ -526,7 +528,7 @@ with psycopg2.connect(**configdb.psycopg) as db:
     orphanMoveLinesByPartner = {}
 
     for moveline_id in unmatchedMoveLines:
-        moveline = solvedMovelines[moveline_id]
+        moveline = paymentMoveLines[moveline_id]
 
         wasEmpty = appendToKey(orphanMoveLinesByPartner, moveline.partner_id, moveline)
         if wasEmpty:
@@ -552,7 +554,7 @@ with psycopg2.connect(**configdb.psycopg) as db:
 
 
     for moveline_id in ungenerated:
-        moveline = solvedMovelines[moveline_id]
+        moveline = paymentMoveLines[moveline_id]
         warn("Not yet generated investment {ref} {order_date} {partner_name}".format(**moveline))
         
 
