@@ -325,7 +325,7 @@ def bindInvestmentWithOrder(db, investment, moveline):
             moveline=moveline,
             amount=investment.nshares*100.,
             )))
-
+    return
     with db.cursor() as cr:
         cr.execute("""\
             UPDATE generationkwh_investment as inv
