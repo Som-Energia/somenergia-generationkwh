@@ -1,13 +1,8 @@
 #!/usr/bin/env python
 description = """
-Generates investments from the accounting logs.
+Runs all the tests
 """
 
-import erppeek
-import dbconfig
-
-import glob
-import os
 from yamlns import namespace as ns
 
 from plantmeter_test import *

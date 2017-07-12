@@ -25,7 +25,7 @@ def datespan(startDate, endDate):
 class PlantMeterApiTestBase(unittest.TestCase):
 
     def setUp(self):
-        import erppeek
+        import erppeek_wst
         import dbconfig
         import pymongo
         import tempfile
@@ -34,7 +34,8 @@ class PlantMeterApiTestBase(unittest.TestCase):
         self.database = 'dummytest'
         self.collection = 'generationkwh.production.measurement'
 
-        self.c = erppeek.Client(**dbconfig.erppeek)
+        self.c = erppeek_wst.ClientWST(**dbconfig.erppeek)
+        self.c.begin()
         self.helper = self.c.GenerationkwhProductionAggregatorTesthelper
         self.m = pymongo.MongoClient()
         self.mdb = self.m[self.database]
@@ -47,6 +48,8 @@ class PlantMeterApiTestBase(unittest.TestCase):
         
     def tearDown(self):
         self.clear()
+        self.c.rollback()
+        self.c.close()
 
     def clear(self):
         self.clearAggregator()
