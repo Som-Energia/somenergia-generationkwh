@@ -78,7 +78,7 @@ class Assignment_Test(unittest.TestCase):
         self.assertRegexpMatches(
             #'null value in column "priority" violates not-null constraint',
             str(ctx.exception),
-            'Integrity Error.*priority.*not.*null')
+            'Integrity.*Error.*priority.*not.*null')
 
     def test_create_contractRequired(self):
 
@@ -90,7 +90,7 @@ class Assignment_Test(unittest.TestCase):
         self.assertRegexpMatches(
             #'null value in column "priority" violates not-null constraint',
             str(ctx.exception),
-            'Integrity Error.*contract_id.*not.*null')
+            'Integrity.*Error.*contract_id.*not.*null')
 
     def test_create_memberRequired(self):
 
@@ -102,7 +102,7 @@ class Assignment_Test(unittest.TestCase):
         self.assertRegexpMatches(
             #'null value in column "priority" violates not-null constraint',
             str(ctx.exception),
-            'Integrity Error.*member_id.*not.*null')
+            'Integrity.*Error.*member_id.*not.*null')
 
     def test_one_assignment(self):
         self.setupProvider([
