@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from c2c_webkit_report import webkit_report
-from report import report_sxw
+from som_generationkwh.report import report_sxw
 from tools import config
 
 class report_webkit_html(report_sxw.rml_parse):
