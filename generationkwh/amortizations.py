@@ -16,7 +16,10 @@ def previousAmortizationDate(purchase_date, current_date):
     if years <= waitYears:
         return None
 
-    amortizationDate = isodate(purchase_date) + relativedelta(years=min(years,expirationYears))
+    firstAmortization = (
+        isodate(purchase_date)
+        + relativedelta(years = min(years,expirationYears)
+        )
 
     return str(amortizationDate)
 
