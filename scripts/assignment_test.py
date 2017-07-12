@@ -7,7 +7,7 @@ from generationkwh.isodates import isodate
 dbconfig = None
 try:
     import dbconfig
-    import erppeek
+    import erppeek_wst
 except ImportError:
     pass
 
@@ -15,7 +15,8 @@ except ImportError:
 class Assignment_Test(unittest.TestCase):
 
     def setUp(self):
-        self.erp = erppeek.Client(**dbconfig.erppeek)
+        self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
+        self.erp.begin()
         self.Assignment = self.erp.GenerationkwhAssignment
         self.Assignment.dropAll()
 
@@ -52,7 +53,8 @@ class Assignment_Test(unittest.TestCase):
             ],expectation)
 
     def tearDown(self):
-        self.Assignment.dropAll()
+        self.erp.rollback()
+        self.erp.close()
 
     def test_no_assignments(self):
         self.setupProvider()
@@ -214,7 +216,8 @@ class AssignmentProvider_Test(unittest.TestCase):
         return tuple([cups.polissa_polissa.id for cups in orderedCups])
 
     def setUp(self):
-        self.erp = erppeek.Client(**dbconfig.erppeek)
+        self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
+        self.erp.begin()
         self.Assignment = self.erp.GenerationkwhAssignment
         self.AssignmentTestHelper = self.erp.GenerationkwhAssignmentTesthelper
         self.Assignment.dropAll()
@@ -298,8 +301,8 @@ class AssignmentProvider_Test(unittest.TestCase):
             ], result)
 
     def tearDown(self):
-        self.Assignment.dropAll()
-
+        self.erp.rollback()
+        self.erp.close()
 
     def test_contractSources_noAssignment(self):
         self.setupAssignments([])

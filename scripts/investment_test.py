@@ -25,6 +25,7 @@ class Investment_Test(unittest.TestCase):
 
     def tearDown(self):
         self.erp.rollback()
+        self.erp.close()
 
     def test__effective_investments_tuple__noInvestments(self):
         self.assertEqual(
@@ -528,6 +529,7 @@ class Investment_Amortization_Test(unittest.TestCase):
 
     def tearDown(self):
         self.erp.rollback()
+        self.erp.close()
 
 
     def assertNsEqual(self, dict1, dict2):

@@ -4,7 +4,7 @@ import datetime
 dbconfig = None
 try:
     import dbconfig
-    import erppeek
+    import erppeek_wst
 except ImportError:
     pass
 
@@ -13,9 +13,10 @@ except ImportError:
 class Remainder_Test(unittest.TestCase):
 
     def setUp(self):
-        erp = erppeek.Client(**dbconfig.erppeek)
-        self.Remainder = erp.GenerationkwhRemainder
-        self.RemainderHelper = erp.GenerationkwhRemainderTesthelper
+        self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
+        self.erp.begin()
+        self.Remainder = self.erp.GenerationkwhRemainder
+        self.RemainderHelper = self.erp.GenerationkwhRemainderTesthelper
         self.RemainderHelper.clean()
 
     def setupProvider(self,remainders=[]):
@@ -26,7 +27,8 @@ class Remainder_Test(unittest.TestCase):
         self.assertEqual([list(a) for a in expectation], result)
 
     def tearDown(self):
-        self.RemainderHelper.clean()
+        self.erp.rollback()
+        self.erp.close()
 
     def test_last_noRemainders(self):
         self.setupProvider()

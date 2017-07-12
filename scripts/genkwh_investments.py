@@ -9,10 +9,14 @@ from dateutil.relativedelta import relativedelta
 from yamlns import namespace as ns
 from generationkwh.isodates import isodate
 
+c = None
+
 def erp():
     global c
+    if c: return c
+    print "Creating client!!!!!!!!!!!!!!!!!!"
     import dbconfig
-    return c or ErpPeekClient(**dbconfig.erppeek)
+    c = ErpPeekClient(**dbconfig.erppeek)
 
 def parseArgumments():
     import argparse
@@ -145,8 +149,6 @@ def effective(
         force,
         )
 
-c = None
-
 def main():
     args = parseArgumments()
     print args.dump()
@@ -156,10 +158,10 @@ def main():
         dbconfig = imp.load_source('config',args.config)
     else:
         import dbconfig
+    del args.config
 
     global c
-    c = c or ErpPeekClient(**dbconfig.erppeek)
-    del args.config
+    c = ErpPeekClient(**dbconfig.erppeek)
 
     # Calls the function homonymous to the subcommand
     # with the options as paramteres

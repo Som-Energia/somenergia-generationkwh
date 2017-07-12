@@ -5,7 +5,7 @@ import datetime
 dbconfig = None
 try:
     import dbconfig
-    import erppeek
+    import erppeek_wst
 except ImportError:
     pass
 from generationkwh.isodates import addDays, localisodate
@@ -46,7 +46,8 @@ class ProductionLoader_Test(unittest.TestCase):
         os.removedirs(self.tempdir)
 
     def setUp(self):
-        self.erp = erppeek.Client(**dbconfig.erppeek)
+        self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
+        self.erp.begin()
         self.ProductionLoader = self.erp.GenerationkwhProductionLoader
         self.TestHelper = self.erp.GenerationkwhTesthelper
         self.setUpAggregator()
@@ -56,8 +57,10 @@ class ProductionLoader_Test(unittest.TestCase):
     def tearDown(self):
         self.clearAggregator()
         self.clearMeasurements()
-        self.clearRemainders()
+        #self.clearRemainders() # db
         self.clearTemp()
+        self.erp.rollback()
+        self.erp.close()
 
     def setupPlant(self, aggr_id, plant, nshares):
         plant_obj = self.erp.model('generationkwh.production.plant')

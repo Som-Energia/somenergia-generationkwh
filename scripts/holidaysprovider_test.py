@@ -8,7 +8,7 @@ import unittest
 dbconfig = None
 try:
     import dbconfig
-    import erppeek
+    import erppeek_wst
 except ImportError:
     pass
 
@@ -18,8 +18,13 @@ class Holidays_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
-        self.c = erppeek.Client(**dbconfig.erppeek)
+        self.c = erppeek_wst.ClientWST(**dbconfig.erppeek)
+        self.c.begin()
         self.HolidaysHelper = self.c.GenerationkwhHolidaysTesthelper
+
+    def tearDown(self):
+        self.c.rollback()
+        self.c.close()
 
     def assertEqualDates(self, result, expected):
         self.assertEqual(expected, result)

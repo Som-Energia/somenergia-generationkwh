@@ -2,14 +2,14 @@
 
 import unittest
 
-
 class Dealer_test(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff=None
-        import erppeek
+        import erppeek_wst
         import dbconfig
-        self.c = erppeek.Client(**dbconfig.erppeek)
+        self.c = erppeek_wst.ClientWST(**dbconfig.erppeek)
+        self.c.begin()
         self.helper = self.c.GenerationkwhTesthelper
         self.DealerApi = self.c.GenerationkwhDealer
         self.clearData()
@@ -20,7 +20,8 @@ class Dealer_test(unittest.TestCase):
         self.partner2 = 550
 
     def tearDown(self):
-        self.clearData()
+        self.c.rollback()
+        self.c.close()
 
     def clearData(self):
         self.c.GenerationkwhAssignment.dropAll()
@@ -77,4 +78,4 @@ class Dealer_test(unittest.TestCase):
 if __name__ == '__main__':
     unittest.main()
 
-
+# vim: et ts=4 sw=4

@@ -3,7 +3,7 @@
 import unittest
 import pymongo
 from generationkwh.memberrightsusage import MemberRightsUsage
-import erppeek
+import erppeek_wst
 import dbconfig
 import os
 from subprocess import call
@@ -13,7 +13,8 @@ import genkwh_curve
 class CurveExporter_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
-        self.erp = erppeek.Client(**dbconfig.erppeek)
+        self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
+        self.erp.begin()
         self.Investment = self.erp.GenerationkwhInvestment
         self.clear()
         self.member = 1
@@ -25,7 +26,12 @@ class CurveExporter_Test(unittest.TestCase):
             self.member, None, '2015-11-19', 0, None)
 
     def tearDown(self):
-        self.clear()
+        self.erp.rollback()
+        self.erp.close()
+        self.erp.GenerationkwhTesthelper.clear_mongo_collections([
+            'rightspershare',
+            'memberrightusage',
+            ])
 
     def clear(self):
         self.Investment.dropAll()

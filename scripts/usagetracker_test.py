@@ -6,7 +6,7 @@ import unittest
 dbconfig = None
 try:
     import dbconfig
-    import erppeek
+    import erppeek_wst
 except ImportError:
     pass
 
@@ -16,7 +16,12 @@ binsPerDay = 25
 class IdMappers_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
-        self.c = erppeek.Client(**dbconfig.erppeek)
+        self.c = erppeek_wst.ClientWST(**dbconfig.erppeek)
+        self.c.begin()
+
+    def tearDown(self):
+        self.c.rollback()
+        self.c.close()
 
     def test_map_member_by_partners_all_in(self):
         map={
@@ -65,12 +70,14 @@ class IdMappers_Test(unittest.TestCase):
             )
         self.assertEqual({"S001620":1585},dict(result))
 
+
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class UsageTracker_Test(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff=None
-        self.c = erppeek.Client(**dbconfig.erppeek)
+        self.c = erppeek_wst.ClientWST(**dbconfig.erppeek)
+        self.c.begin()
         self.clearData()
         self.contract = 4
         self.member = 1 # has 25 shares at the first investment wave
@@ -87,13 +94,18 @@ class UsageTracker_Test(unittest.TestCase):
         Investment.create_from_accounting(member, start, stop, waitingDays, expirationYears)
 
     def tearDown(self):
-        self.clearData()
+        self.clearMongo()
+        self.c.rollback()
+        self.c.close()
 
-    def clearData(self):
+    def clearMongo(self):
         self.c.GenerationkwhTesthelper.clear_mongo_collections([
             'rightspershare',
             'memberrightusage',
             ])
+
+    def clearData(self):
+        self.clearMongo()
         self.c.GenerationkwhInvestment.dropAll()
         self.c.GenerationkwhAssignment.dropAll()
         self.c.GenerationkwhRemainderTesthelper.clean()

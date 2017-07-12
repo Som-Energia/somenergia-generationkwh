@@ -5,6 +5,7 @@ Runs integration tests
 
 
 import b2btest # to activate b2b acceptation on main
+from yamlns import namespace as ns
 
 # Testsuites
 from dealer_test import *
@@ -17,7 +18,6 @@ from assignment_test import *
 from curve_test import *
 from sequence import *
 from productionloader_test import *
-from yamlns import namespace as ns
 
 def parseArgumments():
     import argparse
