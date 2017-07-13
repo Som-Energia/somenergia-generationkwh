@@ -761,6 +761,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         ]))
         invoice.journal_id = invoice.journal_id[1]
         invoice.partner_bank = invoice.partner_bank[1] if invoice.partner_bank else "None"
+        invoice.account_id = invoice.account_id[1]
         invoice.invoice_line = [
             proccesLine(line)
             for line in self.InvoiceLine.read(invoice.invoice_line, [])
@@ -785,9 +786,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         investment = self.Investment.browse(id)
 
         self.assertInvoiceInfoEqual(invoice_id, """\
-            account_id:
-            - 2307
-            - 410000{nsoci:0>6s} {surname}, {name}
+            account_id: 410000{nsoci:0>6s} {surname}, {name}
             amount_total: 80.0
             amount_untaxed: 80.0
             date_invoice: '{invoice_date}'
