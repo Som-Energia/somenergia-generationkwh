@@ -792,7 +792,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             invoice_line:
             - origin: false
               uos_id: PCE
-              account_id: 163500000000 Otras deudas, con otras partes vinculadas
+              account_id: 163500{nsoci:0>6s} {surname}, {name}
               name: 'Amortització fins a 30/01/2018 de {investment_name} '
               invoice_id:
               - {id}
