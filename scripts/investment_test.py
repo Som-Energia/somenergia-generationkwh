@@ -698,11 +698,9 @@ class Investment_Amortization_Test(unittest.TestCase):
         
         self.assertNsEqual(ns(data=result), """\
             data:
-            - 
-              purchase_date: '2017-01-03'
+            - purchase_date: '2017-01-03'
               id: {id1}
-            -
-              purchase_date: '2017-01-03'
+            - purchase_date: '2017-01-03'
               id: {id2}
             """.format(id1=id1, id2=id2))
 
