@@ -767,6 +767,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.assertNsEqual(invoice, expected)
 
 
+
     def test__create_amortization_invoice(self):
 
         id = self.Investment.create_from_form(
@@ -824,6 +825,29 @@ class Investment_Amortization_Test(unittest.TestCase):
                 ** self.personalData
             ))
 
+
+    def test__create_amortization_invoice__twice(self):
+
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            )
+        inv = self.Investment.read(id, ['name'])
+
+        self.Investment.charge([id], '2017-01-03')
+        invoice_id = self.Investment.create_amortization_invoice(
+            id, '2018-01-30', 80)
+
+        with self.assertRaises(Exception) as ctx:
+            self.Investment.create_amortization_invoice(
+                id, '2018-01-30', 80)
+
+        self.assertIn(
+            "Amortization notification {name}-AMOR2018 already exist".format(**inv),
+            unicode(ctx.exception),
+            )
 
 if __name__=='__main__':
     unittest.main()
