@@ -866,12 +866,15 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         result = self.Invoice.investmentAmortization_notificationData_asDict([invoice_id])
         self.assertNsEqual(ns(result), """\
-            inversionName: {inv.name}-AMOR2018
+            inversionName: {inv.name}
+            ownerName: {surname}, {name}
             ownerNif: {nif}
             receiptDate: '{today}'
             """.format(
                 today = datetime.date.today(),
                 nif = self.personalData.nif,
+                name = self.personalData.name,
+                surname = self.personalData.surname,
                 inv = inv,
             ))
 
