@@ -849,6 +849,33 @@ class Investment_Amortization_Test(unittest.TestCase):
             unicode(ctx.exception),
             )
 
+
+    def test__amortization_invoice_report(self):
+
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            )
+        inv = ns(self.Investment.read(id, ['name']))
+
+        self.Investment.charge([id], '2017-01-03')
+        invoice_id = self.Investment.create_amortization_invoice(
+            id, '2018-01-30', 80)
+
+        result = self.Invoice.investmentAmortization_notificationData_asDict([invoice_id])
+        self.assertNsEqual(ns(result), """\
+            inversionName: {inv.name}-AMOR2018
+            ownerNif: {nif}
+            receiptDate: '{today}'
+            """.format(
+                today = datetime.date.today(),
+                nif = self.personalData.nif,
+                inv = inv,
+            ))
+
+
 if __name__=='__main__':
     unittest.main()
 
