@@ -812,7 +812,7 @@ class Investment_Amortization_Test(unittest.TestCase):
               price_subtotal: 80.0
               invoice_line_tax_id: []
               note:
-                amortizedAmount: 666
+                pendingCapital: 1920.0
               discount: 0.0
               account_analytic_id: false
               quantity: 1.0
@@ -878,7 +878,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         result = self.Invoice.investmentAmortization_notificationData_asDict([invoice_id])
         self.assertNsEqual(ns(result), """\
             inversionName: {inv.name}
-            inversionPendingCapital: 666
+            inversionPendingCapital: 1920.0
             ownerName: {surname}, {name}
             ownerNif: {nif}
             receiptDate: '{today}'
