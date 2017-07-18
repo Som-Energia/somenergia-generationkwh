@@ -569,7 +569,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
-            2000,
+            4000,
             '10.10.23.123',
             )
 
@@ -596,7 +596,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             purchase_date: false
             first_effective_date: false
             last_effective_date: false
-            nshares: 20
+            nshares: 40
             amortized_amount: 0.0
             move_line_id: false
             active: true
@@ -611,7 +611,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
             'baddate', # order_date
-            2001,
+            4000,
             '10.10.23.123',
             )
         self.assertFalse(id) # ??
@@ -621,7 +621,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
-            2000,
+            4000,
             '10.10.23.123',
             )
         self.assertFalse(id) # ??
@@ -631,7 +631,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
-            2003,
+            4003,
             '10.10.23.123',
             )
         self.assertFalse(id) # ??
