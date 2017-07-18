@@ -524,8 +524,10 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.erp.begin()
         self.Invoice = self.erp.AccountInvoice
         self.InvoiceLine = self.erp.AccountInvoiceLine
+        self.Partner = self.erp.ResPartner
         self.Investment = self.erp.GenerationkwhInvestment
         self.Investment.dropAll()
+        
 
     def tearDown(self):
         self.erp.rollback()
@@ -571,6 +573,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             '2017-01-01', # order_date
             4000,
             '10.10.23.123',
+            'ES7712341234161234567890',
             )
 
         self.assertTrue(id)
@@ -578,7 +581,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         investment = ns(self.Investment.read(id, []))
         log = investment.pop('log')
         name = investment.pop('name')
-
+        
         self.Investment.unlink(id)
 
         self.assertLogEquals(log,
@@ -586,7 +589,6 @@ class Investment_Amortization_Test(unittest.TestCase):
             )
         
         self.assertRegexpMatches(name,r'^GKWH[0-9]{5}$')
-
         self.assertNsEqual(investment, """
             id: {id}
             member_id:
@@ -613,6 +615,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'baddate', # order_date
             4000,
             '10.10.23.123',
+            'ES7712341234161234567890',
             )
         self.assertFalse(id) # ??
 
@@ -623,6 +626,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             '2017-01-01', # order_date
             4000,
             '10.10.23.123',
+            'ES7712341234161234567890',
             )
         self.assertFalse(id) # ??
 
@@ -633,9 +637,10 @@ class Investment_Amortization_Test(unittest.TestCase):
             '2017-01-01', # order_date
             4003,
             '10.10.23.123',
+            'ES7712341234161234567890',
             )
         self.assertFalse(id) # ??
-
+    
     def test__charge__singleInvestment(self):
     
         id = self.Investment.create_from_form(
@@ -643,6 +648,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.123',
+            'ES7712341234161234567890',
             )
 
         self.Investment.charge([id], '2017-01-03')
@@ -683,6 +689,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.123',
+            'ES7712341234161234567890',
             )
 
         id2 = self.Investment.create_from_form(
@@ -690,6 +697,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             '2017-01-02', # order_date
             2000,
             '10.10.23.123',
+            'ES7712341234161234567890',
             )
 
         self.Investment.charge([id1,id2], '2017-01-03')
@@ -704,7 +712,6 @@ class Investment_Amortization_Test(unittest.TestCase):
               id: {id2}
             """.format(id1=id1, id2=id2))
 
-
     def test__charge__oldLogKept(self):
     
         id1 = self.Investment.create_from_form(
@@ -712,6 +719,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
+            'ES7712341234161234567890',
             )
 
         id2 = self.Investment.create_from_form(
@@ -719,6 +727,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             '2017-01-02', # order_date
             2000,
             '10.10.23.2',
+            'ES7712341234161234567890',
             )
 
         self.Investment.charge([id1,id2], '2017-01-03')
@@ -767,7 +776,6 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.assertNsEqual(invoice, expected)
 
 
-
     def test__create_amortization_invoice(self):
 
         id = self.Investment.create_from_form(
@@ -775,6 +783,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
+            'ES7712341234161234567890',
             )
 
         self.Investment.charge([id], '2017-01-03')
@@ -819,12 +828,11 @@ class Investment_Amortization_Test(unittest.TestCase):
             """.format(
                 invoice_date = datetime.date.today(),
                 id = invoice_id,
-                iban = None, # 'ES77 1234 1234 1612 3456 7890', # TODO: Should be set
+                iban = 'ES71 3183 1700 6400 0096 0002',
                 year = 2018,
                 investment_name = investment.name,
                 ** self.personalData
             ))
-
 
     def test__create_amortization_invoice__twice(self):
 
@@ -833,6 +841,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
+            'ES7712341234161234567890',
             )
         inv = self.Investment.read(id, ['name'])
 
@@ -849,7 +858,6 @@ class Investment_Amortization_Test(unittest.TestCase):
             unicode(ctx.exception),
             )
 
-
     def test__amortization_invoice_report(self):
 
         id = self.Investment.create_from_form(
@@ -857,6 +865,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
+            'ES7712341234161234567890',
             )
         inv = ns(self.Investment.read(id, ['name']))
 
@@ -877,6 +886,18 @@ class Investment_Amortization_Test(unittest.TestCase):
                 surname = self.personalData.surname,
                 inv = inv,
             ))
+
+    def test__create_from_form__ibanIsSet(self):
+
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        partner = self.Partner.browse(self.personalData.partnerid)
+        self.assertTrue(partner.bank_inversions)
 
 
 if __name__=='__main__':
