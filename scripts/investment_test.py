@@ -969,25 +969,21 @@ class Investment_Amortization_Test(unittest.TestCase):
             self.Investment.clean_iban("ABZ12345"),
             "ABZ12345")
 
+    def test__clean_iban__havingLower(self):
+        self.assertEqual(
+            self.Investment.clean_iban("abc123456"),
+            "ABC123456")
+
+    def test__clean_iban__weirdSymbols(self):
+        self.assertEqual(
+            self.Investment.clean_iban("ABC:12.3 4-5+6"),
+            "ABC123456")
+
     def test__check_iban__valid(self):
         self.assertEqual(
             self.Investment.check_iban('ES7712341234161234567890'),
             'ES7712341234161234567890')
 
-'''    def test__clean_iban__beingCanonical(self):
-        self.assertEqual(
-            self.Investment.clean_iban("ABZ12345"),
-            "ABZ12345")                                                      
-
-    def test__clean_iban__havingLower(self):
-        self.assertEqual(
-            self.Investment.clean_iban("abz12345"),
-            "ABZ12345")                                                      
-
-    def test__clean_iban__weirdSymbols(self):  
-        self.assertEqual(
-            self.Investment.clean_iban("ABZ:12.3 4-5"),
-            "ABZ12345")'''
 
 if __name__=='__main__':
     unittest.main()
