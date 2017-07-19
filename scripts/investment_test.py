@@ -831,7 +831,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             """.format(
                 invoice_date = datetime.date.today(),
                 id = invoice_id,
-                iban = 'ES71 3183 1700 6400 0096 0002',
+                iban = 'ES77 1234 1234 1612 3456 7890',
                 year = 2018,
                 investment_name = investment.name,
                 p = self.personalData,
