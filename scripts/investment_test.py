@@ -964,6 +964,37 @@ class Investment_Amortization_Test(unittest.TestCase):
             state_id = False,
             ))
 
+    def test__check_spanish_account__lenghtNot20(self):
+        self.assertEqual(
+            self.Investment.check_spanish_account('1234161234567890'),
+            False)
+
+    def test__check_spanish_account__invalid(self):
+        self.assertEqual(
+            self.Investment.check_spanish_account('00001234061234567890'),
+            False)
+
+    def test__check_spanish_account__knownBank(self):
+        self.assertEqual(
+            self.Investment.check_spanish_account(
+                '14911234761234567890'),
+            dict(
+                acc_number = '1491 1234 76 1234567890',
+                bank_name = 'TRIODOS BANK',
+            ))
+
+    def test__check_spanish_account__unknownBank(self):
+        self.assertEqual(
+            self.Investment.check_spanish_account(
+                '00001234161234567890'),
+            dict(acc_number= "0000 1234 16 1234567890",))
+
+    def test__check_spanish_account__nonDigitsIgnored(self):
+        self.assertEqual(
+            self.Investment.check_spanish_account(
+                'E000F0-12:34161234567890'),
+            dict(acc_number= "0000 1234 16 1234567890",))
+
     def test__clean_iban__beingCanonical(self):
         self.assertEqual(
             self.Investment.clean_iban("ABZ12345"),
