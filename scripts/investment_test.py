@@ -1015,6 +1015,26 @@ class Investment_Amortization_Test(unittest.TestCase):
             self.Investment.check_iban('ES7712341234161234567890'),
             'ES7712341234161234567890')
 
+    def test__check_iban__notNormalized(self):
+        self.assertEqual(
+            self.Investment.check_iban('ES77 1234-1234.16 1234567890'),
+            'ES7712341234161234567890')
+
+    def test__check_iban__badIbanCrc(self):
+        self.assertEqual(
+            self.Investment.check_iban('ES8812341234161234567890'),
+            False)
+
+    def test__check_iban__goodIbanCrc_badCCCCrc(self):
+        self.assertEqual(
+            self.Investment.check_iban('ES0212341234001234567890'),
+            False)
+
+    def test__check_iban__fromForeignCountry_notAcceptedYet(self):
+        self.assertEqual(
+            # Arabian example from wikipedia
+            self.Investment.check_iban('SA03 8000 0000 6080 1016 7519'),
+            False)
 
 if __name__=='__main__':
     unittest.main()
