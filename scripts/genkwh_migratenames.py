@@ -5,6 +5,8 @@
 import dbutils
 from yamlns import namespace as ns
 
+shareValue = 100
+
 
 def activeInvestmentRelatedToFiscalEndYear(db):
     """Returns the list of active investment related to
@@ -323,7 +325,7 @@ def bindInvestmentWithOrder(db, investment, moveline):
         .format(**ns(
             investment=investment,
             moveline=moveline,
-            amount=investment.nshares*100.,
+            amount=investment.nshares*shareValue.,
             )))
     return
     with db.cursor() as cr:
@@ -348,7 +350,7 @@ def displayPartnersMovements(db, partner_id):
             .format(**m))
     investments = getInvestmentsByPartner(db, partner_id)
     for inv in investments:
-        inv.amount = inv.nshares*100.
+        inv.amount = inv.nshares*shareValue.
         inv.active = 'y' if inv.active else 'n'
         error("    inv {active} {order_date_or_not} {purchase_date_or_not} {first_effective_date_or_not} {last_effective_date_or_not} {id} {partner_name} {amount} {name}"
             .format(
@@ -497,7 +499,7 @@ with psycopg2.connect(**configdb.psycopg) as db:
             displayPartnersMovements(db, related_moveline.partner_id)
             unmatchedInvestments.append(inv.id)
             continue
-        if related_moveline.amount != inv.nshares*100:
+        if related_moveline.amount != inv.nshares*shareValue:
             warn("Amount missmatch {partner_name} inv {nshares}00€ mov {mov_amount}€ {mlname}"
                 .format(
                     mov_amount=related_moveline.amount,
