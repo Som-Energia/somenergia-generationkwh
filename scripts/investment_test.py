@@ -890,6 +890,9 @@ class Investment_Amortization_Test(unittest.TestCase):
             inversionPendingCapital: 1920.0
             inversionPurchaseDate: '2017-01-03'
             inversionExpirationDate: '2042-01-03'
+            amortizationAmount: 80.0
+            amortizationName: {inv.name}-AMOR2018
+            inversionBankAccount: ES77 1234 1234 1612 3456 7890
             """.format(
                 today = datetime.date.today(),
                 nif = self.personalData.nif,
