@@ -964,6 +964,10 @@ class Investment_Amortization_Test(unittest.TestCase):
             state_id = False,
             ))
 
+    def test__clean_iban__beingCanonical(self):
+        self.assertEqual(
+            self.Investment.clean_iban("ABZ12345"),
+            "ABZ12345")
 
     def test__check_iban__valid(self):
         self.assertEqual(
