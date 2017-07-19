@@ -526,6 +526,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.InvoiceLine = self.erp.AccountInvoiceLine
         self.Partner = self.erp.ResPartner
         self.Investment = self.erp.GenerationkwhInvestment
+        self.Country = self.erp.ResCountry
         self.Investment.dropAll()
         
 
@@ -795,7 +796,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         investment = self.Investment.browse(id)
 
         self.assertInvoiceInfoEqual(invoice_id, """\
-            account_id: 410000{nsoci:0>6s} {surname}, {name}
+            account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
             amount_total: 80.0
             amount_untaxed: 80.0
             date_invoice: '{invoice_date}'
@@ -803,7 +804,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             invoice_line:
             - origin: false
               uos_id: PCE
-              account_id: 163500{nsoci:0>6s} {surname}, {name}
+              account_id: 163500{p.nsoci:0>6s} {p.surname}, {p.name}
               name: 'Amortització fins a 30/01/2018 de {investment_name} '
               invoice_id:
               - {id}
@@ -821,8 +822,8 @@ class Investment_Amortization_Test(unittest.TestCase):
             name: {investment_name}-AMOR{year}
             partner_bank: {iban}
             partner_id:
-            - {partnerid}
-            - {surname}, {name}
+            - {p.partnerid}
+            - {p.surname}, {p.name}
             payment_type:
             - 2
             - Transferencia
@@ -833,7 +834,7 @@ class Investment_Amortization_Test(unittest.TestCase):
                 iban = 'ES71 3183 1700 6400 0096 0002',
                 year = 2018,
                 investment_name = investment.name,
-                ** self.personalData
+                p = self.personalData,
             ))
 
     def test__create_amortization_invoice__twice(self):
@@ -902,6 +903,87 @@ class Investment_Amortization_Test(unittest.TestCase):
         partner = self.Partner.browse(self.personalData.partnerid)
         self.assertTrue(partner.bank_inversions)
 
+    def test__get_or_create_partner_bank__whenExists(self):
+
+        partner_id = self.personalData.partnerid
+        iban =  self.personalData.iban
+        expected = self.erp.ResPartnerBank.search([
+            ('iban', '=', iban),
+            ('partner_id','=', partner_id),
+            ])[0]
+        result = self.Investment.get_or_create_partner_bank(
+            partner_id, iban)
+        self.assertEqual(expected, result)
+
+    def test__get_or_create_partner_bank__whenNew(self):
+
+        partner_id = self.personalData.partnerid
+        iban = 'ES8901825726580208779553'
+        country_id = self.Country.search([('code', '=', 'ES')])[0]
+        
+        shouldBeNone = self.erp.ResPartnerBank.search([
+            ('iban', '=', iban),
+            ('partner_id','=',partner_id),
+            ])
+        self.assertFalse(shouldBeNone,
+            "Partner already has such iban")
+
+        result = self.Investment.get_or_create_partner_bank(
+            partner_id, iban)
+
+        self.assertTrue(result,
+            "Should have been created")
+
+        bank_id = self.erp.ResPartnerBank.search([
+            ('iban', '=', iban),
+            ('partner_id','=',partner_id),
+            ])[0]
+        self.assertEqual(bank_id, result)
+
+        bank = ns(self.erp.ResPartnerBank.read(
+            bank_id, [
+            'name',
+            'state',
+            'iban',
+            'partner_id',
+            'country_id',
+            'acc_country_id',
+            'state_id',
+            ]))
+        for a in 'partner_id country_id acc_country_id state_id'.split():
+            bank[a] = bank[a] and bank[a][0]
+
+        self.assertNsEqual(bank, ns(
+            id = bank_id,
+            name = '',
+            state = 'iban',
+            iban = iban,
+            partner_id = partner_id,
+            country_id = country_id,
+            acc_country_id = country_id,
+            state_id = False,
+            ))
+
+
+    def test__check_iban__valid(self):
+        self.assertEqual(
+            self.Investment.check_iban('ES7712341234161234567890'),
+            'ES7712341234161234567890')
+
+'''    def test__clean_iban__beingCanonical(self):
+        self.assertEqual(
+            self.Investment.clean_iban("ABZ12345"),
+            "ABZ12345")                                                      
+
+    def test__clean_iban__havingLower(self):
+        self.assertEqual(
+            self.Investment.clean_iban("abz12345"),
+            "ABZ12345")                                                      
+
+    def test__clean_iban__weirdSymbols(self):  
+        self.assertEqual(
+            self.Investment.clean_iban("ABZ:12.3 4-5"),
+            "ABZ12345")'''
 
 if __name__=='__main__':
     unittest.main()
