@@ -23,6 +23,7 @@ class Investment_Test(unittest.TestCase):
         self.personalData = ns(dbconfig.personaldata)
         self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
         self.erp.begin()
+        self.Soci = self.erp.SomenergiaSoci
         self.Investment = self.erp.GenerationkwhInvestment
         self.Investment.dropAll()
 
@@ -73,6 +74,19 @@ class Investment_Test(unittest.TestCase):
 
     @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_accounting__restrictingFirst(self):
+        self.Investment.create_from_accounting(1, '2015-07-01', '2015-11-20', 0, None)
+        self.assertEqual(
+            self.Investment.effective_investments_tuple(None, None, None),
+            [
+                [1, '2015-07-29', False,  1],
+                [1, '2015-11-20', False, 30],
+                [1, '2015-11-20', False, 30],
+            ])
+
+    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
+    def test__create_from_accounting__seesUnactivePartner(self):
+
+        self.Soci.write(1, dict(active=False))
         self.Investment.create_from_accounting(1, '2015-07-01', '2015-11-20', 0, None)
         self.assertEqual(
             self.Investment.effective_investments_tuple(None, None, None),
