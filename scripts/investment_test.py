@@ -916,11 +916,12 @@ class Investment_Amortization_Test(unittest.TestCase):
     def test__get_or_create_partner_bank__whenExists(self):
 
         partner_id = self.personalData.partnerid
-        iban =  self.personalData.iban
         expected = self.erp.ResPartnerBank.search([
-            ('iban', '=', iban),
             ('partner_id','=', partner_id),
             ])[0]
+        iban = self.erp.ResPartnerBank.read(expected, [
+            'iban',
+            ])['iban']
         result = self.Investment.get_or_create_partner_bank(
             partner_id, iban)
         self.assertEqual(expected, result)
