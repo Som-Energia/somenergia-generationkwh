@@ -9,6 +9,7 @@ try:
 except ImportError:
     pass
 import datetime
+from dateutil.relativedelta import relativedelta
 from yamlns import namespace as ns
 import erppeek_wst
 
@@ -870,26 +871,32 @@ class Investment_Amortization_Test(unittest.TestCase):
             '10.10.23.1',
             'ES7712341234161234567890',
             )
-        inv = ns(self.Investment.read(id, ['name']))
 
         self.Investment.charge([id], '2017-01-03')
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80)
 
+        inv = ns(self.Investment.read(id, [
+            'name',
+        ]))
+
         result = self.Invoice.investmentAmortization_notificationData_asDict([invoice_id])
         self.assertNsEqual(ns(result), """\
             inversionName: {inv.name}
-            inversionPendingCapital: 1920.0
             ownerName: {surname}, {name}
             ownerNif: {nif}
             receiptDate: '{today}'
+            inversionInitialAmount: 2000
+            inversionPendingCapital: 1920.0
+            inversionPurchaseDate: '2017-01-03'
+            inversionExpirationDate: '2042-01-03'
             """.format(
                 today = datetime.date.today(),
                 nif = self.personalData.nif,
                 name = self.personalData.name,
                 surname = self.personalData.surname,
                 inv = inv,
-            ))
+        ))
 
     def test__create_from_form__ibanIsSet(self):
 
