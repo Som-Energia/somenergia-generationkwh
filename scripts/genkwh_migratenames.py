@@ -5,7 +5,7 @@
 import dbutils
 from yamlns import namespace as ns
 
-shareValue = 100
+shareValue = 100.
 
 
 def activeInvestmentRelatedToFiscalEndYear(db):
@@ -325,7 +325,7 @@ def bindInvestmentWithOrder(db, investment, moveline):
         .format(**ns(
             investment=investment,
             moveline=moveline,
-            amount=investment.nshares*shareValue.,
+            amount=investment.nshares*shareValue,
             )))
     return
     with db.cursor() as cr:
@@ -350,7 +350,7 @@ def displayPartnersMovements(db, partner_id):
             .format(**m))
     investments = getInvestmentsByPartner(db, partner_id)
     for inv in investments:
-        inv.amount = inv.nshares*shareValue.
+        inv.amount = inv.nshares*shareValue
         inv.active = 'y' if inv.active else 'n'
         error("    inv {active} {order_date_or_not} {purchase_date_or_not} {first_effective_date_or_not} {last_effective_date_or_not} {id} {partner_name} {amount} {name}"
             .format(
