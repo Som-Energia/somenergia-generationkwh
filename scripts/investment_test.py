@@ -877,6 +877,10 @@ class Investment_Amortization_Test(unittest.TestCase):
                 amortizationDate: '2018-01-30'
                 amortizationNumber: 1
                 investmentId: {investment_id}
+                investmentName: {investment_name}
+                investmentPurchaseDate: '2017-01-03'
+                investmentLastEffectiveDate: '2042-01-03'
+                investmentInitialAmount: 2000
               discount: 0.0
               account_analytic_id: false
               quantity: 1.0
