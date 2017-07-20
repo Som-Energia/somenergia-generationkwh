@@ -896,6 +896,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             amortizationTotalPayments: 24
             inversionBankAccount: ES77 1234 1234 1612 3456 7890
             amortizationDate: '2018-01-30'
+            amortizationNumPayment: 1
             """.format(
                 today = datetime.date.today(),
                 nif = self.personalData.nif,
