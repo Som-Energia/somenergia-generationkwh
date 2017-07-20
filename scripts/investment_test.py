@@ -815,6 +815,7 @@ class Investment_Amortization_Test(unittest.TestCase):
               invoice_line_tax_id: []
               note:
                 pendingCapital: 1920.0
+                amortizationDate: '2018-01-30'
               discount: 0.0
               account_analytic_id: false
               quantity: 1.0
@@ -894,6 +895,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             amortizationName: {inv.name}-AMOR2018
             amortizationTotalPayments: 24
             inversionBankAccount: ES77 1234 1234 1612 3456 7890
+            amortizationDate: '2018-01-30'
             """.format(
                 today = datetime.date.today(),
                 nif = self.personalData.nif,
