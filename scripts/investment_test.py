@@ -853,11 +853,11 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         self.Investment.charge([id], '2017-01-03')
         invoice_id = self.Investment.create_amortization_invoice(
-            id, '2018-01-30', 80)
+            id, '2018-01-30', 80, 1)
 
         with self.assertRaises(Exception) as ctx:
             self.Investment.create_amortization_invoice(
-                id, '2018-01-30', 80)
+                id, '2018-01-30', 80, 1)
 
         self.assertIn(
             "Amortization notification {name}-AMOR2018 already exist".format(**inv),
@@ -876,7 +876,7 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         self.Investment.charge([id], '2017-01-03')
         invoice_id = self.Investment.create_amortization_invoice(
-            id, '2018-01-30', 80)
+            id, '2018-01-30', 80, 1)
 
         inv = ns(self.Investment.read(id, [
             'name',
