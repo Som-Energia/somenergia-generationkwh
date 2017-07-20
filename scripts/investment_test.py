@@ -791,7 +791,7 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         self.Investment.charge([id], '2017-01-03')
         invoice_id = self.Investment.create_amortization_invoice(
-            id, '2018-01-30', 80)
+            id, '2018-01-30', 80, 1)
         self.assertTrue(invoice_id)
 
         investment = self.Investment.browse(id)
@@ -816,6 +816,7 @@ class Investment_Amortization_Test(unittest.TestCase):
               note:
                 pendingCapital: 1920.0
                 amortizationDate: '2018-01-30'
+                amortizationNumber: 1
               discount: 0.0
               account_analytic_id: false
               quantity: 1.0
