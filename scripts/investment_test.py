@@ -13,7 +13,7 @@ from dateutil.relativedelta import relativedelta
 from yamlns import namespace as ns
 import erppeek_wst
 
-noExecuteAllTest = True
+noExecuteAllTest = False
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Investment_Test(unittest.TestCase):
@@ -804,7 +804,6 @@ class Investment_Amortization_Test(unittest.TestCase):
             u'FORMFILLED: Formulari omplert des de la IP 10.10.23.2, Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def assertInvoiceInfoEqual(self, invoice_id, expected):
         def proccesLine(line):
             line = ns(line)
@@ -827,6 +826,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'payment_type',
             'date_invoice',
             'invoice_line',
+            'check_total',
         ]))
         invoice.journal_id = invoice.journal_id[1]
         invoice.partner_bank = invoice.partner_bank[1] if invoice.partner_bank else "None"
@@ -859,6 +859,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
             amount_total: 80.0
             amount_untaxed: 80.0
+            check_total: 80.0
             date_invoice: '{invoice_date}'
             id: {id}
             invoice_line:
