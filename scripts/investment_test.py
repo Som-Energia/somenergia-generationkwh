@@ -587,7 +587,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.Investment.unlink(id)
 
         self.assertLogEquals(log,
-            u'ORDER: Formulari emplenat des de 10.10.23.123\n'
+            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.123, Quantitat: 4000 €, IBAN: ES7712341234161234567890\n'
             )
         
         self.assertRegexpMatches(name,r'^GKWH[0-9]{5}$')
@@ -658,12 +658,11 @@ class Investment_Amortization_Test(unittest.TestCase):
         investment = ns(self.Investment.read(id, []))
         log = investment.pop('log')
         name = investment.pop('name')
-
         self.Investment.unlink(id)
 
         self.assertLogEquals(log,
-            u'PAYED: Remesada al compte\n'
-            u'ORDER: Formulari emplenat des de 10.10.23.123\n'
+            u'PAYED: Pagament de 2000 € remesat al compte ES7712341234161234567890\n'
+            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.123, Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
         
         self.assertNsEqual(investment, """
@@ -737,13 +736,13 @@ class Investment_Amortization_Test(unittest.TestCase):
         result = self.Investment.read([id1,id2], ['log'])
         
         self.assertLogEquals(result[0]['log'],
-            u'PAYED: Remesada al compte\n'
-            u'ORDER: Formulari emplenat des de 10.10.23.1\n'
+            u'PAYED: Pagament de 2000 € remesat al compte ES7712341234161234567890\n'
+            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.1, Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
         
         self.assertLogEquals(result[1]['log'],
-            u'PAYED: Remesada al compte\n'
-            u'ORDER: Formulari emplenat des de 10.10.23.2\n'
+            u'PAYED: Pagament de 2000 € remesat al compte ES7712341234161234567890\n'
+            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.2, Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
     def assertInvoiceInfoEqual(self, invoice_id, expected):
@@ -918,6 +917,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         partner = self.Partner.browse(self.personalData.partnerid)
         self.assertTrue(partner.bank_inversions)
 
+##### #TODO: Move to another class ##################
     def test__get_or_create_partner_bank__whenExists(self):
 
         partner_id = self.personalData.partnerid
