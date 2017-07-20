@@ -876,6 +876,7 @@ class Investment_Amortization_Test(unittest.TestCase):
                 pendingCapital: 1920.0
                 amortizationDate: '2018-01-30'
                 amortizationNumber: 1
+                investmentId: {investment_id}
               discount: 0.0
               account_analytic_id: false
               quantity: 1.0
@@ -897,6 +898,7 @@ class Investment_Amortization_Test(unittest.TestCase):
                 year = 2018,
                 investment_name = investment.name,
                 p = self.personalData,
+                investment_id = id
             ))
     @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_amortization_invoice__twice(self):
