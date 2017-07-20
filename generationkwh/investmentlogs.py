@@ -8,4 +8,13 @@ def log_formfilled(data):
         .format(
             **data
         ))
+
+def log_charged(data):
+    return (
+        u'[{create_date} {user}] '
+        u"PAYED: Pagament de {amount} € remesat al compte {iban}\n"
+        .format(
+            **data
+        ))
+
 # vim: et ts=4 sw=4   
