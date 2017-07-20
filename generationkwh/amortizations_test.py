@@ -2,8 +2,11 @@
 
 import unittest
 
-from amortizations import pendingAmortization, previousAmortizationDate
-
+from amortizations import (
+    pendingAmortization,
+    previousAmortizationDate,
+    currentAmortizationNumber,
+    )
 
 class Amortization_Test(unittest.TestCase):
 
@@ -135,6 +138,33 @@ class Amortization_Test(unittest.TestCase):
             )
         self.assertEqual(d, '2026-01-01')
 
+    def test_currentAmortizationNumber_beforeFirstAmortization(self):
+        d = currentAmortizationNumber(
+            purchase_date='2001-01-01',
+            current_date='2002-12-31',
+        )
+        self.assertEqual(d, None)
+
+    def test_currentAmortizationNumber_afterFirstAmortization(self):
+        d = currentAmortizationNumber(
+            purchase_date='2001-01-01',
+            current_date='2003-01-01',
+        )
+        self.assertEqual(d, 1)
+
+    def test_currentAmortizationNumber_afterSecondtAmortization(self):
+        d = currentAmortizationNumber(
+            purchase_date='2001-01-01',
+            current_date='2004-01-01',
+        )
+        self.assertEqual(d, 2)
+
+    def test_currentAmortizationNumber_aYearAfterEndAmortization(self):
+        d = currentAmortizationNumber(
+            purchase_date='2001-01-01',
+            current_date='2027-01-01',
+        )
+        self.assertEqual(d, 24)
 
 
 # vim: et ts=4 sw=4

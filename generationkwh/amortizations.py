@@ -43,5 +43,15 @@ def pendingAmortization(purchase_date, current_date, investment_amount, amortize
     toAmortize = (years-1)*yearly_amortitzation - amortized_amount
     return max(0, toAmortize)
 
+def currentAmortizationNumber(purchase_date, current_date):
+
+    years = relativedelta(
+        isodate(current_date),
+        isodate(purchase_date),
+        ).years
+    if years < 2:
+        return None
+
+    return min(expirationYears, years ) - 1
 
 # vim: et ts=4 sw=4
