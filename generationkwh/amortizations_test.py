@@ -152,7 +152,7 @@ class Amortization_Test(unittest.TestCase):
         )
         self.assertEqual(d, 1)
 
-    def test_currentAmortizationNumber_afterSecondtAmortization(self):
+    def test_currentAmortizationNumber_afterSecondAmortization(self):
         d = currentAmortizationNumber(
             purchase_date='2001-01-01',
             current_date='2004-01-01',
