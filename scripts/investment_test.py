@@ -688,7 +688,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             )
         self.assertFalse(id) # ??
 
-    @unittest.skip('Not implemented')
+    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_form__withNonDivisibleAmount(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -697,7 +697,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
-        self.assertFalse(id) # ??
+        self.assertFalse(id)
     
     @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__charge__singleInvestment(self):
