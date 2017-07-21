@@ -13,7 +13,7 @@ from dateutil.relativedelta import relativedelta
 from yamlns import namespace as ns
 import erppeek_wst
 
-noExecuteAllTest = False
+noExecuteAllTest = False 
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Investment_Test(unittest.TestCase):
@@ -929,6 +929,24 @@ class Investment_Amortization_Test(unittest.TestCase):
             "Amortization notification {name}-AMOR2018 already exist".format(**inv),
             unicode(ctx.exception),
             )
+    
+    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
+    def test__create_amortization_invoice__errorWhenNoBank(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )       
+        self.Partner.write(self.personalData.partnerid,dict(bank_inversions = False))
+        try:
+            self.Investment.create_amortization_invoice(id, '2018-01-30' , 80, 1)
+        except:
+            return
+
+        self.fail("Hauria de sortir un error quan no hi ha Partner.bank_inversions")
+
     @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__amortization_invoice_report(self):
 
