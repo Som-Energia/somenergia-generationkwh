@@ -935,9 +935,9 @@ class Investment_Amortization_Test(unittest.TestCase):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
-            2000,
-            '10.10.23.1',
-            'ES7712341234161234567890',
+            2000, # amount_in_euros
+            '10.10.23.1', # ip
+            'ES7712341234161234567890', # iban
             )
 
         self.Investment.charge([id], '2017-01-03')
