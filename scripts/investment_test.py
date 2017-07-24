@@ -891,6 +891,7 @@ class Investment_Amortization_Test(unittest.TestCase):
                 pendingCapital: 1920.0
                 amortizationDate: '2018-01-30'
                 amortizationNumber: 1
+                amortizationTotalNumber: 24
                 investmentId: {investment_id}
                 investmentName: {investment_name}
                 investmentPurchaseDate: '2017-01-03'
