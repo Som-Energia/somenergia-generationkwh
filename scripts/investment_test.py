@@ -1190,9 +1190,15 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
 
+        investment_name = self.Investment.get_or_create_investment_name(id)
+
+        inv = ns(self.Investment.read(id, [
+            'name',
+        ]))
         self.assertEqual(
-            self.Investment.get_or_create_investment_name(id),
-            'GKWH02965')
+            investment_name,
+            inv.name)
+
     def test__get_or_create_investment_name__name_not_exist(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -1204,18 +1210,17 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.Investment.write(id, dict(
             name=None)
             )
+
+        investment_name = self.Investment.get_or_create_investment_name(id)
+
+        inv = ns(self.Investment.read(id, [
+            'name',
+        ]))
         self.assertEqual(
-            self.Investment.get_or_create_investment_name(id),
-            'GENKWHID84116')
+            investment_name,
+            inv.name)
 
 
-
-
-
-
-
-
-       
 if __name__=='__main__':
     unittest.main()
 
