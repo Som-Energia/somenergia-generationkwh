@@ -54,4 +54,7 @@ def currentAmortizationNumber(purchase_date, current_date):
 
     return min(expirationYears, years ) - 1
 
+def totalAmortizationNumber():
+    return expirationYears - 1
+
 # vim: et ts=4 sw=4

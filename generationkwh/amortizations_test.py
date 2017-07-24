@@ -6,6 +6,7 @@ from amortizations import (
     pendingAmortization,
     previousAmortizationDate,
     currentAmortizationNumber,
+    totalAmortizationNumber,
     )
 
 class Amortization_Test(unittest.TestCase):
@@ -166,5 +167,7 @@ class Amortization_Test(unittest.TestCase):
         )
         self.assertEqual(d, 24)
 
+    def test_totalAmortizationNumber_its_a_constant(self):
+        self.assertEqual(totalAmortizationNumber(),24)
 
 # vim: et ts=4 sw=4
