@@ -1153,7 +1153,69 @@ class Investment_Amortization_Test(unittest.TestCase):
             # Arabian example from wikipedia
             self.Investment.check_iban('SA03 8000 0000 6080 1016 7519'),
             False)
+    
+    def test__check_investment_name__name_exist(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
 
+        self.assertEqual(
+            self.Investment.check_investment_name(id),
+            True)
+    def test__check_investment_name__name_not_exist(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        self.Investment.write(id, dict(
+            name=None)
+            )
+        self.assertEqual(
+            self.Investment.check_investment_name(id),
+            False)
+
+    def test__get_or_create_investment_name__name_exist(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+
+        self.assertEqual(
+            self.Investment.get_or_create_investment_name(id),
+            'GKWH02965')
+    def test__get_or_create_investment_name__name_not_exist(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        self.Investment.write(id, dict(
+            name=None)
+            )
+        self.assertEqual(
+            self.Investment.get_or_create_investment_name(id),
+            'GENKWHID84116')
+
+
+
+
+
+
+
+
+       
 if __name__=='__main__':
     unittest.main()
 
