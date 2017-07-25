@@ -13,7 +13,6 @@ from dateutil.relativedelta import relativedelta
 from yamlns import namespace as ns
 import erppeek_wst
 
-noExecuteAllTest = False 
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Investment_Test(unittest.TestCase):
@@ -47,13 +46,11 @@ class Investment_Test(unittest.TestCase):
         self.assertMultiLineEqual(logContent, expected)
 
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__effective_investments_tuple__noInvestments(self):
         self.assertEqual(
             self.Investment.effective_investments_tuple(None, None, None),
             [])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")    
     def test__create_from_accounting__all(self):
         # Should fail whenever Gijsbert makes further investments
         # Update: We add the fiscal year closing investments
@@ -72,7 +69,6 @@ class Investment_Test(unittest.TestCase):
                 #[1, '2016-05-19', False, 86]  #Fiscal year closing
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_accounting__restrictingFirst(self):
         self.Investment.create_from_accounting(1, '2015-07-01', '2015-11-20', 0, None)
         self.assertEqual(
@@ -83,7 +79,6 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-11-20', False, 30],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_accounting__seesUnactivePartner(self):
 
         self.Soci.write(1, dict(active=False))
@@ -96,7 +91,6 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-11-20', False, 30],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_accounting__restrictingLast(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', 0, None)
         self.assertEqual(
@@ -107,7 +101,6 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-07-29', False,  1],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_accounting__noWaitingDays(self):
         self.Investment.create_from_accounting(1, None, '2015-11-20', None, None)
         self.assertEqual(
@@ -120,7 +113,6 @@ class Investment_Test(unittest.TestCase):
                 [1, False, False, 30],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_accounting__nonZeroWaitingDays(self):
         self.Investment.create_from_accounting(1, None, '2015-11-20', 1, None)
         self.assertEqual(
@@ -133,7 +125,6 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-11-21', False, 30],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_accounting__nonZeroExpireYears(self):
         self.Investment.create_from_accounting(1, None, '2015-11-20', 1, 2)
         self.assertEqual(
@@ -146,7 +137,6 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-11-21', '2017-11-21', 30],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_accounting__severalMembers(self):
         self.Investment.create_from_accounting(1, None, '2015-11-20', 0, None)
         self.Investment.create_from_accounting(38, None, '2015-11-20', 0, None)
@@ -163,7 +153,6 @@ class Investment_Test(unittest.TestCase):
                 [38, '2015-10-20', False, -1],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_accounting__severalMembersArray_reorderbyPurchase(self):
         self.Investment.create_from_accounting([1,38], None, '2015-11-20', 0, None)
         self.assertEqual(
@@ -179,7 +168,6 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-11-20', False, 30],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_accounting__noMemberTakesAll(self):
         self.Investment.create_from_accounting(None, None, '2015-06-30', 0, None)
         self.assertEqual(
@@ -194,7 +182,6 @@ class Investment_Test(unittest.TestCase):
                 [38, '2015-06-30', False, 3],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_accounting__ignoresExisting(self):
         self.Investment.create_from_accounting(1, None, '2015-06-30', None, None)
         self.Investment.create_from_accounting(1, None, '2015-07-29', 0, None)
@@ -209,7 +196,6 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-11-20', '2017-11-20', 30],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__effective_investments_tuple__filtersByMember(self):
         self.Investment.create_from_accounting(1, None, '2015-11-20', 0, None)
         self.Investment.create_from_accounting(38, None, '2015-11-20', 0, None)
@@ -223,7 +209,6 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-11-20', False, 30],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__effective_investments_tuple__filtersByFirst_removesUnstarted(self):
         self.Investment.create_from_accounting(1, None, '2015-06-30', None, None)
         self.assertEqual(
@@ -233,7 +218,6 @@ class Investment_Test(unittest.TestCase):
                 #[1, False, False, 10], # Unstarted
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__effective_investments_tuple__filtersByFirst_keepsUnexpiredWhicheverTheDate(self):
         self.Investment.create_from_accounting(1, None, '2015-06-30', 0, None)
         self.assertEqual(
@@ -243,7 +227,6 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-06-30', False, 10],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__effective_investments_tuple__filtersByFirst_passesNotYetExpired(self):
         self.Investment.create_from_accounting(1, None, '2015-06-30', 0, 2)
         self.assertEqual(
@@ -254,7 +237,6 @@ class Investment_Test(unittest.TestCase):
 
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__effective_investments_tuple__filtersByFirst_removesExpired(self):
         self.Investment.create_from_accounting(1, None, '2015-06-30', 0, 2)
         self.assertEqual(
@@ -265,7 +247,6 @@ class Investment_Test(unittest.TestCase):
 
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__effective_investments_tuple__filtersByLast_removesUnstarted(self):
         self.Investment.create_from_accounting(1, None, '2015-06-30', None, None)
         self.assertEqual(
@@ -275,7 +256,6 @@ class Investment_Test(unittest.TestCase):
                 #[1, False, False, 10], # Unstarted
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__effective_investments_tuple__filtersByLast_includesStarted(self):
         self.Investment.create_from_accounting(1, None, '2015-06-30', 0, None)
         self.assertEqual(
@@ -285,7 +265,6 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-06-30', False, 10],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__effective_investments_tuple__filtersByLast_excludesStartedLater(self):
         self.Investment.create_from_accounting(1, None, '2015-06-30', 0, None)
         self.assertEqual(
@@ -295,7 +274,6 @@ class Investment_Test(unittest.TestCase):
                 #[1, '2015-06-30', False, 10], # Not yet started
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__effective_investments_tuple__deactivatedNotShown(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', 0, None)
         toBeDeactivated=self.Investment.search([
@@ -311,7 +289,6 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-07-29', False,  1],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_accounting__unactiveNotRecreated(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', 0, None)
         toBeDeactivated=self.Investment.search([
@@ -328,7 +305,6 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-07-29', False,  1],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__set_effective__wait(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.Investment.set_effective(None, None, 1, None, False)
@@ -340,7 +316,6 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-07-30', False,  1],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__set_effective__waitAndExpire(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.Investment.set_effective(None, None, 1, 2, False)
@@ -352,7 +327,6 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-07-30', '2017-07-30',  1],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__set_effective__purchasedEarlierIgnored(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.Investment.set_effective('2015-07-01', None, 1, 2, False)
@@ -364,7 +338,6 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-07-30', '2017-07-30',  1],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__set_effective__purchasedLaterIgnored(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.Investment.set_effective(None, '2015-06-30', 1, 2, False)
@@ -376,7 +349,6 @@ class Investment_Test(unittest.TestCase):
                 [1, False, False,  1],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__set_effective__alreadySetIgnored(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.Investment.set_effective(None, '2015-06-30', 1, 2, False)
@@ -389,7 +361,6 @@ class Investment_Test(unittest.TestCase):
                 [1, '2015-08-08', '2019-08-08',  1],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__set_effective__alreadySetForced(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.Investment.set_effective(None, '2015-06-30', 1, 2, False)
@@ -416,16 +387,13 @@ class Investment_Test(unittest.TestCase):
             self.Investment.member_has_effective(1,'2015-07-01','2015-07-01'))
     
     # Amortizations
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def pendingAmortizations(self, currentDate):
         result = self.Investment.pending_amortizations(currentDate)
         return [x[1:-1] for x in result] # filter id and log
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__pending_amortitzations__noInvestments(self):
         self.assertEqual(self.pendingAmortizations('2017-11-20'), [])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__pending_amortitzations__withDueInvestments(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.assertEqual(
@@ -435,7 +403,6 @@ class Investment_Test(unittest.TestCase):
             [1, '2017-06-30', 0, 40],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__pending_amortitzations__notDue(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.assertEqual(
@@ -444,7 +411,6 @@ class Investment_Test(unittest.TestCase):
             [1, '2017-06-30', 0, 40],
             ])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__pending_amortitzations__whenPartiallyAmortized(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.Investment.amortize('2017-11-20')
@@ -456,7 +422,6 @@ class Investment_Test(unittest.TestCase):
             ])
 
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__amortized_amount__zeroByDefault(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         investment_ids = self.Investment.search([])
@@ -467,7 +432,6 @@ class Investment_Test(unittest.TestCase):
             ]
         self.assertEqual(amortized_amounts, [0.0,0.0,0.0])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__amortized_amount__afterAmortization(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.Investment.amortize('2017-11-20')
@@ -479,7 +443,6 @@ class Investment_Test(unittest.TestCase):
             ]
         self.assertEqual(amortized_amounts, [4.0,60.0,40.0])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__amortized_amount__afterAmortizationLimited(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.Investment.amortize('2017-07-28')
@@ -491,7 +454,6 @@ class Investment_Test(unittest.TestCase):
             ]
         self.assertEqual(amortized_amounts, [0.0,60.0,40.0])
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__amortized_amount__secondAmortization(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.Investment.amortize('2017-11-20')
@@ -518,7 +480,6 @@ class Investment_Test(unittest.TestCase):
             u'ORDER: Formulari emplenat\n'
             )
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__migrate_created_from_accounting__keepsPreviousContent(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         investment_id = self.Investment.search([])[0]
@@ -530,7 +491,6 @@ class Investment_Test(unittest.TestCase):
         self.assertEqual(investment['log'], 
             u'previous content')
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__migrate_created_from_accounting__explicitIdForces(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         investment_id = self.Investment.search([])[0]
@@ -544,7 +504,6 @@ class Investment_Test(unittest.TestCase):
             u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
             )
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_accounting__writes_log(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         investment_id = self.Investment.search([])[0]
@@ -554,7 +513,6 @@ class Investment_Test(unittest.TestCase):
             u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
             )
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__amortize__writes_log(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.Investment.amortize('2017-11-20')
@@ -571,7 +529,6 @@ class Investment_Test(unittest.TestCase):
             u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
             )
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__migrate__updatesOrderDate(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
 
@@ -638,7 +595,6 @@ class Investment_Amortization_Test(unittest.TestCase):
                 )
         self.assertMultiLineEqual(logContent, expected)
         
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_form__allOk(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -702,7 +658,6 @@ class Investment_Amortization_Test(unittest.TestCase):
             )
         self.assertFalse(id) # ??
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_form__withNonDivisibleAmount(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -713,7 +668,6 @@ class Investment_Amortization_Test(unittest.TestCase):
             )
         self.assertFalse(id)
     
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__charge__singleInvestment(self):
     
         id = self.Investment.create_from_form(
@@ -754,7 +708,6 @@ class Investment_Amortization_Test(unittest.TestCase):
                 **self.personalData
                 ))
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__charge__samePurchaseDateSetToAll(self):
     
         id1 = self.Investment.create_from_form(
@@ -785,7 +738,6 @@ class Investment_Amortization_Test(unittest.TestCase):
               id: {id2}
             """.format(id1=id1, id2=id2))
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__charge__oldLogKept(self):
     
         id1 = self.Investment.create_from_form(
@@ -851,7 +803,6 @@ class Investment_Amortization_Test(unittest.TestCase):
             ]
         self.assertNsEqual(invoice, expected)
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_amortization_invoice(self):
 
         id = self.Investment.create_from_form(
@@ -920,7 +871,6 @@ class Investment_Amortization_Test(unittest.TestCase):
                 p = self.personalData,
                 investment_id = id
             ))
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_amortization_invoice__twice(self):
 
         id = self.Investment.create_from_form(
@@ -945,7 +895,6 @@ class Investment_Amortization_Test(unittest.TestCase):
             unicode(ctx.exception),
             )
     
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_amortization_invoice__errorWhenNoBank(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -962,7 +911,6 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         self.fail("Hauria de sortir un error quan no hi ha Partner.bank_inversions")
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__amortization_invoice_report(self):
 
         id = self.Investment.create_from_form(
@@ -1005,7 +953,6 @@ class Investment_Amortization_Test(unittest.TestCase):
                 inv = inv,
         ))
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__create_from_form__ibanIsSet(self):
 
         id = self.Investment.create_from_form(
@@ -1019,7 +966,6 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.assertTrue(partner.bank_inversions)
 
 ##### #TODO: Move to another class ##################
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__get_or_create_partner_bank__whenExists(self):
 
         partner_id = self.personalData.partnerid
@@ -1033,7 +979,6 @@ class Investment_Amortization_Test(unittest.TestCase):
             partner_id, iban)
         self.assertEqual(expected, result)
 
-    @unittest.skipIf(noExecuteAllTest, "Estas skipant els testos")
     def test__get_or_create_partner_bank__whenNew(self):
 
         partner_id = self.personalData.partnerid
