@@ -92,8 +92,10 @@ class Remainder_Test(unittest.TestCase):
              ))
 
         self.assertIn(
-            "Only one remainder of last date computed and "
-            "number of shares is allowed",
+            # TODO: at some PG version it shows the simbol instead of the description
+            #"Only one remainder of last date computed and "
+            #"number of shares is allowed",
+            "generationkwh_remainder_unique_n_shares_target_day",
             ctx.exception.faultCode
             )
 
