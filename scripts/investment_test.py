@@ -1200,26 +1200,28 @@ class Investment_Amortization_Test(unittest.TestCase):
             investment_name,
             inv.name)
 
-    def test__get_or_create_investment_name__name_not_exist(self):
+    def test__create_amortization_invoice__withUnnamedInvestment(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
-            '2017-01-01', # order_date
+            '2016-01-01', # order_date
             2000,
             '10.10.23.1',
             'ES7712341234161234567890',
             )
+
         self.Investment.write(id, dict(
             name=None)
             )
 
-        investment_name = self.Investment.get_or_create_investment_name(id)
+        self.Investment.charge([id], '2016-01-03')
 
-        inv = ns(self.Investment.read(id, [
-            'name',
-        ]))
-        self.assertEqual(
-            investment_name,
-            inv.name)
+        invoice_id = self.Investment.create_amortization_invoice(
+            id, '2018-01-03', 80, 1, 24)
+
+        invoice = self.Invoice.browse(invoice_id)
+        self.assertEqual(invoice.name,
+            "GENKWHID{}-AMOR2018".format(invoice_id))
+        
 
 
 if __name__=='__main__':
