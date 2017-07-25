@@ -172,5 +172,7 @@ class Remainder_Test(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    unittest.TestCase.__str__ = unittest.TestCase.id
     unittest.main()
 
+# vim: et sw=4 ts=4

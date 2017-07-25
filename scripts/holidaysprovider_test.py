@@ -44,6 +44,8 @@ class Holidays_Test(unittest.TestCase):
                 '2016-01-01',
             ])
 
-
+if __name__=='__main__':
+	unittest.TestCase.__str__ = unittest.TestCase.id
+	unittest.main()
 
  

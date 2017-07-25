@@ -382,4 +382,8 @@ class UsageTracker_Test(unittest.TestCase):
             +25*[0]
             +25*[0]
             )
+if __name__ == '__main__':
+	unittest.TestCase.__str__ = unittest.TestCase.id
+	unittest.main()
+
 
