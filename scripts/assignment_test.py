@@ -477,7 +477,7 @@ class AssignmentProvider_Test(unittest.TestCase):
 
     def test_sortedDefaultContractsForMember_oneAsPayer(self):
         self.assertContractForMember(self.member_oneAsPayer, [
-            (4646, self.member_oneAsPayer),
+            (106369, self.member_oneAsPayer),
             ])
 
     def test_sortedDefaultContractsForMember_oneAsOwnerButNotPayer(self):
