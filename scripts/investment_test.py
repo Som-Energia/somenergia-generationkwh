@@ -1120,7 +1120,7 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         invoice = self.Invoice.browse(invoice_id)
         self.assertEqual(invoice.name,
-            "GENKWHID{}-AMOR2018".format(invoice_id))
+            "GENKWHID{}-AMOR2018".format(id))
         
 
 
