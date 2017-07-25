@@ -989,16 +989,16 @@ class Investment_Amortization_Test(unittest.TestCase):
             receiptDate: '{today}'
             inversionInitialAmount: 2000
             inversionPendingCapital: 1920.0
-            inversionPurchaseDate: '2017-01-03'
-            inversionExpirationDate: '2042-01-03'
+            inversionPurchaseDate: '03/01/2017'
+            inversionExpirationDate: '03/01/2042'
             amortizationAmount: 80.0
             amortizationName: {inv.name}-AMOR2018
             amortizationTotalPayments: 24
             inversionBankAccount: ES77 1234 1234 1612 3456 7890
-            amortizationDate: '2018-01-30'
+            amortizationDate: '30/01/2018'
             amortizationNumPayment: 1
             """.format(
-                today = datetime.date.today(),
+                today = datetime.date.today().strftime("%d/%m/%Y"),
                 nif = self.personalData.nif,
                 name = self.personalData.name,
                 surname = self.personalData.surname,
