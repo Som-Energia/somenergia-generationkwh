@@ -552,8 +552,6 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.InvoiceLine = self.erp.AccountInvoiceLine
         self.Partner = self.erp.ResPartner
         self.Investment = self.erp.GenerationkwhInvestment
-        self.Investment.dropAll()
-        
 
     def tearDown(self):
         self.erp.rollback()
