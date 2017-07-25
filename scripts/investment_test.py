@@ -398,17 +398,17 @@ class Investment_Test(unittest.TestCase):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.assertEqual(
             self.pendingAmortizations('2017-11-20'),[
-            [1, '2017-06-30', 0, 60],
-            [1, '2017-06-30', 0, 40],
-            [1, '2017-07-29', 0, 4 ],
+            [1, '2017-06-30', 0, 60, 1, 24],
+            [1, '2017-06-30', 0, 40, 1, 24],
+            [1, '2017-07-29', 0, 4,  1, 24],
             ])
 
     def test__pending_amortitzations__notDue(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
         self.assertEqual(
             self.pendingAmortizations('2017-07-28'),[
-            [1, '2017-06-30', 0, 60],
-            [1, '2017-06-30', 0, 40],
+            [1, '2017-06-30', 0, 60, 1, 24],
+            [1, '2017-06-30', 0, 40, 1, 24],
             ])
 
     def test__pending_amortitzations__whenPartiallyAmortized(self):
@@ -416,11 +416,10 @@ class Investment_Test(unittest.TestCase):
         self.Investment.amortize('2017-11-20')
         self.assertEqual(
             self.pendingAmortizations('2018-11-20'),[
-            [1, '2018-06-30', 60, 60],
-            [1, '2018-06-30', 40, 40],
-            [1, '2018-07-29', 4,  4 ],
+            [1, '2018-06-30', 60, 60, 2, 24],
+            [1, '2018-06-30', 40, 40, 2, 24],
+            [1, '2018-07-29', 4,  4,  2, 24],
             ])
-
 
     def test__amortized_amount__zeroByDefault(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
