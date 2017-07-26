@@ -549,6 +549,7 @@ class AssignmentProvider_Test(unittest.TestCase):
             (self.ownerContracts[0], self.member_manyAsPayerAndManyAsOwner),
             (self.ownerContracts[1], self.member_manyAsPayerAndManyAsOwner),
             ])
+
     def test_anyForContract_noActiveContracts(self):
         result = self.Assignment.anyForContract(99999999)
         self.assertEqual(result,False)
