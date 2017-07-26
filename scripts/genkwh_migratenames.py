@@ -45,6 +45,33 @@ def fixInvestmentMovelines(cr, investmentMovelinePairs):
             investment=investment
         ))
 
+def ungeneratedInvestments(cr):
+    cr.execute("""\
+        select
+            ml.*,
+            acc.name
+        from
+            account_move_line as ml
+        left join
+            account_account as acc
+        on
+            acc.id = ml.account_id
+        left outer join
+            generationkwh_investment as inv
+        on
+            ml.id = inv.move_line_id
+        left join
+            account_period as p
+        on
+            p.id = ml.period_id
+        where
+            acc.code like '1635%%' and
+            not p.special and
+            inv.id is NULL
+        """)
+    return dbutils.nsList(cr)
+        
+
 def activeNegativeInvestments(cr):
     cr.execute("""\
         select
@@ -558,17 +585,22 @@ def main(cr):
         fail("There are active investments which are related to fiscal end year")
     deleteInactiveInvestmentRelatedToFiscalEndYear(cr)
 
-    step(" Fixing known investment-movelines relations")
+    step(" Fixing known bad investment-movelines relations")
     fixInvestmentMovelines(cr, cases.investmentMovelinesToFix.items())
 
-    step(" Fixing known investment shares")
+    step(" Fixing known bad investment shares")
     for invid, nshares in cases.investmentSharesToFix.items():
         step("  Fixing {} to be {}".format(invid, nshares))
         cr.execute("UPDATE generationkwh_investment SET nshares=%s WHERE id=%s",
             (nshares, invid))
 
     # Generate here the pending investments
-
+    step(" Checking for ungenerated investments")
+    ungenerated = ungeneratedInvestments(cr)
+    if ungenerated:
+        for inv in ungenerated:
+            success(inv.dump())
+        fail("You should generate remaining investment from accounting at this point.")
 
     step(" Compensating negative investments")
     for mlid in cases.investmentsToDeactivateByMoveline:
