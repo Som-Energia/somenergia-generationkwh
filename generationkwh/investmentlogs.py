@@ -4,7 +4,7 @@
 def log_formfilled(data):
     return (
         u'[{create_date} {user}] '
-        u"FORMFILLED: Formulari omplert des de la IP {ip}, Quantitat: {amount} €, IBAN: {iban}"
+        u"FORMFILLED: Formulari omplert des de la IP {ip}, Quantitat: {amount} €, IBAN: {iban}\n"
         .format(
             **data
         ))
