@@ -585,6 +585,7 @@ def bindInvestmentWithOrder(cr, investment, moveline):
             order_date = moveline.order_date,
             name = moveline.ref,
         ))
+    displayPartnersMovements(cr, moveline.partner_id)
 
 def displayPartnersMovements(cr, partner_id):
     movelines = getGenerationMovelinesByPartner(cr,partner_id)
@@ -863,13 +864,11 @@ def main(cr):
             error("No name for Investment {move_date_created} {move_line_id} {nshares:=5}00.00€ {partner_name}",**inv)
             displayPartnersMovements(cr, inv.partner_id)
             continue
-        bindInvestmentWithOrder(cr, inv, solution)
+        solveSpecialCase(cr, inv, solution)
 
     for orphanNames in orphanMoveLinesByPartner.values():
         for orphanName in orphanNames:
-            error("Unassigned name {ref} {order_date} {partner_name}",
-                **orphanName)
-            displayPartnersMovements(cr, orphanName.partner_id)
+            solveInactiveInvestment(cr, orphanName)
 
 
     for moveline_id in ungenerated:
@@ -906,6 +905,7 @@ from generationkwh.investmentlogs import (
     log_formfilled,
     log_charged,
     log_refunded,
+    log_banktransferred,
 )
 
 
@@ -924,6 +924,13 @@ def logRefund(cr, mlid):
     ml = movementLineCreationInfo(cr, mlid)
 
     return log_refunded(dict(
+        create_date=ml.create_date,
+        user=ml.user.decode('utf-8'),
+        ))
+
+def logBankTransfer(cr, mlid):
+    ml = movementLineCreationInfo(cr, mlid)
+    return log_banktransferred(dict(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
         ))
@@ -967,34 +974,87 @@ def solveNormalCase(cr, investment, moveline):
             log = log,
         ))
 
+def solveSpecialCase(cr, investment, moveline):
+    True and success(
+        "Match inv-od {investment.id} {moveline.ref} {moveline.order_date} {amount:=8}€ {moveline.partner_name}"
+        .format(**ns(
+            investment=investment,
+            moveline=moveline,
+            amount=investment.nshares*gkwh.shareValue,
+            )))
+    log= ""
+    investment = getInvestment(cr, investment.id)
+    investment.name = moveline.ref
+    log += logOrdered(cr, investment, moveline.order_date)
+    if moveline.ref in cases.specialLogs :
+        for movelineid, type in cases.specialLogs[moveline.ref].iteritems():
+            if type == 'payed':
+                log += logPaid(cr, investment, movelineid)
+            elif type == 'refunded':
+                log += logRefund(cr, movelineid)
+            elif type == 'banktransferred':
+                log += logBankTransfer(cr, movelineid)
+            else:
+                raise Exception(
+                    "T'has colat posant '{}' a specialLogs.{}"
+                    .format(type, moveline.ref))
+    else:
+        log += logPaid(cr, investment, moveline.movelineid)
+                
 
-def solveInactiveInvestment(cr):
-    for name, case in cases.cancelledInvestments.items():
-        step(u"Writting log for {name} "
-            "{order} {paid} {cancel} {investment} {partner_name} {concept}"
-            .format(name=name, **case).encode('utf8'))
-        log = ""
-        investment = getInvestment(cr, case.investment)
-        log += logOrdered(cr,investment, case.order)
-        log += logPaid(cr, investment, case.paid)
-        log += logRefund(cr, case.cancel)
-
-        success(("\n"+log).encode('utf-8'))
-        cr.execute("""\
-            UPDATE
-                generationkwh_investment as inv
-            SET
-                name = %(name)s,
-                log = %(log)s,
-                active = false,
-                purchase_date = NULL
-            WHERE
-                inv.id = %(investment)s
+    True and success(("\n"+log).encode('utf-8'))
+    cr.execute("""\
+        UPDATE
+            generationkwh_investment as inv
+        SET
+            name = %(name)s,
+            log = %(log)s,
+            order_date = %(order_date)s
+        WHERE
+            inv.id = %(id)s
         """, dict(
-            investment = case.investment,
-            name = name,
+            id = investment.id,
+            order_date = moveline.order_date,
+            name = moveline.ref,
             log = log,
         ))
+    displayPartnersMovements(cr, moveline.partner_id)
+
+
+def solveInactiveInvestment(cr, moveline): 
+    name = moveline.ref
+    if name not in cases.cancelledInvestments:
+        error("Unassigned name {ref} {order_date} {partner_name}",
+            **moveline)
+        displayPartnersMovements(cr, moveline.partner_id)
+        return
+
+    case = cases.cancelledInvestments[name]
+    step(u"Writting log for {name} "
+        "{order} {paid} {cancel} {investment} {partner_name} {concept}"
+        .format(name=name, **case).encode('utf8'))
+    log = ""
+    investment = getInvestment(cr, case.investment)
+    log += logOrdered(cr, investment, moveline.order_date)
+    log += logPaid(cr, investment, case.paid)
+    log += logRefund(cr, case.cancel)
+
+    success(("\n"+log).encode('utf-8'))
+    cr.execute("""\
+        UPDATE
+            generationkwh_investment as inv
+        SET
+            name = %(name)s,
+            log = %(log)s,
+            active = false,
+            purchase_date = NULL
+        WHERE
+            inv.id = %(investment)s
+    """, dict(
+        investment = case.investment,
+        name = name,
+        log = log,
+    ))
 
 cases = ns.load('migration.yaml')
 
@@ -1002,7 +1062,6 @@ cases = ns.load('migration.yaml')
 with psycopg2.connect(**configdb.psycopg) as db:
     with db.cursor() as cr:
         with transaction(cr, discarded='--doit' not in sys.argv):
-            solveInactiveInvestment(cr)
             main(cr)
 
 
