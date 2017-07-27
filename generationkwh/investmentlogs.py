@@ -17,4 +17,12 @@ def log_charged(data):
             **data
         ))
 
+def log_refunded(data):
+    return (
+        u'[{create_date} {user}] '
+        u'REFUNDED: Devolució del pagament remesat\n'
+        .format(
+            **data
+        ))
+
 # vim: et ts=4 sw=4   
