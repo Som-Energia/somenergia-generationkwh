@@ -930,11 +930,11 @@ class Investment_Amortization_Test(unittest.TestCase):
             ownerName: {surname}, {name}
             ownerNif: {nif}
             receiptDate: '{today}'
-            inversionInitialAmount: 2000
-            inversionPendingCapital: 1920.0
+            inversionInitialAmount: 2.000,00
+            inversionPendingCapital: 1.920,00
             inversionPurchaseDate: '03/01/2017'
             inversionExpirationDate: '03/01/2042'
-            amortizationAmount: 80.0
+            amortizationAmount: 80,00
             amortizationName: {inv.name}-AMOR2018
             amortizationTotalPayments: 24
             inversionBankAccount: ES77 1234 1234 1612 3456 7890
