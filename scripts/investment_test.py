@@ -24,6 +24,7 @@ class Investment_Test(unittest.TestCase):
         self.erp.begin()
         self.Soci = self.erp.SomenergiaSoci
         self.Investment = self.erp.GenerationkwhInvestment
+        self.PaymentOrder = self.erp.PaymentOrder
         self.Investment.dropAll()
 
     def tearDown(self):
@@ -45,6 +46,24 @@ class Investment_Test(unittest.TestCase):
                 )
         self.assertMultiLineEqual(logContent, expected)
 
+    #TODO: Implemented in Investment_Amortization_Test
+    def assertNsEqual(self, dict1, dict2):
+        def parseIfString(nsOrString):
+            if type(nsOrString) in (dict, ns):
+                return nsOrString
+            return ns.loads(nsOrString)
+
+        def sorteddict(d):
+            if type(d) not in (dict, ns):
+                return d
+            return ns(sorted(
+                (k, sorteddict(v))
+                for k,v in d.items()
+                ))
+        dict1 = sorteddict(parseIfString(dict1))
+        dict2 = sorteddict(parseIfString(dict2))
+
+        return self.assertMultiLineEqual(dict1.dump(), dict2.dump())
 
     def test__effective_investments_tuple__noInvestments(self):
         self.assertEqual(
@@ -538,6 +557,52 @@ class Investment_Test(unittest.TestCase):
         investment = self.Investment.read(investment_id,['order_date'])
         self.assertEqual(investment['order_date'], '2015-07-29')
 
+    def test__get_or_create_payment_order__badName(self):
+        order_id = self.Investment.get_or_create_open_payment_order("BAD MODE")
+        self.assertEqual(order_id, False)
+
+    def test__get_or_create_payment_order__calledTwiceReturnsTheSame(self):
+        first_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh')
+        second_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh')
+        self.assertEqual(first_order_id, second_order_id)
+
+    def test__get_or_create_payment_order__noDraftCreatesANewOne(self):
+        first_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh')
+        self.PaymentOrder.write(first_order_id, dict(
+            state='done',
+        ))
+        second_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh')
+        self.assertNotEqual(first_order_id, second_order_id)
+
+    def test__get_or_create_payment_order__properFieldsSet(self):
+        first_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh')
+        self.PaymentOrder.write(first_order_id, dict(
+            state='done',
+        ))
+        #TODO: Is necessary a second Investment for this test?
+        second_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh')
+        order = ns(self.PaymentOrder.read(second_order_id,[
+            "date_prefered",
+            "user_id",
+            "state",
+            "mode",
+            "type",
+            "create_account_moves",
+        ]))
+        order.user_id = order.user_id[0]
+        order.mode = order.mode[1]
+        self.assertNsEqual(order, ns.loads("""\
+             id: {}
+             create_account_moves: direct-payment
+             date_prefered: fixed
+             mode: GENERATION kWh
+             state: draft
+             type: receivable
+             user_id: {}
+            """.format(
+                second_order_id,
+                order.user_id,
+            )))
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Investment_Amortization_Test(unittest.TestCase):
