@@ -9,10 +9,18 @@ def log_formfilled(data):
             **data
         ))
 
+def log_corrected(data):
+    return (
+        u'[{create_date} {user}] '
+        u'CORRECTED: Amount changed from {oldamount} € to {newamount} € before payment\n'
+        .format(
+            **data
+        ))
+
 def log_charged(data):
     return (
         u'[{create_date} {user}] '
-        u"PAYED: Pagament de {amount} € remesat al compte {iban}\n"
+        u"PAID: Pagament de {amount} € remesat al compte {iban} [{mlid}]\n"
         .format(
             **data
         ))
@@ -20,7 +28,7 @@ def log_charged(data):
 def log_refunded(data):
     return (
         u'[{create_date} {user}] '
-        u'REFUNDED: Devolució del pagament remesat\n'
+        u'REFUNDED: Devolució del pagament remesat [{mlid}]\n'
         .format(
             **data
         ))
@@ -28,7 +36,7 @@ def log_refunded(data):
 def log_banktransferred(data):
     return (
         u'[{create_date} {user}] '
-        u'PAYED: Pagament efectuat per transferencia bancària\n'
+        u'REPAID: Pagament efectuat per transferencia bancària [{mlid}]\n'
         .format(
             **data
         ))

@@ -18,6 +18,7 @@ def error(message, **params):
     consoleError(msg)
     errorCases.setdefault(ns(params).partner_id, []).append(msg)
 
+
 @contextlib.contextmanager
 def transaction(cursor, discarded=False):
     cursor.execute('begin')
@@ -45,7 +46,24 @@ def fixInvestmentMovelines(cr, investmentMovelinePairs):
             investment=investment
         ))
 
+def nameDummy(cr):
+    "Not the final name"
+    for i, mlid in enumerate(cases.toBeNamed):
+        cr.execute("""\
+            UPDATE
+                generationkwh_investment as inv
+            SET
+                name = %(name)s
+            WHERE
+                move_line_id = %(id)s
+            """, dict(
+                id = mlid,
+                name = "GKWH_TP{:06}".format(i)
+            ))
+        
+
 def ungeneratedInvestments(cr):
+    "Locates any investment yet to be generated"
     cr.execute("""\
         select
             ml.*,
@@ -56,6 +74,10 @@ def ungeneratedInvestments(cr):
             account_account as acc
         on
             acc.id = ml.account_id
+        left join
+            account_account as pacc
+        on
+            pacc.id = acc.parent_id
         left outer join
             generationkwh_investment as inv
         on
@@ -65,14 +87,13 @@ def ungeneratedInvestments(cr):
         on
             p.id = ml.period_id
         where
-            acc.code like '1635%%' and
+            pacc.code = '1635' and
             not p.special and
             inv.id is NULL
         order by
             create_date
         """)
     return dbutils.nsList(cr)
-
 
 def activeNegativeInvestments(cr):
     cr.execute("""\
@@ -105,7 +126,7 @@ def moveLinesReferencedTwice(cr):
             acc.name as account_name,
             p.ref as partner_code,
             acc.code as account_code,
-            nshares as amount,
+            nshares*%(shareValue)s as amount,
             true
         from
             generationkwh_investment as inv
@@ -135,7 +156,9 @@ def moveLinesReferencedTwice(cr):
             having
                 count(id) > 1
             )
-        """)
+        """, dict(
+            shareValue=gkwh.shareValue,
+        ))
     return dbutils.nsList(cr)
 
 def investmentPointingSomeoneElsesAccount(cr):
@@ -196,8 +219,12 @@ def movementsVsInvesmentAmounts(cr):
                 account_account as ac
             on
                 ac.id = ml.account_id
+            left join
+                account_account as pac
+            on
+                pac.id = ac.parent_id
             where
-                ac.code ilike '1635%%' and
+                pac.code = '1635' and
                 true
             group by
                 ac.code
@@ -285,6 +312,37 @@ def deleteInactiveInvestmentRelatedToFiscalEndYear(cr):
         """
     cr.execute(query)
 
+
+# no cleanup
+
+def getMoveLineInfo(cr, mlids):
+    cr.execute("""\
+        select
+            p.name as partner_name,
+            p.id as partner_id,
+            ml.*,
+            ml.credit-ml.debit as amount,
+            false
+        from
+            account_move_line as ml
+        left join
+            account_account as a
+        on
+            ml.account_id=a.id
+        left join
+            res_partner as p
+        on
+            --- p.id = ml.partner_id or
+            p.ref = 'S' || right(a.code, 6)
+        where
+            ml.id in %(mlids)s and
+            true
+        order by p.id, ml.id
+    """, dict(
+        mlids = tuple(mlids),
+    ))
+    return dbutils.nsList(cr)
+
 def getGenerationMovelinesByPartner(cr, partner_id):
     cr.execute("""\
         select
@@ -303,6 +361,7 @@ def getGenerationMovelinesByPartner(cr, partner_id):
         select
             %(partner_name)s as partner_name,
             ml.*,
+            ml.credit-ml.debit as amount,
             false
         from
             account_move_line as ml
@@ -395,13 +454,18 @@ def getMoveLines(cr, move_id):
             account_move_line as ml
         left join
             account_account as ac
-        on ac.id = ml.account_id
+        on
+            ac.id = ml.account_id
+        left join
+            account_account as pac
+        on
+            pac.id = ac.parent_id
         left join
             res_partner as p
         on
            p.id = ml.partner_id
         where
-            ac.code ilike '1635%%' and
+            pac.code = '1635' and
             ml.move_id = %(move_id)s
         order by ml.id
     """, dict(
@@ -517,8 +581,12 @@ def investmentOrderAndMovements(cr, modeName='GENERATION kWh'):
                 account_account as a
             on
                 l.account_id=a.id
+            left join
+                account_account as pa
+            on
+                pa.id = a.parent_id
             where
-                a.code ilike '1635%%' and
+                pa.code = '1635' and
                 l.name = '/' and
                 true
             group by
@@ -536,10 +604,9 @@ def investmentOrderAndMovements(cr, modeName='GENERATION kWh'):
 
 
 def appendToKey(d, key, value):
-    values = d.get(key, [])
+    values = d.setdefault(key, [])
     wasEmpty = bool(values)
     values.append(value)
-    d[key] = values
     return wasEmpty
 
 def getAndRemoveFirst(d, key):
@@ -548,7 +615,7 @@ def getAndRemoveFirst(d, key):
     return values.pop(0)
 
 def bindMoveLineAndPaymentLine(moveline, orderline):
-    True and success(
+    False and success(
         "Match ml-po ml-{moveline.id} {orderline.name} {orderline.create_date} {amount:=8}€ {moveline.partner_name}"
         .format(**ns(
             moveline=moveline,
@@ -605,8 +672,7 @@ def displayPartnersMovements(cr, partner_id):
             last_effective_date_or_not = inv.last_effective_date or '____-__-__',
             **inv)
 
-def main(cr):
-    global paymentMoveLines
+def cleanUp(cr):
     step("Clean up cases")
 
     step(" Fiscal end year movements")
@@ -645,7 +711,7 @@ def main(cr):
             """, dict(mlid=mlid))
 
     step(" Compensating pending negative investments already efective")
-    for case in cases.lateDisinvestments:
+    for case in cases.lateDivestments:
         cr.execute("""\
             UPDATE generationkwh_investment
             SET
@@ -688,18 +754,56 @@ def main(cr):
     if squatters or referencedTwice:
         fail("No puc avançar si hi ha aquests errors")
 
+    success("Clean up done")
 
+
+
+
+def allMovements(cr):
+    cr.execute("""\
+        select
+            ml.*,
+            COALESCE(u.name, 'Nobody') as user
+        from
+            account_move_line as ml
+        left join
+            account_account as acc
+        on
+            acc.id = ml.account_id
+        left join
+            account_account as pacc
+        on
+            pacc.id = acc.parent_id
+        left join
+            account_period as p
+        on
+            p.id = ml.period_id
+        LEFT JOIN
+            res_users as u
+        ON
+            u.id = ml.create_uid
+        where
+            pacc.code = '1635' and
+            not p.special and
+            true
+        order by
+            create_date
+        """)
+    return {x.id: x for x in dbutils.nsList(cr)}
+
+
+def main(cr):
 
     # Movelines related to payment orders
-    paymentMoveLines = ns()
-
     step("Emparellant moviments amb remeses")
 
+    global paymentMoveLines
+    paymentMoveLines = ns()
     for data in investmentOrderAndMovements(cr):
-        step("Quadrant remesa feta el {move_create_date}".format(**data))
+        step(" Quadrant remesa feta el {move_create_date}".format(**data))
 
 
-        step(" Emparellant les linies del moviment amb les de la remesa")
+        step("  Comprovant que la remesa i el moviment coincideixen")
 
         if not data.move_id:
             warn("Remesa sense moviment. {}: Id {}, amb {} linies" .format(
@@ -734,7 +838,7 @@ def main(cr):
                 .format(len(orderLines), data.order_nlines))
 
 
-        step(" Matching order lines and move lines by partner, amount and order")
+        step("  Quadrant pagaments amb assentaments per persona i quantitat")
         orderLinesDict = ns()
         repesca = []
 
@@ -754,7 +858,7 @@ def main(cr):
             # orderline-movementline match found
             bindMoveLineAndPaymentLine(moveline, orderline)
 
-        step(" Matching missed order lines just by partner")
+        if repesca: step("  Repescant els que no coincideix la quantitat")
 
         #step("  Create a partner -> unpaired movelines map")
         movelinesByPartnerId = {}
@@ -788,6 +892,11 @@ def main(cr):
                     "Linia de Moviment sense parella "
                     "id {id} {create_date} {credit}€ {partner_name}",
                     **moveline)
+
+    step("Recopilant tots els asentaments del generation")
+    global unusedMovements
+    unusedMovements = allMovements(cr)
+    nameDummy(cr)
 
     step("Pairing investments")
     step(" Pairing investments using existing relation")
@@ -868,7 +977,11 @@ def main(cr):
 
     for orphanNames in orphanMoveLinesByPartner.values():
         for orphanName in orphanNames:
-            solveInactiveInvestment(cr, orphanName)
+            if solveInactiveInvestment(cr, orphanName):
+                continue
+            error("Unassigned name {ref} {order_date} {partner_name}",
+                **orphanName)
+            displayPartnersMovements(cr, orphanName.partner_id)
 
 
     for moveline_id in ungenerated:
@@ -885,11 +998,19 @@ def main(cr):
         displayPartnersMovements(cr, missmatch.investment_partner_id)
 
 
+from generationkwh.investmentlogs import (
+    log_formfilled,
+    log_corrected,
+    log_charged,
+    log_refunded,
+    log_banktransferred,
+)
+
 def movementLineCreationInfo(cr, id):
     cr.execute("""\
         SELECT
-            ml.create_date as create_date,
-            u.name as user
+            ml.*
+            COALESCE(u.name, 'Nobody') as user
         FROM
             account_move_line as ml
         LEFT JOIN
@@ -901,38 +1022,30 @@ def movementLineCreationInfo(cr, id):
         """,dict(id=id))
     return dbutils.nsList(cr)[0]
 
-from generationkwh.investmentlogs import (
-    log_formfilled,
-    log_charged,
-    log_refunded,
-    log_banktransferred,
-)
-
-
 def logPaid(cr, investment, mlid):
-    ml = movementLineCreationInfo(cr, mlid)
-
+    ml = unusedMovements.pop(mlid)
     return log_charged(dict(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
         amount=investment.nshares*gkwh.shareValue,
         iban=investment.iban or u"None",
+        mlid=mlid,
         ))
 
-
 def logRefund(cr, mlid):
-    ml = movementLineCreationInfo(cr, mlid)
-
+    ml = unusedMovements.pop(mlid)
     return log_refunded(dict(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
+        mlid=mlid,
         ))
 
-def logBankTransfer(cr, mlid):
-    ml = movementLineCreationInfo(cr, mlid)
+def logRepaid(cr, mlid):
+    ml = unusedMovements.pop(mlid)
     return log_banktransferred(dict(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
+        mlid=mlid,
         ))
 
 def logOrdered(cr, investment, order_date):
@@ -943,6 +1056,64 @@ def logOrdered(cr, investment, order_date):
         amount=investment.nshares*gkwh.shareValue,
         iban=investment.iban or u"None",
         ))
+
+def logCorrected(cr, investment, what):
+    return log_corrected(dict(
+        create_date=what.when,
+        user="Nobody",
+        oldamount = what['from'],
+        newamount = what.to,
+        ))
+
+def logSold(cr, investment, mlid, what):
+    ml = unusedMovements.pop(mlid)
+    mlto = unusedMovements.pop(what.to) # TODO: log it
+    return (
+        u'[{create_date} {user}] '
+        u'TRANSFERCREATED: Traspas cap a {toname} amb codi {toref}'
+        #u'TRANSFERRED: Creada per traspàs de {} fins ara a nom de {toname}'
+
+        .format(
+        create_date=ml.create_date,
+        user=ml.user.decode('utf-8'),
+        toname=mlto.name.decode('utf-8'),
+        toref=mlto.ref,
+        ))
+
+def logPact(cr, investment, what):
+    return (
+        u'[{create_date} {user}] '
+        u'PACT: Pacte amb l\'inversor. {changes} Motiu: {note}\n'
+        .format(
+        create_date=what.create_date,
+        user=what.user,
+        changes=what.changes,
+        note=what.note,
+        ))
+
+def logPartial(cr, investment, mlid):
+    ml = unusedMovements.pop(mlid)
+    return (
+        u'[{create_date} {user}] '
+        u'PARTIAL: Desinversió parcial de {amount} €, en queden TODO € [{mlid}]\n'
+        .format(
+        create_date=ml.create_date,
+        user=ml.user.decode('utf-8'),
+        mlid=mlid,
+        amount=ml.credit-ml.debit,
+        ))
+
+def logDivestment(cr, investment, mlid):
+    ml = unusedMovements.pop(mlid)
+    return (
+        u'[{create_date} {user}] '
+        u'DIVESTED: Desinversió total [{mlid}]\n'
+        .format(
+        create_date=ml.create_date,
+        user=ml.user.decode('utf8'),
+        mlid=mlid,
+        ))
+
 
 def solveNormalCase(cr, investment, moveline):
     True and success(
@@ -955,9 +1126,18 @@ def solveNormalCase(cr, investment, moveline):
     log = ""
     investment = getInvestment(cr, investment.id)
     log += logOrdered(cr, investment, moveline.order_date)
-    log += logPaid(cr, investment, moveline.movelineid)
 
-    True and success(("\n"+log).encode('utf-8'))
+    if moveline.ref in cases.singlePaymentCases :
+        case = cases.singlePaymentCases.pop(moveline.ref)
+        for movelineid, what in case.iteritems():
+            log += logMovement(cr, investment, movelineid, what)
+    else:
+        log += logPaid(cr, investment, moveline.movelineid)
+        success( "{investment.name}: # {partner_name}".format(investment=investment, **moveline))
+        movelines = getGenerationMovelinesByPartner(cr,moveline.partner_id)
+        for m in movelines:
+            success( "    {id}: {date_created} {id} {partner_name} {amount} {name}".format(investment=investment, **m))
+
     cr.execute("""\
         UPDATE
             generationkwh_investment as inv
@@ -973,6 +1153,36 @@ def solveNormalCase(cr, investment, moveline):
             name = moveline.ref,
             log = log,
         ))
+    True and displayPartnersMovements(cr, moveline.partner_id)
+    True and success(("\n"+log).encode('utf-8'))
+
+
+def logMovement(cr, investment, movelineid, what):
+    try:
+        type = what.type
+    except:
+        type = what
+
+    if type == 'corrected':
+        return logCorrected(cr, investment, what)
+    if type == 'sold':
+        return logSold(cr, investment, movelineid, what)
+    if type == 'pact':
+        return logPact(cr, investment, what)
+    if type == 'paid':
+        return logPaid(cr, investment, movelineid)
+    if type == 'refunded':
+        return logRefund(cr, movelineid)
+    if type == 'repaid':
+        return logRepaid(cr, movelineid)
+    if type == 'partial':
+        return logPartial(cr, investment, movelineid)
+    if type == 'divested':
+        return logDivestment(cr, investment, movelineid)
+    raise Exception(
+        "T'has colat posant '{}' a repaidCases.{}"
+        .format(type, moveline.ref))
+
 
 def solveSpecialCase(cr, investment, moveline):
     True and success(
@@ -986,23 +1196,19 @@ def solveSpecialCase(cr, investment, moveline):
     investment = getInvestment(cr, investment.id)
     investment.name = moveline.ref
     log += logOrdered(cr, investment, moveline.order_date)
-    if moveline.ref in cases.specialLogs :
-        for movelineid, type in cases.specialLogs[moveline.ref].iteritems():
-            if type == 'payed':
-                log += logPaid(cr, investment, movelineid)
-            elif type == 'refunded':
-                log += logRefund(cr, movelineid)
-            elif type == 'banktransferred':
-                log += logBankTransfer(cr, movelineid)
-            else:
-                raise Exception(
-                    "T'has colat posant '{}' a specialLogs.{}"
-                    .format(type, moveline.ref))
+    if moveline.ref in cases.repaidCases :
+        case = cases.repaidCases.pop(moveline.ref)
+        for movelineid, what in case.iteritems():
+            log += logMovement(cr, investment, movelineid, what)
+        True and success(("\n"+log).encode('utf-8'))
     else:
         log += logPaid(cr, investment, moveline.movelineid)
-                
-
-    True and success(("\n"+log).encode('utf-8'))
+        success( "{investment.name}: # {partner_name}".format(investment=investment, **moveline))
+        movelines = getGenerationMovelinesByPartner(cr,moveline.partner_id)
+        for m in movelines:
+            success( "    {id}: {date_created} {id} {partner_name} {amount} {name}".format(investment=investment, **m))
+        True and displayPartnersMovements(cr, moveline.partner_id)
+        True and success(("\n"+log).encode('utf-8'))
     cr.execute("""\
         UPDATE
             generationkwh_investment as inv
@@ -1018,27 +1224,40 @@ def solveSpecialCase(cr, investment, moveline):
             name = moveline.ref,
             log = log,
         ))
-    displayPartnersMovements(cr, moveline.partner_id)
 
+borrame=''
 
 def solveInactiveInvestment(cr, moveline): 
     name = moveline.ref
-    if name not in cases.cancelledInvestments:
-        error("Unassigned name {ref} {order_date} {partner_name}",
-            **moveline)
-        displayPartnersMovements(cr, moveline.partner_id)
-        return
+    print moveline.dump()
+    if name not in cases.cancelledCases:
+        return False
 
-    case = cases.cancelledInvestments[name]
+    case = cases.cancelledCases.pop(name)
     step(u"Writting log for {name} "
         "{order} {paid} {cancel} {investment} {partner_name} {concept}"
         .format(name=name, **case).encode('utf8'))
     log = ""
     investment = getInvestment(cr, case.investment)
+    assert investment.move_line_id == case.paid
+    investment.name = name
+    global borrame
+    borrame += (
+        u"  {name}: # {partner_name}\n"
+        u"    {paid}: paid\n"
+        u"    {cancel}: refunded\n\n"
+        ).format(
+            paid = case.paid,
+            name = name,
+            cancel = case.cancel,
+            partner_name=moveline.partner_name.decode('utf-8'),
+        )
+
     log += logOrdered(cr, investment, moveline.order_date)
     log += logPaid(cr, investment, case.paid)
     log += logRefund(cr, case.cancel)
 
+         
     success(("\n"+log).encode('utf-8'))
     cr.execute("""\
         UPDATE
@@ -1055,14 +1274,32 @@ def solveInactiveInvestment(cr, moveline):
         name = name,
         log = log,
     ))
+    return True
+
+def showUnusedMovements(cr):
+    if unusedMovements:
+        consoleError("Some movements were still not considered in logs") 
+    for info in getMoveLineInfo(cr, unusedMovements):
+        error("    mov {date_created} {id} {partner_name} {amount} {name}",
+            **info)
+
+    if cases.repaidCases:
+        consoleError("Some repaid cases have been not considered")
+        consoleError(cases.repaidCases.dump())
+
+    if cases.singlePaymentCases:
+        consoleError("Some single payment cases have been not considered")
+        consoleError(cases.singlePaymentCases.dump())
+
 
 cases = ns.load('migration.yaml')
-
-
 with psycopg2.connect(**configdb.psycopg) as db:
     with db.cursor() as cr:
         with transaction(cr, discarded='--doit' not in sys.argv):
+            cleanUp(cr)
             main(cr)
+            showUnusedMovements(cr)
+            print borrame
 
 
 # vim: et ts=4 sw=4
