@@ -604,6 +604,7 @@ class Investment_Test(unittest.TestCase):
                 order.user_id,
             )))
 
+
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Investment_Amortization_Test(unittest.TestCase):
 
