@@ -854,6 +854,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'date_invoice',
             'invoice_line',
             'check_total',
+            'origin',
         ]))
         invoice.journal_id = invoice.journal_id[1]
         invoice.partner_bank = invoice.partner_bank[1] if invoice.partner_bank else "None"
@@ -913,8 +914,9 @@ class Investment_Amortization_Test(unittest.TestCase):
               account_analytic_id: false
               quantity: 1.0
               product_id: '[GENKWH_AMOR] Amortització Generation kWh'
-            journal_id: Factures Amortitzacions GenerationkWh
+            journal_id: Factures GenerationkWh
             name: {investment_name}-AMOR{year}
+            origin: false # TODO {investment_name}
             partner_bank: {iban}
             partner_id:
             - {p.partnerid}
@@ -932,6 +934,7 @@ class Investment_Amortization_Test(unittest.TestCase):
                 p = self.personalData,
                 investment_id = id
             ))
+
     def test__create_amortization_invoice__twice(self):
 
         id = self.Investment.create_from_form(
