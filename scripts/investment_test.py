@@ -975,7 +975,7 @@ class Investment_Amortization_Test(unittest.TestCase):
               product_id: '[GENKWH_AMOR] Amortització Generation kWh'
             journal_id: Factures GenerationkWh
             name: {investment_name}-AMOR{year}
-            origin: false # TODO {investment_name}
+            origin: {investment_name}
             partner_bank: {iban}
             partner_id:
             - {p.partnerid}
