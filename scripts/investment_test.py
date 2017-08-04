@@ -865,6 +865,65 @@ class Investment_Amortization_Test(unittest.TestCase):
             ]
         self.assertNsEqual(invoice, expected)
 
+    def test__create_initial_invoice(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+
+        invoice_id =  self.Investment.create_initial_invoice(id)
+
+        self.assertTrue(invoice_id)
+
+        investment = self.Investment.browse(id)
+
+        self.assertInvoiceInfoEqual(invoice_id, """\
+            account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
+            amount_total: 2000.0
+            amount_untaxed: 2000.0
+            check_total: 2000.0
+            date_invoice: '{invoice_date}'
+            id: {id}
+            invoice_line:
+            - origin: false # TODO
+              uos_id: PCE
+              account_id: 163500{p.nsoci:0>6s} {p.surname}, {p.name}
+              name: 'Inversió {investment_name} '
+              invoice_id:
+              - {id}
+              - 'CI:  {investment_name}-FACT'
+              price_unit: 100.0
+              price_subtotal: 2000.0
+              invoice_line_tax_id: []
+              note: false
+              discount: 0.0
+              account_analytic_id: false
+              quantity: 20.0
+              product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
+            journal_id: Factures GenerationkWh
+            name: {investment_name}-FACT
+            origin: false # TODO: {investment_name}
+            partner_bank: {iban}
+            partner_id:
+            - {p.partnerid}
+            - {p.surname}, {p.name}
+            payment_type:
+            - 1 # TODO
+            - Recibo domiciliado
+            type: out_invoice
+            """.format(
+            invoice_date=datetime.date.today(),
+            id=invoice_id,
+            iban='ES77 1234 1234 1612 3456 7890',
+            year=2018,
+            investment_name=investment.name,
+            p=self.personalData,
+            investment_id=id
+            ))
+
     def test__create_amortization_invoice(self):
 
         id = self.Investment.create_from_form(
