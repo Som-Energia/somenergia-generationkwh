@@ -888,7 +888,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             date_invoice: '{invoice_date}'
             id: {id}
             invoice_line:
-            - origin: false # TODO
+            - origin: false
               uos_id: PCE
               account_id: 163500{p.nsoci:0>6s} {p.surname}, {p.name}
               name: 'Inversió {investment_name} '
@@ -905,7 +905,7 @@ class Investment_Amortization_Test(unittest.TestCase):
               product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
             journal_id: Factures GenerationkWh
             name: {investment_name}-FACT
-            origin: false # TODO: {investment_name}
+            origin: {investment_name}
             partner_bank: {iban}
             partner_id:
             - {p.partnerid}
