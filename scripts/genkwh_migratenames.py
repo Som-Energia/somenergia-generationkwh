@@ -973,7 +973,7 @@ def main(cr):
             error("No name for Investment {move_date_created} {move_line_id} {nshares:=5}00.00€ {partner_name}",**inv)
             displayPartnersMovements(cr, inv.partner_id)
             continue
-        solveSpecialCase(cr, inv, solution)
+        solveRepaidCase(cr, inv, solution)
 
     for orphanNames in orphanMoveLinesByPartner.values():
         for orphanName in orphanNames:
@@ -1115,7 +1115,35 @@ def logDivestment(cr, investment, move_line_id):
         ))
 
 
+def logMovement(cr, investment, movelineid, what):
+    try:
+        type = what.type
+    except:
+        type = what
+
+    if type == 'corrected':
+        return logCorrected(cr, investment, what)
+    if type == 'sold':
+        return logSold(cr, investment, movelineid, what)
+    if type == 'pact':
+        return logPact(cr, investment, what)
+    if type == 'paid':
+        return logPaid(cr, investment, movelineid)
+    if type == 'refunded':
+        return logRefund(cr, movelineid)
+    if type == 'repaid':
+        return logRepaid(cr, movelineid)
+    if type == 'partial':
+        return logPartial(cr, investment, movelineid)
+    if type == 'divested':
+        return logDivestment(cr, investment, movelineid)
+    raise Exception(
+        "T'has colat posant '{}' a repaidCases.{}"
+        .format(type, moveline.ref))
+
+
 def solveNormalCase(cr, investment, moveline):
+    "Active investment is paired to the original payment"
     True and success(
         "Match inv-od {investment.id} {moveline.ref} {moveline.order_date} {amount:=8}€ {moveline.partner_name}"
         .format(**ns(
@@ -1157,34 +1185,9 @@ def solveNormalCase(cr, investment, moveline):
     True and success(("\n"+log).encode('utf-8'))
 
 
-def logMovement(cr, investment, movelineid, what):
-    try:
-        type = what.type
-    except:
-        type = what
+def solveRepaidCase(cr, investment, moveline):
+    "Active investment is related to a posterior payment"
 
-    if type == 'corrected':
-        return logCorrected(cr, investment, what)
-    if type == 'sold':
-        return logSold(cr, investment, movelineid, what)
-    if type == 'pact':
-        return logPact(cr, investment, what)
-    if type == 'paid':
-        return logPaid(cr, investment, movelineid)
-    if type == 'refunded':
-        return logRefund(cr, movelineid)
-    if type == 'repaid':
-        return logRepaid(cr, movelineid)
-    if type == 'partial':
-        return logPartial(cr, investment, movelineid)
-    if type == 'divested':
-        return logDivestment(cr, investment, movelineid)
-    raise Exception(
-        "T'has colat posant '{}' a repaidCases.{}"
-        .format(type, moveline.ref))
-
-
-def solveSpecialCase(cr, investment, moveline):
     True and success(
         "Match inv-od {investment.id} {moveline.ref} {moveline.order_date} {amount:=8}€ {moveline.partner_name}"
         .format(**ns(
@@ -1227,7 +1230,9 @@ def solveSpecialCase(cr, investment, moveline):
 
 borrame=''
 
-def solveInactiveInvestment(cr, moveline): 
+def solveInactiveInvestment(cr, moveline):
+    "There is no active investment"
+
     name = moveline.ref
     consoleError( moveline.dump())
     if name not in cases.cancelledCases:
