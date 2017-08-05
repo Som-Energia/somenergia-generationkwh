@@ -789,7 +789,10 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         self.Investment.charge([id1,id2], '2017-01-03')
         
-        result = self.Investment.read([id1,id2], ['purchase_date'])
+        result = self.Investment.read(
+            [id1,id2],
+            ['purchase_date'],
+            order='id')
         
         self.assertNsEqual(ns(data=result), """\
             data:
