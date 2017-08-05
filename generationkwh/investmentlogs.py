@@ -20,7 +20,7 @@ def log_corrected(data):
 def log_charged(data):
     return (
         u'[{create_date} {user}] '
-        u"PAID: Pagament de {amount} € remesat al compte {iban} [{mlid}]\n"
+        u"PAID: Pagament de {amount} € remesat al compte {iban} [{move_line_id}]\n"
         .format(
             **data
         ))
@@ -28,7 +28,7 @@ def log_charged(data):
 def log_refunded(data):
     return (
         u'[{create_date} {user}] '
-        u'REFUNDED: Devolució del pagament remesat [{mlid}]\n'
+        u'REFUNDED: Devolució del pagament remesat [{move_line_id}]\n'
         .format(
             **data
         ))
@@ -36,7 +36,7 @@ def log_refunded(data):
 def log_banktransferred(data):
     return (
         u'[{create_date} {user}] '
-        u'REPAID: Pagament efectuat per transferencia bancària [{mlid}]\n'
+        u'REPAID: Pagament efectuat per transferencia bancària [{move_line_id}]\n'
         .format(
             **data
         ))

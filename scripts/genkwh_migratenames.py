@@ -1022,30 +1022,30 @@ def movementLineCreationInfo(cr, id):
         """,dict(id=id))
     return dbutils.nsList(cr)[0]
 
-def logPaid(cr, investment, mlid):
-    ml = unusedMovements.pop(mlid)
+def logPaid(cr, investment, move_line_id):
+    ml = unusedMovements.pop(move_line_id)
     return log_charged(dict(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
         amount=investment.nshares*gkwh.shareValue,
         iban=investment.iban or u"None",
-        mlid=mlid,
+        move_line_id=move_line_id,
         ))
 
-def logRefund(cr, mlid):
-    ml = unusedMovements.pop(mlid)
+def logRefund(cr, move_line_id):
+    ml = unusedMovements.pop(move_line_id)
     return log_refunded(dict(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
-        mlid=mlid,
+        move_line_id=move_line_id,
         ))
 
-def logRepaid(cr, mlid):
-    ml = unusedMovements.pop(mlid)
+def logRepaid(cr, move_line_id):
+    ml = unusedMovements.pop(move_line_id)
     return log_banktransferred(dict(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
-        mlid=mlid,
+        move_line_id=move_line_id,
         ))
 
 def logOrdered(cr, investment, order_date):
@@ -1065,8 +1065,8 @@ def logCorrected(cr, investment, what):
         newamount = what.to,
         ))
 
-def logSold(cr, investment, mlid, what):
-    ml = unusedMovements.pop(mlid)
+def logSold(cr, investment, move_line_id, what):
+    ml = unusedMovements.pop(move_line_id)
     mlto = unusedMovements.pop(what.to) # TODO: log it
     return (
         u'[{create_date} {user}] '
@@ -1091,27 +1091,27 @@ def logPact(cr, investment, what):
         note=what.note,
         ))
 
-def logPartial(cr, investment, mlid):
-    ml = unusedMovements.pop(mlid)
+def logPartial(cr, investment, move_line_id):
+    ml = unusedMovements.pop(move_line_id)
     return (
         u'[{create_date} {user}] '
-        u'PARTIAL: Desinversió parcial de {amount} €, en queden TODO € [{mlid}]\n'
+        u'PARTIAL: Desinversió parcial de {amount} €, en queden TODO € [{move_line_id}]\n'
         .format(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
-        mlid=mlid,
+        move_line_id=move_line_id,
         amount=ml.credit-ml.debit,
         ))
 
-def logDivestment(cr, investment, mlid):
-    ml = unusedMovements.pop(mlid)
+def logDivestment(cr, investment, move_line_id):
+    ml = unusedMovements.pop(move_line_id)
     return (
         u'[{create_date} {user}] '
-        u'DIVESTED: Desinversió total [{mlid}]\n'
+        u'DIVESTED: Desinversió total [{move_line_id}]\n'
         .format(
         create_date=ml.create_date,
         user=ml.user.decode('utf8'),
-        mlid=mlid,
+        move_line_id=move_line_id,
         ))
 
 
@@ -1229,7 +1229,7 @@ borrame=''
 
 def solveInactiveInvestment(cr, moveline): 
     name = moveline.ref
-    print moveline.dump()
+    consoleError( moveline.dump())
     if name not in cases.cancelledCases:
         return False
 
@@ -1299,7 +1299,7 @@ with psycopg2.connect(**configdb.psycopg) as db:
             cleanUp(cr)
             main(cr)
             showUnusedMovements(cr)
-            print borrame
+            print borrame.encode('utf-8')
 
 
 # vim: et ts=4 sw=4

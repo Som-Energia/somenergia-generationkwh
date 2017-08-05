@@ -747,7 +747,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.Investment.unlink(id)
 
         self.assertLogEquals(log,
-            u'PAYED: Pagament de 2000 € remesat al compte ES7712341234161234567890\n'
+            u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
             u'FORMFILLED: Formulari omplert des de la IP 10.10.23.123, Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
         
@@ -825,12 +825,12 @@ class Investment_Amortization_Test(unittest.TestCase):
         result = self.Investment.read([id1,id2], ['log'])
         
         self.assertLogEquals(result[0]['log'],
-            u'PAYED: Pagament de 2000 € remesat al compte ES7712341234161234567890\n'
+            u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
             u'FORMFILLED: Formulari omplert des de la IP 10.10.23.1, Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
         
         self.assertLogEquals(result[1]['log'],
-            u'PAYED: Pagament de 2000 € remesat al compte ES7712341234161234567890\n'
+            u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
             u'FORMFILLED: Formulari omplert des de la IP 10.10.23.2, Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
