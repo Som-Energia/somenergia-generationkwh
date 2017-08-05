@@ -1257,7 +1257,6 @@ def solveInactiveInvestment(cr, moveline):
     log += logPaid(cr, investment, case.paid)
     log += logRefund(cr, case.cancel)
 
-         
     success(("\n"+log).encode('utf-8'))
     cr.execute("""\
         UPDATE

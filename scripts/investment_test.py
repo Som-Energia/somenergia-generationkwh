@@ -521,31 +521,6 @@ class Investment_Test(unittest.TestCase):
             u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
             )
 
-    def test__create_from_accounting__writes_log(self):
-        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
-        investment_id = self.Investment.search([])[0]
-        investment = self.Investment.read(investment_id,['log'])
-        self.assertEqual(investment['log'], 
-            u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
-            u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
-            )
-
-    def test__amortize__writes_log(self):
-        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
-        self.Investment.amortize('2017-11-20')
-
-        investment_id = self.Investment.search([])[0]
-        investment = self.Investment.read(investment_id,['log'])
-        self.assertRegexpMatches(investment['log'].split('\n')[0],
-            u'\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{5} '
-                u'David García Garzón\\] '
-                u'AMORTIZATION: Generada amortització de 4.00 € pel 2017-07-29'
-            )
-        self.assertEqual('\n'.join(investment['log'].split('\n')[1:]),
-            u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
-            u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
-            )
-
     def test__migrate__updatesOrderDate(self):
         self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
 
@@ -1112,6 +1087,24 @@ class Investment_Amortization_Test(unittest.TestCase):
         invoice = self.Invoice.browse(invoice_id)
         self.assertEqual(invoice.name,
             "GENKWHID{}-AMOR2018".format(id))
+
+    def test__amortize__writes_log(self):
+        investment_id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2000-01-01',  # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+        )
+        self.Investment.charge([investment_id], '2000-01-05')
+        self.Investment.amortize('2002-01-06', [investment_id])
+
+        investment = self.Investment.read(investment_id, ['log'])
+        self.assertLogEquals(investment['log'],
+            u'AMORTIZATION: Generada amortització de 80.00 € pel 2002-01-05\n'
+            u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
+            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.1, Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
+            )
 
     def test__open_amortization_invoice__allOk(self):
 
