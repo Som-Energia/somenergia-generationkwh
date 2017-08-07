@@ -833,6 +833,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'invoice_line',
             'check_total',
             'origin',
+            'sii_to_send',
         ]))
         invoice.journal_id = invoice.journal_id[1]
         invoice.partner_bank = invoice.partner_bank[1] if invoice.partner_bank else "None"
@@ -891,6 +892,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             payment_type:
             - 1 # TODO
             - Recibo domiciliado
+            sii_to_send: false
             type: out_invoice
             """.format(
             invoice_date=datetime.date.today(),
@@ -1017,6 +1019,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             payment_type:
             - 2
             - Transferencia
+            sii_to_send: false
             type: in_invoice
             """.format(
                 invoice_date = datetime.date.today(),
