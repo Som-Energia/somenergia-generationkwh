@@ -24,6 +24,8 @@ class Investment_Test(unittest.TestCase):
         self.Soci = self.erp.SomenergiaSoci
         self.Investment = self.erp.GenerationkwhInvestment
         self.PaymentOrder = self.erp.PaymentOrder
+        self.AccountInvoice = self.erp.AccountInvoice
+        self.PaymentLine = self.erp.PaymentLine
         self.Investment.dropAll()
 
     def tearDown(self):
@@ -577,6 +579,23 @@ class Investment_Test(unittest.TestCase):
                 second_order_id,
                 order.user_id,
             )))
+
+    def test__get_investment__found(self):
+        investment_id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+
+        #create invoice
+        invoice_id = self.Investment.create_initial_invoice(investment_id)
+
+        investment_from_invoice = self.AccountInvoice.get_investment(invoice_id)
+
+        self.assertEqual(investment_id, investment_from_invoice)
+
 
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
