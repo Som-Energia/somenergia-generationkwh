@@ -31,19 +31,19 @@ def transaction(cursor, discarded=False):
         cursor.execute('rollback' if discarded else 'commit')
 
 def fixInvestmentMovelines(cr, investmentMovelinePairs):
-    for investment, moveline in investmentMovelinePairs:
-        success("   Fixing inv {investment} -> mov {moveline}".format(
+    for investement_id, moveline_id in investmentMovelinePairs:
+        success("   Fixing inv {investement_id} -> mov {moveline_id}".format(
             **locals()))
         cr.execute("""
             UPDATE
                 generationkwh_investment as inv
             SET
-                move_line_id = %(moveline)s
+                move_line_id = %(moveline_id)s
             WHERE
-                id = %(investment)s
+                id = %(investement_id)s
         """, dict(
-            moveline=moveline,
-            investment=investment
+            moveline_id=moveline_id,
+            investement_id=investement_id
         ))
 
 def nameDummy(cr):
