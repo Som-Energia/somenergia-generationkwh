@@ -593,6 +593,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.InvoiceLine = self.erp.AccountInvoiceLine
         self.Partner = self.erp.ResPartner
         self.Investment = self.erp.GenerationkwhInvestment
+        self.PaymentLine = self.erp.PaymentLine
 
     def tearDown(self):
         self.erp.rollback()
@@ -1196,6 +1197,30 @@ class Investment_Amortization_Test(unittest.TestCase):
             state = 'open',
             date_due = date_due,
             ))
+
+    def test__invoices_to_payment_order(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+
+        invoice_id =  self.Investment.create_initial_invoice(id)
+        self.Investment.open_invoice(invoice_id)
+        self.Investment.invoices_to_payment_order([invoice_id])
+        invoice = self.Invoice.browse(invoice_id)
+
+        order_id = self.Investment.get_or_create_open_payment_order("GENERATION kWh")
+        lines = self.PaymentLine.search([
+            ('order_id','=', order_id),
+            ('communication','like', invoice.origin),
+            ])
+
+        self.assertTrue(lines)
+
+
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class InvestmentPartner_Test(unittest.TestCase):
