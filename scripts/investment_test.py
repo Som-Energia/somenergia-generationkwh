@@ -942,6 +942,22 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.assertEqual(invoice.name,
             "GENKWHID{}-FACT".format(id))
 
+    def test__create_initial_invoice__errorWhenNoBank(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        self.Partner.write(self.personalData.partnerid,dict(bank_inversions = False))
+        try:
+            self.Investment.create_initial_invoice(id)
+        except:
+            return
+
+        self.fail("Hauria de sortir un error quan no hi ha Partner.bank_inversions")
+
     def test__create_amortization_invoice(self):
 
         id = self.Investment.create_from_form(
