@@ -1033,6 +1033,29 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         self.fail("Hauria de sortir un error quan no hi ha Partner.bank_inversions")
 
+
+    def test__create_amortization_invoice__withUnnamedInvestment(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2016-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+
+        self.Investment.write(id, dict(
+            name=None)
+            )
+
+        self.Investment.set_paid([id], '2016-01-03')
+
+        invoice_id = self.Investment.create_amortization_invoice(
+            id, '2018-01-03', 80, 1, 24)
+
+        invoice = self.Invoice.browse(invoice_id)
+        self.assertEqual(invoice.name,
+            "GENKWHID{}-AMOR2018".format(id))
+
     def test__amortization_invoice_report(self):
 
         id = self.Investment.create_from_form(
@@ -1086,28 +1109,6 @@ class Investment_Amortization_Test(unittest.TestCase):
             )
         partner = self.Partner.browse(self.personalData.partnerid)
         self.assertTrue(partner.bank_inversions)
-
-    def test__create_amortization_invoice__withUnnamedInvestment(self):
-        id = self.Investment.create_from_form(
-            self.personalData.partnerid,
-            '2016-01-01', # order_date
-            2000,
-            '10.10.23.1',
-            'ES7712341234161234567890',
-            )
-
-        self.Investment.write(id, dict(
-            name=None)
-            )
-
-        self.Investment.set_paid([id], '2016-01-03')
-
-        invoice_id = self.Investment.create_amortization_invoice(
-            id, '2018-01-03', 80, 1, 24)
-
-        invoice = self.Invoice.browse(invoice_id)
-        self.assertEqual(invoice.name,
-            "GENKWHID{}-AMOR2018".format(id))
 
     def test__amortize__writes_log(self):
         investment_id = self.Investment.create_from_form(
