@@ -4,6 +4,7 @@
 import genkwh_investments as cli
 import erppeek_wst
 import unittest
+import b2btest
 
 dbconfig = None
 try:
