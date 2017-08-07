@@ -923,6 +923,25 @@ class Investment_Amortization_Test(unittest.TestCase):
             unicode(ctx.exception),
             )
 
+    def test__create_initial_invoice__withUnnamedInvestment(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2016-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+
+        self.Investment.write(id, dict(
+            name=None)
+            )
+
+        invoice_id = self.Investment.create_initial_invoice(id)
+
+        invoice = self.Invoice.browse(invoice_id)
+        self.assertEqual(invoice.name,
+            "GENKWHID{}-FACT".format(id))
+
     def test__create_amortization_invoice(self):
 
         id = self.Investment.create_from_form(
