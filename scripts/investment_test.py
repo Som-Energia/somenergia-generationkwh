@@ -797,7 +797,7 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         self.Investment.set_paid([id1,id2], '2017-01-03')
         
-        result = self.Investment.read([id1,id2], ['log'])
+        result = self.Investment.read([id1,id2], ['log'], order='id')
         
         self.assertLogEquals(result[0]['log'],
             u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
