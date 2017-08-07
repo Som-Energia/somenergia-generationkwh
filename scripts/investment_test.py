@@ -902,6 +902,27 @@ class Investment_Amortization_Test(unittest.TestCase):
             investment_id=id
             ))
 
+    def test__create_initial_invoice__twice(self):
+
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        inv = self.Investment.read(id, ['name'])
+
+        invoice_id = self.Investment.create_initial_invoice(id)
+
+        with self.assertRaises(Exception) as ctx:
+            self.Investment.create_initial_invoice(id)
+
+        self.assertIn(
+            "Initial Invoice {name}-FACT already exist".format(**inv),
+            unicode(ctx.exception),
+            )
+
     def test__create_amortization_invoice(self):
 
         id = self.Investment.create_from_form(
@@ -995,7 +1016,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             "Amortization notification {name}-AMOR2018 already exist".format(**inv),
             unicode(ctx.exception),
             )
-    
+
     def test__create_amortization_invoice__errorWhenNoBank(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
