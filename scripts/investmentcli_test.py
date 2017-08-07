@@ -129,7 +129,7 @@ class InvestmentCommand_Test(unittest.TestCase):
         self.assertB2BEqual(data)
 
 
-
+unittest.TestCase.__str__ = unittest.TestCase.id
 
 
 
