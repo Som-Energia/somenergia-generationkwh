@@ -1106,7 +1106,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             u'FORMFILLED: Formulari omplert des de la IP 10.10.23.1, Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
-    def test__open_amortization_invoice__allOk(self):
+    def test__open_invoice__allOk(self):
 
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -1121,7 +1121,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             id, '2018-01-30', 80, 1, 24)
         self.assertTrue(invoice_id)
 
-        self.Investment.open_amortization_invoice(invoice_id)
+        self.Investment.open_invoice(invoice_id)
 
         from datetime import datetime, timedelta
         date_due_dt = datetime.today() + timedelta(7)
