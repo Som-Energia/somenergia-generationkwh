@@ -704,7 +704,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             )
         self.assertFalse(id)
     
-    def test__charge__singleInvestment(self):
+    def test__set_paid__singleInvestment(self):
     
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -714,7 +714,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
 
-        self.Investment.charge([id], '2017-01-03')
+        self.Investment.set_paid([id], '2017-01-03')
 
         investment = ns(self.Investment.read(id, []))
         log = investment.pop('log')
@@ -744,7 +744,7 @@ class Investment_Amortization_Test(unittest.TestCase):
                 **self.personalData
                 ))
 
-    def test__charge__samePurchaseDateSetToAll(self):
+    def test__set_paid__samePurchaseDateSetToAll(self):
     
         id1 = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -762,7 +762,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
 
-        self.Investment.charge([id1,id2], '2017-01-03')
+        self.Investment.set_paid([id1,id2], '2017-01-03')
         
         result = self.Investment.read(
             [id1,id2],
@@ -777,7 +777,7 @@ class Investment_Amortization_Test(unittest.TestCase):
               id: {id2}
             """.format(id1=id1, id2=id2))
 
-    def test__charge__oldLogKept(self):
+    def test__set_paid__oldLogKept(self):
     
         id1 = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -795,7 +795,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
 
-        self.Investment.charge([id1,id2], '2017-01-03')
+        self.Investment.set_paid([id1,id2], '2017-01-03')
         
         result = self.Investment.read([id1,id2], ['log'])
         
@@ -912,7 +912,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
 
-        self.Investment.charge([id], '2017-01-03')
+        self.Investment.set_paid([id], '2017-01-03')
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
         self.assertTrue(invoice_id)
@@ -983,7 +983,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             )
         inv = self.Investment.read(id, ['name'])
 
-        self.Investment.charge([id], '2017-01-03')
+        self.Investment.set_paid([id], '2017-01-03')
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
 
@@ -1022,7 +1022,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890', # iban
             )
 
-        self.Investment.charge([id], '2017-01-03')
+        self.Investment.set_paid([id], '2017-01-03')
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
 
@@ -1079,7 +1079,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             name=None)
             )
 
-        self.Investment.charge([id], '2016-01-03')
+        self.Investment.set_paid([id], '2016-01-03')
 
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-03', 80, 1, 24)
@@ -1116,7 +1116,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',
         )
 
-        self.Investment.charge([id], '2017-01-03')
+        self.Investment.set_paid([id], '2017-01-03')
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
         self.assertTrue(invoice_id)
