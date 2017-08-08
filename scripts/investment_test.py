@@ -595,6 +595,9 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.Partner = self.erp.ResPartner
         self.Investment = self.erp.GenerationkwhInvestment
         self.PaymentLine = self.erp.PaymentLine
+        self.PaymentMandate = self.erp.PaymentMandate
+        self.ResPartnerAddress = self.erp.ResPartnerAddress
+        self.ResPartner = self.erp.ResPartner
 
     def tearDown(self):
         self.erp.rollback()
@@ -1421,8 +1424,80 @@ class Investment_Amortization_Test(unittest.TestCase):
             ]))
         self.assertEqual(len(invoice_ids), len(lines))
 
+    def test__get_or_create_payment_mandate__calledTwiceReturnsSame(self):
+        iban = 'ES8901825726580208779553'
+        purpose = 'GENERATION kWh'
+        creditor_code = 'CREDITORCODE'
+        mandate1_id = self.Investment.get_or_create_payment_mandate(
+            self.personalData.partnerid, iban, purpose, creditor_code)
+        mandate2_id = self.Investment.get_or_create_payment_mandate(
+            self.personalData.partnerid, iban, purpose, creditor_code)
+        self.assertEqual(mandate1_id, mandate2_id)
 
-    
+    def test__get_or_create_payment_mandate__notOpenCreatsANewOne(self):
+            iban = 'ES8901825726580208779553'
+            purpose = 'GENERATION kWh'
+            creditor_code = 'CREDITORCODE'
+            mandate1_id = self.Investment.get_or_create_payment_mandate(
+                self.personalData.partnerid, iban, purpose, creditor_code)
+            self.PaymentMandate.write(mandate1_id, dict(date_end='2015-01-01'))
+            mandate2_id = self.Investment.get_or_create_payment_mandate(
+                self.personalData.partnerid, iban, purpose, creditor_code)
+            self.assertNotEqual(mandate1_id, mandate2_id)
+
+    def test__get_or_create_payment_mandate__newlyCreatedHasProperFields(self):
+            iban = 'ES8901825726580208779553'
+            purpose = 'GENERATION kWh'
+            creditor_code = 'CREDITORCODE'
+
+            old_mandate_id = self.Investment.get_or_create_payment_mandate(
+                self.personalData.partnerid, iban, purpose, creditor_code)
+            # Ensure the next is new
+            self.PaymentMandate.write(old_mandate_id, dict(date_end='2015-01-01'))
+
+            mandate_id = self.Investment.get_or_create_payment_mandate(
+                self.personalData.partnerid, iban, purpose, creditor_code)
+
+            mandate = ns(self.PaymentMandate.read(mandate_id, []))
+            self.assertTrue(mandate.name and
+                all(x in 'abdcdef1234567890' for x in mandate.name),
+                "mandate.name should be a lowercase hex code")
+            mandate.creditor_id = mandate.creditor_id[1]
+            partner = self.ResPartner.browse(self.personalData.partnerid)
+            nom_complet = self.personalData.surname + ", " + self.personalData.name
+            self.assertNsEqual(mandate, ns.loads("""\
+                creditor_address: CL. PIC DE PEGUERA, 11 A 2 8  17003 GIRONA (ESPAÑA)
+                creditor_code: CREDITORCODE
+                creditor_id: SOM ENERGIA SCCL
+                date: '{today}'
+                date_end: false
+                debtor_address: {address}
+                debtor_country: '67'
+                debtor_iban: {iban}
+                debtor_iban_print: {format_iban}
+                debtor_name: {debtor_name}
+                debtor_state: {state}
+                debtor_vat: {vat}
+                id: {id}
+                name: {name}
+                notes: GENERATION kWh
+                payment_type: recurring
+                reference: res.partner,{partner_id}
+                """.format(
+                    id=mandate_id,
+                    name=mandate.name, # always change
+                    partner_id=self.personalData.partnerid,
+                    vat="ES"+self.personalData.nif,
+                    debtor_name=nom_complet,
+                    address = partner.address[0].street.encode('utf-8'),
+                    state = partner.address[0].state_id.name.encode('utf-8'),
+                    iban=iban,
+                    format_iban=' '.join(
+                        iban[n:n+4] for n in xrange(0,len(iban),4)),
+                    today=datetime.date.today(),
+                )))
+
+
 unittest.TestCase.__str__ = unittest.TestCase.id
 
 
