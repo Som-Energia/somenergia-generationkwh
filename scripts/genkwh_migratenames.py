@@ -717,7 +717,7 @@ def cleanUp(cr):
             WHERE move_line_id=%(mlid)s
             """, dict(mlid=mlid))
 
-    step(" Compensating pending negative investments already efective")
+    step(" Compensating pending negative investments already effective")
     for case in cases.lateDivestments:
         cr.execute("""\
             UPDATE generationkwh_investment
@@ -1021,16 +1021,30 @@ from generationkwh.investmentlogs import (
 )
 
 def logOrdered(cr, attributes, investment, amount, order_date, ip):
-    attributes.order_date = order_date
-    attributes.amount = amount
+    attributes.nominal = amount
     attributes.balance = 0
+    attributes.order_date = order_date.date()
     attributes.purchase_date = None
+    attributes.first_effective_date = None
+    attributes.last_effective_date = None
     return log_formfilled(dict(
         create_date=order_date,
         user="Webforms",
         ip=ip,
         amount=int(amount),
         iban=investment.iban or u"None",
+        ))
+
+def logCorrected(cr, attributes, investment, what):
+    if attributes.nominal != what['from']:
+        consoleError("Correction missmatches the from was {} but annotated {}"
+            .format(attributes.nominal, what['from']))
+    attributes.nominal = what.to
+    return log_corrected(dict(
+        create_date=what.when,
+        user="Nobody",
+        oldamount = what['from'],
+        newamount = what.to,
         ))
 
 def logPaid(cr, attributes, investment, move_line_id):
@@ -1068,7 +1082,7 @@ def logRepaid(cr, attributes, move_line_id):
 
 def logPartial(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
-    attributes.amount += ml.amount
+    attributes.nominal += ml.amount
     attributes.balance += ml.amount
     return (
         u'[{create_date} {user}] '
@@ -1077,19 +1091,7 @@ def logPartial(cr, attributes, investment, move_line_id):
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
         move_line_id=move_line_id,
-        amount=ml.credit-ml.debit,
-        ))
-
-def logCorrected(cr, attributes, investment, what):
-    if attributes.amount != what['from']:
-        consoleError("Correction missmatches the from was {} but annotated {}"
-            .format(attributes.amount, what['from']))
-    attributes.amount = what.to
-    return log_corrected(dict(
-        create_date=what.when,
-        user="Nobody",
-        oldamount = what['from'],
-        newamount = what.to,
+        amount=ml.amount,
         ))
 
 # TODO: This way
@@ -1097,11 +1099,13 @@ def logCorrected(cr, attributes, investment, what):
 def logSold(cr, attributes, investment, move_line_id, what):
     ml = unusedMovements.pop(move_line_id)
     mlto = unusedMovements.pop(what.to) # TODO: log it
+    attributes.last_effective_date = what.get('date', ml.create_date.date())
+    attributes.balance += ml.amount
+    attributes.nominal += ml.amount
     return (
         u'[{create_date} {user}] '
         u'TRANSFERCREATED: Traspas cap a {toname} amb codi {toref}'
         #u'TRANSFERRED: Creada per traspàs de {} fins ara a nom de {toname}'
-
         .format(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
@@ -1123,6 +1127,10 @@ def logPact(cr, attributes, investment, what):
 
 def logDivestment(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
+    attributes.nominal += ml.amount
+    attributes.balance += ml.amount
+    attributes.last_effective_date = ml.create_date.date()
+
     return (
         u'[{create_date} {user}] '
         u'DIVESTED: Desinversió total [{move_line_id}]\n'
@@ -1156,8 +1164,45 @@ def logMovement(cr, attributes, investment, movelineid, what):
     if type == 'divested':
         return logDivestment(cr, attributes, investment, movelineid)
     raise Exception(
-        "T'has colat posant '{}' a repaidCases.{}"
-        .format(type, moveline.ref))
+        "T'has colat posant '{}'"
+        .format(type))
+
+
+def checkAttributes(real, computed):
+
+    def check(condition, msg, *args, **kwds):
+        if condition: return
+        consoleError("Check failed: "+msg.format(*args, **kwds))
+
+    for attribute in [
+        'order_date',
+        'purchase_date',
+        #'first_effective_date',
+        'last_effective_date',
+        ]:
+        realvalue = real[attribute]
+        computedvalue = computed[attribute]
+        check(realvalue == computedvalue,
+            "{} differ {} but computed {}",
+            attribute, realvalue, computedvalue)
+
+    if real.active:
+        check(computed.nominal == computed.balance,
+            "Nominal is {nominal} but balance is {balance}",
+            **computed)
+
+    if not real.active:
+        check(computed.balance == 0,
+            "Inactive investment should have balance zero and had {}",
+            computed.balance)
+
+    import datetime
+    if computed.last_effective_date:
+        if computed.last_effective_date < datetime.date.today():
+            check(computed.balance==0,
+                "Balance should be zero as it is not effective since {}",
+                computed.last_effective_date)
+
 
 
 def solveNormalCase(cr, investment, payment):
@@ -1178,6 +1223,7 @@ def solveNormalCase(cr, investment, payment):
         case = cases.singlePaymentCases.pop(payment.ref)
         for movelineid, what in case.iteritems():
             log += logMovement(cr, attributes, investment, movelineid, what)
+        displayPartnersMovements(cr, payment.partner_id)
     else:
         log += logPaid(cr, attributes, investment, payment.movelineid)
         if False:
@@ -1185,10 +1231,6 @@ def solveNormalCase(cr, investment, payment):
             movelines = getGenerationMovelinesByPartner(cr,payment.partner_id)
             for m in movelines:
                 success( "    {id}: {date_created} {id} {partner_name} {amount} {name}".format(investment=investment, **m))
-
-    if investment.purchase_date != attributes.purchase_date:
-        consoleError("purchase date differ {} but computed {}"
-            .format(investment.purchase_date, attributes.purchase_date))
 
     cr.execute("""\
         UPDATE
@@ -1205,6 +1247,10 @@ def solveNormalCase(cr, investment, payment):
             name = payment.ref,
             log = log,
         ))
+
+    investment = getInvestment(cr, investment.id)
+    checkAttributes(investment, attributes)
+
     False and displayPartnersMovements(cr, payment.partner_id)
     False and success(("\n"+log).encode('utf-8'))
 
@@ -1252,8 +1298,9 @@ def solveRepaidCase(cr, investment, payment):
             name = payment.ref,
             log = log,
         ))
+    investment = getInvestment(cr, investment.id)
+    checkAttributes(investment, attributes)
 
-borrame=u''
 
 def solveInactiveInvestment(cr, payment):
     "There is no active investment"
@@ -1279,24 +1326,27 @@ def solveInactiveInvestment(cr, payment):
             name = %(name)s,
             log = %(log)s,
             order_date = %(order_date)s,
-            active = false,
-            purchase_date = NULL
+            purchase_date = %(purchase_date)s,
+            active = false
         WHERE
             inv.id = %(investment)s
     """, dict(
-        order_date = investment.order_date,
+        order_date = payment.order_date,
         investment = investment.id,
         name = investment.name,
         log = log,
+        purchase_date = attributes.purchase_date,
     ))
+    investment = getInvestment(cr, investment.id)
+    checkAttributes(investment, attributes)
     return True
 
 def showUnusedMovements(cr):
     if unusedMovements:
         consoleError("Some movements were still not considered in logs") 
-    for info in getMoveLineInfo(cr, unusedMovements):
-        error("    mov {date_created} {id} {partner_name} {amount} {name}",
-            **info)
+        for info in getMoveLineInfo(cr, unusedMovements):
+            error("    mov {date_created} {id} {partner_name} {amount} {name}",
+                **info)
 
     if cases.repaidCases:
         consoleError("Some repaid cases have been not considered")
@@ -1319,7 +1369,6 @@ with psycopg2.connect(**configdb.psycopg) as db:
             cleanUp(cr)
             main(cr)
             showUnusedMovements(cr)
-            print borrame.encode('utf-8')
 
 
 # vim: et ts=4 sw=4
