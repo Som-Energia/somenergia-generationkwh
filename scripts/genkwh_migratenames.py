@@ -1186,6 +1186,9 @@ def checkAttributes(real, computed):
             "{} differ {} but computed {}",
             attribute, realvalue, computedvalue)
 
+    import datetime
+    expired = computed.last_effective_date and computed.last_effective_date < datetime.date.today()
+
     if real.active:
         check(computed.nominal == computed.balance,
             "Nominal is {nominal} but balance is {balance}",
@@ -1196,13 +1199,10 @@ def checkAttributes(real, computed):
             "Inactive investment should have balance zero and had {}",
             computed.balance)
 
-    import datetime
-    if computed.last_effective_date:
-        if computed.last_effective_date < datetime.date.today():
-            check(computed.balance==0,
-                "Balance should be zero as it is not effective since {}",
-                computed.last_effective_date)
-
+    if not expired and real.active:
+        check(computed.nominal == gkwh.shareValue * real.nshares,
+            "Missmatch nshares {}, nominal {} €",
+            real.nshares, computed.nominal)
 
 
 def solveNormalCase(cr, investment, payment):
