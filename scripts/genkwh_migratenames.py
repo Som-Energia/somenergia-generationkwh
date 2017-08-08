@@ -1020,7 +1020,7 @@ from generationkwh.investmentlogs import (
     log_banktransferred,
 )
 
-def logPaid(cr, investment, move_line_id):
+def logPaid(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     return log_charged(dict(
         create_date=ml.create_date,
@@ -1030,7 +1030,7 @@ def logPaid(cr, investment, move_line_id):
         move_line_id=move_line_id,
         ))
 
-def logRefund(cr, move_line_id):
+def logRefund(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     return log_refunded(dict(
         create_date=ml.create_date,
@@ -1038,7 +1038,7 @@ def logRefund(cr, move_line_id):
         move_line_id=move_line_id,
         ))
 
-def logRepaid(cr, move_line_id):
+def logRepaid(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     return log_banktransferred(dict(
         create_date=ml.create_date,
@@ -1046,7 +1046,7 @@ def logRepaid(cr, move_line_id):
         move_line_id=move_line_id,
         ))
 
-def logOrdered(cr, investment, order_date, ip):
+def logOrdered(cr, attributes, investment, order_date, ip):
     return log_formfilled(dict(
         create_date=order_date,
         user="Webforms",
@@ -1055,7 +1055,7 @@ def logOrdered(cr, investment, order_date, ip):
         iban=investment.iban or u"None",
         ))
 
-def logCorrected(cr, investment, what):
+def logCorrected(cr, attributes, investment, what):
     return log_corrected(dict(
         create_date=what.when,
         user="Nobody",
@@ -1063,7 +1063,7 @@ def logCorrected(cr, investment, what):
         newamount = what.to,
         ))
 
-def logSold(cr, investment, move_line_id, what):
+def logSold(cr, attributes, investment, move_line_id, what):
     ml = unusedMovements.pop(move_line_id)
     mlto = unusedMovements.pop(what.to) # TODO: log it
     return (
@@ -1078,7 +1078,7 @@ def logSold(cr, investment, move_line_id, what):
         toref=mlto.ref,
         ))
 
-def logPact(cr, investment, what):
+def logPact(cr, attributes, investment, what):
     return (
         u'[{create_date} {user}] '
         u'PACT: Pacte amb l\'inversor. {changes} Motiu: {note}\n'
@@ -1089,7 +1089,7 @@ def logPact(cr, investment, what):
         note=what.note,
         ))
 
-def logPartial(cr, investment, move_line_id):
+def logPartial(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     return (
         u'[{create_date} {user}] '
@@ -1101,7 +1101,7 @@ def logPartial(cr, investment, move_line_id):
         amount=ml.credit-ml.debit,
         ))
 
-def logDivestment(cr, investment, move_line_id):
+def logDivestment(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     return (
         u'[{create_date} {user}] '
@@ -1113,28 +1113,28 @@ def logDivestment(cr, investment, move_line_id):
         ))
 
 
-def logMovement(cr, investment, movelineid, what):
+def logMovement(cr, attributes, investment, movelineid, what):
     try:
         type = what.type
     except:
         type = what
 
     if type == 'corrected':
-        return logCorrected(cr, investment, what)
+        return logCorrected(cr, attributes, investment, what)
     if type == 'sold':
-        return logSold(cr, investment, movelineid, what)
+        return logSold(cr, attributes, investment, movelineid, what)
     if type == 'pact':
-        return logPact(cr, investment, what)
+        return logPact(cr, attributes, investment, what)
     if type == 'paid':
-        return logPaid(cr, investment, movelineid)
+        return logPaid(cr, attributes, investment, movelineid)
     if type == 'refunded':
-        return logRefund(cr, movelineid)
+        return logRefund(cr, attributes, movelineid)
     if type == 'repaid':
-        return logRepaid(cr, movelineid)
+        return logRepaid(cr, attributes, movelineid)
     if type == 'partial':
-        return logPartial(cr, investment, movelineid)
+        return logPartial(cr, attributes, investment, movelineid)
     if type == 'divested':
-        return logDivestment(cr, investment, movelineid)
+        return logDivestment(cr, attributes, investment, movelineid)
     raise Exception(
         "T'has colat posant '{}' a repaidCases.{}"
         .format(type, moveline.ref))
@@ -1150,15 +1150,16 @@ def solveNormalCase(cr, investment, payment):
             amount=investment.nshares*gkwh.shareValue,
             )))
     investment = getInvestment(cr, investment.id)
+    attributes = ns()
     log = ""
-    log += logOrdered(cr, investment, payment.order_date, payment.ip)
+    log += logOrdered(cr, attributes, investment, payment.order_date, payment.ip)
 
     if payment.ref in cases.singlePaymentCases :
         case = cases.singlePaymentCases.pop(payment.ref)
         for movelineid, what in case.iteritems():
-            log += logMovement(cr, investment, movelineid, what)
+            log += logMovement(cr, attributes, investment, movelineid, what)
     else:
-        log += logPaid(cr, investment, payment.movelineid)
+        log += logPaid(cr, attributes, investment, payment.movelineid)
         if False:
             success( "{ref}: # {partner_name}".format(**payment))
             movelines = getGenerationMovelinesByPartner(cr,payment.partner_id)
@@ -1195,16 +1196,17 @@ def solveRepaidCase(cr, investment, payment):
             amount=investment.nshares*gkwh.shareValue,
             )))
     log= ""
+    attributes = ns()
     investment = getInvestment(cr, investment.id)
     investment.name = payment.ref
-    log += logOrdered(cr, investment, payment.order_date, payment.ip)
+    log += logOrdered(cr, attributes, investment, payment.order_date, payment.ip)
     if payment.ref in cases.repaidCases :
         case = cases.repaidCases.pop(payment.ref)
         for movelineid, what in case.iteritems():
-            log += logMovement(cr, investment, movelineid, what)
+            log += logMovement(cr, attributes, investment, movelineid, what)
         True and success(("\n"+log).encode('utf-8'))
     else:
-        log += logPaid(cr, investment, payment.movelineid)
+        log += logPaid(cr, attributes, investment, payment.movelineid)
         success( "{investment.name}: # {partner_name}".format(investment=investment, **payment))
         movelines = getGenerationMovelinesByPartner(cr,payment.partner_id)
         for m in movelines:
@@ -1239,10 +1241,11 @@ def solveInactiveInvestment(cr, payment):
     case = cases.cancelledCases.pop(name)
     investment = getInvestmentByMoveline(cr, payment.movelineid)
     log = ""
+    attributes=ns()
     investment.name = name
-    log += logOrdered(cr, investment, payment.order_date, payment.ip)
+    log += logOrdered(cr, attributes, investment, payment.order_date, payment.ip)
     for movelineid, what in case.iteritems():
-        log += logMovement(cr, investment, movelineid, what)
+        log += logMovement(cr, attributes, investment, movelineid, what)
 
     success(("\n"+log).encode('utf-8'))
     cr.execute("""\
