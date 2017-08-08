@@ -1239,7 +1239,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             u'FORMFILLED: Formulari omplert des de la IP 10.10.23.1, Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
-    def test__open_invoice__allOk(self):
+    def test__open_invoices__allOk(self):
 
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -1254,7 +1254,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             id, '2018-01-30', 80, 1, 24)
         self.assertTrue(invoice_id)
 
-        self.Investment.open_invoice([invoice_id])
+        self.Investment.open_invoices([invoice_id])
 
         from datetime import datetime, timedelta
         date_due_dt = datetime.today() + timedelta(7)
@@ -1270,7 +1270,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             date_due = date_due,
             ))
 
-    def test__open_invoice__multipleInvoices(self):
+    def test__open_invoices__multipleInvoices(self):
 
         ids = []
         ids.append(self.Investment.create_from_form(
@@ -1290,7 +1290,7 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         invoice_ids = self.Investment.create_initial_invoices(ids)
 
-        self.Investment.open_invoice(invoice_ids)
+        self.Investment.open_invoices(invoice_ids)
 
         from datetime import datetime, timedelta
         date_due_dt = datetime.today() + timedelta(7)
@@ -1322,7 +1322,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             )
 
         invoice_ids =  self.Investment.create_initial_invoices([id])
-        self.Investment.open_invoice(invoice_ids)
+        self.Investment.open_invoices(invoice_ids)
         self.Investment.invoices_to_payment_order([invoice_ids[0]])
         invoice = self.Invoice.browse(invoice_ids[0])
 
