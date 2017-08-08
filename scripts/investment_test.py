@@ -1025,6 +1025,13 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         self.assertEqual(2,len(invoice_ids))
 
+    def test__create_initial_invoices__zeroInvestments(self):
+
+        ids = []
+        invoice_ids = self.Investment.create_initial_invoices(ids)
+
+        self.assertEqual(0,len(invoice_ids))
+
 
     def test__create_amortization_invoice(self):
 
