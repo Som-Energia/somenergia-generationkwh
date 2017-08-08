@@ -590,7 +590,7 @@ class Investment_Test(unittest.TestCase):
         )
 
         #create invoice
-        invoice_ids = self.Investment.create_initial_invoices([investment_id])
+        invoice_ids, errs = self.Investment.create_initial_invoices([investment_id])
 
         investment_from_invoice = self.AccountInvoice.get_investment(invoice_ids[0])
 
@@ -605,7 +605,7 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
         )
         #create invoice
-        invoice_ids = self.Investment.create_initial_invoices([investment_id])
+        invoice_ids,errs = self.Investment.create_initial_invoices([investment_id])
         invoice = self.AccountInvoice.write(invoice_ids[0], dict(
             journal_id = 2 # random
             ))
@@ -895,8 +895,9 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
 
-        invoice_ids =  self.Investment.create_initial_invoices([id])
+        invoice_ids, errs =  self.Investment.create_initial_invoices([id])
 
+        self.assertFalse(errs)
         self.assertTrue(invoice_ids)
 
         investment = self.Investment.browse(id)
@@ -959,13 +960,11 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         self.Investment.create_initial_invoices([id])
 
-        with self.assertRaises(Exception) as ctx:
-            self.Investment.create_initial_invoices([id])
+        result = self.Investment.create_initial_invoices([id])
 
-        self.assertIn(
-            "Initial Invoice {name}-FACT already exist".format(**inv),
-            unicode(ctx.exception),
-            )
+        self.assertEqual(result, [[], [
+            "Initial Invoice {name}-FACT already exists".format(**inv)
+            ]])
 
     def test__create_initial_invoices__withUnnamedInvestment(self):
         id = self.Investment.create_from_form(
@@ -980,7 +979,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             name=None)
             )
 
-        invoice_ids = self.Investment.create_initial_invoices([id])
+        invoice_ids, errs = self.Investment.create_initial_invoices([id])
 
         invoice = self.Invoice.browse(invoice_ids[0])
         self.assertEqual(invoice.name,
@@ -996,42 +995,39 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
         self.Partner.write(self.personalData.partnerid,dict(bank_inversions = False))
-        try:
-            self.Investment.create_initial_invoices([id])
-        except:
-            return
-
-        self.fail("Hauria de sortir un error quan no hi ha Partner.bank_inversions")
+        result = self.Investment.create_initial_invoices([id])
+        self.assertEqual(result, [[], [
+            "Partner '{surname}, {name}' has no investment bank account"
+                .format(**self.personalData).decode('utf-8')
+            ]])
 
     def test__create_initial_invoices__multiInvestments(self):
 
-        ids = []
-        ids.append(self.Investment.create_from_form(
+        id1 = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
             'ES7712341234161234567890',
-            ))
+            )
 
-        ids.append(self.Investment.create_from_form(
+        id2 = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-02', # order_date
             500,
             '10.10.23.2',
             'ES7712341234161234567890',
-            ))
+            )
 
-        invoice_ids = self.Investment.create_initial_invoices(ids)
+        invoice_ids, errs = self.Investment.create_initial_invoices([id1, id2])
 
         self.assertEqual(2,len(invoice_ids))
 
     def test__create_initial_invoices__zeroInvestments(self):
 
-        ids = []
-        invoice_ids = self.Investment.create_initial_invoices(ids)
+        result  = self.Investment.create_initial_invoices([])
 
-        self.assertEqual(0,len(invoice_ids))
+        self.assertEqual(result, [[],[]])
 
     def test__create_initial_invoices__investmentWithPurchaseDate(self):
 
@@ -1046,13 +1042,11 @@ class Investment_Amortization_Test(unittest.TestCase):
         inv = self.Investment.read(id,['name'])
 
         self.Investment.set_paid([id], '2016-01-04')
-        with self.assertRaises(Exception) as ctx:
-            self.Investment.create_initial_invoices([id])
+        result = self.Investment.create_initial_invoices([id])
 
-        self.assertIn(
+        self.assertEquals(result, [[], [
             "Investment {name} was already paid".format(**inv),
-            unicode(ctx.exception),
-            )
+            ]])
 
     def test__create_initial_invoices__inactiveInvestment(self):
 
@@ -1068,13 +1062,11 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         self.Investment.write(id, {'active':False})
 
-        with self.assertRaises(Exception) as ctx:
-            self.Investment.create_initial_invoices([id])
+        result = self.Investment.create_initial_invoices([id])
 
-        self.assertIn(
+        self.assertEquals(result, [[], [
             "Investment {name} is inactive".format(**inv),
-            unicode(ctx.exception),
-            )
+            ]])
 
 
     def test__create_amortization_invoice(self):
@@ -1333,7 +1325,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',
         ))
 
-        invoice_ids = self.Investment.create_initial_invoices(ids)
+        invoice_ids,errs = self.Investment.create_initial_invoices(ids)
 
         self.Investment.open_invoices(invoice_ids)
 
@@ -1366,7 +1358,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
 
-        invoice_ids =  self.Investment.create_initial_invoices([id])
+        invoice_ids, errs =  self.Investment.create_initial_invoices([id])
         self.Investment.open_invoices(invoice_ids)
         self.Investment.invoices_to_payment_order(invoice_ids)
         invoice = self.Invoice.browse(invoice_ids[0])
@@ -1397,7 +1389,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',
         ))
 
-        invoice_ids =  self.Investment.create_initial_invoices(ids)
+        invoice_ids, err =  self.Investment.create_initial_invoices(ids)
         self.Investment.open_invoices(invoice_ids)
         self.Investment.invoices_to_payment_order(invoice_ids)
 
