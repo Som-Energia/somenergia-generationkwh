@@ -1325,7 +1325,7 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         invoice_ids =  self.Investment.create_initial_invoices([id])
         self.Investment.open_invoices(invoice_ids)
-        self.Investment.invoices_to_payment_order([invoice_ids[0]])
+        self.Investment.invoices_to_payment_order(invoice_ids)
         invoice = self.Invoice.browse(invoice_ids[0])
 
         order_id = self.Investment.get_or_create_open_payment_order("GENERATION kWh")
@@ -1335,6 +1335,40 @@ class Investment_Amortization_Test(unittest.TestCase):
             ])
 
         self.assertTrue(lines)
+
+    def test__invoices_to_payment_order_multiple(self):
+
+        ids=[]
+        ids.append(self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            1000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            ))
+        ids.append(self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-02',  # order_date
+            2000,
+            '10.10.23.2',
+            'ES7712341234161234567890',
+        ))
+
+        invoice_ids =  self.Investment.create_initial_invoices(ids)
+        self.Investment.open_invoices(invoice_ids)
+        self.Investment.invoices_to_payment_order(invoice_ids)
+
+        invoices = self.Invoice.browse(invoice_ids)
+        order_id = self.Investment.get_or_create_open_payment_order("GENERATION kWh")
+        lines = [self.PaymentLine.search([
+            ('order_id','=', order_id),
+            ('communication','like', invoices[0].origin),
+            ])]
+        lines.append(self.PaymentLine.search([
+            ('order_id','=', order_id),
+            ('communication','like', invoices[1].origin),
+            ]))
+        self.assertEqual(len(invoice_ids), len(lines))
 
 
     
