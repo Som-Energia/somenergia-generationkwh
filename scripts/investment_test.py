@@ -1033,6 +1033,27 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         self.assertEqual(0,len(invoice_ids))
 
+    def test__create_initial_invoices__investmentWithPurchaseDate(self):
+
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2016-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+
+        inv = self.Investment.read(id,['name'])
+
+        self.Investment.set_paid([id], '2016-01-04')
+        with self.assertRaises(Exception) as ctx:
+            self.Investment.create_initial_invoices([id])
+
+        self.assertIn(
+            "Investment {name} was already paid".format(**inv),
+            unicode(ctx.exception),
+            )
+
 
     def test__create_amortization_invoice(self):
 
