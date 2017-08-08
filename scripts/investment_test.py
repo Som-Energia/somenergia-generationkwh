@@ -987,6 +987,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             "GENKWHID{}-FACT".format(id))
 
     def test__create_initial_invoices__errorWhenNoBank(self):
+        #TODO: especificar l'excepció
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
@@ -1129,6 +1130,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             )
 
     def test__create_amortization_invoice__errorWhenNoBank(self):
+        #TODO: especificar l'excepció
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
