@@ -946,7 +946,6 @@ class Investment_Amortization_Test(unittest.TestCase):
             "GENKWHID{}-FACT".format(id))
 
     def test__create_initial_invoices__errorWhenNoBank(self):
-        #TODO: especificar l'excepció
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
@@ -961,34 +960,6 @@ class Investment_Amortization_Test(unittest.TestCase):
                 .format(**self.personalData).decode('utf-8')
             ]])
 
-    def test__create_initial_invoices__multiInvestments(self):
-
-        id1 = self.Investment.create_from_form(
-            self.personalData.partnerid,
-            '2017-01-01', # order_date
-            2000,
-            '10.10.23.1',
-            'ES7712341234161234567890',
-            )
-
-        id2 = self.Investment.create_from_form(
-            self.personalData.partnerid,
-            '2017-01-02', # order_date
-            500,
-            '10.10.23.2',
-            'ES7712341234161234567890',
-            )
-
-        invoice_ids, errs = self.Investment.create_initial_invoices([id1, id2])
-
-        self.assertEqual(2,len(invoice_ids))
-
-    def test__create_initial_invoices__zeroInvestments(self):
-
-        result  = self.Investment.create_initial_invoices([])
-
-        self.assertEqual(result, [[],[]])
-
     def test__create_initial_invoices__investmentWithPurchaseDate(self):
 
         id = self.Investment.create_from_form(
@@ -1001,7 +972,7 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         inv = self.Investment.read(id,['name'])
 
-        self.Investment.mark_as_paid([id], '2016-01-04')
+        self.Investment.set_paid([id], '2016-01-04')
         result = self.Investment.create_initial_invoices([id])
 
         self.assertEquals(result, [[], [
@@ -1027,6 +998,91 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.assertEquals(result, [[], [
             "Investment {name} is inactive".format(**inv),
             ]])
+
+
+    def test__create_initial_invoices__multiInvestments(self):
+
+        id1 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+
+        id2 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-02', # order_date
+            500,
+            '10.10.23.2',
+            'ES7712341234161234567890',
+            )
+
+        invoice_ids, errs = self.Investment.create_initial_invoices([id1, id2])
+
+        self.assertEqual(2,len(invoice_ids))
+
+
+    def test__create_initial_invoices__OkAndKo(self):
+        id1 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        id2 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-02-02', # order_date
+            3000,
+            '10.10.23.2',
+            'ES7712341234161234567890',
+            )
+        investment = self.Investment.read(id1,['name'])
+        self.Investment.write(id1, {'active':False})
+
+        invoice_ids, errs = self.Investment.create_initial_invoices([id1,id2])
+
+        self.assertEqual(errs, [
+            "Investment {name} is inactive".format(**investment),
+            ])
+        self.assertEqual(len(invoice_ids), 1)
+
+
+    def test__create_initial_invoices__twoErrors(self):
+        id1 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        id2 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-02-02', # order_date
+            3000,
+            '10.10.23.2',
+            'ES7712341234161234567890',
+            )
+        investment1 = self.Investment.read(id1,['name'])
+        investment2 = self.Investment.read(id2,['name'])
+
+        self.Investment.write(id1, {'active':False})
+        self.Investment.set_paid([id2], '2016-01-04')
+
+        result = self.Investment.create_initial_invoices([id1,id2])
+
+        self.assertEqual(result, [[],[
+            "Investment {name} is inactive".format(**investment1),
+            "Investment {name} was already paid".format(**investment2),
+            ]])
+
+
+    def test__create_initial_invoices__zeroInvestments(self):
+
+        result  = self.Investment.create_initial_invoices([])
+
+        self.assertEqual(result, [[],[]])
 
 
     def test__create_amortization_invoice(self):
