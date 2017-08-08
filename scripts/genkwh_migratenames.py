@@ -1046,11 +1046,11 @@ def logRepaid(cr, move_line_id):
         move_line_id=move_line_id,
         ))
 
-def logOrdered(cr, investment, order_date):
+def logOrdered(cr, investment, order_date, ip):
     return log_formfilled(dict(
         create_date=order_date,
         user="Webforms",
-        ip="0.0.0.0",
+        ip=ip,
         amount=investment.nshares*gkwh.shareValue,
         iban=investment.iban or u"None",
         ))
@@ -1140,28 +1140,28 @@ def logMovement(cr, investment, movelineid, what):
         .format(type, moveline.ref))
 
 
-def solveNormalCase(cr, investment, moveline):
+def solveNormalCase(cr, investment, payment):
     "Active investment is paired to the original payment"
     True and success(
-        "Match inv-od {investment.id} {moveline.ref} {moveline.order_date} {amount:=8}€ {moveline.partner_name}"
+        "Match inv-od {investment.id} {payment.ref} {payment.order_date} {amount:=8}€ {payment.partner_name}"
         .format(**ns(
             investment=investment,
-            moveline=moveline,
+            payment=payment,
             amount=investment.nshares*gkwh.shareValue,
             )))
-    log = ""
     investment = getInvestment(cr, investment.id)
-    log += logOrdered(cr, investment, moveline.order_date)
+    log = ""
+    log += logOrdered(cr, investment, payment.order_date, payment.ip)
 
-    if moveline.ref in cases.singlePaymentCases :
-        case = cases.singlePaymentCases.pop(moveline.ref)
+    if payment.ref in cases.singlePaymentCases :
+        case = cases.singlePaymentCases.pop(payment.ref)
         for movelineid, what in case.iteritems():
             log += logMovement(cr, investment, movelineid, what)
     else:
-        log += logPaid(cr, investment, moveline.movelineid)
+        log += logPaid(cr, investment, payment.movelineid)
         if False:
-            success( "{ref}: # {partner_name}".format(**moveline))
-            movelines = getGenerationMovelinesByPartner(cr,moveline.partner_id)
+            success( "{ref}: # {partner_name}".format(**payment))
+            movelines = getGenerationMovelinesByPartner(cr,payment.partner_id)
             for m in movelines:
                 success( "    {id}: {date_created} {id} {partner_name} {amount} {name}".format(investment=investment, **m))
 
@@ -1176,40 +1176,40 @@ def solveNormalCase(cr, investment, moveline):
             inv.id = %(id)s
         """, dict(
             id = investment.id,
-            order_date = moveline.order_date,
-            name = moveline.ref,
+            order_date = payment.order_date,
+            name = payment.ref,
             log = log,
         ))
-    False and displayPartnersMovements(cr, moveline.partner_id)
+    False and displayPartnersMovements(cr, payment.partner_id)
     False and success(("\n"+log).encode('utf-8'))
 
 
-def solveRepaidCase(cr, investment, moveline):
+def solveRepaidCase(cr, investment, payment):
     "Active investment is related to a posterior payment"
 
     True and success(
-        "Match inv-od {investment.id} {moveline.ref} {moveline.order_date} {amount:=8}€ {moveline.partner_name}"
+        "Match inv-od {investment.id} {payment.ref} {payment.order_date} {amount:=8}€ {payment.partner_name}"
         .format(**ns(
             investment=investment,
-            moveline=moveline,
+            payment=payment,
             amount=investment.nshares*gkwh.shareValue,
             )))
     log= ""
     investment = getInvestment(cr, investment.id)
-    investment.name = moveline.ref
-    log += logOrdered(cr, investment, moveline.order_date)
-    if moveline.ref in cases.repaidCases :
-        case = cases.repaidCases.pop(moveline.ref)
+    investment.name = payment.ref
+    log += logOrdered(cr, investment, payment.order_date, payment.ip)
+    if payment.ref in cases.repaidCases :
+        case = cases.repaidCases.pop(payment.ref)
         for movelineid, what in case.iteritems():
             log += logMovement(cr, investment, movelineid, what)
         True and success(("\n"+log).encode('utf-8'))
     else:
-        log += logPaid(cr, investment, moveline.movelineid)
-        success( "{investment.name}: # {partner_name}".format(investment=investment, **moveline))
-        movelines = getGenerationMovelinesByPartner(cr,moveline.partner_id)
+        log += logPaid(cr, investment, payment.movelineid)
+        success( "{investment.name}: # {partner_name}".format(investment=investment, **payment))
+        movelines = getGenerationMovelinesByPartner(cr,payment.partner_id)
         for m in movelines:
             success( "    {id}: {date_created} {id} {partner_name} {amount} {name}".format(investment=investment, **m))
-        True and displayPartnersMovements(cr, moveline.partner_id)
+        True and displayPartnersMovements(cr, payment.partner_id)
         True and success(("\n"+log).encode('utf-8'))
     cr.execute("""\
         UPDATE
@@ -1222,8 +1222,8 @@ def solveRepaidCase(cr, investment, moveline):
             inv.id = %(id)s
         """, dict(
             id = investment.id,
-            order_date = moveline.order_date,
-            name = moveline.ref,
+            order_date = payment.order_date,
+            name = payment.ref,
             log = log,
         ))
 
@@ -1240,7 +1240,7 @@ def solveInactiveInvestment(cr, payment):
     investment = getInvestmentByMoveline(cr, payment.movelineid)
     log = ""
     investment.name = name
-    log += logOrdered(cr, investment, payment.order_date)
+    log += logOrdered(cr, investment, payment.order_date, payment.ip)
     for movelineid, what in case.iteritems():
         log += logMovement(cr, investment, movelineid, what)
 
