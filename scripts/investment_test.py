@@ -923,9 +923,9 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         self.Investment.create_initial_invoices([id])
 
-        result, errs = self.Investment.create_initial_invoices([id])
+        result = self.Investment.create_initial_invoices([id])
 
-        self.assertEqual([result,errs], [[], [
+        self.assertEqual(result, [[], [
             "Initial Invoice {name}-FACT already exists".format(**inv)
             ]])
 
@@ -957,8 +957,8 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
         self.Partner.write(self.personalData.partnerid,dict(bank_inversions = False))
-        result, errs = self.Investment.create_initial_invoices([id])
-        self.assertEqual([result,errs], [[], [
+        result = self.Investment.create_initial_invoices([id])
+        self.assertEqual(result, [[], [
             "Partner '{surname}, {name}' has no investment bank account"
                 .format(**self.personalData).decode('utf-8')
             ]])
@@ -976,9 +976,9 @@ class Investment_Amortization_Test(unittest.TestCase):
         inv = self.Investment.read(id,['name'])
 
         self.Investment.mark_as_paid([id], '2016-01-04')
-        result, errs = self.Investment.create_initial_invoices([id])
+        result = self.Investment.create_initial_invoices([id])
 
-        self.assertEquals([result,errs], [[], [
+        self.assertEquals(result, [[], [
             "Investment {name} was already paid".format(**inv),
             ]])
 
@@ -996,9 +996,9 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         self.Investment.write(id, {'active':False})
 
-        result, errs = self.Investment.create_initial_invoices([id])
+        result = self.Investment.create_initial_invoices([id])
 
-        self.assertEquals([result,errs], [[], [
+        self.assertEquals(result, [[], [
             "Investment {name} is inactive".format(**inv),
             ]])
 
@@ -1073,9 +1073,9 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.Investment.write(id1, {'active':False})
         self.Investment.mark_as_paid([id2], '2016-01-04')
 
-        result, errs = self.Investment.create_initial_invoices([id1,id2])
+        result = self.Investment.create_initial_invoices([id1,id2])
 
-        self.assertEqual([result,errs], [[],[
+        self.assertEqual(result, [[],[
             "Investment {name} is inactive".format(**investment1),
             "Investment {name} was already paid".format(**investment2),
             ]])
@@ -1083,9 +1083,9 @@ class Investment_Amortization_Test(unittest.TestCase):
 
     def test__create_initial_invoices__zeroInvestments(self):
 
-        result, errs  = self.Investment.create_initial_invoices([])
+        result  = self.Investment.create_initial_invoices([])
 
-        self.assertEqual([result,errs], [[],[]])
+        self.assertEqual(result, [[],[]])
 
 
     def test__create_amortization_invoice(self):
