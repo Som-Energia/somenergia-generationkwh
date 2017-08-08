@@ -18,16 +18,34 @@ def datespan(startDate, endDate, delta=datetime.timedelta(hours=1)):
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class ProductionLoader_Test(unittest.TestCase):
+    def setUp(self):
+        self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
+        self.erp.begin()
+        self.Plant = self.erp.GenerationkwhProductionPlant
+        self.Meter = self.erp.GenerationkwhProductionMeter
+        self.Aggregator = self.erp.GenerationkwhProductionAggregator
+        self.AggregatorTestHelper = self.erp.GenerationkwhProductionAggregatorTesthelper
+        self.ProductionLoader = self.erp.GenerationkwhProductionLoader
+        self.TestHelper = self.erp.GenerationkwhTesthelper
+        self.setUpAggregator()
+        self.setUpMeasurements()
+        self.setUpTemp()
+
+    def tearDown(self):
+        #self.clearAggregator() # db
+        self.clearMeasurements()
+        #self.clearRemainders() # db
+        self.clearTemp()
+        self.erp.rollback()
+        self.erp.close()
+
     def setUpAggregator(self):
         self.clearAggregator()
 
     def clearAggregator(self):
-        aggr_obj = self.erp.model('generationkwh.production.aggregator')
-        plant_obj = self.erp.model('generationkwh.production.plant')
-        meter_obj = self.erp.model('generationkwh.production.meter')
-        meter_obj.unlink(meter_obj.search([]))
-        plant_obj.unlink(plant_obj.search([]))
-        aggr_obj.unlink(aggr_obj.search([]))
+        self.Meter.unlink(self.Meter.search([]))
+        self.Plant.unlink(self.Plant.search([]))
+        self.Aggregator.unlink(self.Aggregator.search([]))
 
     def setUpMeasurements(self):
         self.collection = 'generationkwh.production.measurement'
@@ -45,26 +63,8 @@ class ProductionLoader_Test(unittest.TestCase):
             os.remove(os.path.join(self.tempdir, filename))
         os.removedirs(self.tempdir)
 
-    def setUp(self):
-        self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
-        self.erp.begin()
-        self.ProductionLoader = self.erp.GenerationkwhProductionLoader
-        self.TestHelper = self.erp.GenerationkwhTesthelper
-        self.setUpAggregator()
-        self.setUpMeasurements()
-        self.setUpTemp()
-
-    def tearDown(self):
-        self.clearAggregator()
-        self.clearMeasurements()
-        #self.clearRemainders() # db
-        self.clearTemp()
-        self.erp.rollback()
-        self.erp.close()
-
     def setupPlant(self, aggr_id, plant, nshares):
-        plant_obj = self.erp.model('generationkwh.production.plant')
-        return plant_obj.create(dict(
+        return self.Plant.create(dict(
             aggr_id=aggr_id,
             name='myplant%d' % plant,
             description='myplant%d' % plant,
@@ -72,8 +72,8 @@ class ProductionLoader_Test(unittest.TestCase):
             nshares=nshares))
 
     def setupMeter(self, plant_id, plant, meter):
-        meter_obj = self.erp.model('generationkwh.production.meter')
-        return meter_obj.create(dict(
+        self.Meter = self.erp.model('generationkwh.production.meter')
+        return self.Meter.create(dict(
             plant_id=plant_id,
             name='mymeter%d%d' % (plant, meter),
             description='mymeter%d%d' % (plant, meter),
@@ -81,8 +81,7 @@ class ProductionLoader_Test(unittest.TestCase):
             enabled=True))
 
     def setupAggregator(self, nplants, nmeters, nshares):
-        aggr_obj = self.erp.model('generationkwh.production.aggregator')
-        aggr = aggr_obj.create(dict(
+        aggr = self.Aggregator.create(dict(
             name='myaggr',
             description='myaggr',
             enabled=True))
@@ -116,8 +115,7 @@ class ProductionLoader_Test(unittest.TestCase):
                     values)])
 
     def getProduction(self, aggr_id, start, end):
-        aggr_obj = self.erp.model('generationkwh.production.aggregator.testhelper')
-        return aggr_obj.get_kwh(aggr_id, start, end)
+        return self.AggregatorTestHelper.get_kwh(aggr_id, start, end)
 
     def test_retrieveMeasuresFromPlants_withNoPoints(self):
         aggr_id = self.setupAggregator(
@@ -164,10 +162,6 @@ class ProductionLoader_Test(unittest.TestCase):
         self.assertEqual(production, 10*[0]+[2000]+14*[0])
 
  
-    def getRightsPerShare(self, aggr_id, start, end):
-        aggr_obj = self.erp.model('generationkwh.production.aggregator')
-        return aggr_obj.get_kwh(aggr_id, start, end)
-
     def test_computeAvailableRights_singleDay(self):
         aggr_id = self.setupAggregator(
                 nplants=1,
@@ -228,8 +222,9 @@ class ProductionLoader_Test(unittest.TestCase):
             [1, '2015-08-18', 0],
             ])
 
+unittest.TestCase.__str__ = unittest.TestCase.id
+
 if __name__ == '__main__':
-    unittest.TestCase.__str__ = unittest.TestCase.id
     unittest.main()
 
 

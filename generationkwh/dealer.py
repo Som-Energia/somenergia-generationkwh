@@ -2,7 +2,7 @@
 
 from dateutil.relativedelta import relativedelta
 import datetime
-from isodates import assertDateOrNone, assertDate
+from .isodates import assertDateOrNone, assertDate
 
 class Dealer(object):
     """ It deals investors Generation kWh use rights to contracts according its
