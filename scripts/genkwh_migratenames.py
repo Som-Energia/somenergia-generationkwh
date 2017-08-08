@@ -1020,8 +1020,24 @@ from generationkwh.investmentlogs import (
     log_banktransferred,
 )
 
+def logOrdered(cr, attributes, investment, amount, order_date, ip):
+    attributes.order_date = order_date
+    attributes.amount = amount
+    attributes.balance = 0
+    attributes.purchase_date = None
+    return log_formfilled(dict(
+        create_date=order_date,
+        user="Webforms",
+        ip=ip,
+        amount=int(amount),
+        iban=investment.iban or u"None",
+        ))
+
 def logPaid(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
+    attributes.purchase_date = ml.create_date.date()
+    attributes.balance += ml.amount
+    # TODO: first_effective_date, last_effective_date
     return log_charged(dict(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
@@ -1032,6 +1048,8 @@ def logPaid(cr, attributes, investment, move_line_id):
 
 def logRefund(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
+    attributes.purchase_date = None
+    attributes.balance += ml.amount
     return log_refunded(dict(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
@@ -1040,28 +1058,41 @@ def logRefund(cr, attributes, move_line_id):
 
 def logRepaid(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
+    attributes.purchase_date = ml.create_date.date()
+    attributes.balance += ml.amount
     return log_banktransferred(dict(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
         move_line_id=move_line_id,
         ))
 
-def logOrdered(cr, attributes, investment, order_date, ip):
-    return log_formfilled(dict(
-        create_date=order_date,
-        user="Webforms",
-        ip=ip,
-        amount=investment.nshares*gkwh.shareValue,
-        iban=investment.iban or u"None",
+def logPartial(cr, attributes, investment, move_line_id):
+    ml = unusedMovements.pop(move_line_id)
+    attributes.amount += ml.amount
+    attributes.balance += ml.amount
+    return (
+        u'[{create_date} {user}] '
+        u'PARTIAL: Desinversió parcial de {amount} €, en queden TODO € [{move_line_id}]\n'
+        .format(
+        create_date=ml.create_date,
+        user=ml.user.decode('utf-8'),
+        move_line_id=move_line_id,
+        amount=ml.credit-ml.debit,
         ))
 
 def logCorrected(cr, attributes, investment, what):
+    if attributes.amount != what['from']:
+        consoleError("Correction missmatches the from was {} but annotated {}"
+            .format(attributes.amount, what['from']))
+    attributes.amount = what.to
     return log_corrected(dict(
         create_date=what.when,
         user="Nobody",
         oldamount = what['from'],
         newamount = what.to,
         ))
+
+# TODO: This way
 
 def logSold(cr, attributes, investment, move_line_id, what):
     ml = unusedMovements.pop(move_line_id)
@@ -1079,6 +1110,7 @@ def logSold(cr, attributes, investment, move_line_id, what):
         ))
 
 def logPact(cr, attributes, investment, what):
+    attributes.update(what.changes)
     return (
         u'[{create_date} {user}] '
         u'PACT: Pacte amb l\'inversor. {changes} Motiu: {note}\n'
@@ -1087,18 +1119,6 @@ def logPact(cr, attributes, investment, what):
         user=what.user,
         changes=what.changes,
         note=what.note,
-        ))
-
-def logPartial(cr, attributes, investment, move_line_id):
-    ml = unusedMovements.pop(move_line_id)
-    return (
-        u'[{create_date} {user}] '
-        u'PARTIAL: Desinversió parcial de {amount} €, en queden TODO € [{move_line_id}]\n'
-        .format(
-        create_date=ml.create_date,
-        user=ml.user.decode('utf-8'),
-        move_line_id=move_line_id,
-        amount=ml.credit-ml.debit,
         ))
 
 def logDivestment(cr, attributes, investment, move_line_id):
@@ -1152,7 +1172,7 @@ def solveNormalCase(cr, investment, payment):
     investment = getInvestment(cr, investment.id)
     attributes = ns()
     log = ""
-    log += logOrdered(cr, attributes, investment, payment.order_date, payment.ip)
+    log += logOrdered(cr, attributes, investment, payment.amount, payment.order_date, payment.ip)
 
     if payment.ref in cases.singlePaymentCases :
         case = cases.singlePaymentCases.pop(payment.ref)
@@ -1165,6 +1185,10 @@ def solveNormalCase(cr, investment, payment):
             movelines = getGenerationMovelinesByPartner(cr,payment.partner_id)
             for m in movelines:
                 success( "    {id}: {date_created} {id} {partner_name} {amount} {name}".format(investment=investment, **m))
+
+    if investment.purchase_date != attributes.purchase_date:
+        consoleError("purchase date differ {} but computed {}"
+            .format(investment.purchase_date, attributes.purchase_date))
 
     cr.execute("""\
         UPDATE
@@ -1199,7 +1223,7 @@ def solveRepaidCase(cr, investment, payment):
     attributes = ns()
     investment = getInvestment(cr, investment.id)
     investment.name = payment.ref
-    log += logOrdered(cr, attributes, investment, payment.order_date, payment.ip)
+    log += logOrdered(cr, attributes, investment, payment.amount, payment.order_date, payment.ip)
     if payment.ref in cases.repaidCases :
         case = cases.repaidCases.pop(payment.ref)
         for movelineid, what in case.iteritems():
@@ -1243,7 +1267,7 @@ def solveInactiveInvestment(cr, payment):
     log = ""
     attributes=ns()
     investment.name = name
-    log += logOrdered(cr, attributes, investment, payment.order_date, payment.ip)
+    log += logOrdered(cr, attributes, investment, payment.amount, payment.order_date, payment.ip)
     for movelineid, what in case.iteritems():
         log += logMovement(cr, attributes, investment, movelineid, what)
 
