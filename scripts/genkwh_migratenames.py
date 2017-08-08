@@ -661,29 +661,6 @@ def bindMoveLineAndPaymentLine(moveline, orderline):
         ip = ip,
         )
 
-def bindInvestmentWithOrder(cr, investment, moveline):
-    True and success(
-        "Match inv-od {investment.id} {moveline.ref} {moveline.order_date} {amount:=8}€ {moveline.partner_name}"
-        .format(**ns(
-            investment=investment,
-            moveline=moveline,
-            amount=investment.nshares*gkwh.shareValue,
-            )))
-    cr.execute("""\
-        UPDATE
-            generationkwh_investment as inv
-        SET
-            name = %(name)s,
-            order_date = %(order_date)s
-        WHERE
-            inv.id = %(id)s
-        """, dict(
-            id = investment.id,
-            order_date = moveline.order_date,
-            name = moveline.ref,
-        ))
-    displayPartnersMovements(cr, moveline.partner_id)
-
 def displayPartnersMovements(cr, partner_id):
     movelines = getGenerationMovelinesByPartner(cr,partner_id)
     for m in movelines:
