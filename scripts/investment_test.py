@@ -1254,7 +1254,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             id, '2018-01-30', 80, 1, 24)
         self.assertTrue(invoice_id)
 
-        self.Investment.open_invoice(invoice_id)
+        self.Investment.open_invoice([invoice_id])
 
         from datetime import datetime, timedelta
         date_due_dt = datetime.today() + timedelta(7)
@@ -1270,6 +1270,48 @@ class Investment_Amortization_Test(unittest.TestCase):
             date_due = date_due,
             ))
 
+    def test__open_invoice__multipleInvoices(self):
+
+        ids = []
+        ids.append(self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01',  # order_date
+            1000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+        ))
+        ids.append(self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01',  # order_date
+            2000,
+            '10.10.23.2',
+            'ES7712341234161234567890',
+        ))
+
+        invoice_ids = self.Investment.create_initial_invoices(ids)
+
+        self.Investment.open_invoice(invoice_ids)
+
+        from datetime import datetime, timedelta
+        date_due_dt = datetime.today() + timedelta(7)
+        date_due = date_due_dt.strftime('%Y-%m-%d')
+        invoices_changes = self.Invoice.read(invoice_ids,
+            ['state',
+             'date_due',
+             ],
+            order='id')
+
+        self.assertEqual(invoices_changes, [dict(
+            id = invoice_ids[0],
+            state = 'open',
+            date_due = date_due,
+            ), dict(
+            id=invoice_ids[1],
+            state='open',
+            date_due=date_due,
+        )])
+
+
     def test__invoices_to_payment_order(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -1280,7 +1322,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             )
 
         invoice_ids =  self.Investment.create_initial_invoices([id])
-        self.Investment.open_invoice(invoice_ids[0])
+        self.Investment.open_invoice(invoice_ids)
         self.Investment.invoices_to_payment_order([invoice_ids[0]])
         invoice = self.Invoice.browse(invoice_ids[0])
 
