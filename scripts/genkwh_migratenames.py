@@ -641,12 +641,15 @@ def getAndRemoveFirst(d, key):
     return values.pop(0)
 
 def bindMoveLineAndPaymentLine(moveline, orderline):
-    False and success(
-        "Match ml-po ml-{moveline.id} {orderline.name} {orderline.create_date} {amount:=8}€ {moveline.partner_name}"
+    communication = orderline.communication2
+    ip = communication.split(" IP ")[1] if communication and ' IP ' in communication else '0.0.0.0'
+    True and success(
+        "Match ml-po ml-{moveline.id} {orderline.name} {orderline.create_date} {amount:=8}€ {moveline.partner_name} {ip}"
         .format(**ns(
             moveline=moveline,
             orderline=orderline,
             amount = moveline.credit-moveline.debit,
+            ip = ip,
             )))
     paymentMoveLines[moveline.id] = ns(
         movelineid = moveline.id,
@@ -655,6 +658,7 @@ def bindMoveLineAndPaymentLine(moveline, orderline):
         partner_id = orderline.partner_id,
         partner_name = orderline.partner_name,
         amount = moveline.credit-moveline.debit,
+        ip = ip,
         )
 
 def bindInvestmentWithOrder(cr, investment, moveline):
