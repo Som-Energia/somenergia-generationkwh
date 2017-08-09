@@ -16,16 +16,11 @@ import erppeek_wst
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Account_Invoice_Test(unittest.TestCase):
     def setUp(self):
-#        self.maxDiff=None
-#        self.b2bdatapath="b2bdata"
         self.personalData = ns(dbconfig.personaldata)
         self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
         self.erp.begin()
-#        self.Soci = self.erp.SomenergiaSoci
         self.Investment = self.erp.GenerationkwhInvestment
-#        self.PaymentOrder = self.erp.PaymentOrder
         self.AccountInvoice = self.erp.AccountInvoice
-#        self.PaymentLine = self.erp.PaymentLine
         self.Investment.dropAll()
 
     def tearDown(self):
@@ -71,6 +66,23 @@ class Account_Invoice_Test(unittest.TestCase):
         invoice_id = 23132 # random
         investment_id = self.AccountInvoice.get_investment(invoice_id)
         self.assertFalse(investment_id)
+
+
+    def test__pay_and_reconcile_group(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        invoice_id = self.Investment.create_initial_invoices([id])
+        self.Investment.open_invoices([invoice_id])
+        self.Investment.invoices_to_payment_order([invoice_id])
+        #marcar remesa com a pagada
+        self.Investment.mark_as_paid([id], str(datetime.today()))
+        invoice = self.AccountInvoice.read(invoice_id)
+        #purchrase date
     
 unittest.TestCase.__str__ = unittest.TestCase.id
 
