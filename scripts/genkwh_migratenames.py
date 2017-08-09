@@ -627,7 +627,7 @@ def getAndRemoveFirst(d, key):
 def bindMoveLineAndPaymentLine(moveline, orderline):
     communication = orderline.communication2
     ip = communication.split(" IP ")[1] if communication and ' IP ' in communication else '0.0.0.0'
-    True and success(
+    False and success(
         "Match ml-po ml-{moveline.id} {orderline.name} {orderline.create_date} {amount:=8}€ {moveline.partner_name} {ip}"
         .format(**ns(
             moveline=moveline,
@@ -1239,7 +1239,7 @@ def checkAttributes(real, computed):
 def solveNormalCase(cr, investment, payment):
     "Active investment is paired to the original payment"
     True and success(
-        "Match inv-od {investment.id} {payment.ref} {payment.order_date} {amount:=8}€ {payment.partner_name}"
+        "Solved single {investment.id} {payment.ref} {payment.order_date} {amount:=8}€ {payment.partner_name}"
         .format(**ns(
             investment=investment,
             payment=payment,
@@ -1286,7 +1286,7 @@ def solveRepaidCase(cr, investment, payment):
     "Active investment is related to a posterior payment"
 
     True and success(
-        "Match inv-od {investment.id} {payment.ref} {payment.order_date} {amount:=8}€ {payment.partner_name}"
+        "Solved repaid {investment.id} {payment.ref} {payment.order_date} {amount:=8}€ {payment.partner_name}"
         .format(**ns(
             investment=investment,
             payment=payment,
@@ -1326,15 +1326,15 @@ def solveRepaidCase(cr, investment, payment):
 
 
 def solveUnnamedCases(cr, investment):
-    "Cases with no payment order"
+    "Cases with no payment order, usually transfer receptors"
     name = cases.toBeNamed[investment.move_line_id]
     True and success(
-        "Compra {name} {investment.id} {amount:=8}€"
-        .format(**ns(
+        "Solved compra {investment.id} {name} {amount:=8}€ {investment.partner_name}"
+        .format(
             investment=investment,
             amount=investment.nshares*gkwh.shareValue,
             name=name,
-            )))
+            ))
     log = ""
     attributes=ns()
     log += logBought(cr, attributes, investment)
@@ -1373,7 +1373,7 @@ def solveInactiveInvestment(cr, payment):
         log += logMovement(cr, attributes, investment, movelineid, what)
 
     True and success(
-        "Match inv-od {investment.id} {payment.ref} {payment.order_date} {amount:=8}€ {payment.partner_name}"
+        "Solved inactive {investment.id} {payment.ref} {payment.order_date} {amount:=8}€ {payment.partner_name}"
         .format(**ns(
             investment=investment,
             payment=payment,
