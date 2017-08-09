@@ -1250,14 +1250,11 @@ def solveNormalCase(cr, investment, payment):
         case = cases.singlePaymentCases.pop(payment.ref)
         for movelineid, what in case.iteritems():
             log += logMovement(cr, attributes, investment, movelineid, what)
-        displayPartnersMovements(cr, payment.partner_id)
     else:
         log += logPaid(cr, attributes, investment, payment.movelineid)
-        if False:
-            success( "{ref}: # {partner_name}".format(**payment))
-            movelines = getGenerationMovelinesByPartner(cr,payment.partner_id)
-            for m in movelines:
-                success( "    {id}: {date_created} {id} {partner_name} {amount} {name}".format(investment=investment, **m))
+        False and displayPartnersMovements(cr, payment.partner_id)
+
+    True and success(("\n"+log).encode('utf-8'))
 
     cr.execute("""\
         UPDATE
@@ -1278,8 +1275,6 @@ def solveNormalCase(cr, investment, payment):
     investment = getInvestment(cr, investment.id)
     checkAttributes(investment, attributes)
 
-    False and displayPartnersMovements(cr, payment.partner_id)
-    False and success(("\n"+log).encode('utf-8'))
 
 
 def solveRepaidCase(cr, investment, payment):
@@ -1297,19 +1292,15 @@ def solveRepaidCase(cr, investment, payment):
     investment = getInvestment(cr, investment.id)
     investment.name = payment.ref
     log += logOrdered(cr, attributes, investment, payment.amount, payment.order_date, payment.ip)
-    if payment.ref in cases.repaidCases :
-        case = cases.repaidCases.pop(payment.ref)
-        for movelineid, what in case.iteritems():
-            log += logMovement(cr, attributes, investment, movelineid, what)
-        True and success(("\n"+log).encode('utf-8'))
-    else:
-        log += logPaid(cr, attributes, investment, payment.movelineid)
-        success( "{investment.name}: # {partner_name}".format(investment=investment, **payment))
-        movelines = getGenerationMovelinesByPartner(cr,payment.partner_id)
-        for m in movelines:
-            success( "    {id}: {date_created} {id} {partner_name} {amount} {name}".format(investment=investment, **m))
-        True and displayPartnersMovements(cr, payment.partner_id)
-        True and success(("\n"+log).encode('utf-8'))
+    if payment.ref not in cases.repaidCases :
+        failed("En serio")
+
+    case = cases.repaidCases.pop(payment.ref)
+    for movelineid, what in case.iteritems():
+        log += logMovement(cr, attributes, investment, movelineid, what)
+    False and displayPartnersMovements(cr, payment.partner_id)
+    True and success(("\n"+log).encode('utf-8'))
+
     cr.execute("""\
         UPDATE
             generationkwh_investment as inv
@@ -1345,6 +1336,13 @@ def solveInactiveInvestment(cr, payment):
     for movelineid, what in case.iteritems():
         log += logMovement(cr, attributes, investment, movelineid, what)
 
+    True and success(
+        "Match inv-od {investment.id} {payment.ref} {payment.order_date} {amount:=8}€ {payment.partner_name}"
+        .format(**ns(
+            investment=investment,
+            payment=payment,
+            amount=investment.nshares*gkwh.shareValue,
+            )))
     success(("\n"+log).encode('utf-8'))
     cr.execute("""\
         UPDATE
