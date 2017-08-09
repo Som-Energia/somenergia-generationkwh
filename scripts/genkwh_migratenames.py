@@ -1089,7 +1089,7 @@ def logPaid(cr, attributes, investment, move_line_id):
     return log_charged(dict(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
-        amount=investment.nshares*gkwh.shareValue,
+        amount=int(ml.amount),
         iban=investment.iban or u"None",
         move_line_id=move_line_id,
         ))
@@ -1120,10 +1120,11 @@ def logPartial(cr, attributes, investment, move_line_id):
     attributes.balance += ml.amount
     return (
         u'[{create_date} {user}] '
-        u'PARTIAL: Desinversió parcial de {amount} €, en queden TODO € [{move_line_id}]\n'
+        u'PARTIAL: Desinversió parcial de {amount} €, en queden {remaining} € [{move_line_id}]\n'
         .format(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
+        remaining=attributes.balance,
         move_line_id=move_line_id,
         amount=ml.amount,
         ))
