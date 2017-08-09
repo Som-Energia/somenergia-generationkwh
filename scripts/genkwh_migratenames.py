@@ -997,17 +997,24 @@ def main(cr):
         if wasEmpty:
             warn("partner with two pending movements id {id} {partner_name}".format(id=moveline_id, **payment))
 
+    unnamedActiveInvestments = []
+
     for inv in activeInvestments:
         if inv.id not in unmatchedInvestments:
             continue
 
         partner_id = inv.partner_id
-        solution = getAndRemoveFirst(orphanPaymentsByPartner, partner_id)
-        if not solution:
-            error("No name for Investment {move_date_created} {move_line_id} {nshares:=5}00.00€ {partner_name}",**inv)
-            displayPartnersMovements(cr, inv.partner_id)
+        payment = getAndRemoveFirst(orphanPaymentsByPartner, partner_id)
+        if payment:
+            solveRepaidCase(cr, inv, payment)
             continue
-        solveRepaidCase(cr, inv, solution)
+
+        if inv.move_line_id in cases.toBeNamed:
+            unnamedActiveInvestments.append(inv)
+            continue
+
+        error("No name for Investment {move_date_created} {move_line_id} {nshares:=5}00.00€ {partner_name}",**inv)
+        displayPartnersMovements(cr, inv.partner_id)
 
     if orphanPaymentsByPartner:
         step("Solving payments with no investment (cancelled?)")
@@ -1019,10 +1026,14 @@ def main(cr):
                 **orphanPayment)
             displayPartnersMovements(cr, orphanPayment.partner_id)
 
+    for inv in unnamedActiveInvestments:
+        solveUnnamedCases(cr, inv)
+
 
     for moveline_id in ungenerated:
-        order = paymentMoveLines[moveline_id]
-        warn("Not yet generated investment {ref} {order_date} {partner_name}".format(**order))
+        payment = paymentMoveLines[moveline_id]
+        warn("Not yet generated investment {ref} {order_date} {partner_name}"
+            .format(**payment))
 
     for missmatch in movementsVsInvesmentAmounts(cr):
         error("Balance missmatch: "
@@ -1117,20 +1128,51 @@ def logPartial(cr, attributes, investment, move_line_id):
         amount=ml.amount,
         ))
 
+sold = ns()
+
 def logSold(cr, attributes, investment, move_line_id, what):
+    import datetime
     ml = unusedMovements.pop(move_line_id)
     mlto = unusedMovements[what.to] # TODO: log it
-    attributes.last_effective_date = what.get('date', ml.create_date.date())
+    date = what.get('date', ml.create_date.date())
+    sold[what.to] = ns(
+        amount = attributes.balance,
+        order_date = attributes.order_date,
+        purchase_date = attributes.purchase_date,
+        first_effective_date = date + datetime.timedelta(days=1),
+        last_effective_date = attributes.last_effective_date,
+        from_partner_name = ml.partner_name,
+        from_ref = investment.name,
+        )
+    attributes.last_effective_date = date
     attributes.balance += ml.amount
     return (
         u'[{create_date} {user}] '
         u'DIVESTEDBYTRANSFER: Traspas cap a {toname} amb codi {toref}'
-        #u'CREATEDBYTRANSFER: Creada per traspàs de {} fins ara a nom de {toname}'
         .format(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
         toname=mlto.partner_name.decode('utf-8'),
         toref=cases.brandNewNames[mlto.id],
+        ))
+
+def logBought(cr, attributes, investment):
+    ml = unusedMovements.pop(investment.move_line_id)
+    peer = sold[investment.move_line_id]
+    attributes.nominal = peer.amount
+    attributes.balance = peer.amount
+    attributes.order_date = peer.order_date
+    attributes.purchase_date = peer.purchase_date
+    attributes.first_effective_date = peer.first_effective_date
+    attributes.last_effective_date = peer.last_effective_date
+    return (
+        u'[{create_date} {user}] '
+        u'CREATEDBYTRANSFER: Creada per traspàs de {fromref} a nom de {fromname}'
+        .format(
+        create_date=ml.create_date,
+        user=ml.user.decode('utf-8'),
+        fromname=peer.from_partner_name.decode('utf-8'),
+        fromref=peer.from_ref,
         ))
 
 def logPact(cr, attributes, investment, what):
@@ -1242,6 +1284,7 @@ def solveNormalCase(cr, investment, payment):
             amount=investment.nshares*gkwh.shareValue,
             )))
     investment = getInvestment(cr, investment.id)
+    investment.name = payment.ref
     attributes = ns()
     log = ""
     log += logOrdered(cr, attributes, investment, payment.amount, payment.order_date, payment.ip)
@@ -1293,7 +1336,7 @@ def solveRepaidCase(cr, investment, payment):
     investment.name = payment.ref
     log += logOrdered(cr, attributes, investment, payment.amount, payment.order_date, payment.ip)
     if payment.ref not in cases.repaidCases :
-        failed("En serio")
+        failed("En serio") # TODO explain the error
 
     case = cases.repaidCases.pop(payment.ref)
     for movelineid, what in case.iteritems():
@@ -1319,6 +1362,37 @@ def solveRepaidCase(cr, investment, payment):
     investment = getInvestment(cr, investment.id)
     checkAttributes(investment, attributes)
 
+
+def solveUnnamedCases(cr, investment):
+    "Cases with no payment order"
+    name = cases.brandNewNames[investment.move_line_id]
+    True and success(
+        "Compra {name} {investment.id} {amount:=8}€"
+        .format(**ns(
+            investment=investment,
+            amount=investment.nshares*gkwh.shareValue,
+            name=name,
+            )))
+    log = ""
+    attributes=ns()
+    log += logBought(cr, attributes, investment)
+    success(("\n"+log).encode('utf-8'))
+    cr.execute("""\
+        UPDATE
+            generationkwh_investment as inv
+        SET
+            name = %(name)s,
+            log = %(log)s
+        WHERE
+            inv.id = %(investment)s
+    """, dict(
+        name = name,
+        log = log,
+        investment=investment.id,
+    ))
+    investment = getInvestment(cr, investment.id)
+    checkAttributes(investment, attributes)
+    return True
 
 def solveInactiveInvestment(cr, payment):
     "There is no active investment"
@@ -1388,6 +1462,7 @@ def showUnusedMovements(cr):
 
 
 cases = ns.load('migration.yaml')
+
 with psycopg2.connect(**configdb.psycopg) as db:
     with db.cursor() as cr:
         with transaction(cr, discarded='--doit' not in sys.argv):
