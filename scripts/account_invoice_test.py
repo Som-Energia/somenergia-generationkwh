@@ -8,7 +8,7 @@ try:
     import dbconfig
 except ImportError:
     pass
-import datetime
+from datetime import date
 from yamlns import namespace as ns
 import erppeek_wst
 
@@ -67,23 +67,6 @@ class Account_Invoice_Test(unittest.TestCase):
         investment_id = self.AccountInvoice.get_investment(invoice_id)
         self.assertFalse(investment_id)
 
-
-    def test__pay_and_reconcile_group(self):
-        id = self.Investment.create_from_form(
-            self.personalData.partnerid,
-            '2017-01-01', # order_date
-            2000,
-            '10.10.23.1',
-            'ES7712341234161234567890',
-            )
-        invoice_id = self.Investment.create_initial_invoices([id])
-        self.Investment.open_invoices([invoice_id])
-        self.Investment.invoices_to_payment_order([invoice_id])
-        #marcar remesa com a pagada
-        self.Investment.mark_as_paid([id], str(datetime.today()))
-        invoice = self.AccountInvoice.read(invoice_id)
-        #purchrase date
-    
 unittest.TestCase.__str__ = unittest.TestCase.id
 
 if __name__=='__main__':
