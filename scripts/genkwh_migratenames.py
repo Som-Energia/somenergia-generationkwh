@@ -1183,7 +1183,7 @@ def logPact(cr, attributes, investment, what):
         .format(
         create_date=what.create_date,
         user=what.user,
-        changes=what.changes,
+        changes=', '.join("{}: {}".format(*x) for x in what.changes.items()),
         note=what.note,
         ))
 
