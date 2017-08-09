@@ -10,6 +10,8 @@ from yamlns import namespace as ns
 from consolemsg import step, warn, success, error as consoleError, fail
 import sys
 import generationkwh.investmentmodel as gkwh
+import datetime
+
 
 errorCases = ns()
 
@@ -1000,7 +1002,7 @@ def main(cr):
         displayPartnersMovements(cr, inv.partner_id)
 
     if orphanPaymentsByPartner:
-        step("Solving payments with no investment (cancelled?)")
+        step("Solving payments with active no investment (cancelled?)")
     for orphanPayments in orphanPaymentsByPartner.values():
         for orphanPayment in orphanPayments:
             if solveInactiveInvestment(cr, orphanPayment):
@@ -1064,11 +1066,19 @@ def logCorrected(cr, attributes, investment, what):
         newamount = what.to,
         ))
 
+def firstEffectiveDate(purchase_date):
+    pionersDay = '2016-04-28'
+    waitDays = gkwh.waitingDays
+    if str(purchase_date) < pionersDay:
+        waitDays -= 30
+    waitDelta = datetime.timedelta(days=waitDays)
+    return purchase_date + waitDelta
+
 def logPaid(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     attributes.purchase_date = ml.create_date.date()
     attributes.balance += ml.amount
-    # TODO: first_effective_date, last_effective_date
+    attributes.first_effective_date = firstEffectiveDate(ml.create_date.date())
     return log_charged(dict(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
@@ -1080,6 +1090,7 @@ def logPaid(cr, attributes, investment, move_line_id):
 def logRefund(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     attributes.purchase_date = None
+    attributes.first_effective_date = None
     attributes.balance += ml.amount
     return log_refunded(dict(
         create_date=ml.create_date,
@@ -1091,6 +1102,7 @@ def logRepaid(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     attributes.purchase_date = ml.create_date.date()
     attributes.balance += ml.amount
+    attributes.first_effective_date = firstEffectiveDate(ml.create_date.date())
     return log_banktransferred(dict(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
@@ -1222,7 +1234,7 @@ def checkAttributes(real, computed):
     for attribute in [
         'order_date',
         'purchase_date',
-        #'first_effective_date',
+        'first_effective_date',
         'last_effective_date',
         ]:
         realvalue = real[attribute]
@@ -1231,7 +1243,6 @@ def checkAttributes(real, computed):
             "{} differ {} but computed {}",
             attribute, realvalue, computedvalue)
 
-    import datetime
     expired = computed.last_effective_date and computed.last_effective_date < datetime.date.today()
 
     if real.active and not expired:
