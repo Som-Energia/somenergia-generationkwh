@@ -60,7 +60,22 @@ def nameDummy(cr):
                 id = mlid,
                 name = "GKWH_TP{:06}".format(i)
             ))
-        
+
+def getBrandNewNames(cr):
+    cr.execute("""\
+        SELECT
+            move_line_id,
+            name
+        FROM
+            generationkwh_investment as inv
+        WHERE
+            move_line_id IN %(ids)s
+        ORDER BY
+            move_line_id
+        """, dict(
+            ids = tuple(cases.toBeNamed)
+        ))
+    return ns(cr)
 
 def ungeneratedInvestments(cr):
     "Locates any investment yet to be generated"
@@ -682,6 +697,10 @@ def displayPartnersMovements(cr, partner_id):
 def cleanUp(cr):
     step("Clean up cases")
 
+    # TODO: Aixo cal fer-ho abans i amb l'erp
+    step("Nombrant receptores traspas")
+    nameDummy(cr)
+
     step(" Fiscal end year movements")
     fiscalEndYearInvestments = activeInvestmentRelatedToFiscalEndYear(cr)
     if fiscalEndYearInvestments:
@@ -794,7 +813,7 @@ def allMovements(cr):
         LEFT JOIN
             res_partner as partner
         ON
-            partner.id = ml.partner_id
+            partner.ref = 'S' || right(acc.code, 6)
         where
             pacc.code = '1635' and
             not p.special and
@@ -806,6 +825,10 @@ def allMovements(cr):
 
 
 def main(cr):
+
+    cases.brandNewNames = getBrandNewNames(cr)
+
+    print cases.brandNewNames.dump()
 
     # Movelines related to payment orders
     step("Emparellant moviments amb remeses")
@@ -908,7 +931,6 @@ def main(cr):
     step("Recopilant tots els asentaments del generation")
     global unusedMovements
     unusedMovements = allMovements(cr)
-    nameDummy(cr)
 
     step("Pairing investments")
     step(" Pairing investments using existing relation")
@@ -1020,6 +1042,7 @@ from generationkwh.investmentlogs import (
     log_banktransferred,
 )
 
+
 def logOrdered(cr, attributes, investment, amount, order_date, ip):
     attributes.nominal = amount
     attributes.balance = 0
@@ -1094,23 +1117,20 @@ def logPartial(cr, attributes, investment, move_line_id):
         amount=ml.amount,
         ))
 
-# TODO: This way
-
 def logSold(cr, attributes, investment, move_line_id, what):
     ml = unusedMovements.pop(move_line_id)
-    mlto = unusedMovements.pop(what.to) # TODO: log it
+    mlto = unusedMovements[what.to] # TODO: log it
     attributes.last_effective_date = what.get('date', ml.create_date.date())
     attributes.balance += ml.amount
-    attributes.nominal += ml.amount
     return (
         u'[{create_date} {user}] '
-        u'TRANSFERCREATED: Traspas cap a {toname} amb codi {toref}'
-        #u'TRANSFERRED: Creada per traspàs de {} fins ara a nom de {toname}'
+        u'DIVESTEDBYTRANSFER: Traspas cap a {toname} amb codi {toref}'
+        #u'CREATEDBYTRANSFER: Creada per traspàs de {} fins ara a nom de {toname}'
         .format(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
-        toname=mlto.name.decode('utf-8'),
-        toref=mlto.ref,
+        toname=mlto.partner_name.decode('utf-8'),
+        toref=cases.brandNewNames[mlto.id],
         ))
 
 def logPact(cr, attributes, investment, what):
