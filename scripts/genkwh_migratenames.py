@@ -1147,7 +1147,6 @@ def logPact(cr, attributes, investment, what):
 
 def logDivestment(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
-    attributes.nominal += ml.amount
     attributes.balance += ml.amount
     attributes.last_effective_date = ml.create_date.date()
 
@@ -1209,7 +1208,7 @@ def checkAttributes(real, computed):
     import datetime
     expired = computed.last_effective_date and computed.last_effective_date < datetime.date.today()
 
-    if real.active:
+    if real.active and not expired:
         check(computed.nominal == computed.balance,
             "Nominal is {nominal} but balance is {balance}",
             **computed)
@@ -1223,6 +1222,14 @@ def checkAttributes(real, computed):
         check(computed.nominal == gkwh.shareValue * real.nshares,
             "Missmatch nshares {}, nominal {} €",
             real.nshares, computed.nominal)
+
+    if expired:
+        check(computed.nominal == gkwh.shareValue * real.nshares,
+            "Expired not matching nshares {} with nominal {} €",
+            real.nshares, computed.nominal)
+        check(computed.balance == 0,
+            "Expired should have balance 0 and has {} €",
+            computed.balance)
 
 
 def solveNormalCase(cr, investment, payment):
