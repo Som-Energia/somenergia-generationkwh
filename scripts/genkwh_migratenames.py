@@ -873,14 +873,36 @@ def main(cr):
                         **orderline)
                     continue
                 bindMoveLineAndPaymentLine(moveline, orderline)
+                if orderline.name not in cases.misscorrectedPayments:
+                    error(
+                        "Amount missmatch {orderline.name} "
+                        "order {orderline.amount}€ move {moveline.credit}",
+                            partner_id = moveline.partner_id,
+                            orderline=orderline,
+                            moveline=moveline,
+                        )
+                    displayPartnersMovements(cr, orderline.partner_id)
+                    continue
+                corrected = cases.misscorrectedPayments[orderline.name]
+                if corrected != moveline.credit:
+                    error(
+                        "Badly corrected amount missmatch {orderline.name}  "
+                        "order {orderline.amount}€ move {moveline.credit} "
+                        "corrected {corrected}€",
+                            partner_id = moveline.partner_id,
+                            orderline=orderline,
+                            moveline=moveline,
+                            corrected=corrected,
+                        )
+                    displayPartnersMovements(cr, orderline.partner_id)
+                    continue
                 warn(
-                    "Amount missmatch {orderline.name} "
+                    "Already corrected amount missmatch {orderline.name} "
                     "order {orderline.amount}€ move {moveline.credit}"
                     .format(**ns(
                         orderline=orderline,
                         moveline=moveline,
                     )))
-                displayPartnersMovements(cr, orderline.partner_id)
 
         for partner_id, movelines in movelinesByPartnerId.items():
             for moveline in movelines:
@@ -970,7 +992,7 @@ def main(cr):
             solveRepaidCase(cr, inv, payment)
             continue
 
-        if inv.move_line_id in cases.toBeNamed:
+        if inv.move_line_id in cases.unnamedCases:
             unnamedActiveInvestments.append(inv)
             continue
 
@@ -1115,7 +1137,7 @@ def logSold(cr, attributes, investment, move_line_id, what):
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
         toname=mlto.partner_name.decode('utf-8'),
-        toref=cases.toBeNamed[mlto.id],
+        toref=cases.unnamedCases[mlto.id],
         ))
 
 def logBought(cr, attributes, investment):
@@ -1327,7 +1349,7 @@ def solveRepaidCase(cr, investment, payment):
 
 def solveUnnamedCases(cr, investment):
     "Cases with no payment order, usually transfer receptors"
-    name = cases.toBeNamed[investment.move_line_id]
+    name = cases.unnamedCases[investment.move_line_id]
     True and success(
         "Solved compra {investment.id} {name} {amount:=8}€ {investment.partner_name}"
         .format(
