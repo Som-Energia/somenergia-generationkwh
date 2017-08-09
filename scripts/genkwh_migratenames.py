@@ -991,11 +991,11 @@ def main(cr):
     orphanPaymentsByPartner = {}
 
     for moveline_id in unmatchedMoveLines:
-        order = paymentMoveLines[moveline_id]
+        payment = paymentMoveLines[moveline_id]
 
-        wasEmpty = appendToKey(orphanPaymentsByPartner, order.partner_id, order)
+        wasEmpty = appendToKey(orphanPaymentsByPartner, payment.partner_id, payment)
         if wasEmpty:
-            warn("partner with two pending movements id {id} {partner_name}".format(id=moveline_id, **order))
+            warn("partner with two pending movements id {id} {partner_name}".format(id=moveline_id, **payment))
 
     for inv in activeInvestments:
         if inv.id not in unmatchedInvestments:
