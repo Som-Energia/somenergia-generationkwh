@@ -46,37 +46,6 @@ def fixInvestmentMovelines(cr, investmentMovelinePairs):
             investement_id=investement_id
         ))
 
-def nameDummy(cr):
-    "Not the final name"
-    for i, mlid in enumerate(cases.toBeNamed):
-        cr.execute("""\
-            UPDATE
-                generationkwh_investment as inv
-            SET
-                name = %(name)s
-            WHERE
-                move_line_id = %(id)s
-            """, dict(
-                id = mlid,
-                name = "GKWH_TP{:06}".format(i)
-            ))
-
-def getBrandNewNames(cr):
-    cr.execute("""\
-        SELECT
-            move_line_id,
-            name
-        FROM
-            generationkwh_investment as inv
-        WHERE
-            move_line_id IN %(ids)s
-        ORDER BY
-            move_line_id
-        """, dict(
-            ids = tuple(cases.toBeNamed)
-        ))
-    return ns(cr)
-
 def ungeneratedInvestments(cr):
     "Locates any investment yet to be generated"
     cr.execute("""\
@@ -697,10 +666,6 @@ def displayPartnersMovements(cr, partner_id):
 def cleanUp(cr):
     step("Clean up cases")
 
-    # TODO: Aixo cal fer-ho abans i amb l'erp
-    step("Nombrant receptores traspas")
-    nameDummy(cr)
-
     step(" Fiscal end year movements")
     fiscalEndYearInvestments = activeInvestmentRelatedToFiscalEndYear(cr)
     if fiscalEndYearInvestments:
@@ -825,10 +790,6 @@ def allMovements(cr):
 
 
 def main(cr):
-
-    cases.brandNewNames = getBrandNewNames(cr)
-
-    print cases.brandNewNames.dump()
 
     # Movelines related to payment orders
     step("Emparellant moviments amb remeses")
@@ -1154,7 +1115,7 @@ def logSold(cr, attributes, investment, move_line_id, what):
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
         toname=mlto.partner_name.decode('utf-8'),
-        toref=cases.brandNewNames[mlto.id],
+        toref=cases.toBeNamed[mlto.id],
         ))
 
 def logBought(cr, attributes, investment):
@@ -1366,7 +1327,7 @@ def solveRepaidCase(cr, investment, payment):
 
 def solveUnnamedCases(cr, investment):
     "Cases with no payment order"
-    name = cases.brandNewNames[investment.move_line_id]
+    name = cases.toBeNamed[investment.move_line_id]
     True and success(
         "Compra {name} {investment.id} {amount:=8}€"
         .format(**ns(
