@@ -814,6 +814,82 @@ class Investment_Amortization_Test(unittest.TestCase):
             u'FORMFILLED: Formulari omplert des de la IP 10.10.23.2, Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
+    def test__mark_as_unpaid__singleInvestment(self):
+
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01',  # order_date
+            2000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+
+        self.Investment.mark_as_paid([id], '2017-01-03')
+        self.Investment.mark_as_unpaid([id])
+
+        investment = ns(self.Investment.read(id, []))
+        log = investment.pop('log')
+        name = investment.pop('name')
+        self.Investment.unlink(id)
+
+        self.assertLogEquals(log,
+            u'REFUNDED: Devoluci\xf3 del pagament remesat [None]\n'
+            u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
+            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.123, Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
+                             )
+
+        self.assertNsEqual(investment, """
+            id: {id}
+            member_id:
+            - {member_id}
+            - {surname}, {name}
+            order_date: '2017-01-01'
+            purchase_date: false # Changed!
+            first_effective_date: false
+            last_effective_date: false
+            nshares: 20
+            amortized_amount: 0.0
+            move_line_id: false
+            active: true
+            """.format(
+            id=id,
+            **self.personalData
+        ))
+
+    def test__mark_as_unpaid__samePurchaseDateSetToAll(self):
+
+        id1 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01',  # order_date
+            2000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+
+        id2 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-02',  # order_date
+            2000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+
+        self.Investment.mark_as_paid([id1, id2], '2017-01-03')
+        self.Investment.mark_as_unpaid([id1, id2])
+
+        result = self.Investment.read(
+            [id1, id2],
+            ['purchase_date'],
+            order='id')
+
+        self.assertNsEqual(ns(data=result), """\
+            data:
+            - purchase_date: false
+              id: {id1}
+            - purchase_date: false
+              id: {id2}
+            """.format(id1=id1, id2=id2))
+
     def assertInvoiceInfoEqual(self, invoice_id, expected):
         def proccesLine(line):
             line = ns(line)
