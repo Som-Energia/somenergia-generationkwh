@@ -1608,6 +1608,17 @@ class Investment_Amortization_Test(unittest.TestCase):
                     today=datetime.date.today(),
                 )))
 
+    @unittest.skip('Encue an email, not work if not have poweremail workers')
+    def test__mail(self):
+        ids = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-02',  # order_date
+            2000,
+            '10.10.23.2',
+            'ES7712341234161234567890',
+        )
+        invoice_ids, err =  self.Investment.create_initial_invoices([ids])
+        self.Investment.send_mail_pas2(invoice_ids[0])
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
