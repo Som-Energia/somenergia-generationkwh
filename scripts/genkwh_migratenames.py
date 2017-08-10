@@ -467,7 +467,7 @@ def getActiveInvestments(cr):
             inv.*,
             ml.name as mlname,
             ml.date_created as move_date_created,
-            soci.partner_id,
+            soci.partner_id as partner_id,
             p.name as partner_name
         from
             generationkwh_investment as inv
@@ -1046,6 +1046,7 @@ def logOrdered(cr, attributes, investment, amount, order_date, ip):
     attributes.purchase_date = None
     attributes.first_effective_date = None
     attributes.last_effective_date = None
+    attributes.active = True
     return log_formfilled(dict(
         create_date=order_date,
         user="Webforms",
@@ -1092,6 +1093,7 @@ def logRefund(cr, attributes, move_line_id):
     attributes.purchase_date = None
     attributes.first_effective_date = None
     attributes.balance += ml.amount
+    attributes.active = False
     return log_refunded(dict(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
@@ -1103,6 +1105,7 @@ def logRepaid(cr, attributes, move_line_id):
     attributes.purchase_date = ml.create_date.date()
     attributes.balance += ml.amount
     attributes.first_effective_date = firstEffectiveDate(ml.create_date.date())
+    attributes.active = True
     return log_banktransferred(dict(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
@@ -1142,6 +1145,7 @@ def logSold(cr, attributes, investment, move_line_id, what):
         )
     attributes.last_effective_date = date
     attributes.balance += ml.amount
+    attributes.active = not crossed(attributes)
     return (
         u'[{create_date} {user}] '
         u'DIVESTEDBYTRANSFER: Traspas cap a {toname} amb codi {toref}'
@@ -1156,11 +1160,12 @@ def logBought(cr, attributes, investment):
     ml = unusedMovements.pop(investment.move_line_id)
     peer = sold[investment.move_line_id]
     attributes.nominal = peer.amount
-    attributes.balance = peer.amount
+    attributes.balance = ml.amount
     attributes.order_date = peer.order_date
     attributes.purchase_date = peer.purchase_date
     attributes.first_effective_date = peer.first_effective_date
     attributes.last_effective_date = peer.last_effective_date
+    attributes.active = True
     return (
         u'[{create_date} {user}] '
         u'CREATEDBYTRANSFER: Creada per traspàs de {fromref} a nom de {fromname}'
@@ -1183,10 +1188,20 @@ def logPact(cr, attributes, investment, what):
         note=what.note,
         ))
 
+def crossed(attributes):
+    if not attributes.first_effective_date:
+        return True
+    if not attributes.last_effective_date:
+        return False
+    if attributes.last_effective_date < attributes.first_effective_date:
+        return True
+    return False
+
 def logDivestment(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     attributes.balance += ml.amount
     attributes.last_effective_date = ml.create_date.date()
+    attributes.active = not crossed(attributes)
 
     return (
         u'[{create_date} {user}] '
@@ -1229,13 +1244,18 @@ def checkAttributes(real, computed):
 
     def check(condition, msg, *args, **kwds):
         if condition: return
+        check.failed |= True
         consoleError("Check failed: "+msg.format(*args, **kwds))
+
+    check.failed = False
+
 
     for attribute in [
         'order_date',
         'purchase_date',
         'first_effective_date',
         'last_effective_date',
+        'active',
         ]:
         realvalue = real[attribute]
         computedvalue = computed[attribute]
@@ -1268,6 +1288,7 @@ def checkAttributes(real, computed):
             "Expired should have balance 0 and has {} €",
             computed.balance)
 
+    return check.failed
 
 def solveNormalCase(cr, investment, payment):
     "Active investment is paired to the original payment"
@@ -1311,7 +1332,8 @@ def solveNormalCase(cr, investment, payment):
         ))
 
     investment = getInvestment(cr, investment.id)
-    checkAttributes(investment, attributes)
+    if checkAttributes(investment, attributes):
+        displayPartnersMovements(cr, payment.partner_id)
 
 
 
@@ -1355,12 +1377,14 @@ def solveRepaidCase(cr, investment, payment):
             log = log,
         ))
     investment = getInvestment(cr, investment.id)
-    checkAttributes(investment, attributes)
+    if checkAttributes(investment, attributes):
+        displayPartnersMovements(cr, payment.partner_id)
 
 
 def solveUnnamedCases(cr, investment):
     "Cases with no payment order, usually transfer receptors"
     name = cases.unnamedCases[investment.move_line_id]
+    partner_id = investment.partner_id
     True and success(
         "Solved compra {investment.id} {name} {amount:=8}€ {investment.partner_name}"
         .format(
@@ -1386,7 +1410,8 @@ def solveUnnamedCases(cr, investment):
         investment=investment.id,
     ))
     investment = getInvestment(cr, investment.id)
-    checkAttributes(investment, attributes)
+    if checkAttributes(investment, attributes):
+        displayPartnersMovements(cr, partner_id)
     return True
 
 def solveInactiveInvestment(cr, payment):
@@ -1432,7 +1457,8 @@ def solveInactiveInvestment(cr, payment):
         purchase_date = attributes.purchase_date,
     ))
     investment = getInvestment(cr, investment.id)
-    checkAttributes(investment, attributes)
+    if checkAttributes(investment, attributes):
+        displayPartnersMovements(cr, payment.partner_id)
     return True
 
 def showUnusedMovements(cr):
