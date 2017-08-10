@@ -890,6 +890,41 @@ class Investment_Amortization_Test(unittest.TestCase):
               id: {id2}
             """.format(id1=id1, id2=id2))
 
+    def test__mark_as_unpaid__oldLogKept(self):
+
+        id1 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01',  # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+        )
+
+        id2 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-02',  # order_date
+            2000,
+            '10.10.23.2',
+            'ES7712341234161234567890',
+        )
+
+        self.Investment.mark_as_paid([id1, id2], '2017-01-03')
+        self.Investment.mark_as_unpaid([id1, id2])
+
+        result = self.Investment.read([id1, id2], ['log'], order='id')
+
+        self.assertLogEquals(result[0]['log'],
+                             u'REFUNDED: Devoluci\xf3 del pagament remesat [None]\n'
+                             u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
+                             u'FORMFILLED: Formulari omplert des de la IP 10.10.23.1, Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
+                             )
+
+        self.assertLogEquals(result[1]['log'],
+                             u'REFUNDED: Devoluci\xf3 del pagament remesat [None]\n'
+                             u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
+                             u'FORMFILLED: Formulari omplert des de la IP 10.10.23.2, Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
+                             )
+
     def assertInvoiceInfoEqual(self, invoice_id, expected):
         def proccesLine(line):
             line = ns(line)
