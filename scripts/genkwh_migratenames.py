@@ -1110,18 +1110,16 @@ def logRepaid(cr, attributes, move_line_id):
 
 def logPartial(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
-    attributes.nominal_amount += ml.amount
-    attributes.paid_amount += ml.amount
-    return (
-        u'[{create_date} {user}] '
-        u'PARTIAL: Desinversió parcial de {amount} €, en queden {remaining} € [{move_line_id}]\n'
-        .format(
-        create_date=ml.create_date,
-        user=ml.user.decode('utf-8'),
-        remaining=attributes.paid_amount,
-        move_line_id=move_line_id,
-        amount=ml.amount,
-        ))
+    inv = InvestmentState(ml.user, ml.create_date,
+        **ns(attributes,log='')
+        )
+    inv.partial(
+        amount = -ml.amount,
+        move_line_id = move_line_id,
+        )
+    changes = inv.changed()
+    attributes.update(changes)
+    return changes.log
 
 sold = ns()
 

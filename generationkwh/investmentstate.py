@@ -238,7 +238,7 @@ class InvestmentState(ns):
             user=self._user,
             remaining=remaining,
             move_line_id=move_line_id,
-            amount=amount,
+            amount=-amount,
             ))
 
         self._changed.update(
