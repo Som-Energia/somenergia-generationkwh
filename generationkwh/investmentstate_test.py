@@ -392,8 +392,8 @@ class InvestmentState_Test(unittest.TestCase):
             paid_amount: 300.0
             nominal_amount: 300.0
             """,
-            u'CREATEDBYTRANSFER: Traspas cap a '
-            u'Palotes, Perico amb codi GKWH00069 [666]\n',
+            u'CREATEDBYTRANSFER: Creada per traspàs de '
+            u'GKWH00069 a nom de Palotes, Perico [666]\n',
             noPreviousLog=True,
             )
 
@@ -420,8 +420,8 @@ class InvestmentState_Test(unittest.TestCase):
             paid_amount: 300.0
             nominal_amount: 300.0
             """,
-            u'CREATEDBYTRANSFER: Traspas cap a '
-            u'Palotes, Perico amb codi GKWH00069 [666]\n',
+            u'CREATEDBYTRANSFER: Creada per traspàs de '
+            u'GKWH00069 a nom de Palotes, Perico [666]\n',
             noPreviousLog=True,
             )
 

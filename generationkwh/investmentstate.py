@@ -136,13 +136,13 @@ class InvestmentState(ns):
         move_line_id):
         log = ( 
             u'[{create_date} {user}] '
-            u'CREATEDBYTRANSFER: Traspas cap a '
-            u'Palotes, Perico amb codi GKWH00069 [666]\n'
+            u'CREATEDBYTRANSFER: Creada per traspàs de '
+            u'{from_name} a nom de {from_partner_name} [{move_line_id}]\n'
             .format(
                 create_date=self._timestamp,
                 user=self._user,
                 move_line_id=move_line_id,
-                from_partner_name = from_partner_name,
+                from_partner_name = from_partner_name.decode('utf-8'),
                 from_name = from_name,
             ))
 
