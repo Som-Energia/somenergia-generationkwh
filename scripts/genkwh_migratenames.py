@@ -1094,15 +1094,17 @@ def logRefund(cr, attributes, move_line_id):
 
 def logRepaid(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
-    attributes.purchase_date = ml.create_date.date()
-    attributes.paid_amount += ml.amount
-    attributes.first_effective_date = firstEffectiveDate(ml.create_date.date())
-    attributes.active = True
-    return log_banktransferred(dict(
-        create_date=ml.create_date,
-        user=ml.user.decode('utf-8'),
-        move_line_id=move_line_id,
-        ))
+    inv = InvestmentState(ml.user, ml.create_date,
+        **ns(attributes,log='')
+        )
+    inv.repay(
+        date = ml.create_date.date(),
+        amount = ml.amount,
+        move_line_id = move_line_id,
+        )
+    changes = inv.changed()
+    attributes.update(changes)
+    return changes.log
 
 def logPartial(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)

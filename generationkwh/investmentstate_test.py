@@ -496,6 +496,7 @@ class InvestmentState_Test(unittest.TestCase):
             first_effective_date: 2017-05-01
             #last_effective_date: 2041-05-01 # TODO Add this
             paid_amount: 300.0
+            active: True
             """,
             u"REPAID: Pagament efectuat per transferencia bancària [666]\n"
             )
