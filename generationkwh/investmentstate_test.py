@@ -119,15 +119,80 @@ class InvestmentState_Test(unittest.TestCase):
             date = isodate('2016-05-01'),
             amount = 300.0,
             iban = 'ES7712341234161234567890',
+            move_line_id = 666,
         )
         changes=inv.changed()
-#        log = changes.pop('log')
+        log = changes.pop('log')
         self.assertNsEqual(inv.changed(), """\
             purchase_date: 2016-05-01
             first_effective_date: 2017-05-01
             #last_effective_date: 2041-05-01 # TODO Add this
             paid_amount: 300.0
             """)
+        self.assertMultiLineEqual(log,
+            self.logprefix + u"PAID: "
+            u"Pagament de 300 € remesat "
+            u"al compte ES7712341234161234567890 [666]\n"
+            u"previous log\n"
+            )
+
+    def test_pay_alreadyPaid(self):
+        inv = InvestmentState("MyUser", "2000-01-01 00:00:00.123435", dict(
+            nominal_amount = 300.0,
+            paid_amount = 300.0,
+            log = "previous log\n",
+        ))
+
+        with self.assertRaises(Exception) as ctx:
+            inv.pay(
+                date = isodate('2016-05-01'),
+                amount = 300.0,
+                iban = 'ES7712341234161234567890',
+                move_line_id = 666,
+            )
+        changes=inv.changed()
+        self.assertEqual(ctx.exception.message,
+            "Already paid")
+        log = changes.pop('log')
+        self.assertNsEqual(inv.changed(), """\
+            paid_amount: 600.0
+            """)
+        # TODO: Log the error!
+        self.assertMultiLineEqual(log,
+            self.logprefix + u"PAID: "
+            u"Pagament de 300 € remesat "
+            u"al compte ES7712341234161234567890 [666]\n"
+            u"previous log\n"
+            )
+
+    def test_pay_wrongAmount(self):
+        inv = InvestmentState("MyUser", "2000-01-01 00:00:00.123435", dict(
+            nominal_amount = 300.0,
+            paid_amount = 0.0,
+            log = "previous log\n",
+        ))
+
+        with self.assertRaises(Exception) as ctx:
+            inv.pay(
+                date = isodate('2016-05-01'),
+                amount = 400.0, # Wrong!
+                iban = 'ES7712341234161234567890',
+                move_line_id = 666,
+            )
+        changes=inv.changed()
+        self.assertEqual(ctx.exception.message,
+            "Wrong payment")
+        log = changes.pop('log')
+        self.assertNsEqual(inv.changed(), """\
+            paid_amount: 400.0
+            """)
+        # TODO: Log the error!
+        self.assertMultiLineEqual(log,
+            self.logprefix + u"PAID: "
+            u"Pagament de 400 € remesat "
+            u"al compte ES7712341234161234567890 [666]\n"
+            u"previous log\n"
+            )
 
 
     def test_fistEffectiveDate(self):
@@ -137,7 +202,6 @@ class InvestmentState_Test(unittest.TestCase):
     def test_fistEffectiveDate_pioners(self):
         self.assertEqual(isodate('2017-03-28'),
             InvestmentState.firstEffectiveDate(isodate('2016-04-27')))
-
 
 
 

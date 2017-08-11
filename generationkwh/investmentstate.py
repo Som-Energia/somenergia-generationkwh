@@ -52,14 +52,34 @@ class InvestmentState(ns):
         waitDelta = timedelta(days=waitDays)
         return purchase_date + waitDelta
 
-    def pay(self, date, amount, iban):
+    def pay(self, date, amount, iban, move_line_id):
+
+        log = log_charged(dict(
+            create_date=self._timestamp,
+            user=self._user,
+            amount=int(amount),
+            iban=iban or u"None",
+            move_line_id=move_line_id,
+            ))
+        self._changed.update(
+            log=log+self._prev.log,
+            paid_amount = self._prev.paid_amount + amount,
+            )
+
+        if amount != self._prev.nominal_amount:
+            # TODO: Concrete Exception class
+            raise Exception("Wrong payment")
+
+        if self._prev.paid_amount:
+            # TODO: Concrete Exception class
+            raise Exception("Already paid")
+
         self._changed.update(
             purchase_date = date,
             # TODO: bissextile years
             first_effective_date = self.firstEffectiveDate(date),
             # TODO: Setting also this one
             #last_effective_date = date + timedelta(years=25),
-            paid_amount = amount,
             )
 
 
