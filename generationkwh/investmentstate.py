@@ -161,5 +161,21 @@ class InvestmentState(ns):
             log=log,
             )
 
+    def pact(self, date, comment, **kwds):
+        log = (
+            u"[{create_date} {user}] "
+            u"PACT: Pacte amb l'inversor. {changes} "
+            u"Motiu: {note}\n"
+            .format(
+            create_date=self._timestamp,
+            user=self._user,
+            changes=ns(kwds).dump()[:-1],
+            note=comment,
+        ))
+        
+        self._changed.update(kwds,
+            log=log+self._prev.log
+        )
+
 
 # vim: et ts=4 sw=4
