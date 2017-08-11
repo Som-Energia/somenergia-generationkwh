@@ -11,6 +11,10 @@ unittest.TestCase.__str__ = unittest.TestCase.id
 
 class InvestmentState_Test(unittest.TestCase):
 
+    user = "MyUser"
+    timestamp = "2000-01-01 00:00:00.123435"
+    logprefix = "[{} {}] ".format(timestamp, user)
+
     def assertNsEqual(self, dict1, dict2):
         def parseIfString(nsOrString):
             if type(nsOrString) in (dict, ns):
@@ -35,7 +39,7 @@ class InvestmentState_Test(unittest.TestCase):
                 u'\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d+ [^]]+\\] .*',
                 u"Linia de log con formato no estandard"
             )
-            
+
         logContent = ''.join(
                 x.split('] ')[1]+'\n'
                 for x in log.splitlines()
@@ -71,8 +75,59 @@ class InvestmentState_Test(unittest.TestCase):
             paid_amount: 0.0
             """)
 
-        self.assertLogEquals(log,
-            u"FORMFILLED: Formulari omplert des de la IP 8.8.8.8, Quantitat: 300 €, IBAN: ES7712341234161234567890\n")
+        self.assertMultiLineEqual(log,
+            self.logprefix + u"FORMFILLED: "
+            u"Formulari omplert des de la IP 8.8.8.8, "
+            u"Quantitat: 300 €, IBAN: ES7712341234161234567890\n")
+
+
+    def test_order_withNoIban(self):
+        inv = InvestmentState("MyUser", "2000-01-01 00:00:00.123435")
+
+        inv.order(
+            date = isodate('2000-01-01'),
+            ip = '8.8.8.8',
+            amount = 300.0,
+            iban = '', # This changes
+        )
+        changes=inv.changed()
+        log = changes.pop('log')
+        self.assertNsEqual(inv.changed(), """\
+            order_date: 2000-01-01
+            purchase_date: False
+            first_effective_date: False
+            last_effective_date: False
+            active: True
+            nominal_amount: 300.0
+            paid_amount: 0.0
+            """)
+
+        self.assertMultiLineEqual(log,
+            self.logprefix + u"FORMFILLED: "
+            u"Formulari omplert des de la IP 8.8.8.8, "
+            u"Quantitat: 300 €, IBAN: None\n")
+
+
+    def test_pay(self):
+        inv = InvestmentState("MyUser", "2000-01-01 00:00:00.123435", dict(
+            nominal_amount = 300.0,
+            paid_amount = 0.0,
+            log = "previous log\n",
+        ))
+
+        inv.pay(
+            date = isodate('2016-05-01'),
+            amount = 300.0,
+            iban = 'ES7712341234161234567890',
+        )
+        changes=inv.changed()
+#        log = changes.pop('log')
+        self.assertNsEqual(inv.changed(), """\
+            purchase_date: 2016-05-01
+            first_effective_date: 2017-05-01
+            #last_effective_date: 2041-05-01 # TODO Add this
+            paid_amount: 300.0
+            """)
 
 
 
