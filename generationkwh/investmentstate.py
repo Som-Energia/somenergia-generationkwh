@@ -43,12 +43,20 @@ class InvestmentState(ns):
             log = log,
         )
 
+    @staticmethod
+    def firstEffectiveDate(purchase_date):
+        pionersDay = '2016-04-28'
+        waitDays = gkwh.waitingDays
+        if str(purchase_date) < pionersDay:
+            waitDays -= 30
+        waitDelta = timedelta(days=waitDays)
+        return purchase_date + waitDelta
+
     def pay(self, date, amount, iban):
         self._changed.update(
             purchase_date = date,
             # TODO: bissextile years
-            # TODO: pioners are just 11 months
-            first_effective_date = date + timedelta(days=gkwh.waitingDays),
+            first_effective_date = self.firstEffectiveDate(date),
             # TODO: Setting also this one
             #last_effective_date = date + timedelta(years=25),
             paid_amount = amount,

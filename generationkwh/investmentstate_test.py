@@ -130,6 +130,18 @@ class InvestmentState_Test(unittest.TestCase):
             """)
 
 
+    def test_fistEffectiveDate(self):
+        self.assertEqual(isodate('2017-04-28'),
+            InvestmentState.firstEffectiveDate(isodate('2016-04-28')))
+
+    def test_fistEffectiveDate_pioners(self):
+        self.assertEqual(isodate('2017-03-28'),
+            InvestmentState.firstEffectiveDate(isodate('2016-04-27')))
+
+
+
+
+
 
 
 # vim: ts=4 sw=4 et
