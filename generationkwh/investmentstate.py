@@ -72,6 +72,11 @@ class InvestmentState(ns):
             iban=iban or u"None",
             move_line_id=move_line_id,
             ))
+
+        return self._pay(date, amount, log)
+
+
+    def _pay(self, date, amount, log):
         self._changed.update(
             log=log+self._prev.log,
             paid_amount = self._prev.paid_amount + amount,
