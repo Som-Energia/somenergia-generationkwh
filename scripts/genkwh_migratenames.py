@@ -1077,29 +1077,20 @@ def logPaid(cr, attributes, investment, move_line_id):
     changes = inv.changed()
     attributes.update(changes)
     return changes.log
-    attributes.purchase_date = ml.create_date.date()
-    attributes.paid_amount += ml.amount
-    attributes.first_effective_date = firstEffectiveDate(ml.create_date.date())
-    return log_charged(dict(
-        create_date=ml.create_date,
-        user=ml.user.decode('utf-8'),
-        amount=int(ml.amount),
-        iban=investment.iban or u"None",
-        move_line_id=move_line_id,
-        ))
 
 def logRefund(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
-    attributes.purchase_date = None
-    attributes.first_effective_date = None
-    attributes.last_effective_date = None
-    attributes.paid_amount += ml.amount
-    attributes.active = False
-    return log_refunded(dict(
-        create_date=ml.create_date,
-        user=ml.user.decode('utf-8'),
-        move_line_id=move_line_id,
-        ))
+    inv = InvestmentState(ml.user, ml.create_date,
+        **ns(attributes,log='')
+        )
+    inv.unpay(
+        amount = -ml.amount,
+        move_line_id = move_line_id,
+        )
+    changes = inv.changed()
+    changes.active=False # TODO: cancel action
+    attributes.update(changes)
+    return changes.log
 
 def logRepaid(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
