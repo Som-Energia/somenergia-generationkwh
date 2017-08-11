@@ -14,7 +14,7 @@ from generationkwh.investmentlogs import (
 import generationkwh.investmentmodel as gkwh
 
 class InvestmentState(ns):
-    def __init__(self, user=None, timestamp=None, values={}):
+    def __init__(self, user=None, timestamp=None, **values):
         self._prev=ns(values)
         self._changed=ns()
         self._user = user
@@ -113,7 +113,7 @@ class InvestmentState(ns):
             log=log+self._prev.log,
         )
 
-    def emitTransfer(self, data, to_name, to_partner_name, move_line_id):
+    def emitTransfer(self, data, amount, to_name, to_partner_name, move_line_id):
         log = (
             u'[{create_date} {user}] '
             u'DIVESTEDBYTRANSFER: Traspas cap a {to_partner_name} amb codi {to_name} [{move_line_id}]\n'

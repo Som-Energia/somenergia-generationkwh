@@ -18,7 +18,7 @@ class InvestmentState_Test(unittest.TestCase):
     def setupInvestment(self, **kwds):
         if kwds and 'log' not in kwds:
             kwds.update(log = "previous log\n")
-        return InvestmentState(self.user, self.timestamp, kwds)
+        return InvestmentState(self.user, self.timestamp, **kwds)
 
     def assertChangesEqual(self, inv, attr, expectedlog=None):
         changes=inv.changed()
@@ -298,6 +298,7 @@ class InvestmentState_Test(unittest.TestCase):
             move_line_id = 666,
             to_name = "GKWH00069",
             to_partner_name = "Palotes, Perico",
+            amount = 300.0,
         )
 
         self.assertChangesEqual(inv, """
@@ -324,6 +325,7 @@ class InvestmentState_Test(unittest.TestCase):
             move_line_id = 666,
             to_name = "GKWH00069",
             to_partner_name = "Palotes, Perico",
+            amount = 300.0,
         )
 
         self.assertChangesEqual(inv, """
@@ -352,6 +354,7 @@ class InvestmentState_Test(unittest.TestCase):
             move_line_id = 666,
             to_name = "GKWH00069",
             to_partner_name = "Palotes, Perico",
+            amount = 300.0,
         )
 
         self.assertChangesEqual(inv, """
@@ -362,6 +365,8 @@ class InvestmentState_Test(unittest.TestCase):
             u'DIVESTEDBYTRANSFER: Traspas cap a '
             u'Palotes, Perico amb codi GKWH00069 [666]\n'
             )
+
+
 
 
 
