@@ -50,8 +50,30 @@ class InvestmentState_Test(unittest.TestCase):
             {}
             """)
 
+    def test_order(self):
+        inv = InvestmentState("MyUser", "2000-01-01 00:00:00.123435")
 
-    
+        inv.order(
+            date = isodate('2000-01-01'),
+            ip = '8.8.8.8',
+            amount = 300.0,
+            iban = 'ES7712341234161234567890',
+        )
+        changes=inv.changed()
+        log = changes.pop('log')
+        self.assertNsEqual(inv.changed(), """\
+            order_date: 2000-01-01
+            purchase_date: False
+            first_effective_date: False
+            last_effective_date: False
+            active: True
+            nominal_amount: 300.0
+            paid_amount: 0.0
+            """)
+
+        self.assertLogEquals(log,
+            u"FORMFILLED: Formulari omplert des de la IP 8.8.8.8, Quantitat: 300 €, IBAN: ES7712341234161234567890\n")
+
 
 
 
