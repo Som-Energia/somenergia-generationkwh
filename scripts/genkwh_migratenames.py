@@ -1044,9 +1044,7 @@ def logOrdered(cr, attributes, investment, amount, order_date, ip):
         **ns(attributes)
         )
     inv.order(order_date.date(), ip, amount, investment.iban)
-    changes = inv.changed()
-    attributes.update(changes)
-    return changes.log
+    attributes.update(inv.changed())
 
 def logCorrected(cr, attributes, investment, what):
     inv = InvestmentState(
@@ -1058,9 +1056,7 @@ def logCorrected(cr, attributes, investment, what):
         from_amount = what['from'],
         to_amount = what.to,
         )
-    changes = inv.changed()
-    attributes.update(changes)
-    return changes.log
+    attributes.update(inv.changed())
 
 def firstEffectiveDate(purchase_date):
     pionersDay = '2016-04-28'
@@ -1076,9 +1072,7 @@ def logPaid(cr, attributes, investment, move_line_id):
         **ns(attributes)
         )
     inv.pay(ml.create_date.date(), ml.amount, investment.iban, move_line_id)
-    changes = inv.changed()
-    attributes.update(changes)
-    return changes.log
+    attributes.update(inv.changed())
 
 def logRefund(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
@@ -1089,10 +1083,8 @@ def logRefund(cr, attributes, move_line_id):
         amount = -ml.amount,
         move_line_id = move_line_id,
         )
-    changes = inv.changed()
-    changes.active=False # TODO: cancel action
-    attributes.update(changes)
-    return changes.log
+    attributes.update(inv.changed(),
+        active=False)
 
 def logRepaid(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
@@ -1104,9 +1096,7 @@ def logRepaid(cr, attributes, move_line_id):
         amount = ml.amount,
         move_line_id = move_line_id,
         )
-    changes = inv.changed()
-    attributes.update(changes)
-    return changes.log
+    attributes.update(inv.changed())
 
 def logPartial(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
@@ -1117,9 +1107,7 @@ def logPartial(cr, attributes, investment, move_line_id):
         amount = -ml.amount,
         move_line_id = move_line_id,
         )
-    changes = inv.changed()
-    attributes.update(changes)
-    return changes.log
+    attributes.update(inv.changed())
 
 sold = ns()
 
