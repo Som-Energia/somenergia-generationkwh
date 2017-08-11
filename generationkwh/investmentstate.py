@@ -145,17 +145,20 @@ class InvestmentState(ns):
                 from_partner_name = from_partner_name,
                 from_name = from_name,
             ))
-        self._changed.update(ns.loads("""
-            active: true
-            first_effective_date: 2001-08-02
-            last_effective_date: 2025-01-02
-            nominal_amount: 300.0
-            order_date: 2000-01-01
-            paid_amount: 300.0
-            purchase_date: 2000-01-02
-        """),
-        log=log,
-        )
+
+        first_effective_date = data + timedelta(days=1)
+        if first_effective_date < from_first_effective_date:
+            first_effective_date = from_first_effective_date
+        self._changed.update(
+            active = True,
+            nominal_amount = amount,
+            paid_amount = amount,
+            order_date = from_order_date,
+            purchase_date = from_purchase_date,
+            first_effective_date = first_effective_date,
+            last_effective_date = from_last_effective_date,
+            log=log,
+            )
 
 
 # vim: et ts=4 sw=4

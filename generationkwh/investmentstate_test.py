@@ -397,6 +397,34 @@ class InvestmentState_Test(unittest.TestCase):
             noPreviousLog=True,
             )
 
+    def test_receiveTransfer_beforeEffectiveDate(self):
+        inv = self.setupInvestment()
+        inv.receiveTransfer(
+            data = isodate("2000-08-01"),
+            move_line_id = 666,
+            amount = 300.0,
+            from_name = "GKWH00069",
+            from_partner_name = "Palotes, Perico",
+            from_order_date = isodate("2000-01-01"),
+            from_purchase_date = isodate("2000-01-02"),
+            from_first_effective_date = isodate("2001-01-02"),
+            from_last_effective_date = isodate("2025-01-02"),
+        )
+        
+        self.assertChangesEqual(inv, """
+            order_date: 2000-01-01
+            purchase_date: 2000-01-02
+            first_effective_date: 2001-01-02
+            last_effective_date: 2025-01-02
+            active: True
+            paid_amount: 300.0
+            nominal_amount: 300.0
+            """,
+            u'CREATEDBYTRANSFER: Traspas cap a '
+            u'Palotes, Perico amb codi GKWH00069 [666]\n',
+            noPreviousLog=True,
+            )
+
 
 
 
