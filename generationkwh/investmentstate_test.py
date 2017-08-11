@@ -503,7 +503,7 @@ class InvestmentState_Test(unittest.TestCase):
 
     def test_correct(self):
         inv = self.setupInvestment(
-            nominal_amount = 300.0,
+            nominal_amount = 200.0,
             paid_amount = 0.0,
         )
 
@@ -517,6 +517,37 @@ class InvestmentState_Test(unittest.TestCase):
             """,
             u"CORRECTED: Quantitat canviada abans del pagament de 200.0 € a 300.0 €\n"
             )
+
+    def test_correct_badFromAmount(self):
+        inv = self.setupInvestment(
+            nominal_amount = 200.0,
+            paid_amount = 0.0,
+        )
+
+        with self.assertRaises(Exception) as ctx:
+            inv.correct(
+                date = isodate('2016-05-01'),
+                from_amount= 100.0,
+                to_amount = 300.0,
+            )
+        self.assertEqual(ctx.exception.message,
+            "Correction not matching the 'from' amount")
+
+    # TODO: Not enough, also if it has unpaid invoices
+    def test_correct_alreadyPaid(self):
+        inv = self.setupInvestment(
+            nominal_amount = 200.0,
+            paid_amount = 200.0,
+        )
+
+        with self.assertRaises(Exception) as ctx:
+            inv.correct(
+                date = isodate('2016-05-01'),
+                from_amount= 200.0,
+                to_amount = 300.0,
+            )
+        self.assertEqual(ctx.exception.message,
+            "Correction can not be done with paid investments")
 
 
 

@@ -207,6 +207,12 @@ class InvestmentState(ns):
         )
 
     def correct(self, date, from_amount, to_amount):
+        if self._prev.nominal_amount != from_amount:
+            raise Exception(
+                "Correction not matching the 'from' amount")
+        # Not enough, also if it has unpaid invoices
+        if self._prev.paid_amount:
+            raise Exception("Correction can not be done with paid investments")
         log = log_corrected(dict(
             create_date=self._timestamp,
             user=self._user,
