@@ -11,7 +11,7 @@ from generationkwh.investmentlogs import (
     log_refunded,
     log_banktransferred,
 )
-
+import generationkwh.investmentmodel as gkwh
 
 class InvestmentState(ns):
     def __init__(self, user=None, timestamp=None, values={}):
@@ -48,7 +48,7 @@ class InvestmentState(ns):
             purchase_date = date,
             # TODO: bissextile years
             # TODO: pioners are just 11 months
-            first_effective_date = date + timedelta(days=365),
+            first_effective_date = date + timedelta(days=gkwh.waitingDays),
             # TODO: Setting also this one
             #last_effective_date = date + timedelta(years=25),
             paid_amount = amount,
