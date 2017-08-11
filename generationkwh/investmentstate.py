@@ -12,6 +12,7 @@ from generationkwh.investmentlogs import (
     log_banktransferred,
 )
 import generationkwh.investmentmodel as gkwh
+from decimal import Decimal
 
 class InvestmentState(ns):
     def __init__(self, user=None, timestamp=None, **values):
@@ -34,12 +35,12 @@ class InvestmentState(ns):
 
         self._changed.update(
             order_date = date,
-            purchase_date = False,
-            first_effective_date = False,
-            last_effective_date = False,
+            purchase_date = None,
+            first_effective_date = None,
+            last_effective_date = None,
             active = True,
             nominal_amount = amount,
-            paid_amount = 0.0,
+            paid_amount = Decimal("0.0"),
             log = log,
         )
 
@@ -90,9 +91,9 @@ class InvestmentState(ns):
             ))
 
         self._changed.update(
-            purchase_date = False,
-            first_effective_date = False,
-            last_effective_date = False,
+            purchase_date = None,
+            first_effective_date = None,
+            last_effective_date = None,
             paid_amount = self._prev.paid_amount-amount,
             log=log+self._prev.log,
         )
@@ -108,7 +109,7 @@ class InvestmentState(ns):
             ))
         self._changed.update(
             last_effective_date = data,
-            active = self._prev.first_effective_date and data>=self._prev.first_effective_date,
+            active = bool(self._prev.first_effective_date and data>=self._prev.first_effective_date),
             paid_amount = self._prev.paid_amount-amount,
             log=log+self._prev.log,
         )
@@ -126,7 +127,7 @@ class InvestmentState(ns):
             ))
         self._changed.update(
             last_effective_date = data,
-            active = self._prev.first_effective_date and data>=self._prev.first_effective_date,
+            active = bool(self._prev.first_effective_date and data>=self._prev.first_effective_date),
             paid_amount = self._prev.paid_amount-amount,
             log=log+self._prev.log,
         )

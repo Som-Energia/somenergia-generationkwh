@@ -81,9 +81,9 @@ class InvestmentState_Test(unittest.TestCase):
         log = changes.pop('log')
         self.assertNsEqual(inv.changed(), """\
             order_date: 2000-01-01
-            purchase_date: False
-            first_effective_date: False
-            last_effective_date: False
+            purchase_date: null
+            first_effective_date: null
+            last_effective_date: null
             active: True
             nominal_amount: 300.0
             paid_amount: 0.0
@@ -108,9 +108,9 @@ class InvestmentState_Test(unittest.TestCase):
         log = changes.pop('log','')
         self.assertNsEqual(inv.changed(), """\
             order_date: 2000-01-01
-            purchase_date: False
-            first_effective_date: False
-            last_effective_date: False
+            purchase_date: null
+            first_effective_date: null
+            last_effective_date: null
             active: True
             nominal_amount: 300.0
             paid_amount: 0.0
@@ -210,9 +210,9 @@ class InvestmentState_Test(unittest.TestCase):
             move_line_id = 666,
         )
         self.assertChangesEqual(inv, """\
-            purchase_date: False
-            first_effective_date: False
-            last_effective_date: False
+            purchase_date: null
+            first_effective_date: null
+            last_effective_date: null
             paid_amount: 0.0
             """,
             u"REFUNDED: Devolució del pagament remesat [666]\n"
@@ -268,8 +268,8 @@ class InvestmentState_Test(unittest.TestCase):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 0.0,
-            first_effective_date = False,
-            last_effective_date = False,
+            first_effective_date = None,
+            last_effective_date = None,
         )
 
         inv.divest(
@@ -347,9 +347,9 @@ class InvestmentState_Test(unittest.TestCase):
             nominal_amount = 300.0,
             paid_amount = 0.0,
             order_date = isodate("2000-01-01"),
-            purchase_date = False,
-            first_effective_date = False,
-            last_effective_date = False,
+            purchase_date = None,
+            first_effective_date = None,
+            last_effective_date = None,
         )
 
         inv.emitTransfer(
