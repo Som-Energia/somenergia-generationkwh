@@ -47,6 +47,14 @@ class InvestmentState_Test(unittest.TestCase):
                 )
         self.assertMultiLineEqual(logContent, expected)
 
+    def assertChangesEqual(self, inv, attr, expectedlog):
+        changes=inv.changed()
+        log = changes.pop('log','')
+        self.assertNsEqual(changes, attr)
+        if expectedlog is None: return
+        self.assertMultiLineEqual(log,
+            self.logprefix + expectedlog + u"previous log\n"
+            )
 
     def test_changes_by_default_noChange(self):
         inv = InvestmentState()
@@ -205,18 +213,9 @@ class InvestmentState_Test(unittest.TestCase):
             first_effective_date: False
             last_effective_date: False
             paid_amount: 0.0
-            """, None)
-        (    u"PAID: "
-            u"Pagament de 300 € remesat "
-            u"al compte ES7712341234161234567890 [666]\n"
-)
-    def assertChangesEqual(self, inv, attr, expectedlog):
-        changes=inv.changed()
-        log = changes.pop('log','')
-        self.assertNsEqual(changes, attr)
-        if expectedlog is None: return
-        self.assertMultiLineEqual(log,
-            self.logprefix + expectedlog + u"previous log\n"
+            """,
+            u"REFUNDED: Devolució del pagament remesat [666]\n"
             )
+
 
 # vim: ts=4 sw=4 et
