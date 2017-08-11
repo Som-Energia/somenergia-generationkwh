@@ -480,5 +480,25 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertEqual(ctx.exception.message,
             "Bad parameter changed in pact 'badparam'")
 
+    def test_repay(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            paid_amount = 0.0,
+        )
+
+        inv.repay(
+            date = isodate('2016-05-01'),
+            amount = 300.0,
+            move_line_id = 666,
+        )
+        self.assertChangesEqual(inv, """\
+            purchase_date: 2016-05-01
+            first_effective_date: 2017-05-01
+            #last_effective_date: 2041-05-01 # TODO Add this
+            paid_amount: 300.0
+            """,
+            u"REPAID: Pagament efectuat per transferencia bancària [666]\n"
+            )
+
 
 # vim: ts=4 sw=4 et

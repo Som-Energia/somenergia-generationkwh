@@ -75,6 +75,13 @@ class InvestmentState(ns):
 
         return self._pay(date, amount, log)
 
+    def repay(self, date, amount, move_line_id):
+        log = log_banktransferred(dict(
+            create_date=self._timestamp,
+            user=self._user,
+            move_line_id=move_line_id,
+            ))
+        return self._pay(date, amount, log)
 
     def _pay(self, date, amount, log):
         self._changed.update(
