@@ -1161,14 +1161,9 @@ def logSold(cr, attributes, investment, move_line_id, what):
         )
     changes_to = inv2.changed()
     sold[what.to] = ns(
-        amount = changes_to.nominal_amount,
-        order_date = changes_to.order_date,
-        purchase_date = changes_to.purchase_date,
-        first_effective_date = changes_to.first_effective_date,
-        last_effective_date =  changes_to.last_effective_date,
+        changes_to,
         from_partner_name = ml.partner_name,
         from_ref = investment.name,
-        log = changes_to.log,
         )
     changes = inv1.changed()
     attributes.last_effective_date = changes.last_effective_date
@@ -1179,7 +1174,7 @@ def logSold(cr, attributes, investment, move_line_id, what):
 def logBought(cr, attributes, investment):
     ml = unusedMovements.pop(investment.move_line_id)
     peer = sold[investment.move_line_id]
-    attributes.nominal_amount = peer.amount
+    attributes.nominal_amount = peer.nominal_amount
     attributes.paid_amount = ml.amount
     attributes.order_date = peer.order_date
     attributes.purchase_date = peer.purchase_date
