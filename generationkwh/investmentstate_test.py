@@ -465,5 +465,20 @@ class InvestmentState_Test(unittest.TestCase):
             u" Motiu: lo dice el jefe\n"
             )
 
+    def test_pact_badParams(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            paid_amount = 0.0,
+        )
+
+        with self.assertRaises(Exception) as ctx:
+            inv.pact(
+                date = isodate('2016-05-01'),
+                comment = "lo dice el jefe",
+                badparam = 'value',
+            )
+        self.assertEqual(ctx.exception.message,
+            "Bad parameter changed in pact 'badparam'")
+
 
 # vim: ts=4 sw=4 et

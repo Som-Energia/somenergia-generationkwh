@@ -15,6 +15,16 @@ import generationkwh.investmentmodel as gkwh
 from decimal import Decimal
 
 class InvestmentState(ns):
+    allowedParams = [
+        'paid_amount',
+        'nominal_amount',
+        'active',
+        'first_effective_date',
+        'last_effective_date',
+        'order_date',
+        'purchase_date',
+        ]
+
     def __init__(self, user=None, timestamp=None, **values):
         self._prev=ns(values)
         self._changed=ns()
@@ -162,6 +172,12 @@ class InvestmentState(ns):
             )
 
     def pact(self, date, comment, **kwds):
+        for param in kwds:
+            if param in self.allowedParams: continue
+            raise Exception(
+                "Bad parameter changed in pact '{}'"
+                .format(param))
+
         log = (
             u"[{create_date} {user}] "
             u"PACT: Pacte amb l'inversor. {changes} "
