@@ -1049,16 +1049,18 @@ def logOrdered(cr, attributes, investment, amount, order_date, ip):
     return changes.log
 
 def logCorrected(cr, attributes, investment, what):
-    if attributes.nominal_amount != what['from']:
-        consoleError("Correction missmatches the from was {} but annotated {}"
-            .format(attributes.nominal_amount, what['from']))
-    attributes.nominal_amount = what.to
-    return log_corrected(dict(
-        create_date=what.when,
-        user="Nobody",
-        oldamount = what['from'],
-        newamount = what.to,
-        ))
+    inv = InvestmentState(
+        "Nobody",
+        what.when,
+        **ns(attributes,log='')
+        )
+    inv.correct(
+        from_amount = what['from'],
+        to_amount = what.to,
+        )
+    changes = inv.changed()
+    attributes.update(changes)
+    return changes.log
 
 def firstEffectiveDate(purchase_date):
     pionersDay = '2016-04-28'
