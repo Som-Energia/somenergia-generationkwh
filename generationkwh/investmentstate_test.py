@@ -563,6 +563,20 @@ class InvestmentState_Test(unittest.TestCase):
             u"PARTIAL: Desinversió parcial de 100.0 €, en queden 200.0 € [666]\n"
             )
 
+    def test_partial_unpaid(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            paid_amount = 0.0,
+        )
+
+        with self.assertRaises(Exception) as ctx:
+            inv.partial(
+                amount= 100.0,
+                move_line_id = 666,
+            )
+        self.assertEqual(ctx.exception.message,
+            "Partial divestment can be only applied to paid investments, "
+            "try 'correct'")
 
 
 # vim: ts=4 sw=4 et

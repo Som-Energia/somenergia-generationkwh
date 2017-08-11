@@ -225,6 +225,10 @@ class InvestmentState(ns):
         )
 
     def partial(self, amount, move_line_id):
+        if not self._prev.paid_amount:
+            raise Exception(
+                "Partial divestment can be only applied to paid investments, try 'correct'")
+
         remaining=self._prev.nominal_amount-amount
         log =(
             u'[{create_date} {user}] '
