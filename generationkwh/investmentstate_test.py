@@ -501,5 +501,25 @@ class InvestmentState_Test(unittest.TestCase):
             u"REPAID: Pagament efectuat per transferencia bancària [666]\n"
             )
 
+    def test_correct(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            paid_amount = 0.0,
+        )
+
+        inv.correct(
+            date = isodate('2016-05-01'),
+            from_amount= 200.0,
+            to_amount = 300.0,
+        )
+        self.assertChangesEqual(inv, """\
+            nominal_amount: 300.0
+            """,
+            u"CORRECTED: Quantitat canviada abans del pagament de 200.0 € a 300.0 €\n"
+            )
+
+
+
+
 
 # vim: ts=4 sw=4 et

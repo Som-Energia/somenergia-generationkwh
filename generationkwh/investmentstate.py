@@ -201,10 +201,28 @@ class InvestmentState(ns):
             changes=", ".join("{}: {}".format(*x) for x in  sorted(kwds.items())),
             note=comment,
         ))
-        
+
         self._changed.update(kwds,
             log=log+self._prev.log
         )
+
+    def correct(self, date, from_amount, to_amount):
+        log = log_corrected(dict(
+            create_date=self._timestamp,
+            user=self._user,
+            oldamount = from_amount,
+            newamount = to_amount,
+            ))
+        self._changed.update(
+            nominal_amount=to_amount,
+            log=log+self._prev.log,
+        )
+
+
+
+
+
+
 
 
 # vim: et ts=4 sw=4

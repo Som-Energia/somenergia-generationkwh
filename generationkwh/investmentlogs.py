@@ -12,7 +12,7 @@ def log_formfilled(data):
 def log_corrected(data):
     return (
         u'[{create_date} {user}] '
-        u'CORRECTED: Amount changed from {oldamount} € to {newamount} € before payment\n'
+        u'CORRECTED: Quantitat canviada abans del pagament de {oldamount} € a {newamount} €\n'
         .format(
             **data
         ))
