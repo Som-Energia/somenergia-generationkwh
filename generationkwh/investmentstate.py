@@ -169,7 +169,7 @@ class InvestmentState(ns):
             .format(
             create_date=self._timestamp,
             user=self._user,
-            changes=ns(kwds).dump()[:-1],
+            changes=", ".join("{}: {}".format(*x) for x in  sorted(kwds.items())),
             note=comment,
         ))
         

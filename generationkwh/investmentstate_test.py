@@ -444,5 +444,26 @@ class InvestmentState_Test(unittest.TestCase):
             u" Motiu: lo dice el jefe\n"
             )
 
+    def test_pact_manyParams(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            paid_amount = 0.0,
+        )
+
+        inv.pact(
+            date = isodate('2016-05-01'),
+            comment = "lo dice el jefe",
+            first_effective_date = isodate('2001-02-02'),
+            last_effective_date = isodate('2001-02-04'),
+        )
+        self.assertChangesEqual(inv, """\
+            first_effective_date: 2001-02-02
+            last_effective_date: 2001-02-04
+            """,
+            u"PACT: Pacte amb l'inversor. "
+            u"first_effective_date: 2001-02-02, last_effective_date: 2001-02-04"
+            u" Motiu: lo dice el jefe\n"
+            )
+
 
 # vim: ts=4 sw=4 et
