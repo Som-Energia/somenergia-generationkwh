@@ -1147,17 +1147,28 @@ def logSold(cr, attributes, investment, move_line_id, what):
         move_line_id = move_line_id,
         amount = -ml.amount,
         )
+    inv2 = InvestmentState(ml.user.decode('utf-8'), ml.create_date)
+    inv2.receiveTransfer(
+        data = transaction_date,
+        move_line_id = what.to,
+        amount = mlto.amount,
+        from_name = investment.name,
+        from_partner_name = ml.partner_name,
+        from_order_date = attributes.order_date,
+        from_purchase_date = attributes.purchase_date,
+        from_first_effective_date = attributes.first_effective_date,
+        from_last_effective_date = attributes.last_effective_date,
+        )
+    changes_to = inv2.changed()
     sold[what.to] = ns(
-        amount = attributes.balance,
-        order_date = attributes.order_date,
-        purchase_date = attributes.purchase_date,
-        first_effective_date = max(
-            attributes.first_effective_date or firstEffectiveDate(attributes.purchase_date),
-            transaction_date + datetime.timedelta(days=1),
-            ),
-        last_effective_date = attributes.last_effective_date,
+        amount = changes_to.nominal_amount,
+        order_date = changes_to.order_date,
+        purchase_date = changes_to.purchase_date,
+        first_effective_date = changes_to.first_effective_date,
+        last_effective_date =  changes_to.last_effective_date,
         from_partner_name = ml.partner_name,
         from_ref = investment.name,
+        log = changes_to.log,
         )
     changes = inv1.changed()
     attributes.last_effective_date = changes.last_effective_date
