@@ -15,6 +15,21 @@ class InvestmentState_Test(unittest.TestCase):
     timestamp = "2000-01-01 00:00:00.123435"
     logprefix = "[{} {}] ".format(timestamp, user)
 
+    def setupInvestment(self, **kwds):
+        if kwds and 'log' not in kwds:
+            kwds.update(log = "previous log\n")
+        return InvestmentState(self.user, self.timestamp, kwds)
+
+    def assertChangesEqual(self, inv, attr, expectedlog):
+        changes=inv.changed()
+        log = changes.pop('log','')
+        self.assertNsEqual(changes, attr)
+        if expectedlog is None: return
+        self.assertMultiLineEqual(log,
+            self.logprefix + expectedlog +
+            u"previous log\n"
+            )
+
     def assertNsEqual(self, dict1, dict2):
         def parseIfString(nsOrString):
             if type(nsOrString) in (dict, ns):
@@ -47,23 +62,14 @@ class InvestmentState_Test(unittest.TestCase):
                 )
         self.assertMultiLineEqual(logContent, expected)
 
-    def assertChangesEqual(self, inv, attr, expectedlog):
-        changes=inv.changed()
-        log = changes.pop('log','')
-        self.assertNsEqual(changes, attr)
-        if expectedlog is None: return
-        self.assertMultiLineEqual(log,
-            self.logprefix + expectedlog + u"previous log\n"
-            )
-
     def test_changes_by_default_noChange(self):
-        inv = InvestmentState()
+        inv = self.setupInvestment()
         self.assertNsEqual(inv.changed(), """\
             {}
             """)
 
     def test_order(self):
-        inv = InvestmentState("MyUser", "2000-01-01 00:00:00.123435")
+        inv = self.setupInvestment()
 
         inv.order(
             date = isodate('2000-01-01'),
@@ -90,7 +96,7 @@ class InvestmentState_Test(unittest.TestCase):
 
 
     def test_order_withNoIban(self):
-        inv = InvestmentState("MyUser", "2000-01-01 00:00:00.123435")
+        inv = self.setupInvestment()
 
         inv.order(
             date = isodate('2000-01-01'),
@@ -117,11 +123,10 @@ class InvestmentState_Test(unittest.TestCase):
 
 
     def test_pay(self):
-        inv = InvestmentState("MyUser", "2000-01-01 00:00:00.123435", dict(
+        inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 0.0,
-            log = "previous log\n",
-        ))
+        )
 
         inv.pay(
             date = isodate('2016-05-01'),
@@ -140,11 +145,10 @@ class InvestmentState_Test(unittest.TestCase):
             )
 
     def test_pay_alreadyPaid(self):
-        inv = InvestmentState("MyUser", "2000-01-01 00:00:00.123435", dict(
+        inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 300.0,
-            log = "previous log\n",
-        ))
+        )
 
         with self.assertRaises(Exception) as ctx:
             inv.pay(
@@ -164,11 +168,10 @@ class InvestmentState_Test(unittest.TestCase):
             )
 
     def test_pay_wrongAmount(self):
-        inv = InvestmentState("MyUser", "2000-01-01 00:00:00.123435", dict(
+        inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 0.0,
-            log = "previous log\n",
-        ))
+        )
 
         with self.assertRaises(Exception) as ctx:
             inv.pay(
@@ -196,13 +199,11 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertEqual(isodate('2017-03-28'),
             InvestmentState.firstEffectiveDate(isodate('2016-04-27')))
 
-
     def test_unpay(self):
-        inv = InvestmentState("MyUser", "2000-01-01 00:00:00.123435", dict(
+        inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 300.0,
-            log = "previous log\n",
-        ))
+        )
 
         inv.unpay(
             amount = 300.0,
@@ -216,6 +217,8 @@ class InvestmentState_Test(unittest.TestCase):
             """,
             u"REFUNDED: Devolució del pagament remesat [666]\n"
             )
+
+
 
 
 # vim: ts=4 sw=4 et
