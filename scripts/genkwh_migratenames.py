@@ -1164,16 +1164,19 @@ def logBought(cr, attributes, investment):
     return peer.log
 
 def logPact(cr, attributes, investment, what):
-    attributes.update(what.changes)
-    return (
-        u'[{create_date} {user}] '
-        u'PACT: Pacte amb l\'inversor. {changes} Motiu: {note}\n'
-        .format(
-        create_date=what.create_date,
-        user=what.user,
-        changes=', '.join("{}: {}".format(*x) for x in what.changes.items()),
-        note=what.note,
-        ))
+    inv = InvestmentState(
+        what.user.encode('utf-8'),
+        what.create_date,
+        **ns(attributes,log='')
+        )
+    inv.pact(
+        date=what.create_date,
+        comment = what.note,
+        **what.changes
+        )
+    changes = inv.changed()
+    attributes.update(changes)
+    return changes.log
 
 def logDivestment(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
