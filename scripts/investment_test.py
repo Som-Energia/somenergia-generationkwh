@@ -1305,13 +1305,12 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )       
         self.Partner.write(self.personalData.partnerid,dict(bank_inversions = False))
-        try:
+        with self.assertRaises(Exception) as ctx:
             self.Investment.create_amortization_invoice(id, '2018-01-30' , 80, 1, 24)
-        except:
-            return
-
-        self.fail("Hauria de sortir un error quan no hi ha Partner.bank_inversions")
-
+        print dir(ctx.exception)
+        self.assertIn(
+            "El partner {surname}, {name} no té informat un compte corrent\n".format(**dbconfig.personaldata),
+            unicode(ctx.exception.faultString).encode())
 
     def test__create_amortization_invoice__withUnnamedInvestment(self):
         id = self.Investment.create_from_form(
