@@ -260,7 +260,27 @@ class InvestmentState_Test(unittest.TestCase):
             """,
             u'DIVESTED: Desinversió total [666]\n'
         )
-        
+
+    def test_divest_unpaid(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            paid_amount = 300.0,
+            first_effective_date = False,
+            last_effective_date = False,
+        )
+
+        inv.divest(
+            data = isodate("2000-08-01"),
+            move_line_id = 666,
+        )
+        self.assertChangesEqual(inv, """\
+            last_effective_date: 2000-08-01
+            active: False
+            paid_amount: 0.0
+            """,
+            u'DIVESTED: Desinversió total [666]\n'
+        )
+
 
 
 
