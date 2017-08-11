@@ -360,7 +360,7 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertChangesEqual(inv, """
             last_effective_date: 2000-08-01
             active: False
-            paid_amount: 0.0
+            paid_amount: -300.0
             """,
             u'DIVESTEDBYTRANSFER: Traspas cap a '
             u'Palotes, Perico amb codi GKWH00069 [666]\n'

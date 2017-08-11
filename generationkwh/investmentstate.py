@@ -127,7 +127,7 @@ class InvestmentState(ns):
         self._changed.update(
             last_effective_date = data,
             active = self._prev.first_effective_date and data>=self._prev.first_effective_date,
-            paid_amount = 0.,
+            paid_amount = self._prev.paid_amount-amount,
             log=log+self._prev.log,
         )
 
