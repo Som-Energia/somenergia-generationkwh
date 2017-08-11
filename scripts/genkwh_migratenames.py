@@ -11,6 +11,7 @@ from consolemsg import step, warn, success, error as consoleError, fail
 import sys
 import generationkwh.investmentmodel as gkwh
 import datetime
+from generationkwh.investmentstate import InvestmentState
 
 
 errorCases = ns()
@@ -1039,20 +1040,13 @@ from generationkwh.investmentlogs import (
 )
 
 def logOrdered(cr, attributes, investment, amount, order_date, ip):
-    attributes.nominal_amount = amount
-    attributes.paid_amount = 0
-    attributes.order_date = order_date.date()
-    attributes.purchase_date = None
-    attributes.first_effective_date = None
-    attributes.last_effective_date = None
-    attributes.active = True
-    return log_formfilled(dict(
-        create_date=order_date,
-        user="Webforms",
-        ip=ip,
-        amount=int(amount),
-        iban=investment.iban or u"None",
-        ))
+    inv = InvestmentState("Webforms", order_date,
+        **ns(attributes,log='')
+        )
+    inv.order(order_date.date(), ip, amount, investment.iban)
+    changes = inv.changed()
+    attributes.update(changes)
+    return changes.log
 
 def logCorrected(cr, attributes, investment, what):
     if attributes.nominal_amount != what['from']:
@@ -1076,6 +1070,13 @@ def firstEffectiveDate(purchase_date):
 
 def logPaid(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
+    inv = InvestmentState(ml.user, ml.create_date,
+        **ns(attributes,log='')
+        )
+    inv.pay(ml.create_date.date(), ml.amount, investment.iban, move_line_id)
+    changes = inv.changed()
+    attributes.update(changes)
+    return changes.log
     attributes.purchase_date = ml.create_date.date()
     attributes.paid_amount += ml.amount
     attributes.first_effective_date = firstEffectiveDate(ml.create_date.date())
@@ -1156,9 +1157,8 @@ def logSold(cr, attributes, investment, move_line_id, what):
         from_first_effective_date = attributes.first_effective_date,
         from_last_effective_date = attributes.last_effective_date,
         )
-    changes_to = inv2.changed()
     sold[what.to] = ns(
-        changes_to,
+        inv2.changed(),
         from_partner_name = ml.partner_name,
         from_ref = investment.name,
         )
