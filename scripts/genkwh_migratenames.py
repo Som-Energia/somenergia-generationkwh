@@ -1154,21 +1154,13 @@ def logSold(cr, attributes, investment, move_line_id, what):
         from_ref = investment.name,
         )
     changes = inv1.changed()
-    attributes.last_effective_date = changes.last_effective_date
-    attributes.paid_amount = changes.paid_amount
-    attributes.active = changes.active
+    attributes.update(changes)
     return changes.log
 
 def logBought(cr, attributes, investment):
     ml = unusedMovements.pop(investment.move_line_id)
     peer = sold[investment.move_line_id]
-    attributes.nominal_amount = peer.nominal_amount
-    attributes.paid_amount = ml.amount
-    attributes.order_date = peer.order_date
-    attributes.purchase_date = peer.purchase_date
-    attributes.first_effective_date = peer.first_effective_date
-    attributes.last_effective_date = peer.last_effective_date
-    attributes.active = True
+    attributes.update(peer)
     return peer.log
 
 def logPact(cr, attributes, investment, what):
