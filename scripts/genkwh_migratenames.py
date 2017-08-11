@@ -1283,15 +1283,14 @@ def solveNormalCase(cr, investment, payment):
     investment = getInvestment(cr, investment.id)
     investment.name = payment.ref
     attributes = ns()
-    log = ""
-    log += logOrdered(cr, attributes, investment, payment.amount, payment.order_date, payment.ip)
+    logOrdered(cr, attributes, investment, payment.amount, payment.order_date, payment.ip)
 
     if payment.ref in cases.singlePaymentCases :
         case = cases.singlePaymentCases.pop(payment.ref)
         for movelineid, what in case.iteritems():
-            log += logMovement(cr, attributes, investment, movelineid, what)
+            logMovement(cr, attributes, investment, movelineid, what)
     else:
-        log += logPaid(cr, attributes, investment, payment.movelineid)
+        logPaid(cr, attributes, investment, payment.movelineid)
         False and displayPartnersMovements(cr, payment.partner_id)
 
     log = attributes.log
@@ -1329,17 +1328,16 @@ def solveRepaidCase(cr, investment, payment):
             payment=payment,
             amount=investment.nshares*gkwh.shareValue,
             )))
-    log= ""
     attributes = ns()
     investment = getInvestment(cr, investment.id)
     investment.name = payment.ref
-    log += logOrdered(cr, attributes, investment, payment.amount, payment.order_date, payment.ip)
+    logOrdered(cr, attributes, investment, payment.amount, payment.order_date, payment.ip)
     if payment.ref not in cases.repaidCases :
         failed("En serio") # TODO explain the error
 
     case = cases.repaidCases.pop(payment.ref)
     for movelineid, what in case.iteritems():
-        log += logMovement(cr, attributes, investment, movelineid, what)
+        logMovement(cr, attributes, investment, movelineid, what)
     False and displayPartnersMovements(cr, payment.partner_id)
     log = attributes.log
     True and success(("\n"+log).encode('utf-8'))
@@ -1375,9 +1373,8 @@ def solveUnnamedCases(cr, investment):
             amount=investment.nshares*gkwh.shareValue,
             name=name,
             ))
-    log = ""
     attributes=ns()
-    log += logBought(cr, attributes, investment)
+    logBought(cr, attributes, investment)
     log = attributes.log
     success(("\n"+log).encode('utf-8'))
     cr.execute("""\
@@ -1407,12 +1404,11 @@ def solveInactiveInvestment(cr, payment):
 
     case = cases.cancelledCases.pop(name)
     investment = getInvestmentByMoveline(cr, payment.movelineid)
-    log = ""
     attributes=ns()
     investment.name = name
-    log += logOrdered(cr, attributes, investment, payment.amount, payment.order_date, payment.ip)
+    logOrdered(cr, attributes, investment, payment.amount, payment.order_date, payment.ip)
     for movelineid, what in case.iteritems():
-        log += logMovement(cr, attributes, investment, movelineid, what)
+        logMovement(cr, attributes, investment, movelineid, what)
 
     True and success(
         "Solved inactive {investment.id} {payment.ref} {payment.order_date} {amount:=8}€ {payment.partner_name}"
