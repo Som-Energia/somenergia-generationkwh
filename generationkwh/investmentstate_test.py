@@ -508,7 +508,6 @@ class InvestmentState_Test(unittest.TestCase):
         )
 
         inv.correct(
-            date = isodate('2016-05-01'),
             from_amount= 200.0,
             to_amount = 300.0,
         )
@@ -526,7 +525,6 @@ class InvestmentState_Test(unittest.TestCase):
 
         with self.assertRaises(Exception) as ctx:
             inv.correct(
-                date = isodate('2016-05-01'),
                 from_amount= 100.0,
                 to_amount = 300.0,
             )
@@ -542,7 +540,6 @@ class InvestmentState_Test(unittest.TestCase):
 
         with self.assertRaises(Exception) as ctx:
             inv.correct(
-                date = isodate('2016-05-01'),
                 from_amount= 200.0,
                 to_amount = 300.0,
             )

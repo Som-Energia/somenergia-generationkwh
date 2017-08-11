@@ -206,7 +206,7 @@ class InvestmentState(ns):
             log=log+self._prev.log
         )
 
-    def correct(self, date, from_amount, to_amount):
+    def correct(self, from_amount, to_amount):
         if self._prev.nominal_amount != from_amount:
             raise Exception(
                 "Correction not matching the 'from' amount")
