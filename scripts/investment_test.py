@@ -738,7 +738,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             - {surname}, {name}
             order_date: '2017-01-01'
             purchase_date: '2017-01-03' # Changed!
-            first_effective_date: false
+            first_effective_date: '2018-01-03'
             last_effective_date: '2042-01-03'
             nshares: 20
             amortized_amount: 0.0
