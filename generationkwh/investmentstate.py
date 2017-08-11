@@ -82,5 +82,16 @@ class InvestmentState(ns):
             #last_effective_date = date + timedelta(years=25),
             )
 
+    def unpay(self, amount, move_line_id):
+        self._changed.update(
+            purchase_date = False,
+            first_effective_date = False,
+            last_effective_date = False,
+            paid_amount = 0.0,
+        )
+
+
+
+
 
 # vim: et ts=4 sw=4
