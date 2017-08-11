@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 '''State tracker for investments'''
 
 from yamlns import namespace as ns
@@ -97,6 +97,21 @@ class InvestmentState(ns):
             log=log+self._prev.log,
         )
 
+    def divest(self, data, move_line_id):
+        log = (
+            u'[{create_date} {user}] '
+            u'DIVESTED: Desinversió total [{move_line_id}]\n'
+            .format(
+                create_date=self._timestamp,
+                user=self._user,
+                move_line_id=move_line_id,
+            ))
+        self._changed.update(
+            last_effective_date = data,
+            active = data>=self._prev.first_effective_date,
+            paid_amount = 0.,
+            log=log+self._prev.log,
+        )
 
 
 

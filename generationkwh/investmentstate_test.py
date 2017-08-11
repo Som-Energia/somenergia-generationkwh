@@ -20,7 +20,7 @@ class InvestmentState_Test(unittest.TestCase):
             kwds.update(log = "previous log\n")
         return InvestmentState(self.user, self.timestamp, kwds)
 
-    def assertChangesEqual(self, inv, attr, expectedlog):
+    def assertChangesEqual(self, inv, attr, expectedlog=None):
         changes=inv.changed()
         log = changes.pop('log','')
         self.assertNsEqual(changes, attr)
@@ -218,6 +218,49 @@ class InvestmentState_Test(unittest.TestCase):
             u"REFUNDED: Devolució del pagament remesat [666]\n"
             )
 
+    # TODO: unpay wrong amount
+    # TODO: unpay not paid
+
+    def test_divest(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            paid_amount = 300.0,
+            first_effective_date = isodate("2000-01-01"),
+            last_effective_date = isodate("2024-01-01"),
+        )
+
+        inv.divest(
+            data = isodate("2001-08-01"),
+            move_line_id = 666,
+        )
+        self.assertChangesEqual(inv, """\
+            last_effective_date: 2001-08-01
+            active: True
+            paid_amount: 0.0
+            """,
+            u'DIVESTED: Desinversió total [666]\n'
+        )
+
+    def test_divest_beforeEffectiveDate(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            paid_amount = 300.0,
+            first_effective_date = isodate("2001-01-01"),
+            last_effective_date = isodate("2025-01-01"),
+        )
+
+        inv.divest(
+            data = isodate("2000-08-01"),
+            move_line_id = 666,
+        )
+        self.assertChangesEqual(inv, """\
+            last_effective_date: 2000-08-01
+            active: False
+            paid_amount: 0.0
+            """,
+            u'DIVESTED: Desinversió total [666]\n'
+        )
+        
 
 
 
