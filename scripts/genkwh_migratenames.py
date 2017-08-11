@@ -1175,15 +1175,6 @@ def logSold(cr, attributes, investment, move_line_id, what):
     attributes.paid_amount = changes.paid_amount
     attributes.active = changes.active
     return changes.log
-    return (
-        u'[{create_date} {user}] '
-        u'DIVESTEDBYTRANSFER: Traspas cap a {toname} amb codi {toref}'
-        .format(
-        create_date=ml.create_date,
-        user=ml.user.decode('utf-8'),
-        toname=mlto.partner_name.decode('utf-8'),
-        toref=cases.unnamedCases[mlto.id],
-        ))
 
 def logBought(cr, attributes, investment):
     ml = unusedMovements.pop(investment.move_line_id)
@@ -1195,15 +1186,7 @@ def logBought(cr, attributes, investment):
     attributes.first_effective_date = peer.first_effective_date
     attributes.last_effective_date = peer.last_effective_date
     attributes.active = True
-    return (
-        u'[{create_date} {user}] '
-        u'CREATEDBYTRANSFER: Creada per traspàs de {fromref} a nom de {fromname}'
-        .format(
-        create_date=ml.create_date,
-        user=ml.user.decode('utf-8'),
-        fromname=peer.from_partner_name.decode('utf-8'),
-        fromref=peer.from_ref,
-        ))
+    return peer.log
 
 def logPact(cr, attributes, investment, what):
     attributes.update(what.changes)
