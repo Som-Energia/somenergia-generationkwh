@@ -283,7 +283,7 @@ class InvestmentState_Test(unittest.TestCase):
         )
 
 
-    def test_transfer(self):
+    def test_emitTransfer(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 300.0,
@@ -309,7 +309,7 @@ class InvestmentState_Test(unittest.TestCase):
             u'Palotes, Perico amb codi GKWH00069 [666]\n'
             )
 
-    def test_transfer_beforeEffectiveDate(self):
+    def test_emitTransfer_beforeEffectiveDate(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 300.0,
@@ -336,7 +336,7 @@ class InvestmentState_Test(unittest.TestCase):
             )
 
 
-    def test_transfer_unpaid(self):
+    def test_emitTransfer_unpaid(self):
         # TODO: Should be a failure case
         inv = self.setupInvestment(
             nominal_amount = 300.0,
