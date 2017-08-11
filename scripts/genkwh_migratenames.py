@@ -1039,8 +1039,8 @@ from generationkwh.investmentlogs import (
 )
 
 def logOrdered(cr, attributes, investment, amount, order_date, ip):
-    attributes.nominal = amount
-    attributes.balance = 0
+    attributes.nominal_amount = amount
+    attributes.paid_amount = 0
     attributes.order_date = order_date.date()
     attributes.purchase_date = None
     attributes.first_effective_date = None
@@ -1055,10 +1055,10 @@ def logOrdered(cr, attributes, investment, amount, order_date, ip):
         ))
 
 def logCorrected(cr, attributes, investment, what):
-    if attributes.nominal != what['from']:
+    if attributes.nominal_amount != what['from']:
         consoleError("Correction missmatches the from was {} but annotated {}"
-            .format(attributes.nominal, what['from']))
-    attributes.nominal = what.to
+            .format(attributes.nominal_amount, what['from']))
+    attributes.nominal_amount = what.to
     return log_corrected(dict(
         create_date=what.when,
         user="Nobody",
@@ -1077,7 +1077,7 @@ def firstEffectiveDate(purchase_date):
 def logPaid(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     attributes.purchase_date = ml.create_date.date()
-    attributes.balance += ml.amount
+    attributes.paid_amount += ml.amount
     attributes.first_effective_date = firstEffectiveDate(ml.create_date.date())
     return log_charged(dict(
         create_date=ml.create_date,
@@ -1092,7 +1092,7 @@ def logRefund(cr, attributes, move_line_id):
     attributes.purchase_date = None
     attributes.first_effective_date = None
     attributes.last_effective_date = None
-    attributes.balance += ml.amount
+    attributes.paid_amount += ml.amount
     attributes.active = False
     return log_refunded(dict(
         create_date=ml.create_date,
@@ -1103,7 +1103,7 @@ def logRefund(cr, attributes, move_line_id):
 def logRepaid(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     attributes.purchase_date = ml.create_date.date()
-    attributes.balance += ml.amount
+    attributes.paid_amount += ml.amount
     attributes.first_effective_date = firstEffectiveDate(ml.create_date.date())
     attributes.active = True
     return log_banktransferred(dict(
@@ -1114,15 +1114,15 @@ def logRepaid(cr, attributes, move_line_id):
 
 def logPartial(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
-    attributes.nominal += ml.amount
-    attributes.balance += ml.amount
+    attributes.nominal_amount += ml.amount
+    attributes.paid_amount += ml.amount
     return (
         u'[{create_date} {user}] '
         u'PARTIAL: Desinversió parcial de {amount} €, en queden {remaining} € [{move_line_id}]\n'
         .format(
         create_date=ml.create_date,
         user=ml.user.decode('utf-8'),
-        remaining=attributes.balance,
+        remaining=attributes.paid_amount,
         move_line_id=move_line_id,
         amount=ml.amount,
         ))
@@ -1137,7 +1137,7 @@ def logSold(cr, attributes, investment, move_line_id, what):
     transaction_date = what.get('date', ml.create_date.date())
     inv1 = InvestmentState(ml.user.decode('utf-8'), ml.create_date,
         first_effective_date = attributes.first_effective_date,
-        paid_amount = attributes.balance,
+        paid_amount = attributes.paid_amount,
         log = '',
         )
     inv1.emitTransfer(
@@ -1172,7 +1172,7 @@ def logSold(cr, attributes, investment, move_line_id, what):
         )
     changes = inv1.changed()
     attributes.last_effective_date = changes.last_effective_date
-    attributes.balance = changes.paid_amount
+    attributes.paid_amount = changes.paid_amount
     attributes.active = changes.active
     return changes.log
     return (
@@ -1188,8 +1188,8 @@ def logSold(cr, attributes, investment, move_line_id, what):
 def logBought(cr, attributes, investment):
     ml = unusedMovements.pop(investment.move_line_id)
     peer = sold[investment.move_line_id]
-    attributes.nominal = peer.amount
-    attributes.balance = ml.amount
+    attributes.nominal_amount = peer.amount
+    attributes.paid_amount = ml.amount
     attributes.order_date = peer.order_date
     attributes.purchase_date = peer.purchase_date
     attributes.first_effective_date = peer.first_effective_date
@@ -1228,7 +1228,7 @@ def crossed(attributes):
 
 def logDivestment(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
-    attributes.balance += ml.amount
+    attributes.paid_amount += ml.amount
     attributes.last_effective_date = ml.create_date.date()
     attributes.active = not crossed(attributes)
     return (
@@ -1294,27 +1294,27 @@ def checkAttributes(real, computed):
     expired = computed.last_effective_date and computed.last_effective_date < datetime.date.today()
 
     if real.active and not expired:
-        check(computed.nominal == computed.balance,
-            "Nominal is {nominal} but balance is {balance}",
+        check(computed.nominal_amount == computed.paid_amount,
+            "Nominal is {nominal_amount} but balance is {paid_amount}",
             **computed)
 
     if not real.active:
-        check(computed.balance == 0,
+        check(computed.paid_amount == 0,
             "Inactive investment should have balance zero and had {}",
-            computed.balance)
+            computed.paid_amount)
 
     if not expired and real.active:
-        check(computed.nominal == gkwh.shareValue * real.nshares,
+        check(computed.nominal_amount == gkwh.shareValue * real.nshares,
             "Missmatch nshares {}, nominal {} €",
-            real.nshares, computed.nominal)
+            real.nshares, computed.nominal_amount)
 
     if expired:
-        check(computed.nominal == gkwh.shareValue * real.nshares,
+        check(computed.nominal_amount == gkwh.shareValue * real.nshares,
             "Expired not matching nshares {} with nominal {} €",
-            real.nshares, computed.nominal)
-        check(computed.balance == 0,
+            real.nshares, computed.nominal_amount)
+        check(computed.paid_amount == 0,
             "Expired should have balance 0 and has {} €",
-            computed.balance)
+            computed.paid_amount)
 
     return check.failed
 
