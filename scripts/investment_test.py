@@ -598,6 +598,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         self.PaymentMandate = self.erp.PaymentMandate
         self.ResPartnerAddress = self.erp.ResPartnerAddress
         self.ResPartner = self.erp.ResPartner
+        self.PEAccounts = self.erp.PoweremailCore_accounts
 
     def tearDown(self):
         self.erp.rollback()
@@ -1609,7 +1610,7 @@ class Investment_Amortization_Test(unittest.TestCase):
                 )))
 
     @unittest.skip('Encue an email, not work if not have poweremail workers')
-    def test__mail(self):
+    def test__send_mail(self):
         ids = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-02',  # order_date
@@ -1618,7 +1619,11 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',
         )
         invoice_ids, err =  self.Investment.create_initial_invoices([ids])
-        self.Investment.send_mail_pas2(invoice_ids[0])
+        model_name = 'account.invoice'
+        from_id = self.PEAccounts.search([('name','=','Generation kWh')])
+        template_id = 51 #TODO: IT must be registered in xml data
+
+        self.Investment.send_mail(invoice_ids,template_id,from_id,model_name)
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
