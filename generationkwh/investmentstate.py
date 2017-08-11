@@ -131,6 +131,31 @@ class InvestmentState(ns):
             log=log+self._prev.log,
         )
 
+    def receiveTransfer(self, data, amount, from_name,
+        from_partner_name, from_order_date, from_purchase_date, from_first_effective_date, from_last_effective_date,
+        move_line_id):
+        log = ( 
+            u'[{create_date} {user}] '
+            u'CREATEDBYTRANSFER: Traspas cap a '
+            u'Palotes, Perico amb codi GKWH00069 [666]\n'
+            .format(
+                create_date=self._timestamp,
+                user=self._user,
+                move_line_id=move_line_id,
+                from_partner_name = from_partner_name,
+                from_name = from_name,
+            ))
+        self._changed.update(ns.loads("""
+            active: true
+            first_effective_date: 2001-08-02
+            last_effective_date: 2025-01-02
+            nominal_amount: 300.0
+            order_date: 2000-01-01
+            paid_amount: 300.0
+            purchase_date: 2000-01-02
+        """),
+        log=log,
+        )
 
 
 # vim: et ts=4 sw=4
