@@ -1038,7 +1038,6 @@ from generationkwh.investmentlogs import (
     log_banktransferred,
 )
 
-
 def logOrdered(cr, attributes, investment, amount, order_date, ip):
     attributes.nominal = amount
     attributes.balance = 0
@@ -1092,6 +1091,7 @@ def logRefund(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     attributes.purchase_date = None
     attributes.first_effective_date = None
+    attributes.last_effective_date = None
     attributes.balance += ml.amount
     attributes.active = False
     return log_refunded(dict(
@@ -1131,21 +1131,39 @@ sold = ns()
 
 def logSold(cr, attributes, investment, move_line_id, what):
     import datetime
+    from generationkwh.investmentstate import InvestmentState
     ml = unusedMovements.pop(move_line_id)
-    mlto = unusedMovements[what.to] # TODO: log it
-    date = what.get('date', ml.create_date.date())
+    mlto = unusedMovements[what.to]
+    transaction_date = what.get('date', ml.create_date.date())
+    inv1 = InvestmentState(ml.user.decode('utf-8'), ml.create_date,
+        first_effective_date = attributes.first_effective_date,
+        paid_amount = attributes.balance,
+        log = '',
+        )
+    inv1.emitTransfer(
+        data = transaction_date,
+        to_partner_name = mlto.partner_name.decode('utf-8'),
+        to_name = cases.unnamedCases[mlto.id],
+        move_line_id = move_line_id,
+        amount = -ml.amount,
+        )
     sold[what.to] = ns(
         amount = attributes.balance,
         order_date = attributes.order_date,
         purchase_date = attributes.purchase_date,
-        first_effective_date = date + datetime.timedelta(days=1),
+        first_effective_date = max(
+            attributes.first_effective_date or firstEffectiveDate(attributes.purchase_date),
+            transaction_date + datetime.timedelta(days=1),
+            ),
         last_effective_date = attributes.last_effective_date,
         from_partner_name = ml.partner_name,
         from_ref = investment.name,
         )
-    attributes.last_effective_date = date
-    attributes.balance += ml.amount
-    attributes.active = not crossed(attributes)
+    changes = inv1.changed()
+    attributes.last_effective_date = changes.last_effective_date
+    attributes.balance = changes.paid_amount
+    attributes.active = changes.active
+    return changes.log
     return (
         u'[{create_date} {user}] '
         u'DIVESTEDBYTRANSFER: Traspas cap a {toname} amb codi {toref}'
@@ -1202,7 +1220,6 @@ def logDivestment(cr, attributes, investment, move_line_id):
     attributes.balance += ml.amount
     attributes.last_effective_date = ml.create_date.date()
     attributes.active = not crossed(attributes)
-
     return (
         u'[{create_date} {user}] '
         u'DIVESTED: Desinversió total [{move_line_id}]\n'
