@@ -232,6 +232,7 @@ class InvestmentState_Test(unittest.TestCase):
         inv.divest(
             data = isodate("2001-08-01"),
             move_line_id = 666,
+            amount = 300.,
         )
         self.assertChangesEqual(inv, """\
             last_effective_date: 2001-08-01
@@ -252,6 +253,7 @@ class InvestmentState_Test(unittest.TestCase):
         inv.divest(
             data = isodate("2000-08-01"),
             move_line_id = 666,
+            amount = 300.,
         )
         self.assertChangesEqual(inv, """\
             last_effective_date: 2000-08-01
@@ -265,19 +267,20 @@ class InvestmentState_Test(unittest.TestCase):
         # TODO: should be failure case
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 300.0,
+            paid_amount = 0.0,
             first_effective_date = False,
             last_effective_date = False,
         )
 
         inv.divest(
             data = isodate("2000-08-01"),
+            amount = 300.,
             move_line_id = 666,
         )
         self.assertChangesEqual(inv, """\
             last_effective_date: 2000-08-01
             active: False
-            paid_amount: 0.0
+            paid_amount: -300.0
             """,
             u'DIVESTED: Desinversió total [666]\n'
         )
