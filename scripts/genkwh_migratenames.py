@@ -1041,7 +1041,7 @@ from generationkwh.investmentlogs import (
 
 def logOrdered(cr, attributes, investment, amount, order_date, ip):
     inv = InvestmentState("Webforms", order_date,
-        **ns(attributes,log='')
+        **ns(attributes)
         )
     inv.order(order_date.date(), ip, amount, investment.iban)
     changes = inv.changed()
@@ -1052,7 +1052,7 @@ def logCorrected(cr, attributes, investment, what):
     inv = InvestmentState(
         "Nobody",
         what.when,
-        **ns(attributes,log='')
+        **ns(attributes)
         )
     inv.correct(
         from_amount = what['from'],
@@ -1073,7 +1073,7 @@ def firstEffectiveDate(purchase_date):
 def logPaid(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     inv = InvestmentState(ml.user, ml.create_date,
-        **ns(attributes,log='')
+        **ns(attributes)
         )
     inv.pay(ml.create_date.date(), ml.amount, investment.iban, move_line_id)
     changes = inv.changed()
@@ -1083,7 +1083,7 @@ def logPaid(cr, attributes, investment, move_line_id):
 def logRefund(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     inv = InvestmentState(ml.user, ml.create_date,
-        **ns(attributes,log='')
+        **ns(attributes)
         )
     inv.unpay(
         amount = -ml.amount,
@@ -1097,7 +1097,7 @@ def logRefund(cr, attributes, move_line_id):
 def logRepaid(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     inv = InvestmentState(ml.user, ml.create_date,
-        **ns(attributes,log='')
+        **ns(attributes)
         )
     inv.repay(
         date = ml.create_date.date(),
@@ -1111,7 +1111,7 @@ def logRepaid(cr, attributes, move_line_id):
 def logPartial(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     inv = InvestmentState(ml.user, ml.create_date,
-        **ns(attributes,log='')
+        **ns(attributes)
         )
     inv.partial(
         amount = -ml.amount,
@@ -1129,7 +1129,7 @@ def logSold(cr, attributes, investment, move_line_id, what):
     mlto = unusedMovements[what.to]
     transaction_date = what.get('date', ml.create_date.date())
     inv1 = InvestmentState(ml.user, ml.create_date,
-        **ns(attributes,log='')
+        **ns(attributes)
         )
     inv1.emitTransfer(
         data = transaction_date,
@@ -1169,7 +1169,7 @@ def logPact(cr, attributes, investment, what):
     inv = InvestmentState(
         what.user.encode('utf-8'),
         what.create_date,
-        **ns(attributes,log='')
+        **ns(attributes)
         )
     inv.pact(
         date=what.create_date,
@@ -1294,6 +1294,7 @@ def solveNormalCase(cr, investment, payment):
         log += logPaid(cr, attributes, investment, payment.movelineid)
         False and displayPartnersMovements(cr, payment.partner_id)
 
+    log = attributes.log
     True and success(("\n"+log).encode('utf-8'))
 
     cr.execute("""\
@@ -1340,6 +1341,7 @@ def solveRepaidCase(cr, investment, payment):
     for movelineid, what in case.iteritems():
         log += logMovement(cr, attributes, investment, movelineid, what)
     False and displayPartnersMovements(cr, payment.partner_id)
+    log = attributes.log
     True and success(("\n"+log).encode('utf-8'))
 
     cr.execute("""\
@@ -1376,6 +1378,7 @@ def solveUnnamedCases(cr, investment):
     log = ""
     attributes=ns()
     log += logBought(cr, attributes, investment)
+    log = attributes.log
     success(("\n"+log).encode('utf-8'))
     cr.execute("""\
         UPDATE
@@ -1418,6 +1421,7 @@ def solveInactiveInvestment(cr, payment):
             payment=payment,
             amount=investment.nshares*gkwh.shareValue,
             )))
+    log = attributes.log
     success(("\n"+log).encode('utf-8'))
     cr.execute("""\
         UPDATE
