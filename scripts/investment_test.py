@@ -555,7 +555,7 @@ class Investment_Test(unittest.TestCase):
         self.PaymentOrder.write(first_order_id, dict(
             state='done',
         ))
-        #TODO: Is necessary a second Investment for this test?
+
         second_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh')
         order = ns(self.PaymentOrder.read(second_order_id,[
             "date_prefered",
@@ -1008,7 +1008,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             - {p.partnerid}
             - {p.surname}, {p.name}
             payment_type:
-            - 1 # TODO
+            - 1
             - Recibo domiciliado
             sii_to_send: false
             type: out_invoice
