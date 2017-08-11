@@ -113,6 +113,24 @@ class InvestmentState(ns):
             log=log+self._prev.log,
         )
 
+    def emitTransfer(self, data, to_name, to_partner_name, move_line_id):
+        log = (
+            u'[{create_date} {user}] '
+            u'DIVESTEDBYTRANSFER: Traspas cap a {to_partner_name} amb codi {to_name} [{move_line_id}]\n'
+            .format(
+                create_date=self._timestamp,
+                user=self._user,
+                move_line_id=move_line_id,
+                to_partner_name = to_partner_name,
+                to_name = to_name,
+            ))
+        self._changed.update(
+            last_effective_date = data,
+            active = self._prev.first_effective_date and data>=self._prev.first_effective_date,
+            paid_amount = 0.,
+            log=log+self._prev.log,
+        )
+
 
 
 # vim: et ts=4 sw=4

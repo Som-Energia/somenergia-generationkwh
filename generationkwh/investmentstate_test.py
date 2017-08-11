@@ -262,6 +262,7 @@ class InvestmentState_Test(unittest.TestCase):
         )
 
     def test_divest_unpaid(self):
+        # TODO: should be failure case
         inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 300.0,
@@ -281,6 +282,86 @@ class InvestmentState_Test(unittest.TestCase):
             u'DIVESTED: Desinversió total [666]\n'
         )
 
+
+    def test_transfer(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            paid_amount = 300.0,
+            order_date = isodate("2000-01-01"),
+            purchase_date = isodate("2000-01-02"),
+            first_effective_date = isodate("2001-01-02"),
+            last_effective_date = isodate("2025-01-02"),
+        )
+
+        inv.emitTransfer(
+            data = isodate("2006-08-01"),
+            move_line_id = 666,
+            to_name = "GKWH00069",
+            to_partner_name = "Palotes, Perico",
+        )
+
+        self.assertChangesEqual(inv, """
+            last_effective_date: 2006-08-01
+            active: True
+            paid_amount: 0.0
+            """,
+            u'DIVESTEDBYTRANSFER: Traspas cap a '
+            u'Palotes, Perico amb codi GKWH00069 [666]\n'
+            )
+
+    def test_transfer_beforeEffectiveDate(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            paid_amount = 300.0,
+            order_date = isodate("2000-01-01"),
+            purchase_date = isodate("2000-01-02"),
+            first_effective_date = isodate("2001-01-02"),
+            last_effective_date = isodate("2025-01-02"),
+        )
+
+        inv.emitTransfer(
+            data = isodate("2000-08-01"),
+            move_line_id = 666,
+            to_name = "GKWH00069",
+            to_partner_name = "Palotes, Perico",
+        )
+
+        self.assertChangesEqual(inv, """
+            last_effective_date: 2000-08-01
+            active: False
+            paid_amount: 0.0
+            """,
+            u'DIVESTEDBYTRANSFER: Traspas cap a '
+            u'Palotes, Perico amb codi GKWH00069 [666]\n'
+            )
+
+
+    def test_transfer_unpaid(self):
+        # TODO: Should be a failure case
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            paid_amount = 0.0,
+            order_date = isodate("2000-01-01"),
+            purchase_date = False,
+            first_effective_date = False,
+            last_effective_date = False,
+        )
+
+        inv.emitTransfer(
+            data = isodate("2000-08-01"),
+            move_line_id = 666,
+            to_name = "GKWH00069",
+            to_partner_name = "Palotes, Perico",
+        )
+
+        self.assertChangesEqual(inv, """
+            last_effective_date: 2000-08-01
+            active: False
+            paid_amount: 0.0
+            """,
+            u'DIVESTEDBYTRANSFER: Traspas cap a '
+            u'Palotes, Perico amb codi GKWH00069 [666]\n'
+            )
 
 
 
