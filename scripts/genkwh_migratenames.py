@@ -1175,29 +1175,19 @@ def logPact(cr, attributes, investment, what):
         note=what.note,
         ))
 
-def crossed(attributes):
-    if not attributes.first_effective_date:
-        return True
-    if not attributes.last_effective_date:
-        return False
-    if attributes.last_effective_date < attributes.first_effective_date:
-        return True
-    return False
-
 def logDivestment(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
-    attributes.paid_amount += ml.amount
-    attributes.last_effective_date = ml.create_date.date()
-    attributes.active = not crossed(attributes)
-    return (
-        u'[{create_date} {user}] '
-        u'DIVESTED: Desinversió total [{move_line_id}]\n'
-        .format(
-        create_date=ml.create_date,
-        user=ml.user.decode('utf8'),
-        move_line_id=move_line_id,
-        ))
-
+    inv = InvestmentState(ml.user, ml.create_date,
+        **ns(attributes,log='')
+        )
+    inv.divest(
+        data=ml.create_date.date(),
+        amount = -ml.amount,
+        move_line_id = move_line_id,
+        )
+    changes = inv.changed()
+    attributes.update(changes)
+    return changes.log
 
 def logMovement(cr, attributes, investment, movelineid, what):
     try:
