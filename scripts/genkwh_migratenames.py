@@ -1131,14 +1131,11 @@ sold = ns()
 
 def logSold(cr, attributes, investment, move_line_id, what):
     import datetime
-    from generationkwh.investmentstate import InvestmentState
     ml = unusedMovements.pop(move_line_id)
     mlto = unusedMovements[what.to]
     transaction_date = what.get('date', ml.create_date.date())
-    inv1 = InvestmentState(ml.user.decode('utf-8'), ml.create_date,
-        first_effective_date = attributes.first_effective_date,
-        paid_amount = attributes.paid_amount,
-        log = '',
+    inv1 = InvestmentState(ml.user, ml.create_date,
+        **ns(attributes,log='')
         )
     inv1.emitTransfer(
         data = transaction_date,
@@ -1147,7 +1144,7 @@ def logSold(cr, attributes, investment, move_line_id, what):
         move_line_id = move_line_id,
         amount = -ml.amount,
         )
-    inv2 = InvestmentState(ml.user.decode('utf-8'), ml.create_date)
+    inv2 = InvestmentState(ml.user, ml.create_date)
     inv2.receiveTransfer(
         data = transaction_date,
         move_line_id = what.to,

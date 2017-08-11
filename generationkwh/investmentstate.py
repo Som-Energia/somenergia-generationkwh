@@ -18,7 +18,7 @@ class InvestmentState(ns):
     def __init__(self, user=None, timestamp=None, **values):
         self._prev=ns(values)
         self._changed=ns()
-        self._user = user
+        self._user = user.decode('utf-8')
         self._timestamp = timestamp
 
     def changed(self):
