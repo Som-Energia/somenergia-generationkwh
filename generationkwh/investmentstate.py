@@ -224,7 +224,24 @@ class InvestmentState(ns):
             log=log+self._prev.log,
         )
 
+    def partial(self, amount, move_line_id):
+        remaining=self._prev.nominal_amount-amount
+        log =(
+            u'[{create_date} {user}] '
+            u'PARTIAL: Desinversió parcial de {amount} €, en queden {remaining} € [{move_line_id}]\n'
+            .format(
+            create_date=self._timestamp,
+            user=self._user,
+            remaining=remaining,
+            move_line_id=move_line_id,
+            amount=amount,
+            ))
 
+        self._changed.update(
+            nominal_amount=remaining,
+            paid_amount=self._prev.paid_amount-amount,
+            log=log+self._prev.log,
+        )
 
 
 

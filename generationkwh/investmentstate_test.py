@@ -546,7 +546,22 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertEqual(ctx.exception.message,
             "Correction can not be done with paid investments")
 
+    def test_partial(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            paid_amount = 300.0,
+        )
 
+        inv.partial(
+            amount= 100.0,
+            move_line_id = 666,
+        )
+        self.assertChangesEqual(inv, """\
+            nominal_amount: 200.0
+            paid_amount: 200.0
+            """,
+            u"PARTIAL: Desinversió parcial de 100.0 €, en queden 200.0 € [666]\n"
+            )
 
 
 
