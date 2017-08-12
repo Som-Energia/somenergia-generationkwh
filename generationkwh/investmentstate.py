@@ -45,7 +45,7 @@ class InvestmentState(object):
         return self._changed
 
     def values(self):
-        return ns(self._prev)
+        return ns(self._prev, **self._changed)
 
     def order(self, name, date, ip, amount, iban):
         log = log_formfilled(dict(

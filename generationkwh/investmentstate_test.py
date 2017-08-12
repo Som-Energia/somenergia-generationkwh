@@ -404,6 +404,28 @@ class InvestmentState_Test(unittest.TestCase):
             log: my log
             """)
 
+    def test_values_mergesChanges(self):
+        inv = self.setupInvestment(
+            name = "GKWH00069",
+            nominal_amount = 200.,
+            paid_amount = 0.,
+            log = 'my log'
+            )
+        inv.correct(
+            from_amount= 200.0,
+            to_amount = 300.0,
+        )
+        self.assertNsEqual(inv.values(), """
+            name: GKWH00069
+            nominal_amount: 300.0
+            paid_amount: 0.0
+            log: '[2000-01-01 00:00:00.123435 MyUser] CORRECTED: Quantitat canviada abans del
+              pagament de 200.0 € a 300.0 €
+
+              my log'
+
+            """)
+
     def test_receiveTransfer(self):
         inv = self.setupInvestment()
         inv.receiveTransfer_old(
