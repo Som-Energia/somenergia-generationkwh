@@ -129,7 +129,7 @@ class InvestmentState(ns):
             log=log+self._prev.log,
         )
 
-    def divest(self, data, amount, move_line_id):
+    def divest(self, date, amount, move_line_id):
         log = (
             u'[{create_date} {user}] '
             u'DIVESTED: Desinversió total [{move_line_id}]\n'
@@ -139,13 +139,13 @@ class InvestmentState(ns):
                 move_line_id=move_line_id,
             ))
         self._changed.update(
-            last_effective_date = data,
-            active = bool(self._prev.first_effective_date and data>=self._prev.first_effective_date),
+            last_effective_date = date,
+            active = bool(self._prev.first_effective_date and date>=self._prev.first_effective_date),
             paid_amount = self._prev.paid_amount-amount,
             log=log+self._prev.log,
         )
 
-    def emitTransfer(self, data, amount, to_name, to_partner_name, move_line_id):
+    def emitTransfer(self, date, amount, to_name, to_partner_name, move_line_id):
         log = (
             u'[{create_date} {user}] '
             u'DIVESTEDBYTRANSFER: Traspas cap a {to_partner_name} amb codi {to_name} [{move_line_id}]\n'
@@ -157,13 +157,13 @@ class InvestmentState(ns):
                 to_name = to_name,
             ))
         self._changed.update(
-            last_effective_date = data,
-            active = bool(self._prev.first_effective_date and data>=self._prev.first_effective_date),
+            last_effective_date = date,
+            active = bool(self._prev.first_effective_date and date>=self._prev.first_effective_date),
             paid_amount = self._prev.paid_amount-amount,
             log=log+self._prev.log,
         )
 
-    def receiveTransfer(self, data, amount, from_name,
+    def receiveTransfer(self, date, amount, from_name,
         from_partner_name, from_order_date, from_purchase_date, from_first_effective_date, from_last_effective_date,
         move_line_id):
         log = ( 
@@ -178,7 +178,7 @@ class InvestmentState(ns):
                 from_name = from_name,
             ))
 
-        first_effective_date = data + timedelta(days=1)
+        first_effective_date = date + timedelta(days=1)
         if first_effective_date < from_first_effective_date:
             first_effective_date = from_first_effective_date
         self._changed.update(

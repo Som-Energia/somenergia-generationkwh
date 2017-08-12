@@ -1071,7 +1071,11 @@ def logPaid(cr, attributes, investment, move_line_id):
     inv = InvestmentState(ml.user, ml.create_date,
         **ns(attributes)
         )
-    inv.pay(ml.create_date.date(), ml.amount, investment.iban, move_line_id)
+    inv.pay(
+        date=ml.create_date.date(),
+        amount=ml.amount,
+        iban=investment.iban,
+        move_line_id=move_line_id)
     attributes.update(inv.changed())
 
 def logRefund(cr, attributes, move_line_id):
@@ -1092,9 +1096,9 @@ def logRepaid(cr, attributes, move_line_id):
         **ns(attributes)
         )
     inv.repay(
-        date = ml.create_date.date(),
-        amount = ml.amount,
-        move_line_id = move_line_id,
+        date=ml.create_date.date(),
+        amount=ml.amount,
+        move_line_id=move_line_id,
         )
     attributes.update(inv.changed())
 
@@ -1120,7 +1124,7 @@ def logSold(cr, attributes, investment, move_line_id, what):
         **ns(attributes)
         )
     inv1.emitTransfer(
-        data = transaction_date,
+        date = transaction_date,
         to_partner_name = mlto.partner_name.decode('utf-8'),
         to_name = cases.unnamedCases[mlto.id],
         move_line_id = move_line_id,
@@ -1128,7 +1132,7 @@ def logSold(cr, attributes, investment, move_line_id, what):
         )
     inv2 = InvestmentState(ml.user, ml.create_date)
     inv2.receiveTransfer(
-        data = transaction_date,
+        date = transaction_date,
         move_line_id = what.to,
         amount = mlto.amount,
         from_name = investment.name,
@@ -1163,7 +1167,7 @@ def logDivestment(cr, attributes, investment, move_line_id):
         **ns(attributes)
         )
     inv.divest(
-        data=ml.create_date.date(),
+        date=ml.create_date.date(),
         amount = -ml.amount,
         move_line_id = move_line_id,
         )
