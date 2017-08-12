@@ -41,6 +41,7 @@ class InvestmentState(object):
         self._timestamp = timestamp
 
     def changed(self):
+        self._checkAttribs(**self._changed)
         return self._changed
 
     def order(self, name, date, ip, amount, iban):
