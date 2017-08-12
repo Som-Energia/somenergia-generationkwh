@@ -1294,7 +1294,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             "Amortization notification {name}-AMOR2018 already exist".format(**inv),
             unicode(ctx.exception),
             )
-    @unittest.skip('Problemes amb encoding. TODO')
+
     def test__create_amortization_invoice__errorWhenNoBank(self):
         #TODO: especificar l'excepció
         id = self.Investment.create_from_form(
@@ -1310,7 +1310,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         print dir(ctx.exception)
         self.assertIn(
             "El partner {surname}, {name} no té informat un compte corrent\n".format(**dbconfig.personaldata),
-            unicode(ctx.exception.faultString).encode())
+            unicode(ctx.exception.faultString).encode('utf-8'))
 
     def test__create_amortization_invoice__withUnnamedInvestment(self):
         id = self.Investment.create_from_form(
