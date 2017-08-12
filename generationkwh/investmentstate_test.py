@@ -20,7 +20,8 @@ class InvestmentState_Test(unittest.TestCase):
             kwds.update(log = "previous log\n")
         return InvestmentState(self.user, self.timestamp, **kwds)
 
-    def assertChangesEqual(self, inv, attr, expectedlog=None, noPreviousLog=False):
+    def assertChangesEqual(self, inv, attr,
+            expectedlog=None, noPreviousLog=False):
         changes=inv.changed()
         log = changes.pop('log','')
         self.assertNsEqual(changes, attr)
