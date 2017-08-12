@@ -1120,18 +1120,18 @@ def logSold(cr, attributes, investment, move_line_id, what):
     ml = unusedMovements.pop(move_line_id)
     mlto = unusedMovements.pop(what.to)
     transaction_date = what.get('date', ml.create_date.date())
-    inv1 = InvestmentState(ml.user, ml.create_date,
+    oldinv = InvestmentState(ml.user, ml.create_date,
         **ns(attributes)
         )
-    inv1.emitTransfer(
-        date = transaction_date,
-        to_partner_name = mlto.partner_name.decode('utf-8'),
-        to_name = cases.unnamedCases[mlto.id],
-        move_line_id = move_line_id,
-        amount = -ml.amount,
+    oldinv.emitTransfer(
+        date=transaction_date,
+        to_partner_name=mlto.partner_name.decode('utf-8'),
+        to_name=cases.unnamedCases[mlto.id],
+        move_line_id=move_line_id,
+        amount=-ml.amount,
         )
-    inv2 = InvestmentState(ml.user, ml.create_date)
-    inv2.receiveTransfer(
+    newinv = InvestmentState(ml.user, ml.create_date)
+    newinv.receiveTransfer(
         date = transaction_date,
         move_line_id = what.to,
         amount = mlto.amount,
@@ -1142,8 +1142,8 @@ def logSold(cr, attributes, investment, move_line_id, what):
         from_first_effective_date = attributes.first_effective_date,
         from_last_effective_date = attributes.last_effective_date,
         )
-    sold[what.to] = inv2.changed()
-    attributes.update(inv1.changed())
+    sold[what.to] = newinv.changed()
+    attributes.update(oldinv.changed())
 
 def logBought(cr, attributes, investment):
     attributes.update(sold.pop(investment.move_line_id))
