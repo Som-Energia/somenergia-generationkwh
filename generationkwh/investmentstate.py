@@ -173,11 +173,24 @@ class InvestmentState(object):
 
     def receiveTransfer(self, name, date, amount, origin, origin_partner_name, move_line_id):
         old = origin.values()
+        log = ( 
+            u'[{create_date} {user}] '
+            u'CREATEDBYTRANSFER: Creada per traspàs de '
+            u'{old.name} a nom de {from_partner_name} [{move_line_id}]\n'
+            .format(
+                create_date=self._timestamp,
+                user=self._user,
+                move_line_id=move_line_id,
+                from_partner_name = origin_partner_name.decode('utf-8'),
+                old = old
+            ))
+
         return self.receiveTransfer_old(
             name=name,
             date=date,
             amount=amount,
             from_name = old.name,
+            log = log,
             from_partner_name = origin_partner_name,
             from_order_date = old.order_date,
             from_purchase_date = old.purchase_date,
@@ -186,21 +199,9 @@ class InvestmentState(object):
             move_line_id=move_line_id,
             )
 
-    def receiveTransfer_old(self, name, date, amount, from_name,
+    def receiveTransfer_old(self, name, date, amount, log, from_name,
         from_partner_name, from_order_date, from_purchase_date, from_first_effective_date, from_last_effective_date,
         move_line_id):
-        log = ( 
-            u'[{create_date} {user}] '
-            u'CREATEDBYTRANSFER: Creada per traspàs de '
-            u'{from_name} a nom de {from_partner_name} [{move_line_id}]\n'
-            .format(
-                create_date=self._timestamp,
-                user=self._user,
-                move_line_id=move_line_id,
-                from_partner_name = from_partner_name.decode('utf-8'),
-                from_name = from_name,
-            ))
-
         first_effective_date = date + timedelta(days=1)
         if first_effective_date < from_first_effective_date:
             first_effective_date = from_first_effective_date
