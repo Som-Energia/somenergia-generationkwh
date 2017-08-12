@@ -1131,6 +1131,8 @@ def logSold(cr, attributes, investment, move_line_id, what):
         **ns(attributes)
         )
     newinv = InvestmentState(ml.user, ml.create_date)
+    # Important: keep before emitTransfer so that
+    # receiveTransfer can access original values
     newinv.receiveTransfer(
         name = newname,
         date = transaction_date,
@@ -1139,6 +1141,7 @@ def logSold(cr, attributes, investment, move_line_id, what):
         origin = oldinv,
         origin_partner_name = ml.partner_name,
         )
+    sold[what.to] = newinv.changed()
     oldinv.emitTransfer(
         date=transaction_date,
         to_partner_name=mlto.partner_name.decode('utf-8'),
@@ -1146,7 +1149,6 @@ def logSold(cr, attributes, investment, move_line_id, what):
         move_line_id=move_line_id,
         amount=-ml.amount,
         )
-    sold[what.to] = newinv.changed()
     attributes.update(oldinv.changed())
 
 def logBought(cr, attributes, investment):
