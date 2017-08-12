@@ -1109,12 +1109,12 @@ def logPartial(cr, attributes, investment, move_line_id):
         )
     attributes.update(inv.changed())
 
-sold = ns()
+sold = ns() # Temporary store for sold investments
 
 def logSold(cr, attributes, investment, move_line_id, what):
     import datetime
     ml = unusedMovements.pop(move_line_id)
-    mlto = unusedMovements[what.to]
+    mlto = unusedMovements.pop(what.to)
     transaction_date = what.get('date', ml.create_date.date())
     inv1 = InvestmentState(ml.user, ml.create_date,
         **ns(attributes)
@@ -1138,20 +1138,11 @@ def logSold(cr, attributes, investment, move_line_id, what):
         from_first_effective_date = attributes.first_effective_date,
         from_last_effective_date = attributes.last_effective_date,
         )
-    sold[what.to] = ns(
-        inv2.changed(),
-        from_partner_name = ml.partner_name,
-        from_ref = investment.name,
-        )
-    changes = inv1.changed()
-    attributes.update(changes)
-    return changes.log
+    sold[what.to] = inv2.changed()
+    attributes.update(inv1.changed())
 
 def logBought(cr, attributes, investment):
-    ml = unusedMovements.pop(investment.move_line_id)
-    peer = sold[investment.move_line_id]
-    attributes.update(peer)
-    return peer.log
+    attributes.update(sold.pop(investment.move_line_id))
 
 def logPact(cr, attributes, investment, what):
     inv = InvestmentState(
