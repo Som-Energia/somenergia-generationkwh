@@ -14,7 +14,7 @@ from generationkwh.investmentlogs import (
 import generationkwh.investmentmodel as gkwh
 from decimal import Decimal
 
-class InvestmentState(ns):
+class InvestmentState(object):
     allowedParams = [
         'paid_amount',
         'nominal_amount',
