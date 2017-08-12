@@ -167,6 +167,17 @@ class InvestmentState(object):
             log=log+self._prev.log,
         )
 
+    def receiveTransfer(self, name, date, amount, origin, origin_partner_name, move_line_id):
+        return self.receiveTransfer_old(
+            name, date, amount,
+            from_name = origin.name,
+            from_partner_name = origin_partner_name,
+            from_order_date = origin.order_date,
+            from_purchase_date = origin.purchase_date,
+            from_first_effective_date = origin.first_effective_date,
+            from_last_effective_date = origin.last_effective_date,
+            )
+
     def receiveTransfer_old(self, name, date, amount, from_name,
         from_partner_name, from_order_date, from_purchase_date, from_first_effective_date, from_last_effective_date,
         move_line_id):
