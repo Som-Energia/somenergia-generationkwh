@@ -392,6 +392,18 @@ class InvestmentState_Test(unittest.TestCase):
             log: my log
             """)
 
+    def test_values_avoidsAliasing(self):
+        inv = self.setupInvestment(
+            name = "GKWH00069",
+            log = 'my log'
+            )
+        values = inv.values()
+        values.newAttribute = 'value'
+        self.assertNsEqual(inv.values(), """
+            name: GKWH00069
+            log: my log
+            """)
+
     def test_receiveTransfer(self):
         inv = self.setupInvestment()
         inv.receiveTransfer_old(
