@@ -460,18 +460,21 @@ class InvestmentState_Test(unittest.TestCase):
             )
 
     def test_receiveTransfer_beforeEffectiveDate(self):
+        origin = self.setupInvestment(
+            name = "GKWH00069",
+            order_date = isodate("2000-01-01"),
+            purchase_date = isodate("2000-01-02"),
+            first_effective_date = isodate("2001-01-02"),
+            last_effective_date = isodate("2025-01-02"),
+            )
         inv = self.setupInvestment()
-        inv.receiveTransfer_old(
+        inv.receiveTransfer(
             name = 'GKWH00666',
             date = isodate("2000-08-01"),
             move_line_id = 666,
             amount = 300.0,
-            from_name = "GKWH00069",
-            from_partner_name = "Palotes, Perico",
-            from_order_date = isodate("2000-01-01"),
-            from_purchase_date = isodate("2000-01-02"),
-            from_first_effective_date = isodate("2001-01-02"),
-            from_last_effective_date = isodate("2025-01-02"),
+            origin = origin,
+            origin_partner_name = "Palotes, Perico",
         )
         
         self.assertChangesEqual(inv, """
