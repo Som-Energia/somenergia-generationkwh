@@ -1171,7 +1171,7 @@ def logPact(cr, attributes, investment, what):
 def logDivestment(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     inv = InvestmentState(ml.user, ml.create_date,
-        **ns(attributes,log='')
+        **ns(attributes)
         )
     inv.divest(
         data=ml.create_date.date(),
