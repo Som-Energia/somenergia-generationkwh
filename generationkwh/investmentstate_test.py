@@ -69,6 +69,14 @@ class InvestmentState_Test(unittest.TestCase):
             {}
             """)
 
+    def test_init_withBadParams(self):
+        with self.assertRaises(Exception) as ctx:
+            self.setupInvestment(
+                badParameter = 'value',
+                )
+        self.assertEqual(ctx.exception.message,
+            "Investments have no 'badParameter' attribute")
+
     def test_order(self):
         inv = self.setupInvestment()
 

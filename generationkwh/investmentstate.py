@@ -23,9 +23,17 @@ class InvestmentState(ns):
         'last_effective_date',
         'order_date',
         'purchase_date',
+        'log',
         ]
 
+    def _checkAttribs(self, **kwds):
+        for key in kwds:
+            if key in self.allowedParams: continue
+            raise Exception(
+                "Investments have no '{}' attribute".format(key))
+
     def __init__(self, user=None, timestamp=None, **values):
+        self._checkAttribs(**values)
         self._prev=ns(values)
         self._changed=ns()
         self._user = user.decode('utf-8')
