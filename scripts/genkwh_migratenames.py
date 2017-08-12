@@ -1043,7 +1043,13 @@ def logOrdered(cr, attributes, investment, amount, order_date, ip):
     inv = InvestmentState("Webforms", order_date,
         **ns(attributes)
         )
-    inv.order(order_date.date(), ip, amount, investment.iban)
+    inv.order(
+        name=investment.name,
+        date=order_date.date(),
+        ip=ip,
+        amount=amount,
+        iban=investment.iban,
+        )
     attributes.update(inv.changed())
 
 def logCorrected(cr, attributes, investment, what):
@@ -1120,18 +1126,20 @@ def logSold(cr, attributes, investment, move_line_id, what):
     ml = unusedMovements.pop(move_line_id)
     mlto = unusedMovements.pop(what.to)
     transaction_date = what.get('date', ml.create_date.date())
+    newname = cases.unnamedCases[mlto.id]
     oldinv = InvestmentState(ml.user, ml.create_date,
         **ns(attributes)
         )
     oldinv.emitTransfer(
         date=transaction_date,
         to_partner_name=mlto.partner_name.decode('utf-8'),
-        to_name=cases.unnamedCases[mlto.id],
+        to_name=newname,
         move_line_id=move_line_id,
         amount=-ml.amount,
         )
     newinv = InvestmentState(ml.user, ml.create_date)
     newinv.receiveTransfer(
+        name = newname,
         date = transaction_date,
         move_line_id = what.to,
         amount = mlto.amount,
@@ -1209,8 +1217,8 @@ def checkAttributes(real, computed):
 
     check.failed = False
 
-
     for attribute in [
+        'name',
         'order_date',
         'purchase_date',
         'first_effective_date',

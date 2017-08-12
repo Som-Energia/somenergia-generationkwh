@@ -81,6 +81,7 @@ class InvestmentState_Test(unittest.TestCase):
         inv = self.setupInvestment()
 
         inv.order(
+            name = 'GKWH00069',
             date = isodate('2000-01-01'),
             ip = '8.8.8.8',
             amount = 300.0,
@@ -89,6 +90,7 @@ class InvestmentState_Test(unittest.TestCase):
         changes=inv.changed()
         log = changes.pop('log')
         self.assertNsEqual(inv.changed(), """\
+            name: GKWH00069
             order_date: 2000-01-01
             purchase_date: null
             first_effective_date: null
@@ -108,6 +110,7 @@ class InvestmentState_Test(unittest.TestCase):
         inv = self.setupInvestment()
 
         inv.order(
+            name = 'GKWH00069',
             date = isodate('2000-01-01'),
             ip = '8.8.8.8',
             amount = 300.0,
@@ -116,6 +119,7 @@ class InvestmentState_Test(unittest.TestCase):
         changes=inv.changed()
         log = changes.pop('log','')
         self.assertNsEqual(inv.changed(), """\
+            name: GKWH00069
             order_date: 2000-01-01
             purchase_date: null
             first_effective_date: null
@@ -381,6 +385,7 @@ class InvestmentState_Test(unittest.TestCase):
     def test_receiveTransfer(self):
         inv = self.setupInvestment()
         inv.receiveTransfer(
+            name = 'GKWH00666',
             date = isodate("2001-08-01"),
             move_line_id = 666,
             amount = 300.0,
@@ -393,6 +398,7 @@ class InvestmentState_Test(unittest.TestCase):
         )
         
         self.assertChangesEqual(inv, """
+            name: GKWH00666
             order_date: 2000-01-01
             purchase_date: 2000-01-02
             first_effective_date: 2001-08-02
@@ -409,6 +415,7 @@ class InvestmentState_Test(unittest.TestCase):
     def test_receiveTransfer_beforeEffectiveDate(self):
         inv = self.setupInvestment()
         inv.receiveTransfer(
+            name = 'GKWH00666',
             date = isodate("2000-08-01"),
             move_line_id = 666,
             amount = 300.0,
@@ -421,6 +428,7 @@ class InvestmentState_Test(unittest.TestCase):
         )
         
         self.assertChangesEqual(inv, """
+            name: GKWH00666
             order_date: 2000-01-01
             purchase_date: 2000-01-02
             first_effective_date: 2001-01-02

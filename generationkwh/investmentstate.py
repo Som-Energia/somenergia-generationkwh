@@ -16,6 +16,7 @@ from decimal import Decimal
 
 class InvestmentState(object):
     allowedParams = [
+        'name',
         'paid_amount',
         'nominal_amount',
         'active',
@@ -42,7 +43,7 @@ class InvestmentState(object):
     def changed(self):
         return self._changed
 
-    def order(self, date, ip, amount, iban):
+    def order(self, name, date, ip, amount, iban):
         log = log_formfilled(dict(
             create_date=self._timestamp,
             user=self._user,
@@ -52,6 +53,7 @@ class InvestmentState(object):
         ))
 
         self._changed.update(
+            name = name,
             order_date = date,
             purchase_date = None,
             first_effective_date = None,
@@ -164,7 +166,7 @@ class InvestmentState(object):
             log=log+self._prev.log,
         )
 
-    def receiveTransfer(self, date, amount, from_name,
+    def receiveTransfer(self, name, date, amount, from_name,
         from_partner_name, from_order_date, from_purchase_date, from_first_effective_date, from_last_effective_date,
         move_line_id):
         log = ( 
@@ -183,6 +185,7 @@ class InvestmentState(object):
         if first_effective_date < from_first_effective_date:
             first_effective_date = from_first_effective_date
         self._changed.update(
+            name = name,
             active = True,
             nominal_amount = amount,
             paid_amount = amount,
