@@ -382,50 +382,6 @@ class InvestmentState_Test(unittest.TestCase):
             u'Palotes, Perico amb codi GKWH00069 [666]\n'
             )
 
-    def test_values_takesInitialValues(self):
-        inv = self.setupInvestment(
-            name = "GKWH00069",
-            log = 'my log'
-            )
-        self.assertNsEqual(inv.values(), """
-            name: GKWH00069
-            log: my log
-            """)
-
-    def test_values_avoidsAliasing(self):
-        inv = self.setupInvestment(
-            name = "GKWH00069",
-            log = 'my log'
-            )
-        values = inv.values()
-        values.newAttribute = 'value'
-        self.assertNsEqual(inv.values(), """
-            name: GKWH00069
-            log: my log
-            """)
-
-    def test_values_mergesChanges(self):
-        inv = self.setupInvestment(
-            name = "GKWH00069",
-            nominal_amount = 200.,
-            paid_amount = 0.,
-            log = 'my log'
-            )
-        inv.correct(
-            from_amount= 200.0,
-            to_amount = 300.0,
-        )
-        self.assertNsEqual(inv.values(), """
-            name: GKWH00069
-            nominal_amount: 300.0
-            paid_amount: 0.0
-            log: '[2000-01-01 00:00:00.123435 MyUser] CORRECTED: Quantitat canviada abans del
-              pagament de 200.0 € a 300.0 €
-
-              my log'
-
-            """)
-
     def test_receiveTransfer(self):
         inv = self.setupInvestment()
         origin = self.setupInvestment(
@@ -446,10 +402,10 @@ class InvestmentState_Test(unittest.TestCase):
         
         self.assertChangesEqual(inv, """
             name: GKWH00666
-            order_date: 2000-01-01
-            purchase_date: 2000-01-02
-            first_effective_date: 2001-01-03
-            last_effective_date: 2025-01-02
+            order_date: 2000-01-01 # Same as origin
+            purchase_date: 2000-01-02 # Same as origin
+            first_effective_date: 2001-01-03 # Next day of the transaction date
+            last_effective_date: 2025-01-02 # Same as origin
             active: True
             paid_amount: 300.0
             nominal_amount: 300.0
@@ -644,6 +600,50 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertEqual(ctx.exception.message,
             "Partial divestment can be only applied to paid investments, "
             "try 'correct'")
+
+    def test_values_takesInitialValues(self):
+        inv = self.setupInvestment(
+            name = "GKWH00069",
+            log = 'my log'
+            )
+        self.assertNsEqual(inv.values(), """
+            name: GKWH00069
+            log: my log
+            """)
+
+    def test_values_avoidsAliasing(self):
+        inv = self.setupInvestment(
+            name = "GKWH00069",
+            log = 'my log'
+            )
+        values = inv.values()
+        values.newAttribute = 'value'
+        self.assertNsEqual(inv.values(), """
+            name: GKWH00069
+            log: my log
+            """)
+
+    def test_values_mergesChanges(self):
+        inv = self.setupInvestment(
+            name = "GKWH00069",
+            nominal_amount = 200.,
+            paid_amount = 0.,
+            log = 'my log'
+            )
+        inv.correct(
+            from_amount= 200.0,
+            to_amount = 300.0,
+        )
+        self.assertNsEqual(inv.values(), """
+            name: GKWH00069
+            nominal_amount: 300.0
+            paid_amount: 0.0
+            log: '[2000-01-01 00:00:00.123435 MyUser] CORRECTED: Quantitat canviada abans del
+              pagament de 200.0 € a 300.0 €
+
+              my log'
+
+            """)
 
 
 # vim: ts=4 sw=4 et
