@@ -185,32 +185,18 @@ class InvestmentState(object):
                 old = old
             ))
 
-        return self.receiveTransfer_old(
-            name=name,
-            date=date,
-            amount=amount,
-            log = log,
-            from_order_date = old.order_date,
-            from_purchase_date = old.purchase_date,
-            from_first_effective_date = old.first_effective_date,
-            from_last_effective_date = old.last_effective_date,
-            )
-
-    def receiveTransfer_old(self, name, date, amount, log,
-        from_order_date, from_purchase_date, from_first_effective_date, from_last_effective_date
-        ):
         first_effective_date = date + timedelta(days=1)
-        if first_effective_date < from_first_effective_date:
-            first_effective_date = from_first_effective_date
+        if first_effective_date < old.first_effective_date:
+            first_effective_date = old.first_effective_date
         self._changed.update(
             name = name,
             active = True,
             nominal_amount = amount,
             paid_amount = amount,
-            order_date = from_order_date,
-            purchase_date = from_purchase_date,
+            order_date = old.order_date,
+            purchase_date = old.purchase_date,
             first_effective_date = first_effective_date,
-            last_effective_date = from_last_effective_date,
+            last_effective_date = old.last_effective_date,
             log=log,
             )
 
