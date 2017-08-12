@@ -1204,7 +1204,7 @@ def checkAttributes(real, computed):
 
     def check(condition, msg, *args, **kwds):
         if condition: return
-        check.failed |= True
+        check.failed = True
         consoleError("Check failed: "+msg.format(*args, **kwds))
 
     check.failed = False
