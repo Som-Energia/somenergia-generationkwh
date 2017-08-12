@@ -384,7 +384,7 @@ class InvestmentState_Test(unittest.TestCase):
 
     def test_receiveTransfer(self):
         inv = self.setupInvestment()
-        inv.receiveTransfer(
+        inv.receiveTransfer_old(
             name = 'GKWH00666',
             date = isodate("2001-08-01"),
             move_line_id = 666,
@@ -414,7 +414,7 @@ class InvestmentState_Test(unittest.TestCase):
 
     def test_receiveTransfer_beforeEffectiveDate(self):
         inv = self.setupInvestment()
-        inv.receiveTransfer(
+        inv.receiveTransfer_old(
             name = 'GKWH00666',
             date = isodate("2000-08-01"),
             move_line_id = 666,

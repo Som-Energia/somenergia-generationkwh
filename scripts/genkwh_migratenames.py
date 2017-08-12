@@ -1138,7 +1138,7 @@ def logSold(cr, attributes, investment, move_line_id, what):
         amount=-ml.amount,
         )
     newinv = InvestmentState(ml.user, ml.create_date)
-    newinv.receiveTransfer(
+    newinv.receiveTransfer_old(
         name = newname,
         date = transaction_date,
         move_line_id = what.to,
