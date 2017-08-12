@@ -437,7 +437,7 @@ class InvestmentState_Test(unittest.TestCase):
             )
         inv.receiveTransfer(
             name = 'GKWH00666',
-            date = isodate("2001-08-01"),
+            date = isodate("2001-01-02"),
             move_line_id = 666,
             amount = 300.0,
             origin=origin,
@@ -448,7 +448,7 @@ class InvestmentState_Test(unittest.TestCase):
             name: GKWH00666
             order_date: 2000-01-01
             purchase_date: 2000-01-02
-            first_effective_date: 2001-08-02
+            first_effective_date: 2001-01-03
             last_effective_date: 2025-01-02
             active: True
             paid_amount: 300.0

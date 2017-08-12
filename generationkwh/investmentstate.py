@@ -185,9 +185,9 @@ class InvestmentState(object):
                 old = old
             ))
 
-        first_effective_date = date + timedelta(days=1)
-        if first_effective_date < old.first_effective_date:
-            first_effective_date = old.first_effective_date
+        first_effective_date = old.first_effective_date
+        if date >= first_effective_date:
+            first_effective_date = date + timedelta(days=1)
         self._changed.update(
             name = name,
             active = True,
