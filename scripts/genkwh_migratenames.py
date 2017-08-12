@@ -1155,9 +1155,7 @@ def logPact(cr, attributes, investment, what):
         comment = what.note,
         **what.changes
         )
-    changes = inv.changed()
-    attributes.update(changes)
-    return changes.log
+    attributes.update(inv.changed())
 
 def logDivestment(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
@@ -1169,9 +1167,7 @@ def logDivestment(cr, attributes, investment, move_line_id):
         amount = -ml.amount,
         move_line_id = move_line_id,
         )
-    changes = inv.changed()
-    attributes.update(changes)
-    return changes.log
+    attributes.update(inv.changed())
 
 def logMovement(cr, attributes, investment, movelineid, what):
     try:
