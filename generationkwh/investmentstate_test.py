@@ -561,7 +561,7 @@ class InvestmentState_Test(unittest.TestCase):
             nominal_amount: 200.0
             paid_amount: 200.0
             """,
-            u"PARTIAL: Desinversió parcial de 100.0 €, en queden 200.0 € [666]\n"
+            u"PARTIAL: Desinversió parcial de -100.0 €, en queden 200.0 € [666]\n"
             )
 
     def test_partial_unpaid(self):
