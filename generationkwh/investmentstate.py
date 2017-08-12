@@ -47,6 +47,7 @@ class InvestmentState(object):
     def values(self):
         return ns(self._prev, **self._changed)
 
+
     def order(self, name, date, ip, amount, iban):
         log = log_formfilled(dict(
             create_date=self._timestamp,
@@ -171,14 +172,18 @@ class InvestmentState(object):
         )
 
     def receiveTransfer(self, name, date, amount, origin, origin_partner_name, move_line_id):
+        old = origin.values()
         return self.receiveTransfer_old(
-            name, date, amount,
-            from_name = origin.name,
+            name=name,
+            date=date,
+            amount=amount,
+            from_name = old.name,
             from_partner_name = origin_partner_name,
-            from_order_date = origin.order_date,
-            from_purchase_date = origin.purchase_date,
-            from_first_effective_date = origin.first_effective_date,
-            from_last_effective_date = origin.last_effective_date,
+            from_order_date = old.order_date,
+            from_purchase_date = old.purchase_date,
+            from_first_effective_date = old.first_effective_date,
+            from_last_effective_date = old.last_effective_date,
+            move_line_id=move_line_id,
             )
 
     def receiveTransfer_old(self, name, date, amount, from_name,
