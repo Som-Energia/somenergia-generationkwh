@@ -1084,11 +1084,11 @@ def logRefund(cr, attributes, move_line_id):
         **ns(attributes)
         )
     inv.unpay(
-        amount = -ml.amount,
-        move_line_id = move_line_id,
+        amount=-ml.amount,
+        move_line_id=move_line_id,
         )
     attributes.update(inv.changed(),
-        active=False)
+        active=False) # In erp don't but in migration yes
 
 def logRepaid(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
@@ -1108,8 +1108,8 @@ def logPartial(cr, attributes, investment, move_line_id):
         **ns(attributes)
         )
     inv.partial(
-        amount = -ml.amount,
-        move_line_id = move_line_id,
+        amount=-ml.amount,
+        move_line_id=move_line_id,
         )
     attributes.update(inv.changed())
 

@@ -116,9 +116,10 @@ class InvestmentState(ns):
 
     def unpay(self, amount, move_line_id):
         log = log_refunded(dict(
-            create_date=self._timestamp,
-            user=self._user,
-            move_line_id=move_line_id,
+            create_date = self._timestamp,
+            user = self._user,
+            amount = amount,
+            move_line_id = move_line_id,
             ))
 
         self._changed.update(
@@ -126,7 +127,7 @@ class InvestmentState(ns):
             first_effective_date = None,
             last_effective_date = None,
             paid_amount = self._prev.paid_amount-amount,
-            log=log+self._prev.log,
+            log = log+self._prev.log,
         )
 
     def divest(self, date, amount, move_line_id):

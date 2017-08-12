@@ -224,7 +224,7 @@ class InvestmentState_Test(unittest.TestCase):
             last_effective_date: null
             paid_amount: 0.0
             """,
-            u"REFUNDED: Devolució del pagament remesat [666]\n"
+            u"REFUNDED: Devolució del pagament remesat de 300.0 € [666]\n"
             )
 
     # TODO: unpay wrong amount

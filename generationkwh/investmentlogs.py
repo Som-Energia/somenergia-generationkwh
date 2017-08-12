@@ -28,7 +28,7 @@ def log_charged(data):
 def log_refunded(data):
     return (
         u'[{create_date} {user}] '
-        u'REFUNDED: Devolució del pagament remesat [{move_line_id}]\n'
+        u'REFUNDED: Devolució del pagament remesat de {amount} € [{move_line_id}]\n'
         .format(
             **data
         ))
