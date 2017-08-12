@@ -382,6 +382,16 @@ class InvestmentState_Test(unittest.TestCase):
             u'Palotes, Perico amb codi GKWH00069 [666]\n'
             )
 
+    def test_values_takesInitialValues(self):
+        inv = self.setupInvestment(
+            name = "GKWH00069",
+            log = 'my log'
+            )
+        self.assertNsEqual(inv.values(), """
+            name: GKWH00069
+            log: my log
+            """)
+
     def test_receiveTransfer(self):
         inv = self.setupInvestment()
         inv.receiveTransfer_old(

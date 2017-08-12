@@ -44,6 +44,9 @@ class InvestmentState(object):
         self._checkAttribs(**self._changed)
         return self._changed
 
+    def values(self):
+        return self._prev
+
     def order(self, name, date, ip, amount, iban):
         log = log_formfilled(dict(
             create_date=self._timestamp,
