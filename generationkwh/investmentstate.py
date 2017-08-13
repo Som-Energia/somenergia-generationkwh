@@ -94,6 +94,7 @@ class InvestmentState(object):
         log = log_banktransferred(dict(
             create_date=self._timestamp,
             user=self._user,
+            amount=amount,
             move_line_id=move_line_id,
             ))
         self._changed.update(active = True)

@@ -511,7 +511,7 @@ class InvestmentState_Test(unittest.TestCase):
 
         inv.repay(
             date = isodate('2016-05-01'),
-            amount = 300.0,
+            amount = 300,
             move_line_id = 666,
         )
         self.assertChangesEqual(inv, """\
@@ -521,7 +521,7 @@ class InvestmentState_Test(unittest.TestCase):
             paid_amount: 300.0
             active: True
             """,
-            u"REPAID: Pagament efectuat per transferencia bancària [666]\n"
+            u"REPAID: Pagament de 300 € rebut per transferència bancària [666]\n"
             )
 
     def test_correct(self):

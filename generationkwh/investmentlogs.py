@@ -36,7 +36,7 @@ def log_refunded(data):
 def log_banktransferred(data):
     return (
         u'[{create_date} {user}] '
-        u'REPAID: Pagament efectuat per transferencia bancària [{move_line_id}]\n'
+        u'REPAID: Pagament de {amount} € rebut per transferència bancària [{move_line_id}]\n'
         .format(
             **data
         ))
