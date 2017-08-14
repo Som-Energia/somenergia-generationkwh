@@ -647,5 +647,28 @@ class InvestmentState_Test(unittest.TestCase):
 
             """)
 
+    def test_cancel(self):
+        inv = self.setupInvestment(
+            purchase_date = False,
+            paid_amount = 0.,
+            )
+        inv.cancel()
+        self.assertChangesEqual(inv, """
+            active: False
+            """,
+            u'CANCEL: La inversió ha estat cancel·lada\n'
+            )
+
+    def test_cancel_paid(self):
+        inv = self.setupInvestment(
+            purchase_date = isodate('2001-01-02'),
+            paid_amount = 300.,
+            )
+        with self.assertRaises(Exception) as ctx:
+            inv.cancel()
+        self.assertEqual(ctx.exception.message,
+            "Only unpaid investments can be cancelled")
+
+    # TODO: cancel with payment order
 
 # vim: ts=4 sw=4 et

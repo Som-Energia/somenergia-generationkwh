@@ -332,8 +332,27 @@ class InvestmentState(object):
             log=log+self._prev.log,
         )
 
+    def cancel(self):
+        """
+        Marks an unpaid investments as discarded.
+        Usually a refunded investment once the investor
+        refuses to pay it or cannot be contacted.
+        """
+        if self._prev.purchase_date:
+            raise Exception(
+                "Only unpaid investments can be cancelled")
 
-
+        log = (
+            u'[{create_date} {user}] '
+            u'CANCEL: La inversió ha estat cancel·lada\n'
+            .format(
+            create_date=self._timestamp,
+            user=self._user,
+            ))
+        self._changed.update(
+            active=False,
+            log=log+self._prev.log,
+            )
 
 
 
