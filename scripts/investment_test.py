@@ -720,7 +720,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',False,False,
             )
 
-        self.Investment.mark_as_paid([id], '2017-01-03')
+        self.Investment.mark_as_paid([id], '2017-01-03',False,False)
 
         investment = ns(self.Investment.read(id, []))
         log = investment.pop('log')
@@ -768,7 +768,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',False,False,
             )
 
-        self.Investment.mark_as_paid([id1,id2], '2017-01-03')
+        self.Investment.mark_as_paid([id1,id2], '2017-01-03',False,False)
         
         result = self.Investment.read(
             [id1,id2],
@@ -801,7 +801,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',False,False,
             )
 
-        self.Investment.mark_as_paid([id1,id2], '2017-01-03')
+        self.Investment.mark_as_paid([id1,id2], '2017-01-03',False,False)
         
         result = self.Investment.read([id1,id2], ['log'], order='id')
         
@@ -825,7 +825,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',False,False,
         )
 
-        self.Investment.mark_as_paid([id], '2017-01-03')
+        self.Investment.mark_as_paid([id], '2017-01-03',False,False)
         self.Investment.mark_as_unpaid([id])
 
         investment = ns(self.Investment.read(id, []))
@@ -875,7 +875,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',False,False,
         )
 
-        self.Investment.mark_as_paid([id1, id2], '2017-01-03')
+        self.Investment.mark_as_paid([id1, id2], '2017-01-03',False,False)
         self.Investment.mark_as_unpaid([id1, id2])
 
         result = self.Investment.read(
@@ -909,7 +909,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',False,False,
         )
 
-        self.Investment.mark_as_paid([id1, id2], '2017-01-03')
+        self.Investment.mark_as_paid([id1, id2], '2017-01-03',False,False)
         self.Investment.mark_as_unpaid([id1, id2])
 
         result = self.Investment.read([id1, id2], ['log'], order='id')
@@ -1087,7 +1087,7 @@ class Investment_Amortization_Test(unittest.TestCase):
 
         inv = self.Investment.read(id,['name'])
 
-        self.Investment.mark_as_paid([id], '2016-01-04')
+        self.Investment.mark_as_paid([id], '2016-01-04',False,False)
         result = self.Investment.create_initial_invoices([id])
 
         self.assertEquals(result, [[], [
@@ -1183,7 +1183,7 @@ class Investment_Amortization_Test(unittest.TestCase):
         investment2 = self.Investment.read(id2,['name'])
 
         self.Investment.write(id1, {'active':False})
-        self.Investment.mark_as_paid([id2], '2016-01-04')
+        self.Investment.mark_as_paid([id2], '2016-01-04',False,False)
 
         result = self.Investment.create_initial_invoices([id1,id2])
 
@@ -1210,7 +1210,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',False,False,
             )
 
-        self.Investment.mark_as_paid([id], '2017-01-03')
+        self.Investment.mark_as_paid([id], '2017-01-03',False,False)
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
         self.assertTrue(invoice_id)
@@ -1282,7 +1282,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             )
         inv = self.Investment.read(id, ['name'])
 
-        self.Investment.mark_as_paid([id], '2017-01-03')
+        self.Investment.mark_as_paid([id], '2017-01-03',False,False)
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
 
@@ -1324,7 +1324,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             name=None)
             )
 
-        self.Investment.mark_as_paid([id], '2016-01-03')
+        self.Investment.mark_as_paid([id], '2016-01-03',False,False)
 
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-03', 80, 1, 24)
@@ -1344,7 +1344,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             False,False,
             )
 
-        self.Investment.mark_as_paid([id], '2017-01-03')
+        self.Investment.mark_as_paid([id], '2017-01-03',False,False)
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
 
@@ -1396,7 +1396,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             '10.10.23.1',
             'ES7712341234161234567890',False,False,
         )
-        self.Investment.mark_as_paid([investment_id], '2000-01-05')
+        self.Investment.mark_as_paid([investment_id], '2000-01-05',False,False)
         self.Investment.amortize('2002-01-06', [investment_id])
 
         investment = self.Investment.read(investment_id, ['log'])
@@ -1416,7 +1416,7 @@ class Investment_Amortization_Test(unittest.TestCase):
             'ES7712341234161234567890',False,False,
         )
 
-        self.Investment.mark_as_paid([id], '2017-01-03')
+        self.Investment.mark_as_paid([id], '2017-01-03',False,False)
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
         self.assertTrue(invoice_id)
@@ -1608,21 +1608,6 @@ class Investment_Amortization_Test(unittest.TestCase):
                     today=datetime.date.today(),
                 )))
 
-    @unittest.skip('Encue an email, not work if not have poweremail workers')
-    def test__send_mail(self):
-        ids = self.Investment.create_from_form(
-            self.personalData.partnerid,
-            '2017-01-02',  # order_date
-            2000,
-            '10.10.23.2',
-            'ES7712341234161234567890',
-        )
-        invoice_ids, err =  self.Investment.create_initial_invoices([ids])
-        model_name = 'account.invoice'
-        from_id = self.PEAccounts.search([('name','=','Generation kWh')])
-        template_id = 51 #TODO: IT must be registered in xml data
-
-        self.Investment.send_mail(invoice_ids,template_id,from_id,model_name)
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
