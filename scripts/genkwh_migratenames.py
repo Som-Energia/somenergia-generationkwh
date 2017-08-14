@@ -1442,10 +1442,13 @@ def showUnusedMovements(cr):
         consoleError("Some single payment cases have been not considered")
         consoleError(cases.singlePaymentCases.dump())
 
-
     if cases.cancelledCases:
         consoleError("Some cancelled payment cases have been not considered")
         consoleError(cases.cancelledCases.dump())
+
+    if cases.unnamedCases:
+        consoleError("Some unamed case have been not considered")
+        consoleError(cases.unnamedCases.dump())
 
 
 cases = ns.load('migration.yaml')

@@ -183,7 +183,7 @@ class InvestmentState(object):
             ))
         self._changed.update(
             last_effective_date = date,
-            active = bool(self._prev.first_effective_date and date>=self._prev.first_effective_date),
+            active = bool(self._prev.first_effective_date) and date>=self._prev.first_effective_date,
             paid_amount = self._prev.paid_amount-amount,
             log=log+self._prev.log,
         )

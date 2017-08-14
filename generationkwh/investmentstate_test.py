@@ -232,7 +232,8 @@ class InvestmentState_Test(unittest.TestCase):
             )
 
     # TODO: unpay wrong amount
-    # TODO: unpay not paid
+    # TODO: unpay unpaid
+    # TODO: unpay effective
 
     def test_divest(self):
         inv = self.setupInvestment(
