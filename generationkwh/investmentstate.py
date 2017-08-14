@@ -187,6 +187,10 @@ class InvestmentState(object):
             paid_amount = self._prev.paid_amount-amount,
             log=log+self._prev.log,
         )
+        if self._changed.paid_amount:
+            raise Exception(
+                u"Paid amount after divestment should be 0 but was {} €"
+                .format(self._changed.paid_amount))
 
     def emitTransfer(self, date, amount, to_name, to_partner_name, move_line_id):
         """

@@ -284,12 +284,14 @@ class InvestmentState_Test(unittest.TestCase):
             first_effective_date = None,
             last_effective_date = None,
         )
-
-        inv.divest(
-            date = isodate("2000-08-01"),
-            amount = 300.,
-            move_line_id = 666,
-        )
+        with self.assertRaises(Exception) as ctx:
+            inv.divest(
+                date = isodate("2000-08-01"),
+                amount = 300.,
+                move_line_id = 666,
+            )
+        self.assertEqual(ctx.exception.message,
+            u"Paid amount after divestment should be 0 but was -300.0 €")
         self.assertChangesEqual(inv, """\
             last_effective_date: 2000-08-01
             active: False
