@@ -21,9 +21,12 @@ class Account_Invoice_Test(unittest.TestCase):
         self.erp.begin()
         self.Investment = self.erp.GenerationkwhInvestment
         self.AccountInvoice = self.erp.AccountInvoice
+        self.MailMockup = self.erp.GenerationkwhMailmockup
         self.Investment.dropAll()
+        self.MailMockup.activate()
 
     def tearDown(self):
+        self.MailMockup.deactivate()
         self.erp.rollback()
         self.erp.close()
 

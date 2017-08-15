@@ -724,7 +724,7 @@ def cleanUp(cr):
     for inv in negativeInvestments:
         displayPartnersMovements(cr, inv.partner_id)
 
-    if False and negativeInvestments:
+    if negativeInvestments:
         fail("No puc avançar si hi ha aquests errors")
 
 

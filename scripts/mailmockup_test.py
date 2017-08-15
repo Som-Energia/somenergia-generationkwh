@@ -69,6 +69,7 @@ class MailMockup_Test(unittest.TestCase):
         self.MailMockup.activate()
         self.assertTrue(self.MailMockup.isActive())
         self.MailMockup.deactivate()
+        self.assertFalse(self.MailMockup.isActive())
 
     def test_log(self):
         self.MailMockup.activate()
