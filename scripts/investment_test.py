@@ -14,7 +14,7 @@ import erppeek_wst
 
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
-class Investment_Test(unittest.TestCase):
+class Investment_OLD_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
         self.b2bdatapath="b2bdata"
@@ -534,7 +534,7 @@ class Investment_Test(unittest.TestCase):
 
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
-class Investment_Amortization_Test(unittest.TestCase):
+class Investment_Test(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff=None
