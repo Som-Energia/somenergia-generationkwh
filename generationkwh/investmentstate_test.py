@@ -153,7 +153,7 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertChangesEqual(inv, """\
             purchase_date: 2016-05-01
             first_effective_date: 2017-05-01
-            #last_effective_date: 2041-05-01 # TODO Add this
+            last_effective_date: 2041-05-01 # TODO Add this
             paid_amount: 300.0
             """,
             u"PAID: Pagament de 300 € remesat "
@@ -523,7 +523,7 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertChangesEqual(inv, """\
             purchase_date: 2016-05-01
             first_effective_date: 2017-05-01
-            #last_effective_date: 2041-05-01 # TODO Add this
+            last_effective_date: 2041-05-01 # TODO Add this
             paid_amount: 300.0
             active: True
             """,

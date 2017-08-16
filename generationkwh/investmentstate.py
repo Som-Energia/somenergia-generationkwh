@@ -147,13 +147,13 @@ class InvestmentState(object):
         if self._prev.paid_amount:
             # TODO: Concrete Exception class
             raise Exception("Already paid")
-
+        from dateutil.relativedelta import relativedelta
         self._changed.update(
             purchase_date = date,
             # TODO: bissextile years
             first_effective_date = self.firstEffectiveDate(date),
             # TODO: Setting also this one
-            #last_effective_date = date + timedelta(years=25),
+            last_effective_date = date + relativedelta(years=gkwh.expirationYears),
             )
 
     def unpay(self, amount, move_line_id):
