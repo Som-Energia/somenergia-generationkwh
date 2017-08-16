@@ -724,6 +724,27 @@ class InvestmentState_Test(unittest.TestCase):
             nshares: 2
             """)
 
+    def test_erpChanges_clearsPaidAmount(self):
+        inv = self.setupInvestment(
+            nominal_amount = 100,
+            paid_amount = 0,
+            )
+
+        inv.repay(
+            date = isodate('2016-05-01'),
+            amount = 100,
+            move_line_id = 666,
+        )
+        changes=inv.erpChanges()
+        log = changes.pop('log')
+        self.assertNsEqual(changes, """\
+            active: True
+            #paid_amount: 100 # Excpect this one to be removed
+            purchase_date: 2016-05-01
+            first_effective_date: 2017-05-01
+            last_effective_date: 2041-05-01 # TODO Add this
+            """)
+
 
 
 

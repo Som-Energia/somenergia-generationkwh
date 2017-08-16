@@ -60,6 +60,7 @@ class InvestmentState(object):
             changes.update(
                 nshares=changes.nominal_amount//gkwh.shareValue,
             )
+        changes.pop('paid_amount',None)
         return changes
 
     def values(self):
