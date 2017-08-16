@@ -6,57 +6,7 @@ from .isodates import isodate
 from datetime import timedelta
 import generationkwh.investmentmodel as gkwh
 from decimal import Decimal
-
 from decorator import decorator
-
-
-def log_formfilled(data):
-    return (
-        u'[{create_date} {user}] '
-        u"FORMFILLED: Formulari omplert des de la IP {ip}, Quantitat: {amount} €, IBAN: {iban}\n"
-        .format(
-            **data
-        ))
-
-def log_corrected(data):
-    return (
-        u'[{create_date} {user}] '
-        u'CORRECTED: Quantitat canviada abans del pagament de {oldamount} € a {newamount} €\n'
-        .format(
-            **data
-        ))
-
-def log_charged(data):
-    return (
-        u'[{create_date} {user}] '
-        u"PAID: Pagament de {amount} € remesat al compte {iban} [{move_line_id}]\n"
-        .format(
-            **data
-        ))
-
-def log_refunded(data):
-    return (
-        u'[{create_date} {user}] '
-        u'REFUNDED: Devolució del pagament remesat de {amount} € [{move_line_id}]\n'
-        .format(
-            **data
-        ))
-
-def log_banktransferred(data):
-    return (
-        u'[{create_date} {user}] '
-        u'REPAID: Pagament de {amount} € rebut per transferència bancària [{move_line_id}]\n'
-        .format(
-            **data
-        ))
-
-def log_returned(data):
-    return (
-        u'[{create_date} {user}] '
-        u'RETURNED: Desinversió total\n'
-        .format(
-            **data
-        ))
 
 
 @decorator
@@ -88,6 +38,13 @@ class InvestmentState(object):
         'purchase_date',
         'log',
         ]
+
+    def _log(self, message, **kwds):
+        return (
+            u'[{create_date} {user}] '.format(
+                create_date=self._timestamp,
+                user=self._user,
+            ) + message.format(**kwds))
 
     def _checkAttribs(self, **kwds):
         for key in kwds:
@@ -124,13 +81,12 @@ class InvestmentState(object):
         Creates a new investment from the info retrived
         from the investment form.
         """
-        log = log_formfilled(dict(
-            create_date=self._timestamp,
-            user=self._user,
+        log = self._log(
+            u"FORMFILLED: Formulari omplert des de la IP {ip}, Quantitat: {amount} €, IBAN: {iban}\n",
             ip=ip,
             amount=int(amount),
             iban=iban or None,
-        ))
+        )
 
         return ns(
             name = name,
@@ -164,13 +120,12 @@ class InvestmentState(object):
         Effective period is set accordantly to the
         investment model.
         """
-        log = log_charged(dict(
-            create_date=self._timestamp,
-            user=self._user,
+        log = self._log(
+            u"PAID: Pagament de {amount} € remesat al compte {iban} [{move_line_id}]\n",
             amount=int(amount),
             iban=iban or u"None",
             move_line_id=move_line_id,
-            ))
+            )
 
         return self._pay(date, amount, log)
 
@@ -180,12 +135,11 @@ class InvestmentState(object):
         A previously refunded payment has been paid
         by a bank transfer or another mean.
         """
-        log = log_banktransferred(dict(
-            create_date=self._timestamp,
-            user=self._user,
+        log = self._log(
+            u'REPAID: Pagament de {amount} € rebut per transferència bancària [{move_line_id}]\n',
             amount=amount,
             move_line_id=move_line_id,
-            ))
+            )
         self._changed.update(active = True)
         return self._pay(date, amount, log)
 
@@ -221,12 +175,11 @@ class InvestmentState(object):
         A previous payment has been returned by the bank
         so the investment is set as unpaid.
         """
-        log = log_refunded(dict(
-            create_date = self._timestamp,
-            user = self._user,
+        log = self._log(
+            u'REFUNDED: Devolució del pagament remesat de {amount} € [{move_line_id}]\n',
             amount = amount,
             move_line_id = move_line_id,
-            ))
+            )
 
         return ns(
             purchase_date = None,
@@ -242,14 +195,10 @@ class InvestmentState(object):
         Returns the full loan to the investor after being paid.
         If the loan has been never effective deactivates it.
         """
-        log = (
-            u'[{create_date} {user}] '
-            u'DIVESTED: Desinversió total [{move_line_id}]\n'
-            .format(
-                create_date=self._timestamp,
-                user=self._user,
-                move_line_id=move_line_id,
-            ))
+        log = self._log(
+            u'DIVESTED: Desinversió total [{move_line_id}]\n',
+            move_line_id=move_line_id,
+            )
         paid_amount = self._prev.paid_amount-amount
         if paid_amount:
             raise Exception(
@@ -272,16 +221,12 @@ class InvestmentState(object):
         and call receiveTransfer on it passing this 
         investment as parameter.
         """
-        log = (
-            u'[{create_date} {user}] '
-            u'DIVESTEDBYTRANSFER: Traspas cap a {to_partner_name} amb codi {to_name} [{move_line_id}]\n'
-            .format(
-                create_date=self._timestamp,
-                user=self._user,
-                move_line_id=move_line_id,
-                to_partner_name = to_partner_name,
-                to_name = to_name,
-            ))
+        log = self._log(
+            u'DIVESTEDBYTRANSFER: Traspas cap a {to_partner_name} amb codi {to_name} [{move_line_id}]\n',
+            move_line_id=move_line_id,
+            to_partner_name = to_partner_name,
+            to_name = to_name,
+            )
         return ns(
             last_effective_date = date,
             active = bool(self._prev.first_effective_date) and date>=self._prev.first_effective_date,
@@ -300,13 +245,10 @@ class InvestmentState(object):
         after call this method.
         """
         old = origin.values()
-        log = ( 
-            u'[{create_date} {user}] '
+        log = self._log( 
             u'CREATEDBYTRANSFER: Creada per traspàs de '
             u'{old.name} a nom de {origin_partner_name} [{move_line_id}]\n'
             .format(
-                create_date=self._timestamp,
-                user=self._user,
                 move_line_id=move_line_id,
                 origin_partner_name = origin_partner_name.decode('utf-8'),
                 old = old
@@ -337,16 +279,12 @@ class InvestmentState(object):
                 "Bad parameter changed in pact '{}'"
                 .format(param))
 
-        log = (
-            u"[{create_date} {user}] "
+        log = self._log(
             u"PACT: Pacte amb l'inversor. {changes} "
-            u"Motiu: {note}\n"
-            .format(
-            create_date=self._timestamp,
-            user=self._user,
+            u"Motiu: {note}\n",
             changes=", ".join("{}: {}".format(*x) for x in  sorted(kwds.items())),
             note=comment,
-        ))
+        )
 
         self._changed.update(kwds,
             log=log+self._prev.log
@@ -364,12 +302,12 @@ class InvestmentState(object):
         # TODO: Not enough, also if it has unpaid invoices
         if self._prev.paid_amount:
             raise Exception("Correction can not be done with paid investments")
-        log = log_corrected(dict(
-            create_date=self._timestamp,
-            user=self._user,
+        log = self._log(
+            u'CORRECTED: Quantitat canviada abans del pagament '
+            u'de {oldamount} € a {newamount} €\n',
             oldamount = from_amount,
             newamount = to_amount,
-            ))
+            )
         return ns(
             nominal_amount=to_amount,
             log=log+self._prev.log,
@@ -386,19 +324,17 @@ class InvestmentState(object):
         """
         if not self._prev.paid_amount:
             raise Exception(
-                "Partial divestment can be only applied to paid investments, try 'correct'")
+                "Partial divestment can be only applied to paid investments, "
+                "try 'correct'")
 
         remaining=self._prev.nominal_amount-amount
-        log =(
-            u'[{create_date} {user}] '
-            u'PARTIAL: Desinversió parcial de {amount} €, en queden {remaining} € [{move_line_id}]\n'
-            .format(
-            create_date=self._timestamp,
-            user=self._user,
+        log = self._log(
+            u'PARTIAL: Desinversió parcial de {amount} €, '
+            u'en queden {remaining} € [{move_line_id}]\n',
             remaining=remaining,
             move_line_id=move_line_id,
             amount=-amount,
-            ))
+            )
 
         return ns(
             nominal_amount=remaining,
@@ -421,13 +357,9 @@ class InvestmentState(object):
             raise Exception(
                 "Only unpaid investments can be cancelled")
 
-        log = (
-            u'[{create_date} {user}] '
+        log = self._log(
             u'CANCEL: La inversió ha estat cancel·lada\n'
-            .format(
-            create_date=self._timestamp,
-            user=self._user,
-            ))
+            )
         return ns(
             active=False,
             log=log+self._prev.log,
@@ -437,12 +369,9 @@ class InvestmentState(object):
     def amortize(self, date, to_be_amortized):
         return ns(
             amortized_amount = to_be_amortized + self._prev.amortized_amount,
-            log =
-                u'[{create_date} {user}] '
-                u'AMORTIZATION: Generada amortització de {to_be_amortized:.02f} € pel {date}\n'
-                .format(
-                    create_date=self._timestamp,
-                    user=self._user,
+            log = self._log(
+                u'AMORTIZATION: Generada amortització '
+                u'de {to_be_amortized:.02f} € pel {date}\n',
                     date = date,
                     to_be_amortized = to_be_amortized,
                 ) +self._prev.log
