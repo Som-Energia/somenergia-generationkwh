@@ -1561,7 +1561,20 @@ class Investment_Test(unittest.TestCase):
                     today=datetime.date.today(),
                 )))
 
-    def test__send_mail__emailPagamentSend(self):
+    def test__send_mail__emailCreacioSent(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.assertNsEqual(self.MailMockup.log(), ns.loads("""\
+            logs:
+                - generationkwh_mail_creacio
+            """))
+
+    def test__send_mail__emailPagamentSent(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
