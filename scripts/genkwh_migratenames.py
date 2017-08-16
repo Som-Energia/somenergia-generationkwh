@@ -1031,14 +1031,6 @@ def main(cr):
         displayPartnersMovements(cr, missmatch.investment_partner_id)
 
 
-from generationkwh.investmentlogs import (
-    log_formfilled,
-    log_corrected,
-    log_charged,
-    log_refunded,
-    log_banktransferred,
-)
-
 def logOrdered(cr, attributes, investment, amount, order_date, ip):
     inv = InvestmentState("Webforms", order_date,
         **attributes
