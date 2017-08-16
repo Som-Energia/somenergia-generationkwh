@@ -40,6 +40,13 @@ class InvestmentState(object):
         'log',
         ]
 
+    def __init__(self, user=None, timestamp=None, **values):
+        self._checkAttribs(**values)
+        self._prev=ns(values)
+        self._changed=ns()
+        self._user = user.decode('utf-8')
+        self._timestamp = timestamp
+
     def _log(self, message, **kwds):
         return (
             u'[{create_date} {user}] '.format(
@@ -56,13 +63,6 @@ class InvestmentState(object):
             raise Exception(
                 "Investments have no '{}' attribute".format(key))
 
-    def __init__(self, user=None, timestamp=None, **values):
-        self._checkAttribs(**values)
-        self._prev=ns(values)
-        self._changed=ns()
-        self._user = user.decode('utf-8')
-        self._timestamp = timestamp
-
     def changed(self):
         self._checkAttribs(**self._changed)
         return self._changed
@@ -78,6 +78,20 @@ class InvestmentState(object):
 
     def values(self):
         return ns(self._prev, **self._changed)
+
+    @staticmethod
+    def firstEffectiveDate(purchase_date):
+        # TODO: consider bissextile years for waitDays
+        pionersDay = '2016-04-28'
+        waitDays = gkwh.waitingDays
+        if str(purchase_date) < pionersDay:
+            waitDays -= 30
+        waitDelta = relativedelta(days=waitDays)
+        return purchase_date + waitDelta
+
+    @staticmethod
+    def lastEffectiveDate(purchase_date):
+        return purchase_date + relativedelta(years=gkwh.expirationYears)
 
     @action
     def order(self, name, date, ip, amount, iban):
@@ -103,15 +117,6 @@ class InvestmentState(object):
             paid_amount = Decimal("0.0"),
             log = log,
         )
-
-    @staticmethod
-    def firstEffectiveDate(purchase_date):
-        pionersDay = '2016-04-28'
-        waitDays = gkwh.waitingDays
-        if str(purchase_date) < pionersDay:
-            waitDays -= 30
-        waitDelta = relativedelta(days=waitDays)
-        return purchase_date + waitDelta
 
     @action
     def pay(self, date, amount, iban, move_line_id):
@@ -169,10 +174,8 @@ class InvestmentState(object):
             log=log,
             paid_amount = paid_amount,
             purchase_date = date,
-            # TODO: bissextile years
             first_effective_date = self.firstEffectiveDate(date),
-            # TODO: Setting also this one
-            last_effective_date = date + relativedelta(years=gkwh.expirationYears),
+            last_effective_date = self.lastEffectiveDate(date),
             )
 
     @action
