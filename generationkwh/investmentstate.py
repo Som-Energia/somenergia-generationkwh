@@ -47,6 +47,7 @@ class InvestmentState(object):
                 user=self._user,
             )
             + message.format(**kwds)
+            + self._prev.get('log', '')
             )
 
     def _checkAttribs(self, **kwds):
@@ -152,7 +153,6 @@ class InvestmentState(object):
 
     def _pay(self, date, amount, log):
         paid_amount = self._prev.paid_amount + amount
-        log = log+self._prev.log
         self._changed.update(
             log=log,
             paid_amount = paid_amount,
@@ -194,7 +194,7 @@ class InvestmentState(object):
             first_effective_date = None,
             last_effective_date = None,
             paid_amount = self._prev.paid_amount-amount,
-            log = log+self._prev.log,
+            log = log,
         )
 
     @action
@@ -216,7 +216,7 @@ class InvestmentState(object):
             last_effective_date = date,
             active = bool(self._prev.first_effective_date) and date>=self._prev.first_effective_date,
             paid_amount = paid_amount,
-            log=log+self._prev.log,
+            log=log,
         )
 
     @action
@@ -241,7 +241,7 @@ class InvestmentState(object):
             last_effective_date = date,
             active = bool(self._prev.first_effective_date) and date>=self._prev.first_effective_date,
             paid_amount = self._prev.paid_amount-amount,
-            log=log+self._prev.log,
+            log=log,
         )
 
     @action
@@ -279,6 +279,7 @@ class InvestmentState(object):
             log=log,
             )
 
+    @action
     def pact(self, date, comment, **kwds):
         """
         A pact enables changing any attribute in a
@@ -298,9 +299,7 @@ class InvestmentState(object):
             note=comment,
         )
 
-        self._changed.update(kwds,
-            log=log+self._prev.log
-        )
+        return ns(kwds, log=log)
 
     @action
     def correct(self, from_amount, to_amount):
@@ -322,7 +321,7 @@ class InvestmentState(object):
             )
         return ns(
             nominal_amount=to_amount,
-            log=log+self._prev.log,
+            log=log,
         )
 
     @action
@@ -351,7 +350,7 @@ class InvestmentState(object):
         return ns(
             nominal_amount=remaining,
             paid_amount=self._prev.paid_amount-amount,
-            log=log+self._prev.log,
+            log=log,
         )
 
     @action
@@ -374,7 +373,7 @@ class InvestmentState(object):
             )
         return ns(
             active=False,
-            log=log+self._prev.log,
+            log=log,
             )
 
     @action
@@ -389,7 +388,7 @@ class InvestmentState(object):
                 u'de {to_be_amortized:.02f} € pel {date}\n',
                     date = date,
                     to_be_amortized = to_be_amortized,
-                ) +self._prev.log
+                ),
             )
 
 
