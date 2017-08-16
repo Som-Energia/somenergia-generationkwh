@@ -550,9 +550,11 @@ class Investment_Test(unittest.TestCase):
         self.PaymentMandate = self.erp.PaymentMandate
         self.ResPartnerAddress = self.erp.ResPartnerAddress
         self.ResPartner = self.erp.ResPartner
-        self.PEAccounts = self.erp.PoweremailCore_accounts
+        self.MailMockup = self.erp.GenerationkwhMailmockup
+        self.MailMockup.activate()
 
     def tearDown(self):
+        self.MailMockup.deactivate()
         self.erp.rollback()
         self.erp.close()
 
@@ -595,7 +597,7 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             4000,
             '10.10.23.123',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
 
         self.assertTrue(id)
@@ -637,7 +639,7 @@ class Investment_Test(unittest.TestCase):
             'baddate', # order_date
             4000,
             '10.10.23.123',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
         self.assertFalse(id) # ??
 
@@ -648,7 +650,7 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             4000,
             '10.10.23.123',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
         self.assertFalse(id) # ??
 
@@ -658,7 +660,7 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             4003,
             '10.10.23.123',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
         self.assertFalse(id)
     
@@ -669,10 +671,10 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.123',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
 
-        self.Investment.mark_as_paid([id], '2017-01-03',False,False)
+        self.Investment.mark_as_paid([id], '2017-01-03')
 
         investment = ns(self.Investment.read(id, []))
         log = investment.pop('log')
@@ -709,7 +711,7 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.123',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
 
         id2 = self.Investment.create_from_form(
@@ -717,10 +719,10 @@ class Investment_Test(unittest.TestCase):
             '2017-01-02', # order_date
             2000,
             '10.10.23.123',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
 
-        self.Investment.mark_as_paid([id1,id2], '2017-01-03',False,False)
+        self.Investment.mark_as_paid([id1,id2], '2017-01-03')
         
         result = self.Investment.read(
             [id1,id2],
@@ -742,7 +744,7 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
 
         id2 = self.Investment.create_from_form(
@@ -750,10 +752,10 @@ class Investment_Test(unittest.TestCase):
             '2017-01-02', # order_date
             2000,
             '10.10.23.2',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
 
-        self.Investment.mark_as_paid([id1,id2], '2017-01-03',False,False)
+        self.Investment.mark_as_paid([id1,id2], '2017-01-03')
         
         result = self.Investment.read([id1,id2], ['log'], order='id')
         
@@ -774,10 +776,10 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01',  # order_date
             2000,
             '10.10.23.123',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
         )
 
-        self.Investment.mark_as_paid([id], '2017-01-03',False,False)
+        self.Investment.mark_as_paid([id], '2017-01-03')
         self.Investment.mark_as_unpaid([id])
 
         investment = ns(self.Investment.read(id, []))
@@ -816,7 +818,7 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01',  # order_date
             2000,
             '10.10.23.123',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
         )
 
         id2 = self.Investment.create_from_form(
@@ -824,10 +826,10 @@ class Investment_Test(unittest.TestCase):
             '2017-01-02',  # order_date
             2000,
             '10.10.23.123',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
         )
 
-        self.Investment.mark_as_paid([id1, id2], '2017-01-03',False,False)
+        self.Investment.mark_as_paid([id1, id2], '2017-01-03')
         self.Investment.mark_as_unpaid([id1, id2])
 
         result = self.Investment.read(
@@ -850,7 +852,7 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01',  # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
         )
 
         id2 = self.Investment.create_from_form(
@@ -858,10 +860,10 @@ class Investment_Test(unittest.TestCase):
             '2017-01-02',  # order_date
             2000,
             '10.10.23.2',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
         )
 
-        self.Investment.mark_as_paid([id1, id2], '2017-01-03',False,False)
+        self.Investment.mark_as_paid([id1, id2], '2017-01-03')
         self.Investment.mark_as_unpaid([id1, id2])
 
         result = self.Investment.read([id1, id2], ['log'], order='id')
@@ -919,7 +921,7 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
 
         invoice_ids, errs =  self.Investment.create_initial_invoices([id])
@@ -981,7 +983,7 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
         inv = self.Investment.read(id, ['name'])
 
@@ -999,7 +1001,7 @@ class Investment_Test(unittest.TestCase):
             '2016-01-01', # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
 
         self.Investment.write(id, dict(
@@ -1018,7 +1020,7 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
         self.Partner.write(self.personalData.partnerid,dict(bank_inversions = False))
         result = self.Investment.create_initial_invoices([id])
@@ -1034,12 +1036,12 @@ class Investment_Test(unittest.TestCase):
             '2016-01-01', # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
 
         inv = self.Investment.read(id,['name'])
 
-        self.Investment.mark_as_paid([id], '2016-01-04',False,False)
+        self.Investment.mark_as_paid([id], '2016-01-04')
         result = self.Investment.create_initial_invoices([id])
 
         self.assertEquals(result, [[], [
@@ -1053,7 +1055,7 @@ class Investment_Test(unittest.TestCase):
             '2016-01-01', # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
 
         inv = self.Investment.read(id,['name'])
@@ -1074,7 +1076,7 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
 
         id2 = self.Investment.create_from_form(
@@ -1082,7 +1084,7 @@ class Investment_Test(unittest.TestCase):
             '2017-01-02', # order_date
             500,
             '10.10.23.2',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
 
         invoice_ids, errs = self.Investment.create_initial_invoices([id1, id2])
@@ -1096,14 +1098,14 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
         id2 = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-02-02', # order_date
             3000,
             '10.10.23.2',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
         investment = self.Investment.read(id1,['name'])
         self.Investment.write(id1, {'active':False})
@@ -1122,20 +1124,20 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
         id2 = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-02-02', # order_date
             3000,
             '10.10.23.2',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
         investment1 = self.Investment.read(id1,['name'])
         investment2 = self.Investment.read(id2,['name'])
 
         self.Investment.write(id1, {'active':False})
-        self.Investment.mark_as_paid([id2], '2016-01-04',False,False)
+        self.Investment.mark_as_paid([id2], '2016-01-04')
 
         result = self.Investment.create_initial_invoices([id1,id2])
 
@@ -1159,10 +1161,10 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
 
-        self.Investment.mark_as_paid([id], '2017-01-03',False,False)
+        self.Investment.mark_as_paid([id], '2017-01-03')
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
         self.assertTrue(invoice_id)
@@ -1230,11 +1232,11 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
         inv = self.Investment.read(id, ['name'])
 
-        self.Investment.mark_as_paid([id], '2017-01-03',False,False)
+        self.Investment.mark_as_paid([id], '2017-01-03')
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
 
@@ -1254,7 +1256,7 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )       
         self.Partner.write(self.personalData.partnerid,dict(bank_inversions = False))
         with self.assertRaises(Exception) as ctx:
@@ -1269,14 +1271,14 @@ class Investment_Test(unittest.TestCase):
             '2016-01-01', # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
 
         self.Investment.write(id, dict(
             name=None)
             )
 
-        self.Investment.mark_as_paid([id], '2016-01-03',False,False)
+        self.Investment.mark_as_paid([id], '2016-01-03')
 
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-03', 80, 1, 24)
@@ -1293,10 +1295,9 @@ class Investment_Test(unittest.TestCase):
             2000, # amount_in_euros
             '10.10.23.1', # ip
             'ES7712341234161234567890', # iban
-            False,False,
             )
 
-        self.Investment.mark_as_paid([id], '2017-01-03',False,False)
+        self.Investment.mark_as_paid([id], '2017-01-03')
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
 
@@ -1335,7 +1336,7 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
         partner = self.Partner.browse(self.personalData.partnerid)
         self.assertTrue(partner.bank_inversions)
@@ -1346,9 +1347,9 @@ class Investment_Test(unittest.TestCase):
             '2000-01-01',  # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
         )
-        self.Investment.mark_as_paid([investment_id], '2000-01-05',False,False)
+        self.Investment.mark_as_paid([investment_id], '2000-01-05')
         self.Investment.amortize('2002-01-06', [investment_id])
 
         investment = self.Investment.read(investment_id, ['log'])
@@ -1365,10 +1366,10 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01',  # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
         )
 
-        self.Investment.mark_as_paid([id], '2017-01-03',False,False)
+        self.Investment.mark_as_paid([id], '2017-01-03')
         invoice_id = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
         self.assertTrue(invoice_id)
@@ -1397,14 +1398,14 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01',  # order_date
             1000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
         ))
         ids.append(self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01',  # order_date
             2000,
             '10.10.23.2',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
         ))
 
         invoice_ids,errs = self.Investment.create_initial_invoices(ids)
@@ -1437,7 +1438,7 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             2000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             )
 
         invoice_ids, errs =  self.Investment.create_initial_invoices([id])
@@ -1461,14 +1462,14 @@ class Investment_Test(unittest.TestCase):
             '2017-01-01', # order_date
             1000,
             '10.10.23.1',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
             ))
         ids.append(self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-02',  # order_date
             2000,
             '10.10.23.2',
-            'ES7712341234161234567890',False,False,
+            'ES7712341234161234567890',
         ))
 
         invoice_ids, err =  self.Investment.create_initial_invoices(ids)
