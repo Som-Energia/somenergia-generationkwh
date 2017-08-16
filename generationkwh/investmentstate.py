@@ -4,6 +4,7 @@
 from yamlns import namespace as ns
 from .isodates import isodate
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 import generationkwh.investmentmodel as gkwh
 from decimal import Decimal
 from decorator import decorator
@@ -106,7 +107,7 @@ class InvestmentState(object):
         waitDays = gkwh.waitingDays
         if str(purchase_date) < pionersDay:
             waitDays -= 30
-        waitDelta = timedelta(days=waitDays)
+        waitDelta = relativedelta(days=waitDays)
         return purchase_date + waitDelta
 
     @action
@@ -158,7 +159,6 @@ class InvestmentState(object):
         if self._prev.paid_amount:
             # TODO: Concrete Exception class
             raise Exception("Already paid")
-        from dateutil.relativedelta import relativedelta
         return ns(
             log=log,
             paid_amount = paid_amount,
