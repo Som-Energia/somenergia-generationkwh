@@ -370,7 +370,7 @@ class InvestmentState(object):
 
     def amortize(self, date, to_be_amortized):
         self._changed.update(
-            amortized_amount = to_be_amortized,
+            amortized_amount = to_be_amortized + self._prev.amortized_amount,
             log =
                 u'[{create_date} {user}] '
                 u'AMORTIZED: Generada amortització de {to_be_amortized} € pel {date}\n'
