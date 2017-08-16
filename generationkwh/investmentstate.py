@@ -54,9 +54,16 @@ class InvestmentState(object):
         self._checkAttribs(**self._changed)
         return self._changed
 
+    def erpChanges(self):
+        changes = ns(self.changed())
+        if 'nominal_amount' in changes:
+            changes.update(
+                nshares=changes.nominal_amount//100,
+            )
+        return changes
+
     def values(self):
         return ns(self._prev, **self._changed)
-
 
     def order(self, name, date, ip, amount, iban):
         """

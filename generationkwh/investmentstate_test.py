@@ -15,6 +15,9 @@ class InvestmentState_Test(unittest.TestCase):
     timestamp = "2000-01-01 00:00:00.123435"
     logprefix = "[{} {}] ".format(timestamp, user)
 
+    def setUp(self):
+        self.maxDiff = None
+
     def setupInvestment(self, **kwds):
         if kwds and 'log' not in kwds:
             kwds.update(log = "previous log\n")
@@ -671,5 +674,59 @@ class InvestmentState_Test(unittest.TestCase):
             "Only unpaid investments can be cancelled")
 
     # TODO: cancel with payment order
+
+
+    def test_erpChanges(self):
+        inv = self.setupInvestment(log='previous value\n')
+
+        inv.pact(
+            date = isodate('2016-05-01'),
+            comment = "lo dice el jefe",
+            name = 'GKWH00069',
+            order_date = isodate('2000-01-01'),
+            purchase_date = isodate('2000-01-02'),
+            first_effective_date = isodate('2000-01-03'),
+            last_effective_date = isodate('2000-01-04'),
+            active = False,
+        )
+        changes=inv.erpChanges()
+        log = changes.pop('log')
+        self.assertNsEqual(changes, """\
+            name: GKWH00069
+            order_date: 2000-01-01
+            purchase_date: 2000-01-02
+            first_effective_date: 2000-01-03
+            last_effective_date: 2000-01-04
+            active: False
+            """)
+
+        self.assertMultiLineEqual(log,
+            self.logprefix + 
+            u"PACT: Pacte amb l'inversor. "
+            "active: False, first_effective_date: 2000-01-03, last_effective_date: 2000-01-04, name: GKWH00069, order_date: 2000-01-01, purchase_date: 2000-01-02 "
+            "Motiu: lo dice el jefe\n"
+            u"previous value\n")
+
+    def test_erpChanges_changinAmounts(self):
+        inv = self.setupInvestment(
+            nominal_amount = 100,
+            paid_amount = 0,
+            )
+
+        inv.correct(
+            from_amount = 100,
+            to_amount = 200,
+        )
+        changes=inv.erpChanges()
+        log = changes.pop('log')
+        self.assertNsEqual(changes, """\
+            nominal_amount: 200
+            nshares: 2
+            """)
+
+
+
+
+
 
 # vim: ts=4 sw=4 et
