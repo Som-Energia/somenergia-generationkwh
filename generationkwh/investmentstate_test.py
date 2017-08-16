@@ -215,6 +215,10 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertEqual(isodate('2017-03-28'),
             InvestmentState.firstEffectiveDate(isodate('2016-04-27')))
 
+    def test_fistEffectiveDate_bisextile(self):
+        self.assertEqual(isodate('2021-01-28'),
+            InvestmentState.firstEffectiveDate(isodate('2020-01-28')))
+
     def test_unpay(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
