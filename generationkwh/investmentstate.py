@@ -4,17 +4,60 @@
 from yamlns import namespace as ns
 from .isodates import isodate
 from datetime import timedelta
-from generationkwh.investmentlogs import (
-    log_formfilled,
-    log_corrected,
-    log_charged,
-    log_refunded,
-    log_banktransferred,
-)
 import generationkwh.investmentmodel as gkwh
 from decimal import Decimal
 
 from decorator import decorator
+
+
+def log_formfilled(data):
+    return (
+        u'[{create_date} {user}] '
+        u"FORMFILLED: Formulari omplert des de la IP {ip}, Quantitat: {amount} €, IBAN: {iban}\n"
+        .format(
+            **data
+        ))
+
+def log_corrected(data):
+    return (
+        u'[{create_date} {user}] '
+        u'CORRECTED: Quantitat canviada abans del pagament de {oldamount} € a {newamount} €\n'
+        .format(
+            **data
+        ))
+
+def log_charged(data):
+    return (
+        u'[{create_date} {user}] '
+        u"PAID: Pagament de {amount} € remesat al compte {iban} [{move_line_id}]\n"
+        .format(
+            **data
+        ))
+
+def log_refunded(data):
+    return (
+        u'[{create_date} {user}] '
+        u'REFUNDED: Devolució del pagament remesat de {amount} € [{move_line_id}]\n'
+        .format(
+            **data
+        ))
+
+def log_banktransferred(data):
+    return (
+        u'[{create_date} {user}] '
+        u'REPAID: Pagament de {amount} € rebut per transferència bancària [{move_line_id}]\n'
+        .format(
+            **data
+        ))
+
+def log_returned(data):
+    return (
+        u'[{create_date} {user}] '
+        u'RETURNED: Desinversió total\n'
+        .format(
+            **data
+        ))
+
 
 @decorator
 def action(f, self, *args, **kwds):
