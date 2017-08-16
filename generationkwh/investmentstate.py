@@ -45,7 +45,9 @@ class InvestmentState(object):
             u'[{create_date} {user}] '.format(
                 create_date=self._timestamp,
                 user=self._user,
-            ) + message.format(**kwds))
+            )
+            + message.format(**kwds)
+            )
 
     def _checkAttribs(self, **kwds):
         for key in kwds:
@@ -122,7 +124,9 @@ class InvestmentState(object):
         investment model.
         """
         log = self._log(
-            u"PAID: Pagament de {amount} € remesat al compte {iban} [{move_line_id}]\n",
+            u"PAID: "
+            u"Pagament de {amount} € remesat al compte {iban} "
+            u"[{move_line_id}]\n",
             amount=int(amount),
             iban=iban or u"None",
             move_line_id=move_line_id,
@@ -137,7 +141,9 @@ class InvestmentState(object):
         by a bank transfer or another mean.
         """
         log = self._log(
-            u'REPAID: Pagament de {amount} € rebut per transferència bancària [{move_line_id}]\n',
+            u'REPAID: '
+            u'Pagament de {amount} € rebut per transferència bancària '
+            u'[{move_line_id}]\n',
             amount=amount,
             move_line_id=move_line_id,
             )
@@ -176,7 +182,9 @@ class InvestmentState(object):
         so the investment is set as unpaid.
         """
         log = self._log(
-            u'REFUNDED: Devolució del pagament remesat de {amount} € [{move_line_id}]\n',
+            u'REFUNDED: '
+            u'Devolució del pagament remesat de {amount} € '
+            u'[{move_line_id}]\n',
             amount = amount,
             move_line_id = move_line_id,
             )
@@ -222,7 +230,9 @@ class InvestmentState(object):
         investment as parameter.
         """
         log = self._log(
-            u'DIVESTEDBYTRANSFER: Traspas cap a {to_partner_name} amb codi {to_name} [{move_line_id}]\n',
+            u'DIVESTEDBYTRANSFER: '
+            u'Traspas cap a {to_partner_name} amb codi {to_name} '
+            u'[{move_line_id}]\n',
             move_line_id=move_line_id,
             to_partner_name = to_partner_name,
             to_name = to_name,
@@ -246,8 +256,10 @@ class InvestmentState(object):
         """
         old = origin.values()
         log = self._log( 
-            u'CREATEDBYTRANSFER: Creada per traspàs de '
-            u'{old.name} a nom de {origin_partner_name} [{move_line_id}]\n'
+            u'CREATEDBYTRANSFER: '
+            u'Creada per traspàs de {old.name} '
+            u'a nom de {origin_partner_name} '
+            u'[{move_line_id}]\n'
             .format(
                 move_line_id=move_line_id,
                 origin_partner_name = origin_partner_name.decode('utf-8'),
@@ -367,6 +379,9 @@ class InvestmentState(object):
 
     @action
     def amortize(self, date, to_be_amortized):
+        """
+        Annotates an amortization for the given amount at the given date
+        """
         return ns(
             amortized_amount = to_be_amortized + self._prev.amortized_amount,
             log = self._log(
