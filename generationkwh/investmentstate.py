@@ -373,7 +373,7 @@ class InvestmentState(object):
             amortized_amount = to_be_amortized + self._prev.amortized_amount,
             log =
                 u'[{create_date} {user}] '
-                u'AMORTIZED: Generada amortització de {to_be_amortized} € pel {date}\n'
+                u'AMORTIZATION: Generada amortització de {to_be_amortized:.02f} € pel {date}\n'
                 .format(
                     create_date=self._timestamp,
                     user=self._user,

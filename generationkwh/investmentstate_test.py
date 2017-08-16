@@ -758,7 +758,7 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertChangesEqual(inv, """\
             amortized_amount: 40.0
             """,
-            u"AMORTIZED: Generada amortització de 40.0 € pel 2018-01-01\n"
+            u"AMORTIZATION: Generada amortització de 40.00 € pel 2018-01-01\n"
             )
 
     def test_amortize_withPreviousAmortization(self):
@@ -774,7 +774,7 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertChangesEqual(inv, """\
             amortized_amount: 80.0
             """,
-            u"AMORTIZED: Generada amortització de 40.0 € pel 2018-01-01\n"
+            u"AMORTIZATION: Generada amortització de 40.00 € pel 2018-01-01\n"
             )
 
 
