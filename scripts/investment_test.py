@@ -1561,8 +1561,7 @@ class Investment_Test(unittest.TestCase):
                     today=datetime.date.today(),
                 )))
 
-
-    def test_send_mail_onCreateInvestment__emailSend(self):
+    def test__send_mail__emailPagamentSend(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
@@ -1570,21 +1569,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
-        #self.Investment.send_mail_onCreateInvestment(id)
-        self.assertNsEqual(self.MailMockup.log(), ns.loads("""\
-            logs:
-                - generationkwh_mail_creacio
-            """))
-
-    def test_send_mail_onPayInvestment__emailSend(self):
-        id = self.Investment.create_from_form(
-            self.personalData.partnerid,
-            '2017-01-01', # order_date
-            4000,
-            '10.10.23.123',
-            'ES7712341234161234567890',
-            )
-        self.Investment.send_mail_onPayInvestment(id)
+        self.Investment.send_mail(id,'account.invoice', 'generationkwh_mail_pagament')
         self.assertNsEqual(self.MailMockup.log(), ns.loads("""\
             logs:
                 - generationkwh_mail_creacio
@@ -1592,7 +1577,6 @@ class Investment_Test(unittest.TestCase):
             """))
 
 unittest.TestCase.__str__ = unittest.TestCase.id
-
 
 if __name__=='__main__':
     unittest.main()
