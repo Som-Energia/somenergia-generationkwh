@@ -93,6 +93,12 @@ class InvestmentState(object):
     def lastEffectiveDate(purchase_date):
         return purchase_date + relativedelta(years=gkwh.expirationYears)
 
+    @staticmethod
+    def hasEffectivePeriod(first_date, last_date):
+        if not first_date: return False # never started
+        if not last_date: return True # started but no end
+        return first_date<=last_date # not crossed dates
+
     @action
     def order(self, name, date, ip, amount, iban):
         """
@@ -217,7 +223,7 @@ class InvestmentState(object):
                 .format(paid_amount))
         return ns(
             last_effective_date = date,
-            active = bool(self._prev.first_effective_date) and date>=self._prev.first_effective_date,
+            active = self.hasEffectivePeriod(self._prev.first_effective_date, date),
             paid_amount = paid_amount,
             log=log,
         )
@@ -242,7 +248,7 @@ class InvestmentState(object):
             )
         return ns(
             last_effective_date = date,
-            active = bool(self._prev.first_effective_date) and date>=self._prev.first_effective_date,
+            active = self.hasEffectivePeriod(self._prev.first_effective_date, date),
             paid_amount = self._prev.paid_amount-amount,
             log=log,
         )

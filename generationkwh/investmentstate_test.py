@@ -769,6 +769,44 @@ class InvestmentState_Test(unittest.TestCase):
             )
 
 
+    def test_hasEffectivePeriod_whenUnstarted(self):
+        result = InvestmentState.hasEffectivePeriod(
+            first_date = None,
+            last_date = isodate('2018-01-01'),
+            )
+        self.assertEqual(result, False)
+
+    def test_hasEffectivePeriod_whenUnfinished(self):
+        result = InvestmentState.hasEffectivePeriod(
+            first_date = isodate('2018-01-01'),
+            last_date = None,
+            )
+        self.assertEqual(result, True)
+
+    def test_hasEffectivePeriod_whenSameDay(self):
+        result = InvestmentState.hasEffectivePeriod(
+            first_date = isodate('2018-01-01'),
+            last_date = isodate('2018-01-01'),
+            )
+        self.assertEqual(result, True)
+
+    def test_hasEffectivePeriod_whenOrdered(self):
+        result = InvestmentState.hasEffectivePeriod(
+            first_date = isodate('2018-01-01'),
+            last_date = isodate('2018-02-01'),
+            )
+        self.assertEqual(result, True)
+
+    def test_hasEffectivePeriod_whenCrossed(self):
+        result = InvestmentState.hasEffectivePeriod(
+            first_date = isodate('2018-01-02'),
+            last_date = isodate('2018-01-01'),
+            )
+        self.assertEqual(result, False)
+
+
+
+
 
 
 
