@@ -58,7 +58,7 @@ class InvestmentState(object):
         changes = ns(self.changed())
         if 'nominal_amount' in changes:
             changes.update(
-                nshares=changes.nominal_amount//100,
+                nshares=changes.nominal_amount//gkwh.shareValue,
             )
         return changes
 
