@@ -1096,6 +1096,13 @@ def logRefund(cr, attributes, move_line_id):
     attributes.update(inv.changed(),
         active=False) # In erp don't but in migration yes
 
+def logCancel(cr, attributes):
+    inv = InvestmentState('Migration', 'Never',
+        **attributes
+        )
+    inv.cancel()
+    attributes.update(inv.changed())
+
 def logRepaid(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     inv = InvestmentState(ml.user, ml.create_date,
@@ -1394,6 +1401,12 @@ def solveInactiveInvestment(cr, payment):
     logOrdered(cr, attributes, investment, payment.amount, payment.order_date, payment.ip)
     for movelineid, what in case.iteritems():
         logMovement(cr, attributes, investment, movelineid, what)
+
+    try:
+        logCancel(cr, attributes)
+    except Exception as e:
+        consoleError("{}: {}".format(
+            name, e.message))
 
     True and success(
         "Solved inactive {investment.id} {payment.ref} {payment.order_date} {amount:=8}€ {payment.partner_name}"

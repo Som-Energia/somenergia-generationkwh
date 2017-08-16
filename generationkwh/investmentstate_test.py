@@ -745,6 +745,22 @@ class InvestmentState_Test(unittest.TestCase):
             last_effective_date: 2041-05-01 # TODO Add this
             """)
 
+    def test_amortize(self):
+        inv = self.setupInvestment(
+            amortized_amount = 0.,
+        )
+
+        inv.amortize(
+            date = isodate('2018-01-01'),
+            to_be_amortized=40.,
+        )
+
+        self.assertChangesEqual(inv, """\
+            amortized_amount: 40.0
+            """,
+            u"AMORTIZED: Generada amortització de 40.0 € pel 2018-01-01\n"
+            )
+
 
 
 

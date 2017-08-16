@@ -29,6 +29,7 @@ class InvestmentState(object):
         'name',
         'paid_amount',
         'nominal_amount',
+        'amortized_amount',
         'active',
         'first_effective_date',
         'last_effective_date',
@@ -346,6 +347,10 @@ class InvestmentState(object):
         Usually a refunded investment once the investor
         refuses to pay it or cannot be contacted.
         """
+        if self._prev.paid_amount:
+            raise Exception(
+                "Only unpaid investments can be cancelled")
+
         if self._prev.purchase_date:
             raise Exception(
                 "Only unpaid investments can be cancelled")
@@ -360,6 +365,21 @@ class InvestmentState(object):
         self._changed.update(
             active=False,
             log=log+self._prev.log,
+            )
+
+
+    def amortize(self, date, to_be_amortized):
+        self._changed.update(
+            amortized_amount = to_be_amortized,
+            log =
+                u'[{create_date} {user}] '
+                u'AMORTIZED: Generada amortització de {to_be_amortized} € pel {date}\n'
+                .format(
+                    create_date=self._timestamp,
+                    user=self._user,
+                    date = date,
+                    to_be_amortized = to_be_amortized,
+                ) +self._prev.log
             )
 
 
