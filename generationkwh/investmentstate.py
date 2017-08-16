@@ -14,6 +14,14 @@ from generationkwh.investmentlogs import (
 import generationkwh.investmentmodel as gkwh
 from decimal import Decimal
 
+from decorator import decorator
+
+@decorator
+def action(f, self, *args, **kwds):
+    result = f(self, *args, **kwds)
+    self._changed.update(result)
+    return result
+
 class InvestmentState(object):
     """
     InvestmentState keeps the state of an investment
@@ -67,6 +75,7 @@ class InvestmentState(object):
     def values(self):
         return ns(self._prev, **self._changed)
 
+    @action
     def order(self, name, date, ip, amount, iban):
         """
         Creates a new investment from the info retrived
@@ -80,7 +89,7 @@ class InvestmentState(object):
             iban=iban or None,
         ))
 
-        self._changed.update(
+        return ns(
             name = name,
             order_date = date,
             purchase_date = None,
@@ -101,6 +110,7 @@ class InvestmentState(object):
         waitDelta = timedelta(days=waitDays)
         return purchase_date + waitDelta
 
+    @action
     def pay(self, date, amount, iban, move_line_id):
         """
         A payment invoice has been generated and
@@ -121,6 +131,7 @@ class InvestmentState(object):
 
         return self._pay(date, amount, log)
 
+    @action
     def repay(self, date, amount, move_line_id):
         """
         A previously refunded payment has been paid
@@ -136,9 +147,11 @@ class InvestmentState(object):
         return self._pay(date, amount, log)
 
     def _pay(self, date, amount, log):
+        paid_amount = self._prev.paid_amount + amount
+        log = log+self._prev.log
         self._changed.update(
-            log=log+self._prev.log,
-            paid_amount = self._prev.paid_amount + amount,
+            log=log,
+            paid_amount = paid_amount,
             )
 
         if amount != self._prev.nominal_amount:
@@ -149,7 +162,9 @@ class InvestmentState(object):
             # TODO: Concrete Exception class
             raise Exception("Already paid")
         from dateutil.relativedelta import relativedelta
-        self._changed.update(
+        return ns(
+            log=log,
+            paid_amount = paid_amount,
             purchase_date = date,
             # TODO: bissextile years
             first_effective_date = self.firstEffectiveDate(date),
@@ -157,6 +172,7 @@ class InvestmentState(object):
             last_effective_date = date + relativedelta(years=gkwh.expirationYears),
             )
 
+    @action
     def unpay(self, amount, move_line_id):
         """
         A previous payment has been returned by the bank
@@ -169,7 +185,7 @@ class InvestmentState(object):
             move_line_id = move_line_id,
             ))
 
-        self._changed.update(
+        return ns(
             purchase_date = None,
             first_effective_date = None,
             last_effective_date = None,
@@ -177,6 +193,7 @@ class InvestmentState(object):
             log = log+self._prev.log,
         )
 
+    @action
     def divest(self, date, amount, move_line_id):
         """
         Returns the full loan to the investor after being paid.
@@ -190,17 +207,19 @@ class InvestmentState(object):
                 user=self._user,
                 move_line_id=move_line_id,
             ))
-        self._changed.update(
-            last_effective_date = date,
-            active = bool(self._prev.first_effective_date) and date>=self._prev.first_effective_date,
-            paid_amount = self._prev.paid_amount-amount,
-            log=log+self._prev.log,
-        )
-        if self._changed.paid_amount:
+        paid_amount = self._prev.paid_amount-amount
+        if paid_amount:
             raise Exception(
                 u"Paid amount after divestment should be 0 but was {} €"
-                .format(self._changed.paid_amount))
+                .format(paid_amount))
+        return ns(
+            last_effective_date = date,
+            active = bool(self._prev.first_effective_date) and date>=self._prev.first_effective_date,
+            paid_amount = paid_amount,
+            log=log+self._prev.log,
+        )
 
+    @action
     def emitTransfer(self, date, amount, to_name, to_partner_name, move_line_id):
         """
         Performs the changes required after having transferred
@@ -220,13 +239,14 @@ class InvestmentState(object):
                 to_partner_name = to_partner_name,
                 to_name = to_name,
             ))
-        self._changed.update(
+        return ns(
             last_effective_date = date,
             active = bool(self._prev.first_effective_date) and date>=self._prev.first_effective_date,
             paid_amount = self._prev.paid_amount-amount,
             log=log+self._prev.log,
         )
 
+    @action
     def receiveTransfer(self, name, date, amount, origin, origin_partner_name, move_line_id):
         """
         Initializes the investment as being transfer
@@ -252,7 +272,7 @@ class InvestmentState(object):
         first_effective_date = old.first_effective_date
         if date >= first_effective_date:
             first_effective_date = date + timedelta(days=1)
-        self._changed.update(
+        return ns(
             old,
             name = name,
             active = True,
@@ -289,6 +309,7 @@ class InvestmentState(object):
             log=log+self._prev.log
         )
 
+    @action
     def correct(self, from_amount, to_amount):
         """
         Correct the nominal value before we issue an
@@ -306,11 +327,12 @@ class InvestmentState(object):
             oldamount = from_amount,
             newamount = to_amount,
             ))
-        self._changed.update(
+        return ns(
             nominal_amount=to_amount,
             log=log+self._prev.log,
         )
 
+    @action
     def partial(self, amount, move_line_id):
         """
         This action is only available for migrated investments.
@@ -335,12 +357,13 @@ class InvestmentState(object):
             amount=-amount,
             ))
 
-        self._changed.update(
+        return ns(
             nominal_amount=remaining,
             paid_amount=self._prev.paid_amount-amount,
             log=log+self._prev.log,
         )
 
+    @action
     def cancel(self):
         """
         Marks an unpaid investments as discarded.
@@ -362,14 +385,14 @@ class InvestmentState(object):
             create_date=self._timestamp,
             user=self._user,
             ))
-        self._changed.update(
+        return ns(
             active=False,
             log=log+self._prev.log,
             )
 
-
+    @action
     def amortize(self, date, to_be_amortized):
-        self._changed.update(
+        return ns(
             amortized_amount = to_be_amortized + self._prev.amortized_amount,
             log =
                 u'[{create_date} {user}] '

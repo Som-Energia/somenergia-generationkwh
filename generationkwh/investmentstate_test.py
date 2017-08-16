@@ -281,7 +281,6 @@ class InvestmentState_Test(unittest.TestCase):
         )
 
     def test_divest_unpaid(self):
-        # TODO: should be failure case
         inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 0.0,
@@ -296,14 +295,6 @@ class InvestmentState_Test(unittest.TestCase):
             )
         self.assertEqual(ctx.exception.message,
             u"Paid amount after divestment should be 0 but was -300.0 €")
-        self.assertChangesEqual(inv, """\
-            last_effective_date: 2000-08-01
-            active: False
-            paid_amount: -300.0
-            """,
-            u'DIVESTED: Desinversió total [666]\n'
-        )
-
 
     def test_emitTransfer(self):
         inv = self.setupInvestment(
