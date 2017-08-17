@@ -29,14 +29,21 @@ def pendingAmortizations(purchase_date, current_date, investment_amount, amortiz
     if not purchase_date: return []
     years = gkwh.expirationYears
     yearlyAmount = investment_amount/years
+    total_amortizations = years-1
     return [
-        (i, years-1, amortization_date, (1 if i<years-1 else 2) * yearlyAmount)
-        for i, amortization_date in (
+        (
+            amortization_number,
+            total_amortizations,
+            amortization_date,
+            # to be amortized
+            (2 if amortization_number is total_amortizations else 1) * yearlyAmount,
+        )
+        for amortization_number, amortization_date in (
             (i, str(isodate(purchase_date) + relativedelta(years=i+1)))
             for i in xrange(1,years) 
             )
         if amortization_date <= current_date
-        and i * yearlyAmount > amortized_amount
+        and amortization_number * yearlyAmount > amortized_amount
         ]
 
 
