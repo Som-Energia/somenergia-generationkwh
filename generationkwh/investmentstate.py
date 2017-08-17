@@ -373,10 +373,11 @@ class InvestmentState(object):
     @action
     def cancel(self):
         """
-        Marks an unpaid investments as discarded.
+        Marks an uninvoiced investment as discarded.
         Usually a refunded investment once the investor
         refuses to pay it or cannot be contacted.
         """
+        # TODO: if invoiced but still unpaid cannot be cancelled either
         if self._prev.paid_amount:
             raise Exception(
                 "Only unpaid investments can be cancelled")
