@@ -1073,7 +1073,7 @@ class Investment_Test(unittest.TestCase):
             )
 
         self.Investment.mark_as_paid([id], '2017-01-03')
-        invoice_id = self.Investment.create_amortization_invoice(
+        invoice_id, errors = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
         self.assertTrue(invoice_id)
 
@@ -1145,16 +1145,15 @@ class Investment_Test(unittest.TestCase):
         inv = self.Investment.read(id, ['name'])
 
         self.Investment.mark_as_paid([id], '2017-01-03')
-        invoice_id = self.Investment.create_amortization_invoice(
+        invoice_id, errors = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
 
-        with self.assertRaises(Exception) as ctx:
-            self.Investment.create_amortization_invoice(
+        invoice_id2, errors2 = self.Investment.create_amortization_invoice(
                 id, '2018-01-30', 80, 1, 24)
 
         self.assertIn(
             "Amortization notification {name}-AMOR2018 already exist".format(**inv),
-            unicode(ctx.exception),
+            unicode(errors2),
             )
 
     def test__create_amortization_invoice__errorWhenNoBank(self):
@@ -1167,11 +1166,10 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )       
         self.Partner.write(self.personalData.partnerid,dict(bank_inversions = False))
-        with self.assertRaises(Exception) as ctx:
-            self.Investment.create_amortization_invoice(id, '2018-01-30' , 80, 1, 24)
+        invocie_id, errors = self.Investment.create_amortization_invoice(id, '2018-01-30' , 80, 1, 24)
         self.assertIn(
             "El partner {surname}, {name} no té informat un compte corrent\n".format(**dbconfig.personaldata),
-            unicode(ctx.exception.faultString).encode('utf-8'))
+            unicode(errors).encode('utf-8'))
 
     def test__create_amortization_invoice__withUnnamedInvestment(self):
         id = self.Investment.create_from_form(
@@ -1188,9 +1186,8 @@ class Investment_Test(unittest.TestCase):
 
         self.Investment.mark_as_paid([id], '2016-01-03')
 
-        invoice_id = self.Investment.create_amortization_invoice(
+        invoice_id, errors = self.Investment.create_amortization_invoice(
             id, '2018-01-03', 80, 1, 24)
-
         invoice = self.Invoice.browse(invoice_id)
         self.assertEqual(invoice.name,
             "GENKWHID{}-AMOR2018".format(id))
@@ -1206,7 +1203,7 @@ class Investment_Test(unittest.TestCase):
             )
 
         self.Investment.mark_as_paid([id], '2017-01-03')
-        invoice_id = self.Investment.create_amortization_invoice(
+        invoice_id, errors = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
 
         inv = ns(self.Investment.read(id, [
@@ -1278,7 +1275,7 @@ class Investment_Test(unittest.TestCase):
         )
 
         self.Investment.mark_as_paid([id], '2017-01-03')
-        invoice_id = self.Investment.create_amortization_invoice(
+        invoice_id, errors = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
         self.assertTrue(invoice_id)
 
@@ -1564,12 +1561,12 @@ class Investment_Test(unittest.TestCase):
             )
         self.Investment.mark_as_paid([id], '2015-11-20')
 
-        invoice = self.Investment.amortize('2040-11-20',[id])
+        invoice,errors = self.Investment.amortize('2040-11-20',[id])
         investment = self.Investment.read(id,['amortized_amount'])
         self.assertTrue(invoice)
         self.assertEqual(1000, investment['amortized_amount'])
 
-        invoice = self.Investment.amortize('2041-11-20',[id])
+        invoice,errors = self.Investment.amortize('2041-11-20',[id])
         self.assertFalse(invoice)
         investment = self.Investment.read(id,['amortized_amount'])
         self.assertEqual(1000, investment['amortized_amount'])
