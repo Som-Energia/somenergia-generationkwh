@@ -1152,8 +1152,8 @@ class Investment_Test(unittest.TestCase):
                 id, '2018-01-30', 80, 1, 24)
 
         self.assertIn(
-            "Amortization notification {name}-AMOR2018 already exist".format(**inv),
-            unicode(errors2),
+            "Inversió {id}: L'amortització {name}-AMOR2018 ja existeix".format(**inv),
+            unicode(errors2).encode('utf-8'),
             )
 
     def test__create_amortization_invoice__errorWhenNoBank(self):
