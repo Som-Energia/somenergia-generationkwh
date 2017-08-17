@@ -1530,7 +1530,7 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
         self.Investment.mark_as_paid([id], '2015-01-02')
-        self.Investment.amortize('2017-01-01')
+        self.Investment.amortize('2017-01-01',[id])
         investment = self.Investment.read(id,['amortized_amount'])
         self.assertEqual(0, investment['amortized_amount'])
 
