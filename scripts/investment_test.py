@@ -439,50 +439,6 @@ class Investment_OLD_Test(unittest.TestCase):
             [1, '2018-07-29', 4,  4,  2, 24],
             ])
 
-    def test__amortized_amount__zeroByDefault(self):
-        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
-        investment_ids = self.Investment.search([])
-        investments = self.Investment.read(investment_ids,['amortized_amount'])
-        amortized_amounts = [
-            inv['amortized_amount'] 
-            for inv in investments
-            ]
-        self.assertEqual(amortized_amounts, [0.0,0.0,0.0])
-
-    def test__amortized_amount__afterAmortization(self):
-        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
-        self.Investment.amortize('2017-11-20')
-        investment_ids = self.Investment.search([])
-        investments = self.Investment.read(investment_ids,['amortized_amount'])
-        amortized_amounts = [
-            inv['amortized_amount'] 
-            for inv in investments
-            ]
-        self.assertEqual(amortized_amounts, [4.0,60.0,40.0])
-
-    def test__amortized_amount__afterAmortizationLimited(self):
-        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
-        self.Investment.amortize('2017-07-28')
-        investment_ids = self.Investment.search([])
-        investments = self.Investment.read(investment_ids,['amortized_amount'])
-        amortized_amounts = [
-            inv['amortized_amount'] 
-            for inv in investments
-            ]
-        self.assertEqual(amortized_amounts, [0.0,60.0,40.0])
-
-    def test__amortized_amount__secondAmortization(self):
-        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
-        self.Investment.amortize('2017-11-20')
-        self.Investment.amortize('2018-11-20')
-        investment_ids = self.Investment.search([])
-        investments = self.Investment.read(investment_ids,['amortized_amount'])
-        amortized_amounts = [
-            inv['amortized_amount'] 
-            for inv in investments
-            ]
-        self.assertEqual(amortized_amounts, [8.0,120.0,80.0])
-
         
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
@@ -1539,7 +1495,85 @@ class Investment_Test(unittest.TestCase):
             logs:
                 - generationkwh_mail_creacio
                 - generationkwh_mail_pagament
-            """))
+           """))
+
+    def test__amortized_amount__zeroByDefault(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2015-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_paid([id], '2015-01-02')
+        investment = self.Investment.read(id, ['amortized_amount'])
+        self.assertEqual(0.0, investment['amortized_amount'])
+
+    def test__amortize__justBeforeAmortization(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_paid([id], '2015-01-02')
+        self.Investment.amortize('2017-01-01')
+        investment = self.Investment.read(id,['amortized_amount'])
+        self.assertEqual(0, investment['amortized_amount'])
+
+    def test__amortize__justAtAmortizationDate(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_paid([id], '2015-01-02')
+
+        self.Investment.amortize('2017-01-02',[id])
+
+        investment = self.Investment.read(id,['amortized_amount'])
+        self.assertEqual(40, investment['amortized_amount'])
+
+    def test__amortize__secondAmortization(self):
+        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_paid([id], '2015-11-20')
+        self.Investment.amortize('2017-11-20',[id])
+        self.Investment.amortize('2018-11-20',[id])
+
+        investment = self.Investment.read(id,['amortized_amount'])
+        self.assertEqual(80, investment['amortized_amount'])
+
+    def test__amortize__afterFullAmortization(self):
+        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_paid([id], '2015-11-20')
+
+        invoice = self.Investment.amortize('2040-11-20',[id])
+        investment = self.Investment.read(id,['amortized_amount'])
+        self.assertTrue(invoice)
+        self.assertEqual(1000, investment['amortized_amount'])
+
+        invoice = self.Investment.amortize('2041-11-20',[id])
+        self.assertFalse(invoice)
+        investment = self.Investment.read(id,['amortized_amount'])
+        self.assertEqual(1000, investment['amortized_amount'])
+
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
