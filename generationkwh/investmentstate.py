@@ -81,6 +81,14 @@ class InvestmentState(object):
 
     @staticmethod
     def firstEffectiveDate(purchase_date):
+        # TODO: consider bissextile years for waitDays
+        pionersDay = '2016-04-28'
+        waitDays = gkwh.waitingDays
+        if str(purchase_date) < pionersDay:
+            waitDays -= 30
+        waitDelta = relativedelta(days=waitDays)
+        return purchase_date + waitDelta
+
         pionersDay = '2016-04-28'
         pionersPrize = 0
         if str(purchase_date) < pionersDay:
