@@ -14,6 +14,7 @@ from decorator import decorator
 def action(f, self, *args, **kwds):
     result = f(self, *args, **kwds)
     self._changed.update(result)
+    self._vals.update(result)
     return result
 
 class InvestmentState(object):
@@ -40,9 +41,15 @@ class InvestmentState(object):
         'log',
         ]
 
+    def __getattr__(self, name):
+        if name in self.allowedParams:
+            return self._vals[name]
+        raise AttributeError(name)
+
     def __init__(self, user=None, timestamp=None, **values):
         self._checkAttribs(**values)
         self._prev=ns(values)
+        self._vals=ns(values)
         self._changed=ns()
         self._user = user.decode('utf-8')
         self._timestamp = timestamp
@@ -54,7 +61,7 @@ class InvestmentState(object):
                 user=self._user,
             )
             + message.format(**kwds)
-            + self._prev.get('log', '')
+            + self._vals.get('log', '')
             )
 
     def _checkAttribs(self, **kwds):
@@ -77,7 +84,7 @@ class InvestmentState(object):
         return changes
 
     def values(self):
-        return ns(self._prev, **self._changed)
+        return ns(self._vals, **self._changed)
 
     @staticmethod
     def firstEffectiveDate(purchase_date):
@@ -171,17 +178,17 @@ class InvestmentState(object):
         return self._pay(date, amount, log)
 
     def _pay(self, date, amount, log):
-        paid_amount = self._prev.paid_amount + amount
+        paid_amount = self._vals.paid_amount + amount
         self._changed.update(
             log=log,
             paid_amount = paid_amount,
             )
 
-        if amount != self._prev.nominal_amount:
+        if amount != self.nominal_amount:
             # TODO: Concrete Exception class
             raise Exception("Wrong payment")
 
-        if self._prev.paid_amount:
+        if self.paid_amount:
             # TODO: Concrete Exception class
             raise Exception("Already paid")
         return ns(
@@ -210,7 +217,7 @@ class InvestmentState(object):
             purchase_date = None,
             first_effective_date = None,
             last_effective_date = None,
-            paid_amount = self._prev.paid_amount-amount,
+            paid_amount = self.paid_amount-amount,
             log = log,
         )
 
@@ -224,14 +231,14 @@ class InvestmentState(object):
             u'DIVESTED: Desinversió total [{move_line_id}]\n',
             move_line_id=move_line_id,
             )
-        paid_amount = self._prev.paid_amount-amount
+        paid_amount = self.paid_amount-amount
         if paid_amount:
             raise Exception(
                 u"Paid amount after divestment should be 0 but was {} €"
                 .format(paid_amount))
         return ns(
             last_effective_date = date,
-            active = self.hasEffectivePeriod(self._prev.first_effective_date, date),
+            active = self.hasEffectivePeriod(self.first_effective_date, date),
             paid_amount = paid_amount,
             log=log,
         )
@@ -256,8 +263,8 @@ class InvestmentState(object):
             )
         return ns(
             last_effective_date = date,
-            active = self.hasEffectivePeriod(self._prev.first_effective_date, date),
-            paid_amount = self._prev.paid_amount-amount,
+            active = self.hasEffectivePeriod(self.first_effective_date, date),
+            paid_amount = self.paid_amount-amount,
             log=log,
         )
 
@@ -324,11 +331,11 @@ class InvestmentState(object):
         Correct the nominal value before we issue an
         invoice.
         """
-        if self._prev.nominal_amount != from_amount:
+        if self.nominal_amount != from_amount:
             raise Exception(
                 "Correction not matching the 'from' amount")
         # TODO: Not enough, also if it has unpaid invoices
-        if self._prev.paid_amount:
+        if self.paid_amount:
             raise Exception("Correction can not be done with paid investments")
         log = self._log(
             u'CORRECTED: Quantitat canviada abans del pagament '
@@ -350,12 +357,12 @@ class InvestmentState(object):
         In modern investments you should split it to generate
         two brand new investments and then fully divest one of them.
         """
-        if not self._prev.paid_amount:
+        if not self.paid_amount:
             raise Exception(
                 "Partial divestment can be only applied to paid investments, "
                 "try 'correct'")
 
-        remaining=self._prev.nominal_amount-amount
+        remaining=self.nominal_amount-amount
         log = self._log(
             u'PARTIAL: Desinversió parcial de {amount} €, '
             u'en queden {remaining} € [{move_line_id}]\n',
@@ -366,7 +373,7 @@ class InvestmentState(object):
 
         return ns(
             nominal_amount=remaining,
-            paid_amount=self._prev.paid_amount-amount,
+            paid_amount=self.paid_amount-amount,
             log=log,
         )
 
@@ -378,11 +385,11 @@ class InvestmentState(object):
         refuses to pay it or cannot be contacted.
         """
         # TODO: if invoiced but still unpaid cannot be cancelled either
-        if self._prev.paid_amount:
+        if self.paid_amount:
             raise Exception(
                 "Only unpaid investments can be cancelled")
 
-        if self._prev.purchase_date:
+        if self.purchase_date:
             raise Exception(
                 "Only unpaid investments can be cancelled")
 
@@ -400,7 +407,7 @@ class InvestmentState(object):
         Annotates an amortization for the given amount at the given date
         """
         return ns(
-            amortized_amount = to_be_amortized + self._prev.amortized_amount,
+            amortized_amount = to_be_amortized + self.amortized_amount,
             log = self._log(
                 u'AMORTIZATION: Generada amortització '
                 u'de {to_be_amortized:.02f} € pel {date}\n',

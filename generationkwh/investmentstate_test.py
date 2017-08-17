@@ -669,7 +669,7 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertEqual(ctx.exception.message,
             "Only unpaid investments can be cancelled")
 
-    # TODO: cancel with payment order
+    # TODO: cancel invoiced
 
 
     def test_erpChanges(self):
