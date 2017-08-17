@@ -41,11 +41,6 @@ class InvestmentState(object):
         'log',
         ]
 
-    def __getattr__(self, name):
-        if name in self.allowedParams:
-            return self._vals[name]
-        raise AttributeError(name)
-
     def __init__(self, user=None, timestamp=None, **values):
         self._checkAttribs(**values)
         self._prev=ns(values)
@@ -53,6 +48,20 @@ class InvestmentState(object):
         self._changed=ns()
         self._user = user.decode('utf-8')
         self._timestamp = timestamp
+
+    def __getattr__(self, name):
+        if name in self.allowedParams:
+            return self._vals[name]
+        raise AttributeError(name)
+
+    def __setattr__(self, name, value):
+        """
+        Forbid directly setting the attributes.
+        Do it by returning a dictionary in an @action
+        """
+        if name in self.allowedParams:
+            raise AttributeError(name)
+        return super(InvestmentState, self).__setattr__(name, value)
 
     def _log(self, message, **kwds):
         return (

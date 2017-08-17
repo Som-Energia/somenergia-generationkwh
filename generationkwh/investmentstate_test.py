@@ -809,6 +809,35 @@ class InvestmentState_Test(unittest.TestCase):
             )
         self.assertEqual(result, False)
 
+    def test_getattr(self):
+        inv = self.setupInvestment(
+            nominal_amount = 100,
+            paid_amount = 0,
+            )
+        self.assertEqual(inv.nominal_amount, 100)
+
+
+    def test_getattr_badattr(self):
+        inv = self.setupInvestment(
+            nominal_amount = 100,
+            paid_amount = 0,
+            )
+        with self.assertRaises(AttributeError) as ctx:
+            inv.badattrib
+        self.assertEqual(ctx.exception.message,
+            "badattrib")
+
+    def test_setattr_fails(self):
+        inv = self.setupInvestment(
+            nominal_amount = 100,
+            paid_amount = 0,
+            )
+        with self.assertRaises(AttributeError) as ctx:
+            inv.paid_amount = 5
+        self.assertEqual(ctx.exception.message,
+            "paid_amount")
+
+
 
 
 
