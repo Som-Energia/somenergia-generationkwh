@@ -404,43 +404,6 @@ class Investment_OLD_Test(unittest.TestCase):
         self.assertTrue(
             self.Investment.member_has_effective(1,'2015-07-01','2015-07-01'))
     
-    # Amortizations
-    def pendingAmortizations(self, currentDate):
-        result = self.Investment.pending_amortizations(currentDate)
-        return [x[1:-1] for x in sorted(result)] # filter id and log
-
-    def test__pending_amortitzations__noInvestments(self):
-        self.assertEqual(self.pendingAmortizations('2017-11-20'), [])
-
-    def test__pending_amortitzations__withDueInvestments(self):
-        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
-        self.assertEqual(
-            self.pendingAmortizations('2017-11-20'),[
-            [1, '2017-06-30', 0, 60, 1, 24],
-            [1, '2017-06-30', 0, 40, 1, 24],
-            [1, '2017-07-29', 0, 4,  1, 24],
-            ])
-
-    def test__pending_amortitzations__notDue(self):
-        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
-        self.assertEqual(
-            self.pendingAmortizations('2017-07-28'),[
-            [1, '2017-06-30', 0, 60, 1, 24],
-            [1, '2017-06-30', 0, 40, 1, 24],
-            ])
-
-    def test__pending_amortitzations__whenPartiallyAmortized(self):
-        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
-        self.Investment.amortize('2017-11-20')
-        self.assertEqual(
-            self.pendingAmortizations('2018-11-20'),[
-            [1, '2018-06-30', 60, 60, 2, 24],
-            [1, '2018-06-30', 40, 40, 2, 24],
-            [1, '2018-07-29', 4,  4,  2, 24],
-            ])
-
-        
-
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Investment_Test(unittest.TestCase):
 
