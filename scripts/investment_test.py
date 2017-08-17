@@ -484,54 +484,6 @@ class Investment_OLD_Test(unittest.TestCase):
         self.assertEqual(amortized_amounts, [8.0,120.0,80.0])
 
         
-    def test__migrate_created_from_accounting__whenLogEmpty(self):
-        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
-        investment_id = self.Investment.search([])[0]
-        self.Investment.write(investment_id, dict(log=''))
-
-        self.Investment.migrate_created_from_accounting()
-
-        investment = self.Investment.read(investment_id,['log'])
-        self.assertLogEquals(investment['log'], 
-            u'PAYMENT: Remesa efectuada\n'
-            u'ORDER: Formulari emplenat\n'
-            )
-
-    def test__migrate_created_from_accounting__keepsPreviousContent(self):
-        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
-        investment_id = self.Investment.search([])[0]
-        self.Investment.write(investment_id, dict(log='previous content'))
-
-        self.Investment.migrate_created_from_accounting()
-
-        investment = self.Investment.read(investment_id,['log'])
-        self.assertEqual(investment['log'], 
-            u'previous content')
-
-    def test__migrate_created_from_accounting__explicitIdForces(self):
-        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
-        investment_id = self.Investment.search([])[0]
-        self.Investment.write(investment_id, dict(log='previous content'))
-
-        self.Investment.migrate_created_from_accounting([investment_id])
-
-        investment = self.Investment.read(investment_id,['log'])
-        self.assertEqual(investment['log'], 
-            u'[2015-07-29 09:39:07.70812 Mònica Nuell] PAYMENT: Remesa efectuada\n'
-            u'[2015-07-29 09:39:07.70812 Webforms] ORDER: Formulari emplenat\n'
-            )
-
-    def test__migrate__updatesOrderDate(self):
-        self.Investment.create_from_accounting(1, None, '2015-11-19', None, None)
-
-        investment_id = self.Investment.search([])[0]
-        self.Investment.write(investment_id, dict(order_date=False))
-
-        self.Investment.migrate_created_from_accounting([investment_id])
-
-        investment = self.Investment.read(investment_id,['order_date'])
-        self.assertEqual(investment['order_date'], '2015-07-29')
-
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Investment_Test(unittest.TestCase):
