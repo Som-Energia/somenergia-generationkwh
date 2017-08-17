@@ -26,6 +26,7 @@ def totalAmortizationNumber():
     return gkwh.expirationYears - 1
 
 def pendingAmortizations(purchase_date, current_date, investment_amount, amortized_amount):
+    if not purchase_date: return []
     years = gkwh.expirationYears
     yearlyAmount = investment_amount/years
     return [

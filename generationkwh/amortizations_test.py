@@ -174,6 +174,16 @@ class Amortization_Test(unittest.TestCase):
     def test_totalAmortizationNumber_its_a_constant(self):
         self.assertEqual(totalAmortizationNumber(),24)
 
+    def test_pendingAmortizations_unpaid(self):
+        self.assertEqual(
+            pendingAmortizations(
+                purchase_date=False,
+                current_date='2002-01-01',
+                investment_amount=1000,
+                amortized_amount=0,
+                ), [
+            ])
+
     def test_pendingAmortizations_justFirstAmortization(self):
         self.assertEqual(
             pendingAmortizations(
