@@ -1490,8 +1490,23 @@ class Investment_Test(unittest.TestCase):
         self.Investment.send_mail(id,'account.invoice', 'generationkwh_mail_pagament')
         self.assertNsEqual(self.MailMockup.log(), ns.loads("""\
             logs:
-                - PlantillaEmailEnviada: generationkwh_mail_creacio
-                - PlantillaEmailEnviada: generationkwh_mail_pagament
+                - generationkwh_mail_creacio
+                - generationkwh_mail_pagament
+           """))
+
+    def test__send_mail__emailImpagamentSent(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.send_mail(id,'account.invoice', 'generationkwh_mail_impagament')
+        self.assertNsEqual(self.MailMockup.log(), ns.loads("""\
+            logs:
+                - generationkwh_mail_creacio
+                - generationkwh_mail_impagament
            """))
 
     def test__amortized_amount__zeroByDefault(self):
