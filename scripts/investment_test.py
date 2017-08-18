@@ -1487,7 +1487,6 @@ class Investment_Test(unittest.TestCase):
         self.assertNsEqual(self.MailMockup.log(), ns.loads("""\
             logs:
                 - PlantillaEmailEnviada: generationkwh_mail_creacio
-                - PlantillaEmailEnviada: generationkwh_mail_pagament
                 - PlantillaEmailEnviada: generationkwh_mail_amortitzacio
            """))
 
