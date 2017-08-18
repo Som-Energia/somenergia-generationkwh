@@ -8,7 +8,8 @@ try:
     import dbconfig
 except ImportError:
     pass
-import datetime
+
+from datetime import datetime, timedelta
 from yamlns import namespace as ns
 import erppeek_wst
 
@@ -838,7 +839,7 @@ class Investment_Test(unittest.TestCase):
             sii_to_send: false
             type: out_invoice
             """.format(
-            invoice_date=datetime.date.today(),
+            invoice_date=datetime.today().strftime("%Y-%m-%d"),
             id=invoice_ids[0],
             iban='ES77 1234 1234 1612 3456 7890',
             year=2018,
@@ -1087,7 +1088,7 @@ class Investment_Test(unittest.TestCase):
             sii_to_send: false
             type: in_invoice
             """.format(
-                invoice_date = datetime.date.today(),
+                invoice_date = datetime.today().strftime("%Y-%m-%d"),
                 id = invoice_id,
                 iban = 'ES77 1234 1234 1612 3456 7890',
                 year = 2018,
@@ -1190,7 +1191,7 @@ class Investment_Test(unittest.TestCase):
             amortizationDate: '30/01/2018'
             amortizationNumPayment: 1
             """.format(
-                today = datetime.date.today().strftime("%d/%m/%Y"),
+                today = datetime.today().strftime("%d/%m/%Y"),
                 nif = self.personalData.nif,
                 name = self.personalData.name,
                 surname = self.personalData.surname,
@@ -1244,7 +1245,6 @@ class Investment_Test(unittest.TestCase):
 
         self.Investment.open_invoices([invoice_id])
 
-        from datetime import datetime, timedelta
         date_due_dt = datetime.today() + timedelta(7)
         date_due = date_due_dt.strftime('%Y-%m-%d')
         invoices_changes = self.Invoice.read(invoice_id,
@@ -1280,7 +1280,6 @@ class Investment_Test(unittest.TestCase):
 
         self.Investment.open_invoices(invoice_ids)
 
-        from datetime import datetime, timedelta
         date_due_dt = datetime.today() + timedelta(7)
         date_due = date_due_dt.strftime('%Y-%m-%d')
         invoices_changes = self.Invoice.read(invoice_ids,
@@ -1426,7 +1425,7 @@ class Investment_Test(unittest.TestCase):
                     iban=iban,
                     format_iban=' '.join(
                         iban[n:n+4] for n in xrange(0,len(iban),4)),
-                    today=datetime.date.today(),
+                    today=datetime.today().strftime("%Y-%m-%d"),
                 )))
 
     def test__send_mail__emailCreacioSent(self):
@@ -1470,6 +1469,26 @@ class Investment_Test(unittest.TestCase):
             logs:
                 - PlantillaEmailEnviada: generationkwh_mail_creacio
                 - PlantillaEmailEnviada: generationkwh_mail_impagament
+           """))
+
+    def test__send_mail__emailAmortizationSent(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+
+        date_due_dt = datetime.today() + timedelta(730)
+        date_due = date_due_dt.strftime('%Y-%m-%d')
+        self.Investment.mark_as_paid([id], datetime.today().strftime('%Y-%m-%d'))
+        self.Investment.amortize(date_due, [id])
+        self.assertNsEqual(self.MailMockup.log(), ns.loads("""\
+            logs:
+                - PlantillaEmailEnviada: generationkwh_mail_creacio
+                - PlantillaEmailEnviada: generationkwh_mail_pagament
+                - PlantillaEmailEnviada: generationkwh_mail_amortitzacio
            """))
 
     def test__amortized_amount__zeroByDefault(self):
