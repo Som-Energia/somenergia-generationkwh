@@ -1428,7 +1428,7 @@ class Investment_Test(unittest.TestCase):
                     today=datetime.today().strftime("%Y-%m-%d"),
                 )))
 
-    def test__send_mail__emailCreacioSent(self):
+    def test__create_from_form__sendsCreationEmail(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
@@ -1441,7 +1441,7 @@ class Investment_Test(unittest.TestCase):
                 - PlantillaEmailEnviada: generationkwh_mail_creacio
             """))
 
-    def test__send_mail__emailPagamentSent(self):
+    def test__investment_payment__sendsPaymentEmail(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
@@ -1449,12 +1449,26 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
-        self.Investment.send_mail(id,'account.invoice', 'generationkwh_mail_pagament')
+        self.MailMockup.deactivate()
+        self.MailMockup.activate()
+        self.Investment.investment_payment([id])
         self.assertNsEqual(self.MailMockup.log(), ns.loads("""\
             logs:
-                - PlantillaEmailEnviada: generationkwh_mail_creacio
                 - PlantillaEmailEnviada: generationkwh_mail_pagament
            """))
+
+    def test__mark_as_paid__sendsPaymentEmail(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.MailMockup.deactivate()
+        self.MailMockup.activate()
+        self.Investment.mark_as_paid([id], datetime.today().strftime('%Y-%m-%d'))
+        self.assertFalse(self.MailMockup.log())
 
     def test__send_mail__emailImpagamentSent(self):
         id = self.Investment.create_from_form(
