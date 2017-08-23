@@ -407,6 +407,29 @@ def getInvestmentsByPartner(cr, partner_id):
     ))
     return dbutils.nsList(cr)
 
+def getAllNamedInvestments(cr):
+    cr.execute("""\
+        select
+            partner.name as partner_name,
+            inv.*,
+            false
+        from
+            generationkwh_investment as inv
+        left join
+            somenergia_soci as member
+        on
+            member.id = inv.member_id
+        left join
+            res_partner as partner
+        on
+            partner.id = member.partner_id
+        where
+            inv.name IS NOT NULL AND
+            true
+        order by inv.id
+    """
+    )
+    return dbutils.nsList(cr)
 
 def getOrderLines(cr, order_id):
     cr.execute("""\
@@ -655,15 +678,27 @@ def displayPartnersMovements(cr, partner_id):
             **m)
     investments = getInvestmentsByPartner(cr, partner_id)
     for inv in investments:
-        inv.amount = inv.nshares*gkwh.shareValue
-        inv.active = 'y' if inv.active else 'n'
-        error("    inv {active} {order_date_or_not} {purchase_date_or_not} {first_effective_date_or_not} {last_effective_date_or_not} {id} {partner_name} {amount} {name}",
-            partner_id = partner_id,
+        error(investmentToString(inv), partner_id=partner_id)
+
+def investmentToString(inv):
+    return ("    inv {activeyesno} {order_date_or_not} {purchase_date_or_not} {first_effective_date_or_not} {last_effective_date_or_not} {id} {name_or_not} {partner_name} {amount}"
+        .format(
             order_date_or_not = inv.order_date or '____-__-__',
             purchase_date_or_not = inv.purchase_date or '____-__-__',
             first_effective_date_or_not = inv.first_effective_date or '____-__-__',
             last_effective_date_or_not = inv.last_effective_date or '____-__-__',
-            **inv)
+            name_or_not = inv.name or 'GKWH_____',
+            activeyesno = 'y' if inv.active else 'n',
+            amount = inv.nshares*gkwh.shareValue,
+            **inv))
+
+def displayAllInvestments(cr):
+    investments = getAllNamedInvestments(cr)
+    for inv in investments:
+        print(investmentToString(inv))
+    for inv in investments:
+        print inv.name, inv.partner_name
+        print inv.log
 
 def cleanUp(cr):
     step("Clean up cases")
@@ -1500,6 +1535,7 @@ with psycopg2.connect(**configdb.psycopg) as db:
             cleanUp(cr)
             main(cr)
             showUnusedMovements(cr)
+            displayAllInvestments(cr)
 
 
 # vim: et ts=4 sw=4
