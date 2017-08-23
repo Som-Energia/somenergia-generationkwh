@@ -718,6 +718,25 @@ def cleanUp(cr):
                 move_line_id = %(positive)s
             """,case)
 
+    step(" Compensating pending negative investments when divested")
+    for case in cases.earlyDivestments:
+        cr.execute("""\
+            UPDATE generationkwh_investment
+            SET
+                active=false
+            WHERE move_line_id=%(negative)s
+            ;
+            UPDATE generationkwh_investment
+            SET
+                last_effective_date = %(date)s,
+                --- if has no effective date, recompute it
+                first_effective_date = coalesce(
+                    first_effective_date, purchase_date + interval '%(waitdays)s days')
+            WHERE
+                move_line_id = %(positive)s
+            ;
+            """,case)
+
     step(" Detecting remaining negative investments")
     negativeInvestments = activeNegativeInvestments(cr)
     for inv in negativeInvestments:
