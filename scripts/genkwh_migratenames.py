@@ -718,19 +718,6 @@ def cleanUp(cr):
                 move_line_id = %(positive)s
             """,case)
 
-    step(" Closing open investments")
-    cr.execute("""
-        UPDATE generationkwh_investment
-        SET
-            last_effective_date = purchase_date + interval '25 years'
-        WHERE
-            purchase_date IS NOT NULL
-        AND
-            first_effective_date IS NOT NULL
-        AND
-            last_effective_date IS NULL
-        """)
-
     step(" Detecting remaining negative investments")
     negativeInvestments = activeNegativeInvestments(cr)
     for inv in negativeInvestments:
@@ -759,6 +746,19 @@ def cleanUp(cr):
 
     if squatters or referencedTwice:
         fail("No puc avançar si hi ha aquests errors")
+
+    step(" Closing open investments")
+    cr.execute("""
+        UPDATE generationkwh_investment
+        SET
+            last_effective_date = purchase_date + interval '25 years'
+        WHERE
+            purchase_date IS NOT NULL
+        AND
+            first_effective_date IS NOT NULL
+        AND
+            last_effective_date IS NULL
+        """)
 
     success("Clean up done")
 
