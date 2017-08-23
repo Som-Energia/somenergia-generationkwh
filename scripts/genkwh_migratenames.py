@@ -1397,11 +1397,13 @@ def solveUnnamedCases(cr, investment):
         UPDATE
             generationkwh_investment as inv
         SET
+            order_date = %(order_date)s,
             name = %(name)s,
             log = %(log)s
         WHERE
             inv.id = %(investment)s
     """, dict(
+        order_date = attributes.order_date,
         name = name,
         log = log,
         investment=investment.id,
