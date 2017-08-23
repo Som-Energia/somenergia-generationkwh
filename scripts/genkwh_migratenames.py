@@ -1332,6 +1332,7 @@ def solveRepaidCase(cr, investment, payment):
         SET
             name = %(name)s,
             log = %(log)s,
+            last_effective_date = purchase_date + interval '%(years)s years',
             order_date = %(order_date)s
         WHERE
             inv.id = %(id)s
@@ -1340,6 +1341,7 @@ def solveRepaidCase(cr, investment, payment):
             order_date = payment.order_date,
             name = payment.ref,
             log = log,
+            years = gkwh.expirationYears,
         ))
     investment = getInvestment(cr, investment.id)
     if checkAttributes(investment, attributes):
@@ -1348,7 +1350,7 @@ def solveRepaidCase(cr, investment, payment):
 
 def solveUnnamedCases(cr, investment):
     "Cases with no payment order, usually transfer receptors"
-    name = cases.unnamedCases[investment.move_line_id]
+    name = cases.unnamedCases.pop(investment.move_line_id)
     partner_id = investment.partner_id
     True and success(
         "Solved compra {investment.id} {name} {amount:=8}€ {investment.partner_name}"
