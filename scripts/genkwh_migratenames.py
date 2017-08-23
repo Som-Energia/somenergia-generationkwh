@@ -801,6 +801,21 @@ def cleanUp(cr):
     if squatters or referencedTwice:
         fail("No puc avançar si hi ha aquests errors")
 
+    step(" Performing changes by hand")
+    for movelineid, changes in cases.adhoc.items():
+        for key, value in changes.items():
+            cr.execute("""
+                UPDATE generationkwh_investment as inv
+                SET
+                    %(key)s = '%(value)s'
+                WHERE
+                    move_line_id = %(move_line_id)s
+            """%dict(
+                key=key,
+                value=value,
+                move_line_id = movelineid,
+            ))
+
     step(" Closing open investments")
     cr.execute("""
         UPDATE generationkwh_investment
@@ -1425,6 +1440,9 @@ def solveUnnamedCases(cr, investment):
             name=name,
             ))
     attributes=ns()
+    if investment.move_line_id not in sold:
+        consoleError("Moviment {move_line_id} no disponible com a venut, algu ho ha venut?".format(**investment))
+        return False
     logBought(cr, attributes, investment)
     log = attributes.log
     success(("\n"+log).encode('utf-8'))
