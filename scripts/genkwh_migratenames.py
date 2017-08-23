@@ -807,14 +807,13 @@ def cleanUp(cr):
             cr.execute("""
                 UPDATE generationkwh_investment as inv
                 SET
-                    %(key)s = '%(value)s'
+                    %(key)s = %%(value)s
                 WHERE
                     move_line_id = %(move_line_id)s
             """%dict(
                 key=key,
-                value=value,
                 move_line_id = movelineid,
-            ))
+            ),dict(value=value))
 
     step(" Closing open investments")
     cr.execute("""
