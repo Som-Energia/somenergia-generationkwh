@@ -12,7 +12,6 @@ import generationkwh.investmentmodel as gkwh
 import datetime
 from generationkwh.investmentstate import InvestmentState
 
-
 errorCases = ns()
 
 def error(message, **params):
@@ -820,10 +819,13 @@ def cleanUp(cr):
         SET
             last_effective_date = purchase_date + interval '25 years'
         WHERE
+            -- Si no hi ha data de compra, res a tancar
             purchase_date IS NOT NULL
         AND
+            -- Si no han posat data effectiva, res a tancar
             first_effective_date IS NOT NULL
         AND
+            -- Respecta els que ja la tenen
             last_effective_date IS NULL
         """)
 
@@ -1169,7 +1171,8 @@ def logUnpay(cr, attributes, move_line_id):
         active=False) # In erp don't but in migration yes
 
 def logResign(cr, attributes):
-    inv = InvestmentState('Migration', 'Never',
+    # TODO: Never should be today but in order to b2b properly
+    inv = InvestmentState('Migration', datetime.datetime.now() if '--doit' in sys.argv else 'Never',
         **attributes
         )
     inv.cancel()
@@ -1201,7 +1204,6 @@ def logPartial(cr, attributes, investment, move_line_id):
 sold = ns() # Temporary store for sold investments
 
 def logSold(cr, attributes, investment, move_line_id, what):
-    import datetime
     ml = unusedMovements.pop(move_line_id)
     mlto = unusedMovements.pop(what.to)
     transaction_date = what.get('date', ml.create_date.date())
