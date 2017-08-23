@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-
 import configdb
 import psycopg2
 import dbutils
@@ -719,6 +718,19 @@ def cleanUp(cr):
                 move_line_id = %(positive)s
             """,case)
 
+    step(" Closing open investments")
+    cr.execute("""
+        UPDATE generationkwh_investment
+        SET
+            last_effective_date = purchase_date + interval '25 years'
+        WHERE
+            purchase_date IS NOT NULL
+        AND
+            first_effective_date IS NOT NULL
+        AND
+            last_effective_date IS NULL
+        """)
+
     step(" Detecting remaining negative investments")
     negativeInvestments = activeNegativeInvestments(cr)
     for inv in negativeInvestments:
@@ -1332,7 +1344,6 @@ def solveRepaidCase(cr, investment, payment):
         SET
             name = %(name)s,
             log = %(log)s,
-            last_effective_date = purchase_date + interval '%(years)s years',
             order_date = %(order_date)s
         WHERE
             inv.id = %(id)s
