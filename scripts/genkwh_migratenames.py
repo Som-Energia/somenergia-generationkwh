@@ -1093,7 +1093,8 @@ def main(cr):
             displayPartnersMovements(cr, orphanPayment.partner_id)
 
     for inv in unnamedActiveInvestments:
-        solveUnnamedCases(cr, inv)
+        if not solveUnnamedCases(cr, inv):
+            consoleError("Moviment {move_line_id} no disponible com a venut, algu ho ha venut?".format(**inv))
 
 
     for moveline_id in ungenerated:
@@ -1429,6 +1430,8 @@ def solveRepaidCase(cr, investment, payment):
 
 def solveUnnamedCases(cr, investment):
     "Cases with no payment order, usually transfer receptors"
+    if investment.move_line_id not in sold:
+        return False
     name = cases.unnamedCases.pop(investment.move_line_id)
     partner_id = investment.partner_id
     True and success(
@@ -1439,9 +1442,6 @@ def solveUnnamedCases(cr, investment):
             name=name,
             ))
     attributes=ns()
-    if investment.move_line_id not in sold:
-        consoleError("Moviment {move_line_id} no disponible com a venut, algu ho ha venut?".format(**investment))
-        return False
     logBought(cr, attributes, investment)
     log = attributes.log
     success(("\n"+log).encode('utf-8'))
