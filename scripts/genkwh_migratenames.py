@@ -1359,7 +1359,7 @@ def solveNormalCase(cr, investment, payment):
         False and displayPartnersMovements(cr, payment.partner_id)
 
     log = attributes.log
-    True and success(("\n"+log).encode('utf-8'))
+    False and success(("\n"+log).encode('utf-8'))
 
     cr.execute("""\
         UPDATE
@@ -1405,7 +1405,7 @@ def solveRepaidCase(cr, investment, payment):
         logMovement(cr, attributes, investment, movelineid, what)
     False and displayPartnersMovements(cr, payment.partner_id)
     log = attributes.log
-    True and success(("\n"+log).encode('utf-8'))
+    False and success(("\n"+log).encode('utf-8'))
 
     cr.execute("""\
         UPDATE
@@ -1444,7 +1444,7 @@ def solveUnnamedCases(cr, investment):
     attributes=ns()
     logBought(cr, attributes, investment)
     log = attributes.log
-    success(("\n"+log).encode('utf-8'))
+    False and success(("\n"+log).encode('utf-8'))
     cr.execute("""\
         UPDATE
             generationkwh_investment as inv
@@ -1496,7 +1496,7 @@ def solveInactiveInvestment(cr, payment):
             amount=investment.nshares*gkwh.shareValue,
             ))
     log = attributes.log
-    success(("\n"+log).encode('utf-8'))
+    False and success(("\n"+log).encode('utf-8'))
     cr.execute("""\
         UPDATE
             generationkwh_investment as inv
