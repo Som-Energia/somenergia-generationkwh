@@ -1428,11 +1428,13 @@ def solveInactiveInvestment(cr, payment):
     for movelineid, what in case.iteritems():
         logMovement(cr, attributes, investment, movelineid, what)
 
-    try:
-        logCancel(cr, attributes)
-    except Exception as e:
-        consoleError("{}: {}".format(
-            name, e.message))
+    # Consider any unpaid, also resigned
+    if 'DIVEST' not in attributes.log and 'DIVESTEDBYTRANSFER' not in attributes:
+        try:
+            logResign(cr, attributes)
+        except Exception as e:
+            consoleError("{}: {}".format(
+                name, e.message))
 
     True and success(
         "Solved inactive {investment.id} {payment.ref} {payment.order_date} {amount:=8}€ {payment.partner_name}"
