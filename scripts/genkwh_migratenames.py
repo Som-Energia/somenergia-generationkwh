@@ -733,8 +733,7 @@ def cleanUp(cr):
         cr.execute("""\
             UPDATE generationkwh_investment
             SET
-                active=false,
-                first_effective_date=NULL
+                active=false
             WHERE move_line_id=%(mlid)s
             """, dict(mlid=mlid))
 
