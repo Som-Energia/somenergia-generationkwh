@@ -1505,7 +1505,7 @@ def solveInactiveInvestment(cr, payment):
             name = %(name)s,
             log = %(log)s,
             order_date = %(order_date)s,
-            purchase_date = %(purchase_date)s,
+            purchase_date = CASE WHEN %(has_purchase_date)s THEN purchase_date ELSE NULL END,
             active = false
         WHERE
             inv.id = %(investment)s
@@ -1514,7 +1514,7 @@ def solveInactiveInvestment(cr, payment):
         investment = investment.id,
         name = investment.name,
         log = log,
-        purchase_date = attributes.purchase_date,
+        has_purchase_date = bool(attributes.purchase_date),
     ))
     investment = getInvestment(cr, investment.id)
     if checkAttributes(investment, attributes):
