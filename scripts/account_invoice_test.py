@@ -70,6 +70,25 @@ class Account_Invoice_Test(unittest.TestCase):
         investment_id = self.AccountInvoice.get_investment(invoice_id)
         self.assertFalse(investment_id)
 
+
+    def test__paymentWizard(self):
+
+        investment_id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+        invoice_ids, errors = self.Investment.create_initial_invoices([investment_id])
+        self.Investment.open_invoices(invoice_ids)
+
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(invoice_ids[0])
+
+        invoice = self.AccountInvoice.read(invoice_ids[0], ['residual'])
+        self.assertEqual(invoice['residual'], 0.0)
+
+
     def _test__get_investment_moveline(self):
         investment_id = self.Investment.create_from_form(
             self.personalData.partnerid,
