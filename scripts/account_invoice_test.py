@@ -83,13 +83,14 @@ class Account_Invoice_Test(unittest.TestCase):
         invoice_ids, errors = self.Investment.create_initial_invoices([investment_id])
         self.Investment.open_invoices(invoice_ids)
 
-        self.erp.GenerationkwhPaymentWizardTesthelper.pay(invoice_ids[0])
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(invoice_ids[0], 'movement description')
 
         invoice = self.AccountInvoice.read(invoice_ids[0], ['residual'])
         self.assertEqual(invoice['residual'], 0.0)
 
 
     def _test__get_investment_moveline(self):
+
         investment_id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
