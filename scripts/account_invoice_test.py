@@ -16,6 +16,7 @@ import erppeek_wst
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Account_Invoice_Test(unittest.TestCase):
     def setUp(self):
+        self.maxDiff = None
         self.personalData = ns(dbconfig.personaldata)
         self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
         self.erp.begin()
@@ -30,6 +31,25 @@ class Account_Invoice_Test(unittest.TestCase):
         self.erp.rollback()
         self.erp.close()
 
+
+    #TODO: Implemented in Investment_Amortization_Test
+    def assertNsEqual(self, dict1, dict2):
+        def parseIfString(nsOrString):
+            if type(nsOrString) in (dict, ns):
+                return nsOrString
+            return ns.loads(nsOrString)
+
+        def sorteddict(d):
+            if type(d) not in (dict, ns):
+                return d
+            return ns(sorted(
+                (k, sorteddict(v))
+                for k,v in d.items()
+                ))
+        dict1 = sorteddict(parseIfString(dict1))
+        dict2 = sorteddict(parseIfString(dict2))
+
+        return self.assertMultiLineEqual(dict1.dump(), dict2.dump())
 
     def test__get_investment__found(self):
         investment_id = self.Investment.create_from_form(
@@ -88,8 +108,34 @@ class Account_Invoice_Test(unittest.TestCase):
         invoice = self.AccountInvoice.read(invoice_ids[0], ['residual'])
         self.assertEqual(invoice['residual'], 0.0)
 
+    def test__paymentWizard__remesa(self):
 
-    def _test__get_investment_moveline(self):
+        investment_id1 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            1000,
+            '10.10.23.121',
+            'ES7712341234161234567890',
+        )
+        investment_id2 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-02', # order_date
+            2000,
+            '10.10.23.122',
+            'ES7712341234161234567890',
+        )
+        investment_ids = [investment_id1, investment_id2]
+        invoice_ids, errors = self.Investment.create_initial_invoices(investment_ids)
+        self.Investment.open_invoices(invoice_ids)
+        self.Investment.invoices_to_payment_order(invoice_ids)
+
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(invoice_ids[0], 'movement description')
+
+        invoice = self.AccountInvoice.read(invoice_ids[0], ['residual'])
+        self.assertEqual(invoice['residual'], 0.0)
+
+
+    def test__get_investment_moveline(self):
 
         investment_id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -98,32 +144,33 @@ class Account_Invoice_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
         )
-        #create invoice
+        investment = self.Investment.read(investment_id, ['name'])
         invoice_ids, errors = self.Investment.create_initial_invoices([investment_id])
         self.Investment.open_invoices(invoice_ids)
-        InvoicePayerWizard = self.erp.FacturacioPayInvoice
-        wizid = InvoicePayerWizard.create(dict(
-            amount = 4000,
-            name = "The wizard",
-            date = '2017-01-02',
-            journal_id  = False,
-            period_id  = False,
-            ), context = dict(active_ids = invoice_ids))
 
-        wizard = InvoicePayerWizard.get(wizid)
-        wizard.action_pay_and_reconcile(cursor, uid, wizid, dict(
-            active_ids = invoice_ids))
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(invoice_ids[0], 'my movement')
 
-        move_line_returned = self.AccountInvoice.get_investment_moveline(invoice_ids[0])
+        move_line_id = self.AccountInvoice.get_investment_moveline(invoice_ids[0])
 
-        self.assertMovelineEquals(move_line_id, """
-        move_line_returned = self.AccountInvoice.get_investment_moveline(invoice_ids[0])
-            move_id: {move_id}
+        move_line = ns(self.erp.AccountMoveLine.read(move_line_id, [
+            'name',
+            'account_id',
+            'debit',
+            'credit',
+            ]))
+        move_line.account_id = move_line.account_id[1]
+
+        self.assertNsEqual(move_line, """
+            name: 'Inversió {investment_name} '
             id: {moveline_id}
-            account_id: 1635000{codisoci}
-            credit: 4000
-            debit: 0
-        """)
+            account_id: 1635000{nsoci:>05} {surname}, {name}
+            credit: 4000.0
+            debit: 0.0
+        """.format(
+            investment_name = investment['name'],
+            moveline_id = move_line_id,
+            **self.personalData
+        ))
 
 
 
