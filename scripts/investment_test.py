@@ -1436,6 +1436,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
+
         self.assertMailLogEqual("""\
             logs:
                 - PlantillaEmailEnviada: generationkwh_mail_creacio
@@ -1451,7 +1452,9 @@ class Investment_Test(unittest.TestCase):
             )
         self.MailMockup.deactivate()
         self.MailMockup.activate()
+
         self.Investment.investment_payment([id])
+
         self.assertMailLogEqual("""\
             logs:
                 - PlantillaEmailEnviada: generationkwh_mail_pagament
@@ -1468,7 +1471,9 @@ class Investment_Test(unittest.TestCase):
         self.Investment.investment_payment([id])
         self.MailMockup.deactivate()
         self.MailMockup.activate()
+
         self.Investment.mark_as_paid([id], datetime.today().strftime('%Y-%m-%d'))
+
         self.assertMailLogEqual('{}')
 
     def test__mark_as_unpaid__sendsMail(self):
@@ -1503,13 +1508,14 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
-
         date_due_dt = datetime.today() + timedelta(730)
         date_due = date_due_dt.strftime('%Y-%m-%d')
         self.Investment.mark_as_paid([id], datetime.today().strftime('%Y-%m-%d'))
         self.MailMockup.deactivate()
         self.MailMockup.activate()
+
         self.Investment.amortize(date_due, [id])
+
         self.assertMailLogEqual("""\
             logs:
                 - PlantillaEmailEnviada: generationkwh_mail_amortitzacio

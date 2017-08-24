@@ -70,6 +70,43 @@ class Account_Invoice_Test(unittest.TestCase):
         investment_id = self.AccountInvoice.get_investment(invoice_id)
         self.assertFalse(investment_id)
 
+    def _test__get_investment_moveline(self):
+        investment_id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+        #create invoice
+        invoice_ids, errors = self.Investment.create_initial_invoices([investment_id])
+        self.Investment.open_invoices(invoice_ids)
+        InvoicePayerWizard = self.erp.FacturacioPayInvoice
+        wizid = InvoicePayerWizard.create(dict(
+            amount = 4000,
+            name = "The wizard",
+            date = '2017-01-02',
+            journal_id  = False,
+            period_id  = False,
+            ), context = dict(active_ids = invoice_ids))
+
+        wizard = InvoicePayerWizard.get(wizid)
+        wizard.action_pay_and_reconcile(cursor, uid, wizid, dict(
+            active_ids = invoice_ids))
+
+        move_line_returned = self.AccountInvoice.get_investment_moveline(invoice_ids[0])
+
+        self.assertMovelineEquals(move_line_id, """
+        move_line_returned = self.AccountInvoice.get_investment_moveline(invoice_ids[0])
+            move_id: {move_id}
+            id: {moveline_id}
+            account_id: 1635000{codisoci}
+            credit: 4000
+            debit: 0
+        """)
+
+
+
 unittest.TestCase.__str__ = unittest.TestCase.id
 
 if __name__=='__main__':
