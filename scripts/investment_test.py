@@ -784,6 +784,7 @@ class Investment_Test(unittest.TestCase):
             'mandate_id',
         ]))
         invoice.journal_id = invoice.journal_id[1]
+        invoice.mandate_id = invoice.mandate_id and invoice.mandate_id[0]
         invoice.partner_bank = invoice.partner_bank[1] if invoice.partner_bank else "None"
         invoice.account_id = invoice.account_id[1]
         invoice.invoice_line = [
@@ -857,7 +858,7 @@ class Investment_Test(unittest.TestCase):
             investment_name=investment.name,
             p=self.personalData,
             investment_id=id,
-            mandate_id = False, # TODO Should not
+            mandate_id = mandate_id,
             ))
 
     def test__create_initial_invoices__twice(self):
