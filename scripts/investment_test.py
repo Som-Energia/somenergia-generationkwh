@@ -12,6 +12,7 @@ except ImportError:
 from datetime import datetime, timedelta
 from yamlns import namespace as ns
 import erppeek_wst
+import generationkwh.investmentmodel as gkwh
 
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
@@ -780,6 +781,7 @@ class Investment_Test(unittest.TestCase):
             'check_total',
             'origin',
             'sii_to_send',
+            'mandate_id',
         ]))
         invoice.journal_id = invoice.journal_id[1]
         invoice.partner_bank = invoice.partner_bank[1] if invoice.partner_bank else "None"
@@ -806,6 +808,11 @@ class Investment_Test(unittest.TestCase):
 
         investment = self.Investment.browse(id)
 
+
+        iban = 'ES7712341234161234567890'
+        mandate_id = self.Investment.get_or_create_payment_mandate(
+            self.personalData.partnerid, iban, gkwh.mandateName, gkwh.creditorCode)
+
         self.assertInvoiceInfoEqual(invoice_ids[0], """\
             account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
             amount_total: 2000.0
@@ -830,6 +837,7 @@ class Investment_Test(unittest.TestCase):
               quantity: 20.0
               product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
             journal_id: Factures GenerationkWh
+            mandate_id: {mandate_id}
             name: {investment_name}-FACT
             origin: {investment_name}
             partner_bank: {iban}
@@ -848,7 +856,8 @@ class Investment_Test(unittest.TestCase):
             year=2018,
             investment_name=investment.name,
             p=self.personalData,
-            investment_id=id
+            investment_id=id,
+            mandate_id = False, # TODO Should not
             ))
 
     def test__create_initial_invoices__twice(self):
@@ -1079,6 +1088,7 @@ class Investment_Test(unittest.TestCase):
               quantity: 1.0
               product_id: '[GENKWH_AMOR] Amortització Generation kWh'
             journal_id: Factures GenerationkWh
+            mandate_id: {mandate_id}
             name: {investment_name}-AMOR{year}
             origin: {investment_name}
             partner_bank: {iban}
@@ -1097,7 +1107,8 @@ class Investment_Test(unittest.TestCase):
                 year = 2018,
                 investment_name = investment.name,
                 p = self.personalData,
-                investment_id = id
+                investment_id = id,
+                mandate_id = False,
             ))
 
     def test__create_amortization_invoice__twice(self):
