@@ -1325,7 +1325,7 @@ class Investment_Test(unittest.TestCase):
 
         invoice_ids, errs =  self.Investment.create_initial_invoices([id])
         self.Investment.open_invoices(invoice_ids)
-        self.Investment.invoices_to_payment_order(invoice_ids)
+        self.Investment.invoices_to_payment_order(invoice_ids, 'GENERATION kWh')
         invoice = self.Invoice.browse(invoice_ids[0])
 
         order_id = self.Investment.get_or_create_open_payment_order("GENERATION kWh")
@@ -1356,7 +1356,7 @@ class Investment_Test(unittest.TestCase):
 
         invoice_ids, err =  self.Investment.create_initial_invoices(ids)
         self.Investment.open_invoices(invoice_ids)
-        self.Investment.invoices_to_payment_order(invoice_ids)
+        self.Investment.invoices_to_payment_order(invoice_ids, 'GENERATION kWh')
 
         invoices = self.Invoice.browse(invoice_ids)
         order_id = self.Investment.get_or_create_open_payment_order("GENERATION kWh")
