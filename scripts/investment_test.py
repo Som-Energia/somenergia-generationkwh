@@ -463,6 +463,9 @@ class Investment_Test(unittest.TestCase):
                 )
         self.assertMultiLineEqual(logContent, expected)
         
+    def assertMailLogEqual(self, expected):
+        self.assertNsEqual(ns.loads(self.MailMockup.log() or '{}'), expected)
+
     def test__create_from_form__allOk(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -1439,8 +1442,13 @@ class Investment_Test(unittest.TestCase):
 
         self.assertMailLogEqual("""\
             logs:
-                - PlantillaEmailEnviada: generationkwh_mail_creacio
-            """)
+            - model: generationkwh.investment
+              id: {id}
+              template: generationkwh_mail_creacio
+              from_id: [ 17 ] # TODO: magic number
+            """.format(
+                id=id,
+            ))
 
     def test__investment_payment__sendsPaymentEmail(self):
         id = self.Investment.create_from_form(
@@ -1453,12 +1461,17 @@ class Investment_Test(unittest.TestCase):
         self.MailMockup.deactivate()
         self.MailMockup.activate()
 
-        self.Investment.investment_payment([id])
+        invoice_ids, errors = self.Investment.investment_payment([id])
 
         self.assertMailLogEqual("""\
             logs:
-                - PlantillaEmailEnviada: generationkwh_mail_pagament
-           """)
+            - model: account.invoice
+              id: {id}
+              template: generationkwh_mail_pagament
+              from_id: [ 17 ] # TODO: magic number
+            """.format(
+                id=invoice_ids[0],
+            ))
 
     def test__mark_as_paid__sendsPaymentEmail(self):
         id = self.Investment.create_from_form(
@@ -1493,11 +1506,13 @@ class Investment_Test(unittest.TestCase):
 
         self.assertMailLogEqual("""
             logs:
-                - PlantillaEmailEnviada: generationkwh_mail_impagament
-           """)
-
-    def assertMailLogEqual(self, expected):
-        self.assertNsEqual(self.MailMockup.log() or ns(), expected)
+            - model: account.invoice
+              id: {id}
+              template: generationkwh_mail_impagament
+              from_id: [ 17 ] # TODO: magic number
+            """.format(
+                id=id,
+            ))
 
 
     def test__amortize__sendsMails(self):
@@ -1514,12 +1529,17 @@ class Investment_Test(unittest.TestCase):
         self.MailMockup.deactivate()
         self.MailMockup.activate()
 
-        self.Investment.amortize(date_due, [id])
+        amortization_ids, errors = self.Investment.amortize(date_due, [id])
 
         self.assertMailLogEqual("""\
             logs:
-                - PlantillaEmailEnviada: generationkwh_mail_amortitzacio
-           """)
+            - model: account.invoice
+              id: {id}
+              template: generationkwh_mail_amortitzacio
+              from_id: [ 17 ] # TODO: magic number
+            """.format(
+                id=amortization_ids[0],
+            ))
 
     def test__amortized_amount__zeroByDefault(self):
         id = self.Investment.create_from_form(
