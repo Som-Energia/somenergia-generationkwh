@@ -1325,10 +1325,10 @@ class Investment_Test(unittest.TestCase):
 
         invoice_ids, errs =  self.Investment.create_initial_invoices([id])
         self.Investment.open_invoices(invoice_ids)
-        self.Investment.invoices_to_payment_order(invoice_ids, 'GENERATION kWh')
+        self.Investment.invoices_to_payment_order(invoice_ids, gkwh.investmentPaymentMode)
         invoice = self.Invoice.browse(invoice_ids[0])
 
-        order_id = self.Investment.get_or_create_open_payment_order("GENERATION kWh")
+        order_id = self.Investment.get_or_create_open_payment_order(gkwh.investmentPaymentMode)
         lines = self.PaymentLine.search([
             ('order_id','=', order_id),
             ('communication','like', invoice.origin),
@@ -1336,7 +1336,7 @@ class Investment_Test(unittest.TestCase):
 
         self.assertTrue(lines)
 
-    def test__invoices_to_payment_order_multiple(self):
+    def test__invoices_to_payment_order__multiple(self):
 
         ids=[]
         ids.append(self.Investment.create_from_form(
@@ -1356,10 +1356,10 @@ class Investment_Test(unittest.TestCase):
 
         invoice_ids, err =  self.Investment.create_initial_invoices(ids)
         self.Investment.open_invoices(invoice_ids)
-        self.Investment.invoices_to_payment_order(invoice_ids, 'GENERATION kWh')
+        self.Investment.invoices_to_payment_order(invoice_ids, gkwh.investmentPaymentMode)
 
         invoices = self.Invoice.browse(invoice_ids)
-        order_id = self.Investment.get_or_create_open_payment_order("GENERATION kWh")
+        order_id = self.Investment.get_or_create_open_payment_order(gkwh.investmentPaymentMode)
         lines = [self.PaymentLine.search([
             ('order_id','=', order_id),
             ('communication','like', invoices[0].origin),

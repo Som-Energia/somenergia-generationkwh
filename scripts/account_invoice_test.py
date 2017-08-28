@@ -11,6 +11,7 @@ except ImportError:
 from datetime import date
 from yamlns import namespace as ns
 import erppeek_wst
+import generationkwh.investmentmodel as gkwh
 
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
@@ -127,7 +128,7 @@ class Account_Invoice_Test(unittest.TestCase):
         investment_ids = [investment_id1, investment_id2]
         invoice_ids, errors = self.Investment.create_initial_invoices(investment_ids)
         self.Investment.open_invoices(invoice_ids)
-        self.Investment.invoices_to_payment_order(invoice_ids)
+        self.Investment.invoices_to_payment_order(invoice_ids, gkwh.investmentPaymentMode)
 
         self.erp.GenerationkwhPaymentWizardTesthelper.pay(invoice_ids[0], 'movement description')
 
