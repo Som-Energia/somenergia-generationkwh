@@ -13,6 +13,9 @@ waitingDays = 365 # number of days until a Gkwh investment comes effective
 expirationYears = 25 # number of active years for a Gkwh investment 
 mandateName = "PRESTEC GENERATION kWh"
 creditorCode = 'ES24000F55091367'
+journalCode = 'GENKWH'
 
+investmentProductCode = 'GENKWH_AE'
+amortizationProductCode = 'GENKWH_AMOR'
 
 # vim: et sw=4 ts=4
