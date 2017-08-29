@@ -339,6 +339,7 @@ class InvestmentState(object):
         """
         Correct the nominal value before we issue an
         invoice.
+        THIS ACTION IS JUST FOR MIGRATION.
         """
         if self.nominal_amount != from_amount:
             raise Exception(
@@ -363,6 +364,7 @@ class InvestmentState(object):
         This action is only available for migrated investments.
         Partial divest changes the nominal value of the action
         once it is already paid.
+        THIS ACTION IS JUST FOR MIGRATION.
         In modern investments you should split it to generate
         two brand new investments and then fully divest one of them.
         """
