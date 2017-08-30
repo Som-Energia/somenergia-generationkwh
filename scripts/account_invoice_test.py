@@ -91,8 +91,7 @@ class Account_Invoice_Test(unittest.TestCase):
         investment_id = self.AccountInvoice.get_investment(invoice_id)
         self.assertFalse(investment_id)
 
-    def test__is_first_invoice_first_invoice(self):
-
+    def test__is_investment_payment_invoice(self):
         investment_id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
@@ -103,7 +102,28 @@ class Account_Invoice_Test(unittest.TestCase):
         #create invoice
         invoice_ids,errs = self.Investment.create_initial_invoices([investment_id])
 
-        self.assertTrue(self.AccountInvoice.is_first_invoice(invoice_ids[0]))
+        self.assertTrue(self.AccountInvoice.is_investment_payment(invoice_ids[0]))
+
+    def test__is_investment_payment_null_invoice(self):
+        invoice_id = 999999999 # does not exists
+        self.assertFalse(self.AccountInvoice.is_investment_payment(invoice_id))
+
+    def test__is_investment_payment_unamed_invoice(self):
+        invoice_id = 325569 # name null
+        self.assertFalse(self.AccountInvoice.is_investment_payment(invoice_id))
+
+    def test__is_investment_payment_amortization_invoice(self):
+        investment_id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2014-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+        #create invoice
+        self.Investment.mark_as_paid([investment_id], '2014-01-01')
+        amortinv_ids,errs = self.Investment.amortize('2017-01-02',[investment_id])
+        self.assertFalse(self.AccountInvoice.is_investment_payment(amortinv_ids[0]))
 
     def test__paymentWizard(self):
 
