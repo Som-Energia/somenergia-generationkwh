@@ -206,7 +206,81 @@ class Account_Invoice_Test(unittest.TestCase):
             **self.personalData
         ))
 
+    def test__investment_payment__generatesAccounting(self):
+        investment_id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+        invoice_ids, errors = self.Investment.investment_payment([investment_id])
 
+        self.assertInvoiceAccountingEqual(invoice_ids[0], """
+        movelines:
+        - account_id: 410000001620 García Garzón, David
+          amount_currency: 0.0
+          amount_to_pay: -4000.0
+          balance: 4032.34
+          credit: 0.0
+          debit: 4000.0
+          invoice: 'CI: 2017/473 GKWH03096-FACT'
+          journal_id: Factures GenerationkWh
+          name: GKWH03096-FACT
+          payment_type: Recibo domiciliado
+          product_id: false
+          quantity: 1.0
+          ref: '2017473'
+        - account_id: 163500001620 García Garzón, David
+          amount_currency: 0.0
+          amount_to_pay: 4000.0
+          balance: -4000.0
+          credit: 4000.0
+          debit: 0.0
+          invoice: 'CI: 2017/473 GKWH03096-FACT'
+          journal_id: Factures GenerationkWh
+          name: 'Inversió GKWH03096 '
+          payment_type: Recibo domiciliado
+          product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
+          quantity: 40.0
+          ref: '2017473'
+        """)
+
+    def assertInvoiceAccountingEqual(self, invoice_id, expected):
+
+        invoice = self.erp.AccountInvoice.browse(invoice_id)
+        fields = [
+            "amount_to_pay",
+            "invoice",
+            "journal_id",
+            "debit",
+            "ref",
+            "account_id",
+            "amount_currency",
+            "name",
+            "product_id",
+            "credit",
+            "payment_type",
+            "balance",
+            "quantity",
+            ]
+        fks = [
+            "invoice",
+            "journal_id",
+            "account_id",
+            "product_id",
+            "payment_type",
+            ]
+
+        result = ns(movelines=[])
+        movelines = result.movelines
+        for line in invoice.move_id.line_id:
+            moveline = ns(sorted(self.erp.AccountMoveLine.read(line.id,fields).items()))
+            del moveline.id
+            for field in fks:
+                    moveline[field]=moveline[field] and moveline[field][1]
+            movelines.append(moveline)
+        self.assertNsEqual(result, expected)
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
