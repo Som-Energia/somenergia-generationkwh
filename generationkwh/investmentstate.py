@@ -236,6 +236,8 @@ class InvestmentState(object):
         Returns the full loan to the investor after being paid.
         If the loan has been never effective deactivates it.
         """
+        # TODO: Consider amortization
+        # TODO: What about penalties
         log = self._log(
             u'DIVESTED: Desinversió total [{move_line_id}]\n',
             move_line_id=move_line_id,
