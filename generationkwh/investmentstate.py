@@ -46,7 +46,7 @@ class InvestmentState(object):
         self._prev=ns(values)
         self._vals=ns(values)
         self._changed=ns()
-        self._user = user.decode('utf-8')
+        self._user = user if type(user) is unicode else user.decode('utf-8')
         self._timestamp = timestamp
 
     def __getattr__(self, name):
