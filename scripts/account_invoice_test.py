@@ -219,9 +219,9 @@ class Account_Invoice_Test(unittest.TestCase):
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
         invoice_number = "2017/463" # TODO: ask
-        invoice_ref = invoice_number.replace('/','')
+        invoice_ref = invoice_number.replace("/","")
 
-        self.assertInvoiceAccountingEqual(invoice_ids[0], """
+        self.assertInvoiceAccountingByRefEqual(invoice_ids[0], """
         movelines:
         - account_id: 1635000{nsoci:>05} {surname}, {name}
           amount_to_pay: 4000.0
@@ -266,8 +266,8 @@ class Account_Invoice_Test(unittest.TestCase):
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
         invoice_number = "2017/463" # TODO: ask
-        invoice_ref = invoice_number.replace('/','')
-        self.assertInvoiceAccountingEqual(invoice_ids[0], """
+        invoice_ref = invoice_number.replace("/","")
+        self.assertInvoiceAccountingByRefEqual(invoice_ids[0], """
         movelines:
         - account_id: 1635000{nsoci:>05} {surname}, {name}
           amount_to_pay: 4000.0
@@ -320,21 +320,91 @@ class Account_Invoice_Test(unittest.TestCase):
             **self.personalData
         ))
 
-    def assertInvoiceAccountingEqual(self, invoice_id, expected):
+    def test__amortize__generatesAccounting(self):
+        investment_id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+ 
+        self.Investment.mark_as_paid([investment_id], '2017-01-02')
+        amortization_ids, errors = self.Investment.amortize(
+            '2019-01-02', [investment_id])
 
-        invoice = self.erp.AccountInvoice.browse(invoice_id)
+        investment_name = self.Investment.read(investment_id,['name'])['name']
+        invoice_number = "2017/5218" # TODO: ask
+        invoice_ref = invoice_number.replace("/","")
+
+        self.assertInvoiceAccountingEqual(amortization_ids[0], """
+        movelines:
+        - account_id: 1635000{nsoci:>05} {surname}, {name}
+          amount_to_pay: -160.0
+          credit: 0.0
+          debit: 160.0
+          invoice: 'SI: {invoice_number} {investment_name}-AMOR2019'
+          journal_id: Factures GenerationkWh
+          name: 'Amortització fins a 02/01/2019 de {investment_name} '
+          payment_type: Transferencia
+          product_id: '[GENKWH_AMOR] Amortització Generation kWh'
+          quantity: 1.0
+          ref: false
+        - account_id: 4100000{nsoci:>05} {surname}, {name}
+          amount_to_pay: 160.0
+          credit: 160.0
+          debit: 0.0
+          invoice: 'SI: {invoice_number} {investment_name}-AMOR2019'
+          journal_id: Factures GenerationkWh
+          name: {investment_name}-AMOR2019
+          payment_type: Transferencia
+          product_id: false
+          quantity: 1.0
+          ref: false
+        """.format(
+            investment_name = investment_name,
+            invoice_number = invoice_number,
+            invoice_ref = invoice_ref,
+            **self.personalData
+        ))
+
+    def assertInvoiceAccountingEqual(self, invoice_id, expected):
+        invoice = self.erp.AccountInvoice.read(invoice_id, [
+            'move_id',
+        ])
+
+        result = self.movelines([
+            ('move_id','=',invoice['move_id'] and invoice['move_id'][0]),
+        ])
+        self.assertNsEqual(result, expected)
+
+    def assertInvoiceAccountingByRefEqual(self, invoice_id, expected):
+        invoice = self.erp.AccountInvoice.read(invoice_id, [
+            'number',
+            'journal_id',
+        ])
+
+        result = self.movelines([
+            # TODO: Cap altra cosa mes?? amb el ref es prou??
+            #('journal_id','=',invoice['journal_id'][0]),
+            ('ref','=',invoice.get('number','').replace('/','')),
+        ])
+        self.assertNsEqual(result, expected)
+
+
+    def movelines(self, conditions):
         fields = [
+            "account_id",
             "amount_to_pay",
             "invoice",
             "journal_id",
             "debit",
-            "ref",
-            "account_id",
             "name",
-            "product_id",
             "credit",
             "payment_type",
+            "product_id",
             "quantity",
+            "ref",
             ]
         fks = [
             "invoice",
@@ -343,21 +413,19 @@ class Account_Invoice_Test(unittest.TestCase):
             "product_id",
             "payment_type",
             ]
-
-        line_ids = self.erp.AccountMoveLine.search([
-            # TODO: Cap altra cosa mes?? amb el ref es prou??
-            #('journal_id','=',invoice.journal_id.id),
-            ('ref','=',(invoice.number or '').replace('/','')),
-        ], order='id')
+        line_ids = self.erp.AccountMoveLine.search(conditions)
         result = ns(movelines=[])
         movelines = result.movelines
-        for line_id in sorted(line_ids): #invoice.move_id.line_id:
-            moveline = ns(sorted(self.erp.AccountMoveLine.read(line_id,fields).items()))
+        lines = self.erp.AccountMoveLine.read(
+            sorted(line_ids),fields,order='id')
+        for line in lines:
+            moveline = ns(sorted(line.items()))
             del moveline.id
             for field in fks:
                 moveline[field]=moveline[field] and moveline[field][1]
             movelines.append(moveline)
-        self.assertNsEqual(result, expected)
+        return result
+
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
