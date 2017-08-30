@@ -214,37 +214,111 @@ class Account_Invoice_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
         )
+ 
         invoice_ids, errors = self.Investment.investment_payment([investment_id])
+
+        investment_name = self.Investment.read(investment_id,['name'])['name']
+        invoice_number = "2017/463" # TODO: ask
+        invoice_ref = invoice_number.replace('/','')
 
         self.assertInvoiceAccountingEqual(invoice_ids[0], """
         movelines:
-        - account_id: 410000001620 García Garzón, David
-          amount_currency: 0.0
-          amount_to_pay: -4000.0
-          balance: 4032.34
-          credit: 0.0
-          debit: 4000.0
-          invoice: 'CI: 2017/473 GKWH03096-FACT'
-          journal_id: Factures GenerationkWh
-          name: GKWH03096-FACT
-          payment_type: Recibo domiciliado
-          product_id: false
-          quantity: 1.0
-          ref: '2017473'
-        - account_id: 163500001620 García Garzón, David
-          amount_currency: 0.0
+        - account_id: 1635000{nsoci:>05} {surname}, {name}
           amount_to_pay: 4000.0
-          balance: -4000.0
           credit: 4000.0
           debit: 0.0
-          invoice: 'CI: 2017/473 GKWH03096-FACT'
+          invoice: 'CI: {invoice_number} {investment_name}-FACT'
           journal_id: Factures GenerationkWh
-          name: 'Inversió GKWH03096 '
+          name: 'Inversió {investment_name} '
           payment_type: Recibo domiciliado
           product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
           quantity: 40.0
-          ref: '2017473'
-        """)
+          ref: '{invoice_ref}'
+        - account_id: 4100000{nsoci:>05} {surname}, {name}
+          amount_to_pay: -4000.0
+          credit: 0.0
+          debit: 4000.0
+          invoice: 'CI: {invoice_number} {investment_name}-FACT'
+          journal_id: Factures GenerationkWh
+          name: {investment_name}-FACT
+          payment_type: Recibo domiciliado
+          product_id: false
+          quantity: 1.0
+          ref: '{invoice_ref}'
+        """.format(
+            investment_name = investment_name,
+            invoice_number = invoice_number,
+            invoice_ref = invoice_ref,
+            **self.personalData
+        ))
+
+    def test__pay__generatesAccounting(self):
+        investment_id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+        invoice_ids, errors = self.Investment.investment_payment([investment_id])
+
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(invoice_ids[0], 'movement description')
+
+        investment_name = self.Investment.read(investment_id,['name'])['name']
+        invoice_number = "2017/463" # TODO: ask
+        invoice_ref = invoice_number.replace('/','')
+        self.assertInvoiceAccountingEqual(invoice_ids[0], """
+        movelines:
+        - account_id: 1635000{nsoci:>05} {surname}, {name}
+          amount_to_pay: 4000.0
+          credit: 4000.0
+          debit: 0.0
+          invoice: 'CI: {invoice_number} {investment_name}-FACT'
+          journal_id: Factures GenerationkWh
+          name: 'Inversió {investment_name} '
+          payment_type: Recibo domiciliado
+          product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
+          quantity: 40.0
+          ref: '{invoice_ref}'
+        - account_id: 4100000{nsoci:>05} {surname}, {name}
+          amount_to_pay: 0.0 # TURNED ZERO
+          credit: 0.0
+          debit: 4000.0
+          invoice: 'CI: {invoice_number} {investment_name}-FACT'
+          journal_id: Factures GenerationkWh
+          name: {investment_name}-FACT
+          payment_type: Recibo domiciliado
+          product_id: false
+          quantity: 1.0
+          ref: '{invoice_ref}'
+        - account_id: 4100000{nsoci:>05} {surname}, {name}
+          amount_to_pay: 0.0
+          credit: 4000.0
+          debit: 0.0
+          invoice: false
+          journal_id: BANC INVERSIONS
+          name: movement description
+          payment_type: []
+          product_id: false
+          quantity: false
+          ref: '{invoice_ref}'
+        - account_id: 572000000003 CAIXA ARQUITECTES (inversio)
+          amount_to_pay: -4000.0
+          credit: 0.0
+          debit: 4000.0
+          invoice: false
+          journal_id: BANC INVERSIONS
+          name: movement description
+          payment_type: []
+          product_id: false
+          quantity: false
+          ref: '{invoice_ref}'
+        """.format(
+            investment_name = investment_name,
+            invoice_number = invoice_number,
+            invoice_ref = invoice_ref,
+            **self.personalData
+        ))
 
     def assertInvoiceAccountingEqual(self, invoice_id, expected):
 
@@ -256,12 +330,10 @@ class Account_Invoice_Test(unittest.TestCase):
             "debit",
             "ref",
             "account_id",
-            "amount_currency",
             "name",
             "product_id",
             "credit",
             "payment_type",
-            "balance",
             "quantity",
             ]
         fks = [
@@ -272,13 +344,18 @@ class Account_Invoice_Test(unittest.TestCase):
             "payment_type",
             ]
 
+        line_ids = self.erp.AccountMoveLine.search([
+            # TODO: Cap altra cosa mes?? amb el ref es prou??
+            #('journal_id','=',invoice.journal_id.id),
+            ('ref','=',(invoice.number or '').replace('/','')),
+        ], order='id')
         result = ns(movelines=[])
         movelines = result.movelines
-        for line in invoice.move_id.line_id:
-            moveline = ns(sorted(self.erp.AccountMoveLine.read(line.id,fields).items()))
+        for line_id in sorted(line_ids): #invoice.move_id.line_id:
+            moveline = ns(sorted(self.erp.AccountMoveLine.read(line_id,fields).items()))
             del moveline.id
             for field in fks:
-                    moveline[field]=moveline[field] and moveline[field][1]
+                moveline[field]=moveline[field] and moveline[field][1]
             movelines.append(moveline)
         self.assertNsEqual(result, expected)
 
@@ -288,4 +365,3 @@ if __name__=='__main__':
     unittest.main()
 
 # vim: et ts=4 sw=4
-    
