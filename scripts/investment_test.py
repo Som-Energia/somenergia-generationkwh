@@ -772,6 +772,7 @@ class Investment_Test(unittest.TestCase):
             'partner_id',
             'type',
             'name',
+            'number',
             'journal_id',
             'account_id',
             'partner_bank',
@@ -840,6 +841,7 @@ class Investment_Test(unittest.TestCase):
             journal_id: Factures GenerationkWh
             mandate_id: {mandate_id}
             name: {investment_name}-FACT
+            number: {investment_name}-FACT
             origin: {investment_name}
             partner_bank: {iban}
             partner_id:
@@ -1070,7 +1072,7 @@ class Investment_Test(unittest.TestCase):
               name: 'Amortització fins a 30/01/2018 de {investment_name} '
               invoice_id:
               - {id}
-              - 'SI:  {investment_name}-AMOR{year}'
+              - 'SI: {investment_name}-AMOR{year} {investment_name}-AMOR{year}' 
               price_unit: 80.0
               price_subtotal: 80.0
               invoice_line_tax_id: []
@@ -1091,6 +1093,7 @@ class Investment_Test(unittest.TestCase):
             journal_id: Factures GenerationkWh
             mandate_id: {mandate_id}
             name: {investment_name}-AMOR{year}
+            number: {investment_name}-AMOR{year}
             origin: {investment_name}
             partner_bank: {iban}
             partner_id:
