@@ -11,6 +11,7 @@ except ImportError:
 import datetime
 from yamlns import namespace as ns
 import erppeek_wst
+import generationkwh.investmentmodel as gkwh
 
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
@@ -25,6 +26,8 @@ class Partner_Test(unittest.TestCase):
         self.Investment = self.erp.GenerationkwhInvestment
         self.Country = self.erp.ResCountry
         self.PaymentOrder = self.erp.PaymentOrder
+        self.receiveMode = gkwh.investmentPaymentMode
+        self.payMode = gkwh.amortizationPaymentMode
 
     def tearDown(self):
         self.erp.rollback()
@@ -54,25 +57,25 @@ class Partner_Test(unittest.TestCase):
         self.assertEqual(order_id, False)
 
     def test__get_or_create_payment_order__calledTwiceReturnsTheSame(self):
-        first_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh')
-        second_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh')
+        first_order_id = self.Investment.get_or_create_open_payment_order(self.receiveMode)
+        second_order_id = self.Investment.get_or_create_open_payment_order(self.receiveMode)
         self.assertEqual(first_order_id, second_order_id)
 
     def test__get_or_create_payment_order__noDraftCreatesANewOne(self):
-        first_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh')
+        first_order_id = self.Investment.get_or_create_open_payment_order(self.receiveMode)
         self.PaymentOrder.write(first_order_id, dict(
             state='done',
         ))
-        second_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh')
+        second_order_id = self.Investment.get_or_create_open_payment_order(self.receiveMode)
         self.assertNotEqual(first_order_id, second_order_id)
 
     def test__get_or_create_payment_order__properFieldsSet(self):
-        first_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh')
+        first_order_id = self.Investment.get_or_create_open_payment_order(self.receiveMode)
         self.PaymentOrder.write(first_order_id, dict(
             state='done',
         ))
 
-        second_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh')
+        second_order_id = self.Investment.get_or_create_open_payment_order(self.receiveMode)
         order = ns(self.PaymentOrder.read(second_order_id,[
             "date_prefered",
             "user_id",
@@ -99,13 +102,13 @@ class Partner_Test(unittest.TestCase):
 
     def test__get_or_create_payment_order__receivableInvoice(self):
 
-        previous_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh')
+        previous_order_id = self.Investment.get_or_create_open_payment_order(self.receiveMode)
         self.PaymentOrder.write(previous_order_id, dict(
             state='done',
         ))
 
         order_id = self.Investment.get_or_create_open_payment_order(
-            'GENERATION kWh',
+            self.receiveMode,
             True, #use_invoice
             )
 
@@ -117,13 +120,13 @@ class Partner_Test(unittest.TestCase):
                 """))
 
     def test__get_or_create_payment_order__payableInvoice(self):
-        previous_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh Amor')
+        previous_order_id = self.Investment.get_or_create_open_payment_order(self.payMode)
         self.PaymentOrder.write(previous_order_id, dict(
             state='done',
         ))
 
         order_id = self.Investment.get_or_create_open_payment_order(
-            'GENERATION kWh Amor',
+            self.payMode,
             True, #use_invoice
             )
 

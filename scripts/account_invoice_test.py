@@ -433,7 +433,6 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: false
           quantity: false
           ref: {investment_name}-AMOR2019
-
         """.format(
             investment_name = investment_name,
             invoice_number = invoice_number,
