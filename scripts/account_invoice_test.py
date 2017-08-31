@@ -383,7 +383,7 @@ class Account_Invoice_Test(unittest.TestCase):
             '2019-01-02', [investment_id])
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
-        invoice_number = "2017/5218" # TODO: ask
+        invoice_number = self.AccountInvoice.read(amortization_ids[0], ['number'])['number']
         invoice_ref = invoice_number.replace("/","")
 
         self.erp.GenerationkwhPaymentWizardTesthelper.pay(amortization_ids[0], 'movement description')
