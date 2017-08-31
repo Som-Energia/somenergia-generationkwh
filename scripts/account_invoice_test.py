@@ -218,7 +218,7 @@ class Account_Invoice_Test(unittest.TestCase):
         invoice_ids, errors = self.Investment.investment_payment([investment_id])
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
-        invoice_number = "2017/463" # TODO: ask
+        invoice_number = self.AccountInvoice.read(invoice_ids[0], ['number'])['number']
         invoice_ref = invoice_number.replace("/","")
 
         self.assertInvoiceAccountingEqual(invoice_ids[0], """
@@ -260,12 +260,13 @@ class Account_Invoice_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
         )
+
         invoice_ids, errors = self.Investment.investment_payment([investment_id])
 
         self.erp.GenerationkwhPaymentWizardTesthelper.pay(invoice_ids[0], 'movement description')
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
-        invoice_number = "2017/463" # TODO: ask
+        invoice_number = self.AccountInvoice.read(invoice_ids[0], ['number'])['number']
         invoice_ref = invoice_number.replace("/","")
         self.assertAccountingByInvoiceNumberRefEqual(invoice_ids[0], """
         movelines:
@@ -334,7 +335,7 @@ class Account_Invoice_Test(unittest.TestCase):
             '2019-01-02', [investment_id])
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
-        invoice_number = "2017/5218" # TODO: ask
+        invoice_number = self.AccountInvoice.read(amortization_ids[0], ['number'])['number']
         invoice_ref = invoice_number.replace("/","")
 
         self.assertInvoiceAccountingEqual(amortization_ids[0], """
@@ -453,7 +454,6 @@ class Account_Invoice_Test(unittest.TestCase):
     def assertAccountingByInvoiceNumberRefEqual(self, invoice_id, expected):
         invoice = self.erp.AccountInvoice.read(invoice_id, [
             'number',
-            'journal_id',
         ])
 
         result = self.movelines([
