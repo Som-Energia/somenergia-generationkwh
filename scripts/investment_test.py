@@ -34,7 +34,7 @@ class Investment_OLD_Test(unittest.TestCase):
         self.erp.close()
 
     #TODO: move this in a utils class (copy pasted from Investment_Amortization_Test
-    def assertLogEquals(self, log, expected):                                                             
+    def assertLogEquals(self, log, expected):
         for x in log.splitlines():
             self.assertRegexpMatches(x,
                 u'\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d+ [^]]+\\] .*',
@@ -485,7 +485,8 @@ class Investment_Test(unittest.TestCase):
         self.Investment.unlink(id)
 
         self.assertLogEquals(log,
-            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.123, Quantitat: 4000 €, IBAN: ES7712341234161234567890\n'
+            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.123,'
+            u' Quantitat: 4000 €, IBAN: ES7712341234161234567890\n'
             )
         
         self.assertRegexpMatches(name,r'^GKWH[0-9]{5}$')
@@ -559,7 +560,8 @@ class Investment_Test(unittest.TestCase):
 
         self.assertLogEquals(log,
             u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
-            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.123, Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
+            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.123,'
+            u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
         
         self.assertNsEqual(investment, """
