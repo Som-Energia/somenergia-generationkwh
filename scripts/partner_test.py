@@ -97,6 +97,44 @@ class Partner_Test(unittest.TestCase):
             )))
 
 
+    def test__get_or_create_payment_order__receivableInvoice(self):
+
+        previous_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh')
+        self.PaymentOrder.write(previous_order_id, dict(
+            state='done',
+        ))
+
+        order_id = self.Investment.get_or_create_open_payment_order(
+            'GENERATION kWh',
+            True, #use_invoice
+            )
+
+        order = (self.PaymentOrder.read(order_id, ['create_account_moves','type']))
+        order.pop('id')
+        self.assertNsEqual(order, ns.loads("""\
+                create_account_moves: bank-statement
+                type: receivable
+                """))
+
+    def test__get_or_create_payment_order__payableInvoice(self):
+        previous_order_id = self.Investment.get_or_create_open_payment_order('GENERATION kWh Amor')
+        self.PaymentOrder.write(previous_order_id, dict(
+            state='done',
+        ))
+
+        order_id = self.Investment.get_or_create_open_payment_order(
+            'GENERATION kWh Amor',
+            True, #use_invoice
+            )
+
+        order = (self.PaymentOrder.read(order_id, ['create_account_moves','type']))
+        order.pop('id')
+        self.assertNsEqual(order, ns.loads("""\
+                create_account_moves: bank-statement
+                type: payable
+                """))
+
+
     def test__get_or_create_partner_bank__whenExists(self):
 
         partner_id = self.personalData.partnerid
