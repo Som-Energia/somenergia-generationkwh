@@ -400,7 +400,7 @@ class Account_Invoice_Test(unittest.TestCase):
           quantity: 1.0
           ref: {investment_name}-AMOR2019
         - account_id: 4100000{nsoci:>05} {surname}, {name}
-          amount_to_pay: 160.0
+          amount_to_pay: 0.0 # CHANGED!!
           credit: 160.0
           debit: 0.0
           invoice: 'SI: {invoice_number} {investment_name}-AMOR2019'
