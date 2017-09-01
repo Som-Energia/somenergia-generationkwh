@@ -137,7 +137,8 @@ class Account_Invoice_Test(unittest.TestCase):
         invoice_ids, errors = self.Investment.create_initial_invoices([investment_id])
         self.Investment.open_invoices(invoice_ids)
 
-        self.erp.GenerationkwhPaymentWizardTesthelper.pay(invoice_ids[0], 'movement description')
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(
+            invoice_ids[0], 'movement description')
 
         invoice = self.AccountInvoice.read(invoice_ids[0], ['residual'])
         self.assertEqual(invoice['residual'], 0.0)
@@ -182,7 +183,8 @@ class Account_Invoice_Test(unittest.TestCase):
         invoice_ids, errors = self.Investment.create_initial_invoices([investment_id])
         self.Investment.open_invoices(invoice_ids)
 
-        self.erp.GenerationkwhPaymentWizardTesthelper.pay(invoice_ids[0], 'my movement')
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(
+            invoice_ids[0], 'my movement')
 
         move_line_id = self.AccountInvoice.get_investment_moveline(invoice_ids[0])
 
@@ -259,7 +261,8 @@ class Account_Invoice_Test(unittest.TestCase):
 
         invoice_ids, errors = self.Investment.investment_payment([investment_id])
 
-        self.erp.GenerationkwhPaymentWizardTesthelper.pay(invoice_ids[0], 'movement description')
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(
+            invoice_ids[0], 'movement description')
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
         self.assertAccountingByInvoiceNameRefEqual(invoice_ids[0], """
@@ -291,18 +294,18 @@ class Account_Invoice_Test(unittest.TestCase):
           credit: 4000.0
           debit: 0.0
           invoice: false
-          journal_id: BANC INVERSIONS
+          journal_id: Factures GenerationkWh
           name: movement description
           payment_type: []
           product_id: false
           quantity: false
           ref: {investment_name}-FACT
-        - account_id: 572000000003 CAIXA ARQUITECTES (inversio)
+        - account_id: 555000000004 CAIXA GKWH
           amount_to_pay: -4000.0
           credit: 0.0
           debit: 4000.0
           invoice: false
-          journal_id: BANC INVERSIONS
+          journal_id: Factures GenerationkWh
           name: movement description
           payment_type: []
           product_id: false
@@ -372,7 +375,9 @@ class Account_Invoice_Test(unittest.TestCase):
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
 
-        self.erp.GenerationkwhPaymentWizardTesthelper.pay(amortization_ids[0], 'movement description')
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(
+            amortization_ids[0], 'movement description')
+
         self.assertAccountingByInvoiceNameRefEqual(amortization_ids[0], """
         movelines:
         - account_id: 1635000{nsoci:>05} {surname}, {name}
@@ -402,18 +407,18 @@ class Account_Invoice_Test(unittest.TestCase):
           credit: 0.0
           debit: 160.0
           invoice: false
-          journal_id: BANC INVERSIONS
+          journal_id: Factures GenerationkWh
           name: movement description
           payment_type: []
           product_id: false
           quantity: false
           ref: {investment_name}-AMOR2019
-        - account_id: 572000000003 CAIXA ARQUITECTES (inversio)
+        - account_id: 555000000004 CAIXA GKWH
           amount_to_pay: 160.0
           credit: 160.0
           debit: 0.0
           invoice: false
-          journal_id: BANC INVERSIONS
+          journal_id: Factures GenerationkWh
           name: movement description
           payment_type: []
           product_id: false
@@ -427,9 +432,11 @@ class Account_Invoice_Test(unittest.TestCase):
     def assertInvoiceAccountingEqual(self, invoice_id, expected):
         invoice = self.erp.AccountInvoice.read(invoice_id, [
             'move_id',
+            'journal_id',
         ])
 
         result = self.movelines([
+            ('journal_id','=',invoice['journal_id'][0]),
             ('move_id','=',invoice['move_id'] and invoice['move_id'][0]),
         ])
         self.assertNsEqual(result, expected)
@@ -441,8 +448,7 @@ class Account_Invoice_Test(unittest.TestCase):
         ])
 
         result = self.movelines([
-            # TODO: Cap altra cosa mes?? amb el ref es prou?? va lent!
-            #('journal_id','=',invoice['journal_id'][0]),
+            ('journal_id','=',invoice['journal_id'][0]),
             ('ref','=',invoice.get('name','caca')),
         ])
         self.assertNsEqual(result, expected)
