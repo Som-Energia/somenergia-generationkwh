@@ -1544,6 +1544,31 @@ def showUnusedMovements(cr):
         consoleError("Some unamed case have been not considered")
         consoleError(cases.unnamedCases.dump())
 
+def deleteNullNamedInvestments(cr):
+    csv_file_name = "DeletedNullNamedInvestments{0}.log".format(
+            datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+        )
+
+    success("Generate the null named investments list")
+    query = """\
+        select *
+        from generationkwh_investment
+        where name IS NULL
+        """
+    cr.execute(query)
+    csv_content = dbutils.csvTable(cr)
+
+    with open(csv_file_name, "w") as csv_file:
+        csv_file.write(csv_content)
+    success("Null named investments stored at {0}".format(csv_file_name))
+
+    query = """\
+        delete
+        from generationkwh_investment
+        where name IS NULL
+        """
+    cr.execute(query)
+    success("Null named investments deleted from database")
 
 cases = ns.load('migration.yaml')
 
@@ -1552,8 +1577,8 @@ with psycopg2.connect(**configdb.psycopg) as db:
         with transaction(cr, discarded='--doit' not in sys.argv):
             cleanUp(cr)
             main(cr)
+            deleteNullNamedInvestments(cr)
             showUnusedMovements(cr)
             displayAllInvestments(cr)
-
 
 # vim: et ts=4 sw=4
