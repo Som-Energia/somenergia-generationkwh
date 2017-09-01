@@ -18,7 +18,6 @@ journalCode = 'GENKWH'
 investmentProductCode = 'GENKWH_AE'
 amortizationProductCode = 'GENKWH_AMOR'
 investmentPaymentMode = 'GENERATION kWh'
-amortizationPaymentMode = 'GENERATION kWh Amor'
-amortizationPaymentMode = 'GENERATION kWh' # TODO: remove when the new mode exists
+amortizationPaymentMode = 'GENERATION kWh AMOR'
 
 # vim: et sw=4 ts=4
