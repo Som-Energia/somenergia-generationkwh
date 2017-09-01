@@ -218,8 +218,6 @@ class Account_Invoice_Test(unittest.TestCase):
         invoice_ids, errors = self.Investment.investment_payment([investment_id])
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
-        invoice_number = self.AccountInvoice.read(invoice_ids[0], ['number'])['number']
-        invoice_ref = invoice_number.replace("/","")
 
         self.assertInvoiceAccountingEqual(invoice_ids[0], """
         movelines:
@@ -227,28 +225,26 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: 4000.0
           credit: 4000.0
           debit: 0.0
-          invoice: 'CI: {invoice_number} {investment_name}-FACT'
+          invoice: 'CI: {investment_name}-FACT {investment_name}-FACT'
           journal_id: Factures GenerationkWh
           name: 'Inversió {investment_name} '
           payment_type: Recibo domiciliado
           product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
           quantity: 40.0
-          ref: '{invoice_ref}'
+          ref: {investment_name}-FACT
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: -4000.0
           credit: 0.0
           debit: 4000.0
-          invoice: 'CI: {invoice_number} {investment_name}-FACT'
+          invoice: 'CI: {investment_name}-FACT {investment_name}-FACT'
           journal_id: Factures GenerationkWh
           name: {investment_name}-FACT
           payment_type: Recibo domiciliado
           product_id: false
           quantity: 1.0
-          ref: '{invoice_ref}'
+          ref: {investment_name}-FACT
         """.format(
             investment_name = investment_name,
-            invoice_number = invoice_number,
-            invoice_ref = invoice_ref,
             **self.personalData
         ))
 
@@ -266,32 +262,30 @@ class Account_Invoice_Test(unittest.TestCase):
         self.erp.GenerationkwhPaymentWizardTesthelper.pay(invoice_ids[0], 'movement description')
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
-        invoice_number = self.AccountInvoice.read(invoice_ids[0], ['number'])['number']
-        invoice_ref = invoice_number.replace("/","")
-        self.assertAccountingByInvoiceNumberRefEqual(invoice_ids[0], """
+        self.assertAccountingByInvoiceNameRefEqual(invoice_ids[0], """
         movelines:
         - account_id: 1635000{nsoci:>05} {surname}, {name}
           amount_to_pay: 4000.0
           credit: 4000.0
           debit: 0.0
-          invoice: 'CI: {invoice_number} {investment_name}-FACT'
+          invoice: 'CI: {investment_name}-FACT {investment_name}-FACT'
           journal_id: Factures GenerationkWh
           name: 'Inversió {investment_name} '
           payment_type: Recibo domiciliado
           product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
           quantity: 40.0
-          ref: '{invoice_ref}'
+          ref: {investment_name}-FACT
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 0.0 # TURNED ZERO
           credit: 0.0
           debit: 4000.0
-          invoice: 'CI: {invoice_number} {investment_name}-FACT'
+          invoice: 'CI: {investment_name}-FACT {investment_name}-FACT'
           journal_id: Factures GenerationkWh
           name: {investment_name}-FACT
           payment_type: Recibo domiciliado
           product_id: false
           quantity: 1.0
-          ref: '{invoice_ref}'
+          ref: {investment_name}-FACT
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 0.0
           credit: 4000.0
@@ -302,7 +296,7 @@ class Account_Invoice_Test(unittest.TestCase):
           payment_type: []
           product_id: false
           quantity: false
-          ref: '{invoice_ref}'
+          ref: {investment_name}-FACT
         - account_id: 572000000003 CAIXA ARQUITECTES (inversio)
           amount_to_pay: -4000.0
           credit: 0.0
@@ -313,11 +307,9 @@ class Account_Invoice_Test(unittest.TestCase):
           payment_type: []
           product_id: false
           quantity: false
-          ref: '{invoice_ref}'
+          ref: {investment_name}-FACT
         """.format(
             investment_name = investment_name,
-            invoice_number = invoice_number,
-            invoice_ref = invoice_ref,
             **self.personalData
         ))
 
@@ -335,8 +327,6 @@ class Account_Invoice_Test(unittest.TestCase):
             '2019-01-02', [investment_id])
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
-        invoice_number = self.AccountInvoice.read(amortization_ids[0], ['number'])['number']
-        invoice_ref = invoice_number.replace("/","")
 
         self.assertInvoiceAccountingEqual(amortization_ids[0], """
         movelines:
@@ -344,7 +334,7 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: -160.0
           credit: 0.0
           debit: 160.0
-          invoice: 'SI: {invoice_number} {investment_name}-AMOR2019'
+          invoice: 'SI: {investment_name}-AMOR2019 {investment_name}-AMOR2019'
           journal_id: Factures GenerationkWh
           name: 'Amortització fins a 02/01/2019 de {investment_name} '
           payment_type: Transferencia
@@ -355,7 +345,7 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: 160.0
           credit: 160.0
           debit: 0.0
-          invoice: 'SI: {invoice_number} {investment_name}-AMOR2019'
+          invoice: 'SI: {investment_name}-AMOR2019 {investment_name}-AMOR2019'
           journal_id: Factures GenerationkWh
           name: {investment_name}-AMOR2019
           payment_type: Transferencia
@@ -364,8 +354,6 @@ class Account_Invoice_Test(unittest.TestCase):
           ref: {investment_name}-AMOR2019
         """.format(
             investment_name = investment_name,
-            invoice_number = invoice_number,
-            invoice_ref = invoice_ref,
             **self.personalData
         ))
 
@@ -383,8 +371,6 @@ class Account_Invoice_Test(unittest.TestCase):
             '2019-01-02', [investment_id])
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
-        invoice_number = self.AccountInvoice.read(amortization_ids[0], ['number'])['number']
-        invoice_ref = invoice_number.replace("/","")
 
         self.erp.GenerationkwhPaymentWizardTesthelper.pay(amortization_ids[0], 'movement description')
         self.assertAccountingByInvoiceNameRefEqual(amortization_ids[0], """
@@ -393,7 +379,7 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: -160.0
           credit: 0.0
           debit: 160.0
-          invoice: 'SI: {invoice_number} {investment_name}-AMOR2019'
+          invoice: 'SI: {investment_name}-AMOR2019 {investment_name}-AMOR2019'
           journal_id: Factures GenerationkWh
           name: 'Amortització fins a 02/01/2019 de {investment_name} '
           payment_type: Transferencia
@@ -404,7 +390,7 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: 0.0 # CHANGED!!
           credit: 160.0
           debit: 0.0
-          invoice: 'SI: {invoice_number} {investment_name}-AMOR2019'
+          invoice: 'SI: {investment_name}-AMOR2019 {investment_name}-AMOR2019'
           journal_id: Factures GenerationkWh
           name: {investment_name}-AMOR2019
           payment_type: Transferencia
@@ -435,8 +421,6 @@ class Account_Invoice_Test(unittest.TestCase):
           ref: {investment_name}-AMOR2019
         """.format(
             investment_name = investment_name,
-            invoice_number = invoice_number,
-            invoice_ref = invoice_ref,
             **self.personalData
         ))
 
@@ -450,18 +434,6 @@ class Account_Invoice_Test(unittest.TestCase):
         ])
         self.assertNsEqual(result, expected)
 
-    def assertAccountingByInvoiceNumberRefEqual(self, invoice_id, expected):
-        invoice = self.erp.AccountInvoice.read(invoice_id, [
-            'number',
-        ])
-
-        result = self.movelines([
-            # TODO: Cap altra cosa mes?? amb el ref es prou??
-            #('journal_id','=',invoice['journal_id'][0]),
-            ('ref','=',invoice.get('number','caca').replace('/','')),
-        ])
-        self.assertNsEqual(result, expected)
-
     def assertAccountingByInvoiceNameRefEqual(self, invoice_id, expected):
         invoice = self.erp.AccountInvoice.read(invoice_id, [
             'name',
@@ -469,7 +441,7 @@ class Account_Invoice_Test(unittest.TestCase):
         ])
 
         result = self.movelines([
-            # TODO: Cap altra cosa mes?? amb el ref es prou??
+            # TODO: Cap altra cosa mes?? amb el ref es prou?? va lent!
             #('journal_id','=',invoice['journal_id'][0]),
             ('ref','=',invoice.get('name','caca')),
         ])

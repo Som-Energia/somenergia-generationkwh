@@ -829,7 +829,7 @@ class Investment_Test(unittest.TestCase):
               name: 'Inversió {investment_name} '
               invoice_id:
               - {id}
-              - 'CI:  {investment_name}-FACT'
+              - 'CI: {investment_name}-FACT {investment_name}-FACT' 
               price_unit: 100.0
               price_subtotal: 2000.0
               invoice_line_tax_id: []
