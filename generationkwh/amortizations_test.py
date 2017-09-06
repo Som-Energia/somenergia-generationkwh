@@ -242,7 +242,7 @@ class Amortization_Test(unittest.TestCase):
         self.assertEqual(
             pendingAmortizations(
                 purchase_date='2000-01-01',
-                current_date='2025-01-01',
+                current_date='2050-01-01',
                 investment_amount=1000,
                 amortized_amount=1000,
                 ), [

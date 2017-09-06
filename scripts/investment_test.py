@@ -1254,6 +1254,26 @@ class Investment_Test(unittest.TestCase):
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
+    def test__amortize__writesLogTwiceSameInvestment(self):
+        investment_id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2000-01-01',  # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+        )
+        self.Investment.mark_as_paid([investment_id], '2000-01-05')
+        self.Investment.amortize('2003-01-06', [investment_id])
+
+        investment = self.Investment.read(investment_id, ['log'])
+        self.assertLogEquals(investment['log'],
+            u'AMORTIZATION: Generada amortització de 80.00 € pel 2003-01-05\n'
+            u'AMORTIZATION: Generada amortització de 80.00 € pel 2002-01-05\n'
+            u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
+            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.1,'
+            u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
+            )
+
     def test__open_invoices__allOk(self):
 
         id = self.Investment.create_from_form(
