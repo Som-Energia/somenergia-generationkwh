@@ -4,26 +4,6 @@ from plantmeter.isodates import isodate
 from dateutil.relativedelta import relativedelta
 import generationkwh.investmentmodel as gkwh
 
-def previousAmortizationDate(purchase_date, current_date):
-
-    pending = pendingAmortizations(purchase_date, current_date, 100, 0)
-    if not pending: return None
-    return pending[-1][2]
-
-def pendingAmortization(purchase_date, current_date, investment_amount, amortized_amount):
-
-    pending = pendingAmortizations(purchase_date, current_date, investment_amount, amortized_amount)
-    if not pending: return 0
-    return sum(x[-1] for x in pending)
-
-def currentAmortizationNumber(purchase_date, current_date):
-
-    pending = pendingAmortizations(purchase_date, current_date, 100, 0)
-    if not pending: return None
-    return pending[-1][0]
-
-def totalAmortizationNumber():
-    return gkwh.expirationYears - 1
 
 def pendingAmortizations(purchase_date, current_date, investment_amount, amortized_amount):
     if not purchase_date: return []
