@@ -1662,11 +1662,10 @@ class Investment_Test(unittest.TestCase):
         self.assertEqual(1000, investment['amortized_amount'])
 
     # Amortizations
-    def pendingAmortizations(self, id, currentDate):
-        result = self.Investment.pending_amortizations(currentDate, [id])
-        return sorted(result)
+    def pendingAmortizationSummary(self, id, currentDate):
+        return self.Investment.pending_amortization_summary(currentDate, [id])
 
-    def test__pending_amortitzations__unpaid(self):
+    def test__pending_amortitzation_summary__unpaid(self):
         mid = self.personalData.member_id
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -1675,26 +1674,10 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
-        self.assertEqual(self.pendingAmortizations(id, '2017-11-20'), [])
+        self.assertEqual([0, 0.0],
+            self.pendingAmortizationSummary(id, '2017-11-20'))
 
-    def test__pending_amortitzations__manyAmortizationsSameInvestment(self):
-        mid = self.personalData.member_id
-        id = self.Investment.create_from_form(
-            self.personalData.partnerid,
-            '2000-01-01', # order_date
-            1000,
-            '10.10.23.123',
-            'ES7712341234161234567890',
-            )
-        self.Investment.mark_as_paid([id], '2000-01-02')
-        self.assertEqual(
-            self.pendingAmortizations(id, '2004-01-04'),[
-            [id, mid, '2002-01-02',  0, 40, 1, 24],
-            [id, mid, '2003-01-02', 40, 40, 2, 24],
-            [id, mid, '2004-01-02', 80, 40, 3, 24],
-            ])
-
-    def test__pending_amortitzations__withDueInvestments(self):
+    def test__pending_amortitzation_summary__manyAmortizationsSameInvestment(self):
         mid = self.personalData.member_id
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -1704,12 +1687,10 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
         self.Investment.mark_as_paid([id], '2000-01-02')
-        self.assertEqual(
-            self.pendingAmortizations(id, '2002-01-02'),[
-            [id, mid, '2002-01-02',  0, 40, 1, 24],
-            ])
+        self.assertEqual([3,120.],
+            self.pendingAmortizationSummary(id, '2004-01-04'))
 
-    def test__pending_amortitzations__notDue(self):
+    def test__pending_amortitzation_summary__withDueInvestments(self):
         mid = self.personalData.member_id
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -1719,11 +1700,23 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
         self.Investment.mark_as_paid([id], '2000-01-02')
-        self.assertEqual(
-            self.pendingAmortizations(id, '2002-01-01'),[
-            ])
+        self.assertEqual([1, 40],
+            self.pendingAmortizationSummary(id, '2002-01-02'))
 
-    def test__pending_amortitzations__whenPartiallyAmortized(self):
+    def test__pending_amortitzation_summary__notDue(self):
+        mid = self.personalData.member_id
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2000-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_paid([id], '2000-01-02')
+        self.assertEqual([0,0.0],
+            self.pendingAmortizationSummary(id, '2002-01-01'))
+
+    def test__pending_amortitzation_summary__whenPartiallyAmortized(self):
         mid = self.personalData.member_id
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -1734,10 +1727,8 @@ class Investment_Test(unittest.TestCase):
             )
         self.Investment.mark_as_paid([id], '2000-01-02')
         self.Investment.amortize('2002-01-02',[id])
-        self.assertEqual(
-            self.pendingAmortizations(id, '2003-01-02'),[
-            [id, mid, '2003-01-02', 40, 40, 2, 24],
-            ])
+        self.assertEqual([1,40],
+            self.pendingAmortizationSummary(id, '2003-01-02'))
 
 
 unittest.TestCase.__str__ = unittest.TestCase.id
