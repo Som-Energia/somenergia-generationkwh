@@ -430,14 +430,28 @@ class InvestmentState(object):
             )
 
 
-    def pendingAmortizations(self, date):
-        from .amortizations import pendingAmortizations
-        return pendingAmortizations(
-            purchase_date=self.purchase_date and str(self.purchase_date),
-            current_date=str(date),
-            investment_amount=self.nominal_amount,
-            amortized_amount=self.amortized_amount,
+    def pendingAmortizations(self, current_date):
+
+        if not self.purchase_date: return []
+        years = gkwh.expirationYears
+        yearlyAmount = self.nominal_amount/years
+        total_amortizations = years-1
+        return [
+            (
+                amortization_number,
+                total_amortizations,
+                amortization_date,
+                # to be amortized
+                (2 if amortization_number is total_amortizations else 1) * yearlyAmount,
             )
+            for amortization_number, amortization_date in (
+                (i, str(isodate(str(self.purchase_date)) + relativedelta(years=i+1)))
+                for i in xrange(1,years) 
+                )
+            if amortization_date <= str(current_date)
+            and amortization_number * yearlyAmount > self.amortized_amount
+            ]
+
 
 
 # vim: et ts=4 sw=4
