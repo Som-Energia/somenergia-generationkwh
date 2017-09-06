@@ -440,15 +440,15 @@ class InvestmentState(object):
             (
                 amortization_number,
                 total_amortizations,
-                amortization_date,
+                str(amortization_date),
                 # to be amortized
                 (2 if amortization_number is total_amortizations else 1) * yearlyAmount,
             )
             for amortization_number, amortization_date in (
-                (i, str(isodate(str(self.purchase_date)) + relativedelta(years=i+1)))
-                for i in xrange(1,years) 
+                (i, self.purchase_date + relativedelta(years=i+1))
+                for i in xrange(1,years)
                 )
-            if amortization_date <= str(current_date)
+            if amortization_date <= current_date
             and amortization_number * yearlyAmount > self.amortized_amount
             ]
 
