@@ -1664,7 +1664,7 @@ class Investment_Test(unittest.TestCase):
     # Amortizations
     def pendingAmortizations(self, id, currentDate):
         result = self.Investment.pending_amortizations(currentDate, [id])
-        return [x[:-1] for x in sorted(result)] # filter id and log
+        return sorted(result)
 
     def test__pending_amortitzations__unpaid(self):
         mid = self.personalData.member_id
