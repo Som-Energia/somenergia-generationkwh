@@ -430,5 +430,14 @@ class InvestmentState(object):
             )
 
 
+    def pendingAmortizations(self, date):
+        from .amortizations import pendingAmortizations
+        return pendingAmortizations(
+            purchase_date=self.purchase_date and str(self.purchase_date),
+            current_date=str(date),
+            investment_amount=self.nominal_amount,
+            amortized_amount=self.amortized_amount,
+            )
+
 
 # vim: et ts=4 sw=4
