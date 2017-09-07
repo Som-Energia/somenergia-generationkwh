@@ -130,7 +130,8 @@ class InvestmentState(object):
         from the investment form.
         """
         log = self._log(
-            u"FORMFILLED: Formulari omplert des de la IP {ip}, Quantitat: {amount} €, IBAN: {iban}\n",
+            u"ORDER: Formulari omplert des de la IP {ip},"
+            u" Quantitat: {amount} €, IBAN: {iban}\n",
             ip=ip,
             amount=int(amount),
             iban=iban or None,

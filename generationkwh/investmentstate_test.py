@@ -104,7 +104,7 @@ class InvestmentState_Test(unittest.TestCase):
             """)
 
         self.assertMultiLineEqual(log,
-            self.logprefix + u"FORMFILLED: "
+            self.logprefix + u"ORDER: "
             u"Formulari omplert des de la IP 8.8.8.8, "
             u"Quantitat: 300 €, IBAN: ES7712341234161234567890\n")
 
@@ -133,7 +133,7 @@ class InvestmentState_Test(unittest.TestCase):
             """)
 
         self.assertMultiLineEqual(log,
-            self.logprefix + u"FORMFILLED: "
+            self.logprefix + u"ORDER: "
             u"Formulari omplert des de la IP 8.8.8.8, "
             u"Quantitat: 300 €, IBAN: None\n")
 

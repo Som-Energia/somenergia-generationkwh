@@ -485,7 +485,7 @@ class Investment_Test(unittest.TestCase):
         self.Investment.unlink(id)
 
         self.assertLogEquals(log,
-            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.123,'
+            u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 4000 €, IBAN: ES7712341234161234567890\n'
             )
         
@@ -560,7 +560,7 @@ class Investment_Test(unittest.TestCase):
 
         self.assertLogEquals(log,
             u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
-            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.123,'
+            u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
         
@@ -639,13 +639,13 @@ class Investment_Test(unittest.TestCase):
         
         self.assertLogEquals(result[0]['log'],
             u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
-            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.1,'
+            u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
         
         self.assertLogEquals(result[1]['log'],
             u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
-            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.2,'
+            u'ORDER: Formulari omplert des de la IP 10.10.23.2,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
@@ -670,7 +670,7 @@ class Investment_Test(unittest.TestCase):
         self.assertLogEquals(log,
             u'REFUNDED: Devolució del pagament remesat de 2000 € [None]\n'
             u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
-            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.123,'
+            u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
                              )
 
@@ -752,14 +752,14 @@ class Investment_Test(unittest.TestCase):
         self.assertLogEquals(result[0]['log'],
             u'REFUNDED: Devoluci\xf3 del pagament remesat de 2000 € [None]\n'
             u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
-            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.1,'
+            u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
         self.assertLogEquals(result[1]['log'],
             u'REFUNDED: Devoluci\xf3 del pagament remesat de 2000 € [None]\n'
             u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
-            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.2,'
+            u'ORDER: Formulari omplert des de la IP 10.10.23.2,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
@@ -1250,7 +1250,7 @@ class Investment_Test(unittest.TestCase):
         self.assertLogEquals(investment['log'],
             u'AMORTIZATION: Generada amortització de 80.00 € pel 2002-01-05\n'
             u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
-            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.1,'
+            u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
@@ -1270,7 +1270,7 @@ class Investment_Test(unittest.TestCase):
             u'AMORTIZATION: Generada amortització de 80.00 € pel 2003-01-05\n'
             u'AMORTIZATION: Generada amortització de 80.00 € pel 2002-01-05\n'
             u'PAID: Pagament de 2000 € remesat al compte ES7712341234161234567890 [None]\n'
-            u'FORMFILLED: Formulari omplert des de la IP 10.10.23.1,'
+            u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
