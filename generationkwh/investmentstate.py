@@ -39,6 +39,7 @@ class InvestmentState(object):
         'order_date',
         'purchase_date',
         'log',
+        'actions',
         ]
 
     def __init__(self, user=None, timestamp=None, **values):
@@ -137,6 +138,17 @@ class InvestmentState(object):
             iban=iban or None,
         )
 
+        actions = ns(actions=[
+            ns(
+                amount = amount,
+                iban = iban or None,
+                ip = ip,
+                timestamp = self._timestamp,
+                type = 'order',
+                user = self._user,
+            ),
+        ])
+
         return ns(
             name = name,
             order_date = date,
@@ -147,6 +159,7 @@ class InvestmentState(object):
             nominal_amount = amount,
             paid_amount = Decimal("0.0"),
             log = log,
+            actions = actions.dump(),
         )
 
     @action

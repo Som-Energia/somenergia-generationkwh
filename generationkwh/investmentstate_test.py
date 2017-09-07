@@ -25,8 +25,9 @@ class InvestmentState_Test(unittest.TestCase):
 
     def assertChangesEqual(self, inv, attr,
             expectedlog=None, noPreviousLog=False):
-        changes=inv.changed()
+        changes=ns(inv.changed())
         log = changes.pop('log','')
+        actions = changes.pop('actions','[]')
         self.assertNsEqual(changes, attr)
         if expectedlog is None: return
         self.assertMultiLineEqual(log,
@@ -92,7 +93,7 @@ class InvestmentState_Test(unittest.TestCase):
         )
         changes=inv.changed()
         log = changes.pop('log')
-        self.assertNsEqual(inv.changed(), """\
+        self.assertChangesEqual(inv, """\
             name: GKWH00069
             order_date: 2000-01-01
             purchase_date: null
@@ -108,6 +109,22 @@ class InvestmentState_Test(unittest.TestCase):
             u"Formulari omplert des de la IP 8.8.8.8, "
             u"Quantitat: 300 €, IBAN: ES7712341234161234567890\n")
 
+        self.assertActionsEqual(inv, u"""
+            type: order
+            user: {user}
+            timestamp: '{timestamp}'
+            amount: 300.0
+            ip: 8.8.8.8
+            iban: ES7712341234161234567890
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
+
+    def assertActionsEqual(self, inv, expected):
+        actions = ns.loads(inv.changed().get('actions','actions: []'))
+        lastAction = actions.actions[-1] if actions else None
+        self.assertNsEqual(lastAction, expected)
 
     def test_order_withNoIban(self):
         inv = self.setupInvestment()
@@ -121,7 +138,7 @@ class InvestmentState_Test(unittest.TestCase):
         )
         changes=inv.changed()
         log = changes.pop('log','')
-        self.assertNsEqual(inv.changed(), """\
+        self.assertChangesEqual(inv, """\
             name: GKWH00069
             order_date: 2000-01-01
             purchase_date: null
@@ -136,6 +153,18 @@ class InvestmentState_Test(unittest.TestCase):
             self.logprefix + u"ORDER: "
             u"Formulari omplert des de la IP 8.8.8.8, "
             u"Quantitat: 300 €, IBAN: None\n")
+
+        self.assertActionsEqual(inv, u"""
+            type: order
+            user: {user}
+            timestamp: '{timestamp}'
+            amount: 300.0
+            ip: 8.8.8.8
+            iban: null
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
 
 
     def test_pay(self):
