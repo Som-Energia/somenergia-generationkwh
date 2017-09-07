@@ -1399,8 +1399,8 @@ def solveRepaidCase(cr, investment, payment):
     investment.name = payment.ref
     logOrdered(cr, attributes, investment, payment.amount, payment.order_date, payment.ip)
     if payment.ref not in cases.repaidCases :
-        failed("En serio") # TODO explain the error
-
+        error("cas repagat, no controlat",**payment)
+        return
     case = cases.repaidCases.pop(payment.ref)
     for movelineid, what in case.iteritems():
         logMovement(cr, attributes, investment, movelineid, what)
@@ -1545,11 +1545,13 @@ def showUnusedMovements(cr):
         consoleError(cases.unnamedCases.dump())
 
 def deleteNullNamedInvestments(cr):
+    step("Managing Unnamed investments")
+    step(" Generating the null named investments list")
     csv_file_name = "DeletedNullNamedInvestments{0}.log".format(
             datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
         )
 
-    success("Generate the null named investments list")
+    step(" Storing Null named investments at {0}".format(csv_file_name))
     query = """\
         select *
         from generationkwh_investment
@@ -1560,7 +1562,7 @@ def deleteNullNamedInvestments(cr):
 
     with open(csv_file_name, "w") as csv_file:
         csv_file.write(csv_content)
-    success("Null named investments stored at {0}".format(csv_file_name))
+    step(" Deleting Null named investments from database")
 
     query = """\
         delete
@@ -1568,7 +1570,6 @@ def deleteNullNamedInvestments(cr):
         where name IS NULL
         """
     cr.execute(query)
-    success("Null named investments deleted from database")
 
 cases = ns.load('migration.yaml')
 
