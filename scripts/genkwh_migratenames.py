@@ -1138,14 +1138,6 @@ def logCorrected(cr, attributes, investment, what):
         )
     attributes.update(inv.changed())
 
-def firstEffectiveDate(purchase_date):
-    pionersDay = '2016-04-28'
-    waitDays = gkwh.waitingDays
-    if str(purchase_date) < pionersDay:
-        waitDays -= 30
-    waitDelta = datetime.timedelta(days=waitDays)
-    return purchase_date + waitDelta
-
 def logPaid(cr, attributes, investment, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     inv = InvestmentState(ml.user, ml.create_date,

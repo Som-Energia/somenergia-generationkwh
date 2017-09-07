@@ -272,6 +272,7 @@ class InvestmentState(object):
             to_partner_name = to_partner_name,
             to_name = to_name,
             )
+        # TODO: Error if unpaid
         return ns(
             last_effective_date = date,
             active = self.hasEffectivePeriod(self.first_effective_date, date),
