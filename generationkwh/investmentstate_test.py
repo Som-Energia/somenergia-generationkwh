@@ -176,7 +176,6 @@ class InvestmentState_Test(unittest.TestCase):
         inv.pay(
             date = isodate('2016-05-01'),
             amount = 300.0,
-            iban = 'ES7712341234161234567890',
             move_line_id = 666,
         )
         self.assertChangesEqual(inv, """\
@@ -185,8 +184,8 @@ class InvestmentState_Test(unittest.TestCase):
             last_effective_date: 2041-05-01 # TODO Add this
             paid_amount: 300.0
             """,
-            u"PAID: Pagament de 300 € remesat "
-            u"al compte ES7712341234161234567890 [666]\n"
+            u"PAID: Pagament de 300 € efectuat "
+            u"[666]\n"
             )
 
     def test_pay_alreadyPaid(self):
@@ -199,7 +198,6 @@ class InvestmentState_Test(unittest.TestCase):
             inv.pay(
                 date = isodate('2016-05-01'),
                 amount = 300.0,
-                iban = 'ES7712341234161234567890',
                 move_line_id = 666,
             )
         self.assertEqual(ctx.exception.message,
@@ -208,8 +206,8 @@ class InvestmentState_Test(unittest.TestCase):
             paid_amount: 600.0
             """,
             # TODO: Log the error!
-            u"PAID: Pagament de 300 € remesat "
-            u"al compte ES7712341234161234567890 [666]\n"
+            u"PAID: Pagament de 300 € efectuat "
+            u"[666]\n"
             )
 
     def test_pay_wrongAmount(self):
@@ -222,7 +220,6 @@ class InvestmentState_Test(unittest.TestCase):
             inv.pay(
                 date = isodate('2016-05-01'),
                 amount = 400.0, # Wrong!
-                iban = 'ES7712341234161234567890',
                 move_line_id = 666,
             )
         self.assertEqual(ctx.exception.message,
@@ -231,8 +228,8 @@ class InvestmentState_Test(unittest.TestCase):
             paid_amount: 400.0
             """,
             # TODO: Log the error!
-            u"PAID: Pagament de 400 € remesat "
-            u"al compte ES7712341234161234567890 [666]\n"
+            u"PAID: Pagament de 400 € efectuat "
+            u"[666]\n"
             )
 
 

@@ -1146,7 +1146,6 @@ def logPaid(cr, attributes, investment, move_line_id):
     inv.pay(
         date=ml.create_date.date(),
         amount=ml.amount,
-        iban=investment.iban,
         move_line_id=move_line_id)
     attributes.update(inv.changed())
 

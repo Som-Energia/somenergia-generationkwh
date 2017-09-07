@@ -163,7 +163,7 @@ class InvestmentState(object):
         )
 
     @action
-    def pay(self, date, amount, iban, move_line_id):
+    def pay(self, date, amount, move_line_id):
         """
         A payment invoice has been generated and
         a payment order has been sent to the bank,
@@ -175,10 +175,9 @@ class InvestmentState(object):
         """
         log = self._log(
             u"PAID: "
-            u"Pagament de {amount} € remesat al compte {iban} "
+            u"Pagament de {amount} € efectuat "
             u"[{move_line_id}]\n",
             amount=int(amount),
-            iban=iban or u"None",
             move_line_id=move_line_id,
             )
 
