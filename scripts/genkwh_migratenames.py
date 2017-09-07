@@ -1414,7 +1414,6 @@ def solveRepaidCase(cr, investment, payment):
             order_date = payment.order_date,
             name = payment.ref,
             log = log,
-            years = gkwh.expirationYears,
         ))
     investment = getInvestment(cr, investment.id)
     if checkAttributes(investment, attributes):
