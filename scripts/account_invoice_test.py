@@ -22,6 +22,7 @@ class Account_Invoice_Test(unittest.TestCase):
         self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
         self.erp.begin()
         self.Investment = self.erp.GenerationkwhInvestment
+        self.Invoice = self.erp.AccountInvoice
         self.AccountInvoice = self.erp.AccountInvoice
         self.MailMockup = self.erp.GenerationkwhMailmockup
         self.Investment.dropAll()
@@ -84,7 +85,6 @@ class Account_Invoice_Test(unittest.TestCase):
         investment_from_invoice = self.AccountInvoice.get_investment(invoice_ids[0])
 
         self.assertFalse(investment_from_invoice)
-
 
     def test__get_investment__notFound(self):
         invoice_id = 23132 # random
@@ -168,7 +168,6 @@ class Account_Invoice_Test(unittest.TestCase):
 
         invoice = self.AccountInvoice.read(invoice_ids[0], ['residual'])
         self.assertEqual(invoice['residual'], 0.0)
-
 
     def test__get_investment_moveline(self):
 
@@ -311,6 +310,75 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: false
           quantity: false
           ref: {investment_name}-FACT
+        """.format(
+            investment_name = investment_name,
+            **self.personalData
+        ))
+
+    def test_invoiceState_paidInvestmentInvoice(self):
+        investment_id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+        invoice_ids, errors = self.Investment.investment_payment([investment_id])
+
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(
+            invoice_ids[0], 'movement description')
+
+        invoice_state = self.Invoice.read(invoice_ids[0],['state'])
+        invoicens = ns(
+                state = invoice_state['state'])
+        self.assertNsEqual(invoicens, """
+            state: paid""")
+
+    def test_invoiceState_paidAmortizationInvoice(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2000-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_paid([id], '2000-01-03')
+        amortization_ids, errors = self.Investment.amortize(
+            '2003-01-02', [id])
+
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(
+            amortization_ids[0], 'amortize movement')
+
+        invoice_state = self.Invoice.read(amortization_ids[0],['state'])
+        invoicens = ns(
+                state = invoice_state['state'])
+        self.assertNsEqual(invoicens, """
+            state: paid""")
+
+    @unittest.skip("Not implemented")
+    def _test__accounting__unpaidInvestmentInvoice(self):
+        investment_id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+
+        invoice_ids, errors = self.Investment.investment_payment([investment_id])
+
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(
+            invoice_ids[0], 'movement description')
+
+        print "Dins test"
+        context_obj = {}
+        print invoice_ids
+        print context_obj
+        self.erp.GenerationkwhUnpaymentWizardTesthelper.unpay(
+            invoice_ids, context_obj)
+
+        investment_name = self.Investment.read(investment_id,['name'])['name']
+        self.assertAccountingByInvoiceNameRefEqual(invoice_ids[0], """
         """.format(
             investment_name = investment_name,
             **self.personalData
