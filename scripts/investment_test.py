@@ -668,7 +668,7 @@ class Investment_Test(unittest.TestCase):
         self.Investment.unlink(id)
 
         self.assertLogEquals(log,
-            u'REFUNDED: Devolució del pagament remesat de 2000 € [None]\n'
+            u'UNPAID: Devolució del pagament de 2000 € [None]\n'
             u'PAID: Pagament de 2000 € efectuat [None]\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
@@ -750,14 +750,14 @@ class Investment_Test(unittest.TestCase):
         result = self.Investment.read([id1, id2], ['log'], order='id')
 
         self.assertLogEquals(result[0]['log'],
-            u'REFUNDED: Devoluci\xf3 del pagament remesat de 2000 € [None]\n'
+            u'UNPAID: Devoluci\xf3 del pagament de 2000 € [None]\n'
             u'PAID: Pagament de 2000 € efectuat [None]\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
         self.assertLogEquals(result[1]['log'],
-            u'REFUNDED: Devoluci\xf3 del pagament remesat de 2000 € [None]\n'
+            u'UNPAID: Devoluci\xf3 del pagament de 2000 € [None]\n'
             u'PAID: Pagament de 2000 € efectuat [None]\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.2,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'

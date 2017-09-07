@@ -228,8 +228,8 @@ class InvestmentState(object):
         so the investment is set as unpaid.
         """
         log = self._log(
-            u'REFUNDED: '
-            u'Devolució del pagament remesat de {amount} € '
+            u'UNPAID: '
+            u'Devolució del pagament de {amount} € '
             u'[{move_line_id}]\n',
             amount = amount,
             move_line_id = move_line_id,
