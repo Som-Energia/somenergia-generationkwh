@@ -140,12 +140,12 @@ class InvestmentState(object):
 
         actions = ns(actions=[
             ns(
+                timestamp = self._timestamp,
+                user = self._user,
+                type = 'order',
                 amount = amount,
                 iban = iban or None,
                 ip = ip,
-                timestamp = self._timestamp,
-                type = 'order',
-                user = self._user,
             ),
         ])
 
