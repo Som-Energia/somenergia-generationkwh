@@ -164,6 +164,17 @@ class InvestmentState(object):
             draft = True,
         )
 
+
+    @action
+    def invoice(self):
+        if not self.draft:
+            raise Exception("Already invoiced")
+
+        return ns(
+            draft=False,
+            log = self._log("INVOICED: Facturada i remesada\n")
+            )
+
     @action
     def pay(self, date, amount, move_line_id):
         """
@@ -202,7 +213,12 @@ class InvestmentState(object):
         return self._pay(date, amount, log)
 
     def _pay(self, date, amount, log):
+        if self.draft:
+            # TODO: Concrete Exception class
+            raise Exception("Not invoiced yet")
+
         paid_amount = self._vals.paid_amount + amount
+
         self._changed.update(
             log=log,
             paid_amount = paid_amount,
@@ -236,6 +252,16 @@ class InvestmentState(object):
             amount = amount,
             move_line_id = move_line_id,
             )
+
+        if self.draft:
+            raise Exception("Not invoiced yet")
+
+        # TODO: also purchase date
+        if not self.paid_amount:
+            raise Exception("No pending amount to unpay")
+
+        if amount != self.paid_amount:
+            raise Exception("Unpaying wrong amount")
 
         return ns(
             purchase_date = None,
@@ -287,7 +313,9 @@ class InvestmentState(object):
             to_partner_name = to_partner_name,
             to_name = to_name,
             )
-        # TODO: Error if unpaid
+        if not self.purchase_date:
+            raise Exception("Only paid investments can be transferred")
+
         return ns(
             last_effective_date = date,
             active = self.hasEffectivePeriod(self.first_effective_date, date),
@@ -316,6 +344,9 @@ class InvestmentState(object):
                 origin_partner_name = origin_partner_name.decode('utf-8'),
                 old = old
             ))
+
+        if not old.purchase_date:
+            raise Exception("Only paid investments can be transferred")
 
         first_effective_date = old.first_effective_date
         if date >= first_effective_date:

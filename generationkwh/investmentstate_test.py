@@ -173,6 +173,7 @@ class InvestmentState_Test(unittest.TestCase):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 0.0,
+            draft = False,
         )
 
         inv.pay(
@@ -194,6 +195,7 @@ class InvestmentState_Test(unittest.TestCase):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 300.0,
+            draft = False,
         )
 
         with self.assertRaises(Exception) as ctx:
@@ -216,6 +218,7 @@ class InvestmentState_Test(unittest.TestCase):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 0.0,
+            draft = False,
         )
 
         with self.assertRaises(Exception) as ctx:
@@ -232,6 +235,27 @@ class InvestmentState_Test(unittest.TestCase):
             # TODO: Log the error!
             u"PAID: Pagament de 400 € efectuat "
             u"[666]\n"
+            )
+
+    def test_pay_draft(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            paid_amount = 0.0,
+            draft = True, # Wrong!!
+        )
+
+        with self.assertRaises(Exception) as ctx:
+            inv.pay(
+                date = isodate('2016-05-01'),
+                amount = 300.0, # Wrong!
+                move_line_id = 666,
+            )
+        self.assertEqual(ctx.exception.message,
+            "Not invoiced yet")
+        self.assertChangesEqual(inv, """\
+            {}
+            """
+            # TODO: Log the error!
             )
 
 
@@ -252,6 +276,7 @@ class InvestmentState_Test(unittest.TestCase):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 300.0,
+            draft = False,
         )
 
         inv.unpay(
@@ -267,16 +292,75 @@ class InvestmentState_Test(unittest.TestCase):
             u"UNPAID: Devolució del pagament de 300.0 € [666]\n"
             )
 
-    # TODO: unpay wrong amount
-    # TODO: unpay unpaid
+    def test_unpay_unpaid(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            paid_amount = 0.0,
+            draft = False,
+        )
+
+        with self.assertRaises(Exception) as ctx:
+            inv.unpay(
+                amount = 300.0,
+                move_line_id = 666,
+            )
+        self.assertEqual(ctx.exception.message,
+            "No pending amount to unpay")
+        self.assertChangesEqual(inv, """\
+            {}
+            """
+            # TODO: Log the error!
+            )
+
+    def test_unpay_wrongAmount(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            paid_amount = 300.0,
+            draft = False,
+        )
+
+        with self.assertRaises(Exception) as ctx:
+            inv.unpay(
+                amount = 200.0,
+                move_line_id = 666,
+            )
+        self.assertEqual(ctx.exception.message,
+            "Unpaying wrong amount")
+        self.assertChangesEqual(inv, """\
+            {}
+            """
+            # TODO: Log the error!
+            )
+
+    def test_unpay_draft(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            paid_amount = 0.0,
+            draft = True,
+        )
+
+        with self.assertRaises(Exception) as ctx:
+            inv.unpay(
+                amount = 300.0,
+                move_line_id = 666,
+            )
+        self.assertEqual(ctx.exception.message,
+            "Not invoiced yet")
+        self.assertChangesEqual(inv, """\
+            {}
+            """
+            # TODO: Log the error!
+            )
+
     # TODO: unpay effective
 
-    def test_divest(self):
+    def test_divest_effective(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 300.0,
             first_effective_date = isodate("2000-01-01"),
             last_effective_date = isodate("2024-01-01"),
+            draft = False,
         )
 
         inv.divest(
@@ -298,6 +382,7 @@ class InvestmentState_Test(unittest.TestCase):
             paid_amount = 300.0,
             first_effective_date = isodate("2001-01-01"),
             last_effective_date = isodate("2025-01-01"),
+            draft = False,
         )
 
         inv.divest(
@@ -319,6 +404,7 @@ class InvestmentState_Test(unittest.TestCase):
             paid_amount = 0.0,
             first_effective_date = None,
             last_effective_date = None,
+            draft = False,
         )
         with self.assertRaises(Exception) as ctx:
             inv.divest(
@@ -337,6 +423,7 @@ class InvestmentState_Test(unittest.TestCase):
             purchase_date = isodate("2000-01-02"),
             first_effective_date = isodate("2001-01-02"),
             last_effective_date = isodate("2025-01-02"),
+            draft = False,
         )
 
         inv.emitTransfer(
@@ -364,6 +451,7 @@ class InvestmentState_Test(unittest.TestCase):
             purchase_date = isodate("2000-01-02"),
             first_effective_date = isodate("2001-01-02"),
             last_effective_date = isodate("2025-01-02"),
+            draft = False,
         )
 
         inv.emitTransfer(
@@ -385,7 +473,6 @@ class InvestmentState_Test(unittest.TestCase):
 
 
     def test_emitTransfer_unpaid(self):
-        # TODO: Should be a failure case
         inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 0.0,
@@ -393,23 +480,24 @@ class InvestmentState_Test(unittest.TestCase):
             purchase_date = None,
             first_effective_date = None,
             last_effective_date = None,
+            draft = False,
         )
 
-        inv.emitTransfer(
-            date = isodate("2000-08-01"),
-            move_line_id = 666,
-            to_name = "GKWH00069",
-            to_partner_name = "Palotes, Perico",
-            amount = 300.0,
-        )
+        with self.assertRaises(Exception) as ctx:
+            inv.emitTransfer(
+                date = isodate("2000-08-01"),
+                move_line_id = 666,
+                to_name = "GKWH00069",
+                to_partner_name = "Palotes, Perico",
+                amount = 300.0,
+            )
+        self.assertEqual(ctx.exception.message,
+            "Only paid investments can be transferred")
 
         self.assertChangesEqual(inv, """
-            last_effective_date: 2000-08-01
-            active: False
-            paid_amount: -300.0
-            """,
-            u'DIVESTEDBYTRANSFER: Traspas cap a '
-            u'Palotes, Perico amb codi GKWH00069 [666]\n'
+            {}
+            """
+            # TODO: Log the error!
             )
 
     def test_receiveTransfer(self):
@@ -420,6 +508,7 @@ class InvestmentState_Test(unittest.TestCase):
             purchase_date = isodate("2000-01-02"),
             first_effective_date = isodate("2001-01-02"),
             last_effective_date = isodate("2025-01-02"),
+            draft = False,
             )
         inv.receiveTransfer(
             name = 'GKWH00666',
@@ -439,6 +528,7 @@ class InvestmentState_Test(unittest.TestCase):
             active: True
             paid_amount: 300.0
             nominal_amount: 300.0
+            draft: false
             """,
             u'CREATEDBYTRANSFER: Creada per traspàs de '
             u'GKWH00069 a nom de Palotes, Perico [666]\n',
@@ -452,6 +542,7 @@ class InvestmentState_Test(unittest.TestCase):
             purchase_date = isodate("2000-01-02"),
             first_effective_date = isodate("2001-01-02"),
             last_effective_date = isodate("2025-01-02"),
+            draft = False,
             )
         inv = self.setupInvestment()
         inv.receiveTransfer(
@@ -472,11 +563,42 @@ class InvestmentState_Test(unittest.TestCase):
             active: True
             paid_amount: 300.0
             nominal_amount: 300.0
+            draft: False
             """,
             u'CREATEDBYTRANSFER: Creada per traspàs de '
             u'GKWH00069 a nom de Palotes, Perico [666]\n',
             noPreviousLog=True,
             )
+
+    def test_receiveTransfer_unpaid(self):
+        origin = self.setupInvestment(
+            name = "GKWH00069",
+            order_date = isodate("2000-01-01"),
+            purchase_date = False,
+            first_effective_date = False,
+            last_effective_date = False,
+            draft = False,
+            )
+        inv = self.setupInvestment()
+        with self.assertRaises(Exception) as ctx:
+            inv.receiveTransfer(
+                name = 'GKWH00666',
+                date = isodate("2000-08-01"),
+                move_line_id = 666,
+                amount = 300.0,
+                origin = origin,
+                origin_partner_name = "Palotes, Perico",
+            )
+        print ctx.exception
+        self.assertEqual(ctx.exception.message,
+            "Only paid investments can be transferred")
+
+        self.assertChangesEqual(inv, """
+            {}
+            """,
+            # TODO: Log error
+            )
+
 
     def test_pact_singleParam(self):
         inv = self.setupInvestment(
@@ -533,10 +655,13 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertEqual(ctx.exception.message,
             "Bad parameter changed in pact 'badparam'")
 
+    # TODO: PORAKI
+
     def test_repay(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 0.0,
+            draft = False,
         )
 
         inv.repay(
@@ -752,6 +877,7 @@ class InvestmentState_Test(unittest.TestCase):
         inv = self.setupInvestment(
             nominal_amount = 100,
             paid_amount = 0,
+            draft = False,
             )
 
         inv.repay(
@@ -982,6 +1108,32 @@ class InvestmentState_Test(unittest.TestCase):
                 (24, 24, '2025-01-01', 80),
             ])
 
+
+    def test_invoice(self):
+        inv = self.setupInvestment(
+            draft = True,
+        )
+
+        inv.invoice()
+        self.assertChangesEqual(inv, """\
+            draft: false
+            """,
+            u"INVOICED: Facturada i remesada\n"
+            )
+
+    def test_invoice_notDraft(self):
+        inv = self.setupInvestment(
+            draft = False,
+        )
+        with self.assertRaises(Exception) as ctx:
+            inv.invoice()
+        self.assertEqual(ctx.exception.message,
+            "Already invoiced")
+        self.assertChangesEqual(inv, """\
+            {}
+            """
+            # TODO: Log Error
+            )
 
 
 

@@ -1124,6 +1124,7 @@ def logOrdered(cr, attributes, investment, amount, order_date, ip):
         amount=amount,
         iban=investment.iban,
         )
+    inv.invoice()
     attributes.update(inv.changed())
 
 def logCorrected(cr, attributes, investment, what):
