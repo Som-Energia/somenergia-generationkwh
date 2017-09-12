@@ -102,6 +102,7 @@ class InvestmentState_Test(unittest.TestCase):
             active: True
             nominal_amount: 300.0
             paid_amount: 0.0
+            draft: True
             """)
 
         self.assertMultiLineEqual(log,
@@ -147,6 +148,7 @@ class InvestmentState_Test(unittest.TestCase):
             active: True
             nominal_amount: 300.0
             paid_amount: 0.0
+            draft: True
             """)
 
         self.assertMultiLineEqual(log,

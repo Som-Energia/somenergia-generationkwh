@@ -33,6 +33,7 @@ class InvestmentState(object):
         'paid_amount',
         'nominal_amount',
         'amortized_amount',
+        'draft',
         'active',
         'first_effective_date',
         'last_effective_date',
@@ -160,6 +161,7 @@ class InvestmentState(object):
             paid_amount = Decimal("0.0"),
             log = log,
             actions = actions.dump(),
+            draft = True,
         )
 
     @action
