@@ -649,6 +649,32 @@ class Investment_Test(unittest.TestCase):
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
+    def test__mark_as_paid__alreadyPaid(self):
+
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+
+        self.Investment.mark_as_paid([id], '2017-01-03')
+        with self.assertRaises(Exception) as ctx:
+            self.Investment.mark_as_paid([id], '2017-01-03')
+
+        self.assertEqual(ctx.exception.faultCode,
+            "Already paid"
+            )
+
+        result = self.Investment.read(id, ['log'])
+
+        self.assertLogEquals(result['log'],
+            u'PAID: Pagament de 2000 € efectuat [None]\n'
+            u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
+            u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
+            )
+
     def test__mark_as_unpaid__singleInvestment(self):
 
         id = self.Investment.create_from_form(
