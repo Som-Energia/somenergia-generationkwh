@@ -143,31 +143,24 @@ class Account_Invoice_Test(unittest.TestCase):
         invoice = self.AccountInvoice.read(invoice_ids[0], ['residual'])
         self.assertEqual(invoice['residual'], 0.0)
 
-    def test__paymentWizard__remesa(self):
+    def test__paymentWizard__unpay(self):
 
-        investment_id1 = self.Investment.create_from_form(
+        investment_id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
             1000,
             '10.10.23.121',
             'ES7712341234161234567890',
         )
-        investment_id2 = self.Investment.create_from_form(
-            self.personalData.partnerid,
-            '2017-01-02', # order_date
-            2000,
-            '10.10.23.122',
-            'ES7712341234161234567890',
-        )
-        investment_ids = [investment_id1, investment_id2]
-        invoice_ids, errors = self.Investment.create_initial_invoices(investment_ids)
+        invoice_ids, errors = self.Investment.create_initial_invoices([investment_id])
         self.Investment.open_invoices(invoice_ids)
         self.Investment.invoices_to_payment_order(invoice_ids, gkwh.investmentPaymentMode)
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(invoice_ids[0], 'a payment')
 
-        self.erp.GenerationkwhPaymentWizardTesthelper.pay(invoice_ids[0], 'movement description')
+        self.erp.GenerationkwhPaymentWizardTesthelper.unpay(invoice_ids[0], 'an unpayment')
 
         invoice = self.AccountInvoice.read(invoice_ids[0], ['residual'])
-        self.assertEqual(invoice['residual'], 0.0)
+        self.assertEqual(invoice['residual'], 1000.0)
 
     def test__get_investment_moveline(self):
 
@@ -543,6 +536,38 @@ class Account_Invoice_Test(unittest.TestCase):
                 moveline[field]=moveline[field] and moveline[field][1]
             movelines.append(moveline)
         return result
+
+
+
+    @unittest.skip("TARGET TEST")
+    def test__last_investment_payment_moveline__(self):
+        investment_id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+
+        invoice_ids, errors = self.Investment.investment_payment([investment_id])
+
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(
+            invoice_ids[0], 'payment 1')
+
+        self.erp.generationkwhpaymentwizardtesthelper.unpay(
+            invoice_ids[0], 'unpayment 1')
+
+        self.erp.generationkwhpaymentwizardtesthelper.pay(
+            invoice_ids[0], 'moveline 2')
+
+        ml_id = self.Investment.last_investment_payment_moveline(invoice_ids[0])
+        self.assertMoveLineEqual(ml_id, """
+            name: moveline 2
+            debit: 4000
+            credit: 0
+            """)
+
+
 
 
 unittest.TestCase.__str__ = unittest.TestCase.id
