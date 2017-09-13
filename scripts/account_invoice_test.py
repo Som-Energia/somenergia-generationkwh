@@ -308,6 +308,98 @@ class Account_Invoice_Test(unittest.TestCase):
             **self.personalData
         ))
 
+    def test__accounting__unpaidInvestmentInvoice(self):
+        investment_id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+
+        invoice_ids, errors = self.Investment.investment_payment([investment_id])
+
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(
+            invoice_ids[0], 'a payment')
+
+        self.erp.GenerationkwhPaymentWizardTesthelper.unpay(
+            invoice_ids[0], 'an unpayment')
+
+        investment_name = self.Investment.read(investment_id,['name'])['name']
+        self.assertAccountingByInvoice(invoice_ids[0], """
+        movelines:
+        - account_id: 1635000{nsoci:>05} {surname}, {name}
+          amount_to_pay: 4000.0
+          credit: 4000.0
+          debit: 0.0
+          invoice: false # CHANGED
+          journal_id: Factures GenerationkWh
+          name: 'Inversió {investment_name} '
+          payment_type: [] # CHANGED
+          product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
+          quantity: 40.0
+          ref: {investment_name}-FACT
+        - account_id: 4100000{nsoci:>05} {surname}, {name}
+          amount_to_pay: 0.0
+          credit: 0.0
+          debit: 4000.0
+          invoice: false # CHANGED
+          journal_id: Factures GenerationkWh
+          name: {investment_name}-FACT
+          payment_type: [] # CHANGED
+          product_id: false
+          quantity: 1.0
+          ref: {investment_name}-FACT
+        - account_id: 4100000{nsoci:>05} {surname}, {name}
+          amount_to_pay: 0.0
+          credit: 4000.0
+          debit: 0.0
+          invoice: false
+          journal_id: Factures GenerationkWh
+          name: a payment
+          payment_type: []
+          product_id: false
+          quantity: false
+          ref: {investment_name}-FACT
+        - account_id: 555000000004 CAIXA GKWH
+          amount_to_pay: -4000.0
+          credit: 0.0
+          debit: 4000.0
+          invoice: false
+          journal_id: Factures GenerationkWh
+          name: a payment
+          payment_type: []
+          product_id: false
+          quantity: false
+          ref: {investment_name}-FACT
+        - account_id: 555000000004 CAIXA GKWH
+          amount_to_pay: 4000.0
+          credit: 4000.0
+          debit: 0.0
+          invoice: 'CI: {investment_name}-FACT {investment_name}-FACT'
+          journal_id: Factures GenerationkWh
+          name: an unpayment
+          payment_type: Recibo domiciliado
+          product_id: false
+          quantity: false
+          ref: {investment_name}-FACT
+        - account_id: 410000001620 {surname}, {name}
+          amount_to_pay: -4000.0
+          credit: 0.0
+          debit: 4000.0
+          invoice: 'CI: {investment_name}-FACT {investment_name}-FACT'
+          journal_id: Factures GenerationkWh
+          name: an unpayment
+          payment_type: Recibo domiciliado
+          product_id: false
+          quantity: false
+          ref: {investment_name}-FACT
+
+        """.format(
+            investment_name = investment_name,
+            **self.personalData
+        ))
+
     def test_invoiceState_paidInvestmentInvoice(self):
         investment_id = self.Investment.create_from_form(
             self.personalData.partnerid,
