@@ -1160,16 +1160,15 @@ class Investment_Test(unittest.TestCase):
         inv = self.Investment.read(id, ['name'])
 
         self.Investment.mark_as_paid([id], '2017-01-03')
+        self.Investment.create_amortization_invoice(
+            id, '2018-01-30', 80, 1, 24)
+
         invoice_id, errors = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
 
-        invoice_id2, errors2 = self.Investment.create_amortization_invoice(
-                id, '2018-01-30', 80, 1, 24)
-
-        self.assertIn(
-            "Inversió {id}: L'amortització {name}-AMOR2018 ja existeix".format(**inv),
-            unicode(errors2).encode('utf-8'),
-            )
+        self.assertEqual(errors,
+            u"Inversió {id}: L'amortització {name}-AMOR2018 ja existeix"
+            .format(**inv))
 
     def test__create_amortization_invoice__errorWhenNoBank(self):
         #TODO: especificar l'excepció
@@ -1181,10 +1180,13 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )       
         self.Partner.write(self.personalData.partnerid,dict(bank_inversions = False))
-        invocie_id, errors = self.Investment.create_amortization_invoice(id, '2018-01-30' , 80, 1, 24)
-        self.assertIn(
-            "El partner {surname}, {name} no té informat un compte corrent\n".format(**dbconfig.personaldata),
-            unicode(errors).encode('utf-8'))
+
+        invocie_id, errors = self.Investment.create_amortization_invoice(
+            id, '2018-01-30' , 80, 1, 24)
+
+        self.assertEqual(unicode(errors).encode('utf-8'),
+            "Inversió {id}: El partner {surname}, {name} no té informat un compte corrent\n"
+            .format(id=id, **dbconfig.personaldata))
 
     def test__create_amortization_invoice__withUnnamedInvestment(self):
         id = self.Investment.create_from_form(
@@ -1198,11 +1200,11 @@ class Investment_Test(unittest.TestCase):
         self.Investment.write(id, dict(
             name=None)
             )
-
         self.Investment.mark_as_paid([id], '2016-01-03')
 
         invoice_id, errors = self.Investment.create_amortization_invoice(
             id, '2018-01-03', 80, 1, 24)
+
         invoice = self.Invoice.browse(invoice_id)
         self.assertEqual(invoice.name,
             "GENKWHID{}-AMOR2018".format(id))
