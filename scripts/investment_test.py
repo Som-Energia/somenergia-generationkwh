@@ -789,6 +789,26 @@ class Investment_Test(unittest.TestCase):
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
+    def test__mark_as_unpaid__notPaid(self):
+
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01',  # order_date
+            2000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+        with self.assertRaises(Exception) as ctx:
+            self.Investment.mark_as_unpaid([id])
+
+        investment = ns(self.Investment.read(id, []))
+        log = investment.pop('log')
+
+        self.assertLogEquals(log,
+            u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
+            u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
+                             )
+
     def assertInvoiceInfoEqual(self, invoice_id, expected):
         def proccesLine(line):
             line = ns(line)
