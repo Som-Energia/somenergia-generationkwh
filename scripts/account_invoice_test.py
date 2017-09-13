@@ -220,7 +220,7 @@ class Account_Invoice_Test(unittest.TestCase):
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
 
-        self.assertInvoiceAccountingEqual(invoice_ids[0], """
+        self.assertAccountingByInvoice(invoice_ids[0], """
         movelines:
         - account_id: 1635000{nsoci:>05} {surname}, {name}
           amount_to_pay: 4000.0
@@ -264,7 +264,7 @@ class Account_Invoice_Test(unittest.TestCase):
             invoice_ids[0], 'movement description')
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
-        self.assertAccountingByInvoiceNameRefEqual(invoice_ids[0], """
+        self.assertAccountingByInvoice(invoice_ids[0], """
         movelines:
         - account_id: 1635000{nsoci:>05} {surname}, {name}
           amount_to_pay: 4000.0
@@ -378,7 +378,7 @@ class Account_Invoice_Test(unittest.TestCase):
             invoice_ids, context_obj)
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
-        self.assertAccountingByInvoiceNameRefEqual(invoice_ids[0], """
+        self.assertAccountingByInvoice(invoice_ids[0], """
         """.format(
             investment_name = investment_name,
             **self.personalData
@@ -399,7 +399,7 @@ class Account_Invoice_Test(unittest.TestCase):
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
 
-        self.assertInvoiceAccountingEqual(amortization_ids[0], """
+        self.assertAccountingByInvoice(amortization_ids[0], """
         movelines:
         - account_id: 1635000{nsoci:>05} {surname}, {name}
           amount_to_pay: -160.0
@@ -446,7 +446,7 @@ class Account_Invoice_Test(unittest.TestCase):
         self.erp.GenerationkwhPaymentWizardTesthelper.pay(
             amortization_ids[0], 'movement description')
 
-        self.assertAccountingByInvoiceNameRefEqual(amortization_ids[0], """
+        self.assertAccountingByInvoice(amortization_ids[0], """
         movelines:
         - account_id: 1635000{nsoci:>05} {surname}, {name}
           amount_to_pay: -160.0
@@ -497,19 +497,7 @@ class Account_Invoice_Test(unittest.TestCase):
             **self.personalData
         ))
 
-    def assertInvoiceAccountingEqual(self, invoice_id, expected):
-        invoice = self.erp.AccountInvoice.read(invoice_id, [
-            'move_id',
-            'journal_id',
-        ])
-
-        result = self.movelines([
-            ('journal_id','=',invoice['journal_id'][0]),
-            ('move_id','=',invoice['move_id'] and invoice['move_id'][0]),
-        ])
-        self.assertNsEqual(result, expected)
-
-    def assertAccountingByInvoiceNameRefEqual(self, invoice_id, expected):
+    def assertAccountingByInvoice(self, invoice_id, expected):
         invoice = self.erp.AccountInvoice.read(invoice_id, [
             'name',
             'journal_id',
