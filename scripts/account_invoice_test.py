@@ -631,8 +631,7 @@ class Account_Invoice_Test(unittest.TestCase):
 
 
 
-    @unittest.skip("TARGET TEST")
-    def test__last_investment_payment_moveline__(self):
+    def test__last_moveline__paid(self):
         investment_id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
@@ -646,18 +645,75 @@ class Account_Invoice_Test(unittest.TestCase):
         self.erp.GenerationkwhPaymentWizardTesthelper.pay(
             invoice_ids[0], 'payment 1')
 
-        self.erp.generationkwhpaymentwizardtesthelper.unpay(
+        ml_id = self.Investment.last_moveline(invoice_ids[0])
+        self.assertMoveLineEqual(ml_id, """
+            id: {id}
+            name: payment 1
+            credit: 4000.0
+            debit: 0.0
+            """.format(id=ml_id))
+
+
+    def test__last_moveline__unpaid(self):
+        investment_id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+
+        invoice_ids, errors = self.Investment.investment_payment([investment_id])
+
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(
+            invoice_ids[0], 'payment 1')
+
+        self.erp.GenerationkwhPaymentWizardTesthelper.unpay(
             invoice_ids[0], 'unpayment 1')
 
-        self.erp.generationkwhpaymentwizardtesthelper.pay(
-            invoice_ids[0], 'moveline 2')
-
-        ml_id = self.Investment.last_investment_payment_moveline(invoice_ids[0])
+        ml_id = self.Investment.last_moveline(invoice_ids[0])
         self.assertMoveLineEqual(ml_id, """
-            name: moveline 2
-            debit: 4000
-            credit: 0
-            """)
+            id: {id}
+            name: unpayment 1
+            debit: 4000.0
+            credit: 0.0
+            """.format(id=ml_id))
+
+    def test__last_moveline__repaid(self):
+        investment_id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+        )
+
+        invoice_ids, errors = self.Investment.investment_payment([investment_id])
+
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(
+            invoice_ids[0], 'payment 1')
+
+        self.erp.GenerationkwhPaymentWizardTesthelper.unpay(
+            invoice_ids[0], 'unpayment 1')
+
+        self.erp.GenerationkwhPaymentWizardTesthelper.pay(
+            invoice_ids[0], 'payment 2')
+
+        ml_id = self.Investment.last_moveline(invoice_ids[0])
+        self.assertMoveLineEqual(ml_id, """
+            id: {id}
+            name: payment 2
+            credit: 4000.0
+            debit: 0.0
+            """.format(id=ml_id))
+
+
+    def assertMoveLineEqual(self, ml_id, expected):
+        self.assertNsEqual(ns(self.erp.AccountMoveLine.read(ml_id, [
+            'name',
+            'debit',
+            'credit',
+            ])), expected)
 
 
 
