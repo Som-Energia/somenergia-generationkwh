@@ -481,6 +481,7 @@ class Investment_Test(unittest.TestCase):
         investment = ns(self.Investment.read(id, []))
         log = investment.pop('log')
         name = investment.pop('name')
+        actions_log = investment.pop('actions_log') # TODO: Test
 
         self.assertLogEquals(log,
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
@@ -554,6 +555,7 @@ class Investment_Test(unittest.TestCase):
         investment = ns(self.Investment.read(id, []))
         log = investment.pop('log')
         name = investment.pop('name')
+        actions_log = investment.pop('actions_log') # TODO: Test
 
         self.assertLogEquals(log,
             u'INVOICED: Facturada i remesada\n'
@@ -598,7 +600,7 @@ class Investment_Test(unittest.TestCase):
         investment = ns(self.Investment.read(id, []))
         log = investment.pop('log')
         name = investment.pop('name')
-        self.Investment.unlink(id)
+        actions_log = investment.pop('actions_log') # TODO: Test
 
         self.assertLogEquals(log,
             u'PAID: Pagament de 2000 € efectuat [None]\n'
@@ -744,7 +746,7 @@ class Investment_Test(unittest.TestCase):
         investment = ns(self.Investment.read(id, []))
         log = investment.pop('log')
         name = investment.pop('name')
-        self.Investment.unlink(id)
+        actions_log = investment.pop('actions_log') # TODO: Test
 
         self.assertLogEquals(log,
             u'UNPAID: Devolució del pagament de 2000 € [None]\n'
@@ -752,7 +754,7 @@ class Investment_Test(unittest.TestCase):
             u'INVOICED: Facturada i remesada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
-                             )
+            )
 
         self.assertNsEqual(investment, """
             id: {id}
