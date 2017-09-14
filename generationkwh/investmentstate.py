@@ -126,19 +126,6 @@ class InvestmentState(object):
         return first_date<=last_date # not crossed dates
     
     @action
-    def migrate(self, oldVersion, newVersion):
-        """
-        Change investment state to migrate
-        """
-        return ns( 
-            log = self._log(
-                u"MIGRATED: "
-                u"Migració de la versió {oldVersion} a {newVersion}\n",
-                oldVersion=oldVersion,
-                newVersion=newVersion,
-            )
-        )
-    @action
     def order(self, name, date, ip, amount, iban):
         """
         Creates a new investment from the info retrived
@@ -523,5 +510,18 @@ class InvestmentState(object):
             ]
 
 
+    @action
+    def migrate(self, oldVersion, newVersion):
+        """
+        Change investment state to migrate
+        """
+        return ns(
+            log = self._log(
+                u"MIGRATED: "
+                u"Migració de la versió {oldVersion} a {newVersion}\n",
+                oldVersion=oldVersion,
+                newVersion=newVersion,
+            )
+        )
 
 # vim: et ts=4 sw=4
