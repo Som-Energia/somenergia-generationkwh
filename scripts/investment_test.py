@@ -482,8 +482,6 @@ class Investment_Test(unittest.TestCase):
         log = investment.pop('log')
         name = investment.pop('name')
         
-        self.Investment.unlink(id)
-
         self.assertLogEquals(log,
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 4000 €, IBAN: ES7712341234161234567890\n'
