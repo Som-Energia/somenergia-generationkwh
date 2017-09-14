@@ -194,24 +194,6 @@ class InvestmentState(object):
             move_line_id=move_line_id,
             )
 
-        return self._pay(date, amount, log)
-
-    @action
-    def repay(self, date, amount, move_line_id):
-        """
-        A previously refunded payment has been paid
-        by a bank transfer or another mean.
-        """
-        log = self._log(
-            u'REPAID: '
-            u'Pagament de {amount} € rebut per transferència bancària '
-            u'[{move_line_id}]\n',
-            amount=amount,
-            move_line_id=move_line_id,
-            )
-        return self._pay(date, amount, log)
-
-    def _pay(self, date, amount, log):
         if self.draft:
             # TODO: Concrete Exception class
             raise Exception("Not invoiced yet")

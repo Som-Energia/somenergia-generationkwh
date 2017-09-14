@@ -658,27 +658,6 @@ class InvestmentState_Test(unittest.TestCase):
 
     # TODO: PORAKI
 
-    def test_repay(self):
-        inv = self.setupInvestment(
-            nominal_amount = 300.0,
-            paid_amount = 0.0,
-            draft = False,
-        )
-
-        inv.repay(
-            date = isodate('2016-05-01'),
-            amount = 300,
-            move_line_id = 666,
-        )
-        self.assertChangesEqual(inv, """\
-            purchase_date: 2016-05-01
-            first_effective_date: 2017-05-01
-            last_effective_date: 2041-05-01 # TODO Add this
-            paid_amount: 300.0
-            """,
-            u"REPAID: Pagament de 300 € rebut per transferència bancària [666]\n"
-            )
-
     def test_correct(self):
         inv = self.setupInvestment(
             nominal_amount = 200.0,
@@ -880,7 +859,7 @@ class InvestmentState_Test(unittest.TestCase):
             draft = False,
             )
 
-        inv.repay(
+        inv.pay(
             date = isodate('2016-05-01'),
             amount = 100,
             move_line_id = 666,
