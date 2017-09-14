@@ -1152,6 +1152,16 @@ class InvestmentState_Test(unittest.TestCase):
             u"MIGRATED: "
             u"Migració de la versió 1.0 a 2.0\n"
             )
+        self.assertActionsEqual(inv,"""
+            type: migrate
+            user: {user}
+            timestamp: '{timestamp}'
+            oldversion: '1.0'
+            newversion: '2.0'
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
 
 
     def test_addAction_firstAction(self):

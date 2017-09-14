@@ -540,6 +540,11 @@ class InvestmentState(object):
                 u"Migració de la versió {oldVersion} a {newVersion}\n",
                 oldVersion=oldVersion,
                 newVersion=newVersion,
+            ),
+            actions_log = self.addAction(
+                type = 'migrate',
+                oldversion = oldVersion,
+                newversion = newVersion,
             )
         )
 
