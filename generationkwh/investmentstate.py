@@ -175,7 +175,12 @@ class InvestmentState(object):
             amount=int(amount),
             iban=iban or None,
         )
-
+        actions = self.addAction(
+            type = 'order',
+            amount = amount,
+            iban = iban or None,
+            ip = ip,
+        )
         return ns(
             name = name,
             order_date = date,
@@ -186,12 +191,7 @@ class InvestmentState(object):
             nominal_amount = amount,
             paid_amount = Decimal("0.0"),
             log = log,
-            actions = self.addAction(
-                type = 'order',
-                amount = amount,
-                iban = iban or None,
-                ip = ip,
-            ),
+            actions = actions,
             draft = True,
         )
 
