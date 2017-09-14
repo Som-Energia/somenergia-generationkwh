@@ -239,7 +239,12 @@ class InvestmentState(object):
 
         if amount != self.nominal_amount:
             # TODO: Concrete Exception class
-            raise Exception("Wrong payment")
+            raise Exception(
+                "Wrong payment, expected {expected}, given {given}"
+                .format(
+                    expected=self.nominal_amount,
+                    given=amount,
+                ))
 
         if self.paid_amount:
             # TODO: Concrete Exception class
