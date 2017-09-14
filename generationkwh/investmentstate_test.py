@@ -69,6 +69,11 @@ class InvestmentState_Test(unittest.TestCase):
                 )
         self.assertMultiLineEqual(logContent, expected)
 
+    def assertActionsEqual(self, inv, expected):
+        actions = ns.loads(inv.changed().get('actions_log','actions: []'))
+        lastAction = actions.actions[-1] if actions and actions.actions else {}
+        self.assertNsEqual(lastAction, expected)
+
     def test_changes_by_default_noChange(self):
         inv = self.setupInvestment()
         self.assertNsEqual(inv.changed(), """\
@@ -123,11 +128,6 @@ class InvestmentState_Test(unittest.TestCase):
                 user = self.user,
                 timestamp = self.timestamp,
             ))
-
-    def assertActionsEqual(self, inv, expected):
-        actions = ns.loads(inv.changed().get('actions_log','actions: []'))
-        lastAction = actions.actions[-1] if actions else None
-        self.assertNsEqual(lastAction, expected)
 
     def test_order_withNoIban(self):
         inv = self.setupInvestment()
