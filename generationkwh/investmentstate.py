@@ -110,12 +110,13 @@ class InvestmentState(object):
                 content = yaml,
                 type='badcontent',
             )])
-
-        actions.actions.append(ns(
-            kwds,
-            timestamp=self._timestamp,
-            user=self._user,
-            ))
+        action = ns()
+        if 'type' in kwds:
+            action.update(type=kwds['type'])
+        action.update(timestamp=str(self._timestamp))
+        action.update(user=self._user)
+        action.update(kwds)
+        actions.actions.append(action)
         return actions.dump()
 
     def changed(self):
