@@ -989,6 +989,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.1',
             'ES7712341234161234567890',
             )
+
         self.Investment.mark_as_invoiced(id)
 
         result = self.Investment.create_initial_invoices([id])
@@ -1063,6 +1064,7 @@ class Investment_Test(unittest.TestCase):
 
         inv = self.Investment.read(id,['name'])
 
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2016-01-04')
         result = self.Investment.create_initial_invoices([id])
 
@@ -1159,6 +1161,7 @@ class Investment_Test(unittest.TestCase):
         investment2 = self.Investment.read(id2,['name'])
 
         self.Investment.write(id1, {'active':False})
+        self.Investment.mark_as_invoiced(id2)
         self.Investment.mark_as_paid([id2], '2016-01-04')
 
         result = self.Investment.create_initial_invoices([id1,id2])
@@ -1186,6 +1189,7 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
 
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2017-01-03')
         invoice_id, errors = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
@@ -1261,6 +1265,7 @@ class Investment_Test(unittest.TestCase):
             )
         inv = self.Investment.read(id, ['name'])
 
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2017-01-03')
         self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
@@ -1302,6 +1307,7 @@ class Investment_Test(unittest.TestCase):
         self.Investment.write(id, dict(
             name=None)
             )
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2016-01-03')
 
         invoice_id, errors = self.Investment.create_amortization_invoice(
@@ -1321,6 +1327,7 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890', # iban
             )
 
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2017-01-03')
         invoice_id, errors = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
@@ -1408,7 +1415,7 @@ class Investment_Test(unittest.TestCase):
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
-    def test__open_invoices__allOk(self):
+    def test__open_invoices__amortizationAllOk(self):
 
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -1418,6 +1425,7 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
         )
 
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2017-01-03')
         invoice_id, errors = self.Investment.create_amortization_invoice(
             id, '2018-01-30', 80, 1, 24)
@@ -1440,21 +1448,21 @@ class Investment_Test(unittest.TestCase):
 
     def test__open_invoices__multipleInvoices(self):
 
-        ids = []
-        ids.append(self.Investment.create_from_form(
+        id1 = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01',  # order_date
             1000,
             '10.10.23.1',
             'ES7712341234161234567890',
-        ))
-        ids.append(self.Investment.create_from_form(
+        )
+        id2 = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01',  # order_date
             2000,
             '10.10.23.2',
             'ES7712341234161234567890',
-        ))
+        )
+        ids = [id1,id2]
 
         invoice_ids,errs = self.Investment.create_initial_invoices(ids)
 
@@ -1521,8 +1529,11 @@ class Investment_Test(unittest.TestCase):
 
         invoice_ids, err =  self.Investment.create_initial_invoices(ids)
         self.Investment.open_invoices(invoice_ids)
+
         self.Investment.invoices_to_payment_order(invoice_ids, gkwh.investmentPaymentMode)
 
+
+        # TODO: Take the origin from investment name
         invoices = self.Invoice.browse(invoice_ids)
         order_id = self.Investment.get_or_create_open_payment_order(gkwh.investmentPaymentMode)
         lines = [self.PaymentLine.search([
@@ -1702,6 +1713,7 @@ class Investment_Test(unittest.TestCase):
             )
         date_due_dt = datetime.today() + timedelta(730)
         date_due = date_due_dt.strftime('%Y-%m-%d')
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], datetime.today().strftime('%Y-%m-%d'))
         self.MailMockup.deactivate()
         self.MailMockup.activate()
@@ -1726,6 +1738,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2015-01-02')
         investment = self.Investment.read(id, ['amortized_amount'])
         self.assertEqual(0.0, investment['amortized_amount'])
@@ -1738,6 +1751,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2015-01-02')
         self.Investment.amortize('2017-01-01',[id])
         investment = self.Investment.read(id,['amortized_amount'])
@@ -1751,6 +1765,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2015-01-02')
 
         self.Investment.amortize('2017-01-02',[id])
@@ -1767,6 +1782,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2015-11-20')
         self.Investment.amortize('2017-11-20',[id])
         self.Investment.amortize('2018-11-20',[id])
@@ -1783,6 +1799,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2015-11-20')
 
         invoice,errors = self.Investment.amortize('2040-11-20',[id])
@@ -1799,6 +1816,18 @@ class Investment_Test(unittest.TestCase):
     def pendingAmortizationSummary(self, id, currentDate):
         return self.Investment.pending_amortization_summary(currentDate, [id])
 
+    def test__pending_amortitzation_summary__draft(self):
+        mid = self.personalData.member_id
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2000-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.assertEqual([0, 0.0],
+            self.pendingAmortizationSummary(id, '2017-11-20'))
+
     def test__pending_amortitzation_summary__unpaid(self):
         mid = self.personalData.member_id
         id = self.Investment.create_from_form(
@@ -1808,6 +1837,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
+        self.Investment.mark_as_invoiced(id)
         self.assertEqual([0, 0.0],
             self.pendingAmortizationSummary(id, '2017-11-20'))
 
@@ -1820,6 +1850,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2000-01-02')
         self.assertEqual([3,120.],
             self.pendingAmortizationSummary(id, '2004-01-04'))
@@ -1833,6 +1864,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2000-01-02')
         self.assertEqual([1, 40],
             self.pendingAmortizationSummary(id, '2002-01-02'))
@@ -1846,6 +1878,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2000-01-02')
         self.assertEqual([0,0.0],
             self.pendingAmortizationSummary(id, '2002-01-01'))
@@ -1859,6 +1892,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2000-01-02')
         self.Investment.amortize('2002-01-02',[id])
         self.assertEqual([1,40],

@@ -121,6 +121,7 @@ class Account_Invoice_Test(unittest.TestCase):
             'ES7712341234161234567890',
         )
         #create invoice
+        self.Investment.mark_as_invoiced(investment_id)
         self.Investment.mark_as_paid([investment_id], '2014-01-01')
         amortinv_ids,errs = self.Investment.amortize('2017-01-02',[investment_id])
         self.assertFalse(self.AccountInvoice.is_investment_payment(amortinv_ids[0]))
@@ -401,6 +402,7 @@ class Account_Invoice_Test(unittest.TestCase):
             '10.10.23.1',
             'ES7712341234161234567890',
             )
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2000-01-03')
         amortization_ids, errors = self.Investment.amortize(
             '2003-01-02', [id])
@@ -429,12 +431,7 @@ class Account_Invoice_Test(unittest.TestCase):
         self.erp.GenerationkwhPaymentWizardTesthelper.pay(
             invoice_ids[0], 'movement description')
 
-        print "Dins test"
-        context_obj = {}
-        print invoice_ids
-        print context_obj
-        self.erp.GenerationkwhUnpaymentWizardTesthelper.unpay(
-            invoice_ids, context_obj)
+        self.erp.GenerationkwhUnpaymentWizardTesthelper.unpay(invoice_ids)
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
         self.assertAccountingByInvoice(invoice_ids[0], """
@@ -452,6 +449,7 @@ class Account_Invoice_Test(unittest.TestCase):
             'ES7712341234161234567890',
         )
  
+        self.Investment.mark_as_invoiced(investment_id)
         self.Investment.mark_as_paid([investment_id], '2017-01-02')
         amortization_ids, errors = self.Investment.amortize(
             '2019-01-02', [investment_id])
@@ -498,6 +496,7 @@ class Account_Invoice_Test(unittest.TestCase):
             'ES7712341234161234567890',
         )
  
+        self.Investment.mark_as_invoiced(investment_id)
         self.Investment.mark_as_paid([investment_id], '2017-01-02')
         amortization_ids, errors = self.Investment.amortize(
             '2019-01-02', [investment_id])
