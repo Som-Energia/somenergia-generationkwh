@@ -19,5 +19,7 @@ investmentProductCode = 'GENKWH_AE'
 amortizationProductCode = 'GENKWH_AMOR'
 investmentPaymentMode = 'GENERATION kWh'
 amortizationPaymentMode = 'GENERATION kWh AMOR'
+bridgeAccountCode = '555000000004' # Bridge account to concile payments to the bank
+
 
 # vim: et sw=4 ts=4
