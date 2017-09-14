@@ -227,6 +227,16 @@ class InvestmentState_Test(unittest.TestCase):
             u"PAID: Pagament de 300 € efectuat "
             u"[666]\n"
             )
+        self.assertActionsEqual(inv, u"""
+            type: pay
+            user: {user}
+            timestamp: '{timestamp}'
+            amount: 300.0
+            move_line_id: 666
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
 
 
     def test_pay_alreadyPaid(self):
@@ -329,6 +339,16 @@ class InvestmentState_Test(unittest.TestCase):
             """,
             u"UNPAID: Devolució del pagament de 300.0 € [666]\n"
             )
+        self.assertActionsEqual(inv, u"""
+            type: unpay
+            user: {user}
+            timestamp: '{timestamp}'
+            amount: 300.0
+            move_line_id: 666
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
 
     def test_unpay_unpaid(self):
         inv = self.setupInvestment(
@@ -413,6 +433,17 @@ class InvestmentState_Test(unittest.TestCase):
             """,
             u'DIVESTED: Desinversió total [666]\n'
         )
+        self.assertActionsEqual(inv, u"""
+            type: divest
+            user: {user}
+            timestamp: '{timestamp}'
+            amount: 300.0
+            move_line_id: 666
+            date: 2001-08-01
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
 
     def test_divest_beforeEffectiveDate(self):
         inv = self.setupInvestment(
@@ -435,6 +466,18 @@ class InvestmentState_Test(unittest.TestCase):
             """,
             u'DIVESTED: Desinversió total [666]\n'
         )
+        self.assertActionsEqual(inv, u"""
+            type: divest
+            user: {user}
+            timestamp: '{timestamp}'
+            amount: 300.0
+            move_line_id: 666
+            date: 2000-08-01
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
+
 
     def test_divest_unpaid(self):
         inv = self.setupInvestment(
@@ -480,6 +523,20 @@ class InvestmentState_Test(unittest.TestCase):
             u'DIVESTEDBYTRANSFER: Traspas cap a '
             u'Palotes, Perico amb codi GKWH00069 [666]\n'
             )
+        self.assertActionsEqual(inv, u"""
+            type: transferout
+            user: {user}
+            timestamp: '{timestamp}'
+            amount: 300.0
+            move_line_id: 666
+            date: 2006-08-01
+            toinvestment: GKWH00069
+            topartner: Palotes, Perico
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
+
 
     def test_emitTransfer_beforeEffectiveDate(self):
         inv = self.setupInvestment(
@@ -508,6 +565,20 @@ class InvestmentState_Test(unittest.TestCase):
             u'DIVESTEDBYTRANSFER: Traspas cap a '
             u'Palotes, Perico amb codi GKWH00069 [666]\n'
             )
+        self.assertActionsEqual(inv, u"""
+            type: transferout
+            user: {user}
+            timestamp: '{timestamp}'
+            amount: 300.0
+            move_line_id: 666
+            date: 2000-08-01
+            toinvestment: GKWH00069
+            topartner: Palotes, Perico
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
+
 
 
     def test_emitTransfer_unpaid(self):
@@ -576,9 +647,9 @@ class InvestmentState_Test(unittest.TestCase):
             type: transferin
             user: {user}
             timestamp: '{timestamp}'
-            origin: GKWH00069
-            origin_partner_name: Palotes, Perico
-            # TODO: partner_id, member_id?
+            date: 2001-01-02
+            frominvestment: GKWH00069
+            frompartner: Palotes, Perico
             move_line_id: 666
             """.format(
                 user = self.user,
@@ -619,6 +690,19 @@ class InvestmentState_Test(unittest.TestCase):
             u'GKWH00069 a nom de Palotes, Perico [666]\n',
             noPreviousLog=True,
             )
+        self.assertActionsEqual(inv, u"""
+            type: transferin
+            user: {user}
+            timestamp: '{timestamp}'
+            date: 2000-08-01
+            frominvestment: GKWH00069
+            frompartner: Palotes, Perico
+            move_line_id: 666
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
+
 
     def test_receiveTransfer_unpaid(self):
         origin = self.setupInvestment(
@@ -667,6 +751,18 @@ class InvestmentState_Test(unittest.TestCase):
             u"first_effective_date: 2001-02-02"
             u" Motiu: lo dice el jefe\n"
             )
+        self.assertActionsEqual(inv, u"""
+            type: pact
+            user: {user}
+            timestamp: '{timestamp}'
+            date: 2016-05-01
+            comment: lo dice el jefe
+            first_effective_date: 2001-02-02
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
+
 
     def test_pact_manyParams(self):
         inv = self.setupInvestment(
@@ -688,6 +784,19 @@ class InvestmentState_Test(unittest.TestCase):
             u"first_effective_date: 2001-02-02, last_effective_date: 2001-02-04"
             u" Motiu: lo dice el jefe\n"
             )
+        self.assertActionsEqual(inv, u"""
+            type: pact
+            user: {user}
+            timestamp: '{timestamp}'
+            date: 2016-05-01
+            comment: lo dice el jefe
+            first_effective_date: 2001-02-02
+            last_effective_date: 2001-02-04
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
+
 
     def test_pact_badParams(self):
         inv = self.setupInvestment(
@@ -721,6 +830,16 @@ class InvestmentState_Test(unittest.TestCase):
             """,
             u"CORRECTED: Quantitat canviada abans del pagament de 200.0 € a 300.0 €\n"
             )
+        self.assertActionsEqual(inv, u"""
+            type: correct
+            user: {user}
+            timestamp: '{timestamp}'
+            oldamount: 200.0
+            newamount: 300.0
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
 
     def test_correct_badFromAmount(self):
         inv = self.setupInvestment(
@@ -767,6 +886,16 @@ class InvestmentState_Test(unittest.TestCase):
             """,
             u"PARTIAL: Desinversió parcial de -100.0 €, en queden 200.0 € [666]\n"
             )
+        self.assertActionsEqual(inv, u"""
+            type: partial
+            user: {user}
+            timestamp: '{timestamp}'
+            amount: 100.0
+            move_line_id: 666
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
 
     def test_partial_unpaid(self):
         inv = self.setupInvestment(
@@ -818,11 +947,12 @@ class InvestmentState_Test(unittest.TestCase):
             from_amount= 200.0,
             to_amount = 300.0,
         )
-        self.assertNsEqual(inv.values(), """
+        values = inv.values()
+        values.pop('actions_log')
+        self.assertNsEqual(values, """
             name: GKWH00069
             nominal_amount: 300.0
             paid_amount: 0.0
-            actions_log: 'actions: []' # TODO: Add something when correct has actions
             log: '[2000-01-01 00:00:00.123435 MyUser] CORRECTED: Quantitat canviada abans del
               pagament de 200.0 € a 300.0 €
 
@@ -841,6 +971,14 @@ class InvestmentState_Test(unittest.TestCase):
             """,
             u'CANCEL: La inversió ha estat cancel·lada\n'
             )
+        self.assertActionsEqual(inv, u"""
+            type: cancel
+            user: {user}
+            timestamp: '{timestamp}'
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
 
     def test_cancel_paid(self):
         inv = self.setupInvestment(
@@ -870,6 +1008,7 @@ class InvestmentState_Test(unittest.TestCase):
         )
         changes=inv.erpChanges()
         log = changes.pop('log')
+        actions = changes.pop('actions_log')
         self.assertNsEqual(changes, """\
             name: GKWH00069
             order_date: 2000-01-01
@@ -898,6 +1037,7 @@ class InvestmentState_Test(unittest.TestCase):
         )
         changes=inv.erpChanges()
         log = changes.pop('log')
+        actions = changes.pop('actions_log')
         self.assertNsEqual(changes, """\
             nominal_amount: 200
             nshares: 2
@@ -917,6 +1057,7 @@ class InvestmentState_Test(unittest.TestCase):
         )
         changes=inv.erpChanges()
         log = changes.pop('log')
+        actions = changes.pop('actions_log')
         self.assertNsEqual(changes, """\
             #paid_amount: 100 # Excpect this one to be removed
             purchase_date: 2016-05-01
@@ -939,6 +1080,17 @@ class InvestmentState_Test(unittest.TestCase):
             """,
             u"AMORTIZATION: Generada amortització de 40.00 € pel 2018-01-01\n"
             )
+        self.assertActionsEqual(inv, u"""
+            type: amortize
+            user: {user}
+            timestamp: '{timestamp}'
+            amount: 40.0
+            date: 2018-01-01
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
+
 
     def test_amortize_withPreviousAmortization(self):
         inv = self.setupInvestment(

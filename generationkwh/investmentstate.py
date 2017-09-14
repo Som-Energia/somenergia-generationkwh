@@ -256,6 +256,11 @@ class InvestmentState(object):
             purchase_date = date,
             first_effective_date = self.firstEffectiveDate(date),
             last_effective_date = self.lastEffectiveDate(date),
+            actions_log = self.addAction(
+                type = 'pay',
+                amount = paid_amount,
+                move_line_id = move_line_id,
+                ),
             )
 
     @action
@@ -293,6 +298,11 @@ class InvestmentState(object):
             last_effective_date = None,
             paid_amount = self.paid_amount-amount,
             log = log,
+            actions_log = self.addAction(
+                type = 'unpay',
+                amount = amount,
+                move_line_id = move_line_id,
+            ),
         )
 
     @action
@@ -317,6 +327,12 @@ class InvestmentState(object):
             active = self.hasEffectivePeriod(self.first_effective_date, date),
             paid_amount = paid_amount,
             log=log,
+            actions_log = self.addAction(
+                type = 'divest',
+                amount = amount,
+                move_line_id = move_line_id,
+                date = date,
+            ),
         )
 
     @action
@@ -345,6 +361,14 @@ class InvestmentState(object):
             active = self.hasEffectivePeriod(self.first_effective_date, date),
             paid_amount = self.paid_amount-amount,
             log=log,
+            actions_log = self.addAction(
+                type = 'transferout',
+                amount = amount,
+                move_line_id = move_line_id,
+                date = date,
+                toinvestment = to_name,
+                topartner = to_partner_name,
+            ),
         )
 
     @action
@@ -385,8 +409,9 @@ class InvestmentState(object):
             log=log,
             actions_log=self.addAction(
                 type = 'transferin',
-                origin = old.name,
-                origin_partner_name = origin_partner_name,
+                frominvestment = old.name,
+                frompartner = origin_partner_name,
+                date = date,
                 move_line_id = move_line_id,
             ))
 
@@ -410,7 +435,15 @@ class InvestmentState(object):
             note=comment,
         )
 
-        return ns(kwds, log=log)
+        return ns(kwds,
+            log=log,
+            actions_log=self.addAction(
+                type = 'pact',
+                comment = comment,
+                date = date,
+                **kwds
+                ),
+            )
 
     @action
     def correct(self, from_amount, to_amount):
@@ -434,6 +467,11 @@ class InvestmentState(object):
         return ns(
             nominal_amount=to_amount,
             log=log,
+            actions_log=self.addAction(
+                type = 'correct',
+                oldamount = from_amount,
+                newamount = to_amount,
+                ),
         )
 
     @action
@@ -464,6 +502,11 @@ class InvestmentState(object):
             nominal_amount=remaining,
             paid_amount=self.paid_amount-amount,
             log=log,
+            actions_log = self.addAction(
+                type = 'partial',
+                amount = amount,
+                move_line_id = move_line_id,
+            ),
         )
 
     @action
@@ -488,6 +531,9 @@ class InvestmentState(object):
         return ns(
             active=False,
             log=log,
+            actions_log = self.addAction(
+                type = 'cancel',
+                ),
             )
 
     @action
@@ -502,6 +548,11 @@ class InvestmentState(object):
                 u'de {to_be_amortized:.02f} € pel {date}\n',
                     date = date,
                     to_be_amortized = to_be_amortized,
+                ),
+            actions_log = self.addAction(
+                type = 'amortize',
+                date=date,
+                amount=to_be_amortized,
                 ),
             )
 
