@@ -21,15 +21,15 @@ class InvestmentState_Test(unittest.TestCase):
     def setupInvestment(self, **kwds):
         if kwds and 'log' not in kwds:
             kwds.update(log = "previous log\n")
-        if kwds and 'actions' not in kwds:
-            kwds.update(actions = "actions: []")
+        if kwds and 'actions_log' not in kwds:
+            kwds.update(actions_log = "actions: []")
         return InvestmentState(self.user, self.timestamp, **kwds)
 
     def assertChangesEqual(self, inv, attr,
             expectedlog=None, noPreviousLog=False):
         changes=ns(inv.changed())
         log = changes.pop('log','')
-        actions = changes.pop('actions','actions: []')
+        actions = changes.pop('actions_log','actions: []')
         self.assertNsEqual(changes, attr)
         if expectedlog is None: return
         self.assertMultiLineEqual(log,
@@ -125,7 +125,7 @@ class InvestmentState_Test(unittest.TestCase):
             ))
 
     def assertActionsEqual(self, inv, expected):
-        actions = ns.loads(inv.changed().get('actions','actions: []'))
+        actions = ns.loads(inv.changed().get('actions_log','actions: []'))
         lastAction = actions.actions[-1] if actions else None
         self.assertNsEqual(lastAction, expected)
 
@@ -572,6 +572,18 @@ class InvestmentState_Test(unittest.TestCase):
             u'GKWH00069 a nom de Palotes, Perico [666]\n',
             noPreviousLog=True,
             )
+        self.assertActionsEqual(inv, u"""
+            type: transferin
+            user: {user}
+            timestamp: '{timestamp}'
+            origin: GKWH00069
+            origin_partner_name: Palotes, Perico
+            # TODO: partner_id, member_id?
+            move_line_id: 666
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
 
     def test_receiveTransfer_beforeEffectiveDate(self):
         origin = self.setupInvestment(
@@ -779,7 +791,7 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertNsEqual(inv.values(), """
             name: GKWH00069
             log: my log
-            actions: 'actions: []'
+            actions_log: 'actions: []'
             """)
 
     def test_values_avoidsAliasing(self):
@@ -792,7 +804,7 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertNsEqual(inv.values(), """
             name: GKWH00069
             log: my log
-            actions: 'actions: []'
+            actions_log: 'actions: []'
             """)
 
     def test_values_mergesChanges(self):
@@ -810,7 +822,7 @@ class InvestmentState_Test(unittest.TestCase):
             name: GKWH00069
             nominal_amount: 300.0
             paid_amount: 0.0
-            actions: 'actions: []' # TODO: Add something when correct has actions
+            actions_log: 'actions: []' # TODO: Add something when correct has actions
             log: '[2000-01-01 00:00:00.123435 MyUser] CORRECTED: Quantitat canviada abans del
               pagament de 200.0 € a 300.0 €
 
@@ -1156,7 +1168,7 @@ class InvestmentState_Test(unittest.TestCase):
 
     def test_addAction_secondAction(self):
         inv = InvestmentState(self.user, self.timestamp,
-            actions = """
+            actions_log = """
                 actions:
                 - param1: value1
                   user: Fulanito
@@ -1176,7 +1188,7 @@ class InvestmentState_Test(unittest.TestCase):
 
     def test_addAction_unparseable(self):
         inv = InvestmentState(self.user, self.timestamp,
-            actions = " : badcontent",
+            actions_log = " : badcontent",
         )
         actions = inv.addAction( param2 = 'value2')
         self.assertNsEqual(actions, """
@@ -1190,7 +1202,7 @@ class InvestmentState_Test(unittest.TestCase):
 
     def test_addAction_notADict(self):
         inv = InvestmentState(self.user, self.timestamp,
-            actions = "badcontent",
+            actions_log = "badcontent",
         )
         actions = inv.addAction( param2 = 'value2')
         self.assertNsEqual(actions, """
@@ -1204,7 +1216,7 @@ class InvestmentState_Test(unittest.TestCase):
 
     def test_addAction_badRootKey(self):
         inv = InvestmentState(self.user, self.timestamp,
-            actions = "badroot: lala",
+            actions_log = "badroot: lala",
         )
         actions = inv.addAction( param2 = 'value2')
         self.assertNsEqual(actions, """
@@ -1218,7 +1230,7 @@ class InvestmentState_Test(unittest.TestCase):
 
     def test_addAction_notInnerList(self):
         inv = InvestmentState(self.user, self.timestamp,
-            actions = "actions: notalist",
+            actions_log = "actions: notalist",
         )
         actions = inv.addAction( param2 = 'value2')
         self.assertNsEqual(actions, """

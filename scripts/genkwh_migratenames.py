@@ -699,6 +699,10 @@ def displayAllInvestments(cr):
         print inv.name, inv.partner_name
         print inv.log
 
+    for inv in investments:
+        print inv.name, inv.partner_name
+        print inv.actions_log
+
 def cleanUp(cr):
     step("Clean up cases")
 
@@ -1348,11 +1352,13 @@ def solveNormalCase(cr, investment, payment):
         SET
             name = %(name)s,
             log = %(log)s,
+            actions_log = %(actions_log)s,
             order_date = %(order_date)s
         WHERE
             inv.id = %(id)s
         """, dict(
             id = investment.id,
+            actions_log = attributes.actions_log,
             order_date = payment.order_date,
             name = payment.ref,
             log = log,
@@ -1394,11 +1400,13 @@ def solveRepaidCase(cr, investment, payment):
         SET
             name = %(name)s,
             log = %(log)s,
+            actions_log = %(actions_log)s,
             order_date = %(order_date)s
         WHERE
             inv.id = %(id)s
         """, dict(
             id = investment.id,
+            actions_log = attributes.actions_log,
             order_date = payment.order_date,
             name = payment.ref,
             log = log,
@@ -1430,11 +1438,13 @@ def solveUnnamedCases(cr, investment):
             generationkwh_investment as inv
         SET
             order_date = %(order_date)s,
+            actions_log = %(actions_log)s,
             name = %(name)s,
             log = %(log)s
         WHERE
             inv.id = %(investment)s
     """, dict(
+        actions_log = attributes.actions_log,
         order_date = attributes.order_date,
         name = name,
         log = log,
@@ -1483,11 +1493,13 @@ def solveInactiveInvestment(cr, payment):
         SET
             name = %(name)s,
             log = %(log)s,
+            actions_log = %(actions_log)s,
             order_date = %(order_date)s,
             purchase_date = CASE WHEN %(has_purchase_date)s THEN purchase_date ELSE NULL END
         WHERE
             inv.id = %(investment)s
     """, dict(
+        actions_log = attributes.actions_log,
         order_date = payment.order_date,
         investment = investment.id,
         name = investment.name,

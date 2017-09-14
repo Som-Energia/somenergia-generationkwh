@@ -40,7 +40,7 @@ class InvestmentState(object):
         'order_date',
         'purchase_date',
         'log',
-        'actions',
+        'actions_log',
         ]
 
     def __init__(self, user=None, timestamp=None, **values):
@@ -86,8 +86,8 @@ class InvestmentState(object):
         from yaml.parser import ParserError
 
         yaml = 'actions: []'
-        if 'actions' in self._vals:
-            yaml = self.actions
+        if 'actions_log' in self._vals:
+            yaml = self.actions_log
         try:
             actions = ns.loads(yaml)
         except ParserError as error:
@@ -191,7 +191,7 @@ class InvestmentState(object):
             nominal_amount = amount,
             paid_amount = Decimal("0.0"),
             log = log,
-            actions = actions,
+            actions_log = actions,
             draft = True,
         )
 
@@ -204,7 +204,7 @@ class InvestmentState(object):
         return ns(
             draft=False,
             log = self._log("INVOICED: Facturada i remesada\n"),
-            actions = self.addAction(
+            actions_log = self.addAction(
                 type = 'invoice',
             ))
 
@@ -383,7 +383,12 @@ class InvestmentState(object):
             paid_amount = amount,
             first_effective_date = first_effective_date,
             log=log,
-            )
+            actions_log=self.addAction(
+                type = 'transferin',
+                origin = old.name,
+                origin_partner_name = origin_partner_name,
+                move_line_id = move_line_id,
+            ))
 
     @action
     def pact(self, date, comment, **kwds):
