@@ -74,6 +74,8 @@ class InvestmentState_Test(unittest.TestCase):
         lastAction = actions.actions[-1] if actions and actions.actions else {}
         self.assertNsEqual(lastAction, expected)
 
+    # Infrastructure tests
+
     def test_changes_by_default_noChange(self):
         inv = self.setupInvestment()
         self.assertNsEqual(inv.changed(), """\
@@ -87,6 +89,415 @@ class InvestmentState_Test(unittest.TestCase):
                 )
         self.assertEqual(ctx.exception.message,
             "Investments have no 'badParameter' attribute")
+
+    def test_getattr(self):
+        inv = self.setupInvestment(
+            nominal_amount = 100,
+            paid_amount = 0,
+            )
+        self.assertEqual(inv.nominal_amount, 100)
+
+
+    def test_getattr_badattr(self):
+        inv = self.setupInvestment(
+            nominal_amount = 100,
+            paid_amount = 0,
+            )
+        with self.assertRaises(AttributeError) as ctx:
+            inv.badattrib
+        self.assertEqual(ctx.exception.message,
+            "badattrib")
+
+    def test_setattr_fails(self):
+        inv = self.setupInvestment(
+            nominal_amount = 100,
+            paid_amount = 0,
+            )
+        with self.assertRaises(AttributeError) as ctx:
+            inv.paid_amount = 5
+        self.assertEqual(ctx.exception.message,
+            "paid_amount")
+
+    def test_values_takesInitialValues(self):
+        inv = self.setupInvestment(
+            name = "GKWH00069",
+            log = 'my log',
+            )
+        self.assertNsEqual(inv.values(), """
+            name: GKWH00069
+            log: my log
+            actions_log: 'actions: []'
+            """)
+
+    def test_values_avoidsAliasing(self):
+        inv = self.setupInvestment(
+            name = "GKWH00069",
+            log = 'my log',
+            )
+        values = inv.values()
+        values.newAttribute = 'value'
+        self.assertNsEqual(inv.values(), """
+            name: GKWH00069
+            log: my log
+            actions_log: 'actions: []'
+            """)
+
+    def test_values_mergesChanges(self):
+        inv = self.setupInvestment(
+            name = "GKWH00069",
+            nominal_amount = 200.,
+            paid_amount = 0.,
+            log = 'my log',
+            )
+        inv.correct(
+            from_amount= 200.0,
+            to_amount = 300.0,
+        )
+        values = inv.values()
+        values.pop('actions_log')
+        self.assertNsEqual(values, """
+            name: GKWH00069
+            nominal_amount: 300.0
+            paid_amount: 0.0
+            log: '[2000-01-01 00:00:00.123435 MyUser] CORRECTED: Quantitat canviada abans del
+              pagament de 200.0 € a 300.0 €
+
+              my log'
+
+            """)
+
+    def test_erpChanges(self):
+        inv = self.setupInvestment(log='previous value\n')
+
+        inv.pact(
+            date = isodate('2016-05-01'),
+            comment = "lo dice el jefe",
+            name = 'GKWH00069',
+            order_date = isodate('2000-01-01'),
+            purchase_date = isodate('2000-01-02'),
+            first_effective_date = isodate('2000-01-03'),
+            last_effective_date = isodate('2000-01-04'),
+            active = False,
+        )
+        changes=inv.erpChanges()
+        log = changes.pop('log')
+        actions = changes.pop('actions_log')
+        self.assertNsEqual(changes, """\
+            name: GKWH00069
+            order_date: 2000-01-01
+            purchase_date: 2000-01-02
+            first_effective_date: 2000-01-03
+            last_effective_date: 2000-01-04
+            active: False
+            """)
+
+        self.assertMultiLineEqual(log,
+            self.logprefix + 
+            u"PACT: Pacte amb l'inversor. "
+            "active: False, first_effective_date: 2000-01-03, last_effective_date: 2000-01-04, name: GKWH00069, order_date: 2000-01-01, purchase_date: 2000-01-02 "
+            "Motiu: lo dice el jefe\n"
+            u"previous value\n")
+
+    def test_erpChanges_changinAmounts(self):
+        inv = self.setupInvestment(
+            nominal_amount = 100,
+            paid_amount = 0,
+            )
+
+        inv.correct(
+            from_amount = 100,
+            to_amount = 200,
+        )
+        changes=inv.erpChanges()
+        log = changes.pop('log')
+        actions = changes.pop('actions_log')
+        self.assertNsEqual(changes, """\
+            nominal_amount: 200
+            nshares: 2
+            """)
+
+    def test_erpChanges_clearsPaidAmount(self):
+        inv = self.setupInvestment(
+            nominal_amount = 100,
+            paid_amount = 0,
+            draft = False,
+            )
+
+        inv.pay(
+            date = isodate('2016-05-01'),
+            amount = 100,
+            move_line_id = 666,
+        )
+        changes=inv.erpChanges()
+        log = changes.pop('log')
+        actions = changes.pop('actions_log')
+        self.assertNsEqual(changes, """\
+            #paid_amount: 100 # Excpect this one to be removed
+            purchase_date: 2016-05-01
+            first_effective_date: 2017-05-01
+            last_effective_date: 2041-05-01 # TODO Add this
+            """)
+
+    def test_addAction_firstAction(self):
+        inv = InvestmentState(self.user, self.timestamp)
+        actions = inv.addAction(
+            param = 'value'
+            )
+        self.assertNsEqual(actions, """
+            actions:
+            - timestamp: '{0.timestamp}'
+              user: {0.user}
+              param: value
+            """.format(self))
+
+    def test_addAction_secondAction(self):
+        inv = InvestmentState(self.user, self.timestamp,
+            actions_log = """
+                actions:
+                - timestamp: 'asdafs'
+                  user: Fulanito
+                  param1: value1
+                """,
+        )
+        actions = inv.addAction( param2 = 'value2')
+        self.assertNsEqual(actions, """
+            actions:
+            - timestamp: 'asdafs'
+              user: Fulanito
+              param1: value1
+            - timestamp: '{0.timestamp}'
+              user: {0.user}
+              param2: value2
+            """.format(self))
+
+    def test_addAction_unparseable(self):
+        inv = InvestmentState(self.user, self.timestamp,
+            actions_log = " : badcontent",
+        )
+        actions = inv.addAction( param2 = 'value2')
+        self.assertNsEqual(actions, """
+            actions:
+            - content: " : badcontent"
+              type: unparseable
+            - timestamp: '{0.timestamp}'
+              user: {0.user}
+              param2: value2
+            """.format(self))
+
+    def test_addAction_notADict(self):
+        inv = InvestmentState(self.user, self.timestamp,
+            actions_log = "badcontent",
+        )
+        actions = inv.addAction( param2 = 'value2')
+        self.assertNsEqual(actions, """
+            actions:
+            - content: "badcontent"
+              type: badcontent
+            - timestamp: '{0.timestamp}'
+              user: {0.user}
+              param2: value2
+            """.format(self))
+
+    def test_addAction_badRootKey(self):
+        inv = InvestmentState(self.user, self.timestamp,
+            actions_log = "badroot: lala",
+        )
+        actions = inv.addAction( param2 = 'value2')
+        self.assertNsEqual(actions, """
+            actions:
+            - content: "badroot: lala"
+              type: badroot
+            - timestamp: '{0.timestamp}'
+              user: {0.user}
+              param2: value2
+            """.format(self))
+
+    def test_addAction_notInnerList(self):
+        inv = InvestmentState(self.user, self.timestamp,
+            actions_log = "actions: notalist",
+        )
+        actions = inv.addAction( param2 = 'value2')
+        self.assertNsEqual(actions, """
+            actions:
+            - content: "actions: notalist"
+              type: badcontent
+            - timestamp: '{0.timestamp}'
+              user: {0.user}
+              param2: value2
+            """.format(self))
+
+
+
+    # Helper and getter tests
+
+    def test_fistEffectiveDate(self):
+        self.assertEqual(isodate('2017-04-28'),
+            InvestmentState.firstEffectiveDate(isodate('2016-04-28')))
+
+    def test_fistEffectiveDate_pioners(self):
+        self.assertEqual(isodate('2017-03-28'),
+            InvestmentState.firstEffectiveDate(isodate('2016-04-27')))
+
+    @unittest.skip("First investment didn't take into account bisixtile year")
+    def test_fistEffectiveDate_bisextile(self):
+        self.assertEqual(isodate('2021-01-28'),
+            InvestmentState.firstEffectiveDate(isodate('2020-01-28')))
+
+    def test_hasEffectivePeriod_whenUnstarted(self):
+        result = InvestmentState.hasEffectivePeriod(
+            first_date = None,
+            last_date = isodate('2018-01-01'),
+            )
+        self.assertEqual(result, False)
+
+    def test_hasEffectivePeriod_whenUnfinished(self):
+        result = InvestmentState.hasEffectivePeriod(
+            first_date = isodate('2018-01-01'),
+            last_date = None,
+            )
+        self.assertEqual(result, True)
+
+    def test_hasEffectivePeriod_whenSameDay(self):
+        result = InvestmentState.hasEffectivePeriod(
+            first_date = isodate('2018-01-01'),
+            last_date = isodate('2018-01-01'),
+            )
+        self.assertEqual(result, True)
+
+    def test_hasEffectivePeriod_whenOrdered(self):
+        result = InvestmentState.hasEffectivePeriod(
+            first_date = isodate('2018-01-01'),
+            last_date = isodate('2018-02-01'),
+            )
+        self.assertEqual(result, True)
+
+    def test_hasEffectivePeriod_whenCrossed(self):
+        result = InvestmentState.hasEffectivePeriod(
+            first_date = isodate('2018-01-02'),
+            last_date = isodate('2018-01-01'),
+            )
+        self.assertEqual(result, False)
+
+    def pendingAmortizations(self, purchase_date, current_date, investment_amount, amortized_amount):
+        inv = self.setupInvestment(
+            purchase_date=purchase_date and isodate(purchase_date),
+            nominal_amount=investment_amount,
+            amortized_amount=amortized_amount,
+        )
+        return inv.pendingAmortizations(isodate(current_date))
+
+
+    def test_pendingAmortizations_unpaid(self):
+        self.assertEqual(
+            self.pendingAmortizations(
+                purchase_date=False,
+                current_date='2002-01-01',
+                investment_amount=1000,
+                amortized_amount=0,
+                ), [
+            ])
+
+    def test_pendingAmortizations_justFirstAmortization(self):
+        self.assertEqual(
+            self.pendingAmortizations(
+                purchase_date='2000-01-01',
+                current_date='2002-01-01',
+                investment_amount=1000,
+                amortized_amount=0,
+                ), [
+                (1, 24, '2002-01-01', 40),
+            ])
+
+    def test_pendingAmortizations_justBeforeFirstOne(self):
+        self.assertEqual(
+            self.pendingAmortizations(
+                purchase_date='2000-01-01',
+                current_date='2001-12-31',
+                investment_amount=1000,
+                amortized_amount=0,
+                ), [])
+
+    def test_pendingAmortizations_justSecondOne(self):
+        self.assertEqual(
+            self.pendingAmortizations(
+                purchase_date='2000-01-01',
+                current_date='2003-01-01',
+                investment_amount=1000,
+                amortized_amount=0,
+                ), [
+                (1, 24, '2002-01-01', 40),
+                (2, 24, '2003-01-01', 40),
+            ])
+
+    def test_pendingAmortizations_alreadyAmortized(self):
+        self.assertEqual(
+            self.pendingAmortizations(
+                purchase_date='2000-01-01',
+                current_date='2003-01-01',
+                investment_amount=1000,
+                amortized_amount=40,
+                ), [
+                (2, 24, '2003-01-01', 40),
+            ])
+
+    def test_pendingAmortizations_lastDouble(self):
+        self.assertEqual(
+            self.pendingAmortizations(
+                purchase_date='2000-01-01',
+                current_date='2025-01-01',
+                investment_amount=1000,
+                amortized_amount=920,
+                ), [
+                (24, 24, '2025-01-01', 80),
+            ])
+
+    def test_pendingAmortizations_allDone(self):
+        self.assertEqual(
+            self.pendingAmortizations(
+                purchase_date='2000-01-01',
+                current_date='2050-01-01',
+                investment_amount=1000,
+                amortized_amount=1000,
+                ), [
+            ])
+
+    def test_pendingAmortizations_allPending(self):
+        self.assertEqual(
+            self.pendingAmortizations(
+                purchase_date='2000-01-01',
+                current_date='2040-01-01',
+                investment_amount=1000,
+                amortized_amount=0,
+                ), [
+                ( 1, 24, '2002-01-01', 40),
+                ( 2, 24, '2003-01-01', 40),
+                ( 3, 24, '2004-01-01', 40),
+                ( 4, 24, '2005-01-01', 40),
+                ( 5, 24, '2006-01-01', 40),
+                ( 6, 24, '2007-01-01', 40),
+                ( 7, 24, '2008-01-01', 40),
+                ( 8, 24, '2009-01-01', 40),
+                ( 9, 24, '2010-01-01', 40),
+                (10, 24, '2011-01-01', 40),
+                (11, 24, '2012-01-01', 40),
+                (12, 24, '2013-01-01', 40),
+                (13, 24, '2014-01-01', 40),
+                (14, 24, '2015-01-01', 40),
+                (15, 24, '2016-01-01', 40),
+                (16, 24, '2017-01-01', 40),
+                (17, 24, '2018-01-01', 40),
+                (18, 24, '2019-01-01', 40),
+                (19, 24, '2020-01-01', 40),
+                (20, 24, '2021-01-01', 40),
+                (21, 24, '2022-01-01', 40),
+                (22, 24, '2023-01-01', 40),
+                (23, 24, '2024-01-01', 40),
+                (24, 24, '2025-01-01', 80),
+            ])
+
+
+
+    # Public actions tests
 
     def test_order(self):
         inv = self.setupInvestment()
@@ -306,19 +717,6 @@ class InvestmentState_Test(unittest.TestCase):
             # TODO: Log the error!
             )
 
-
-    def test_fistEffectiveDate(self):
-        self.assertEqual(isodate('2017-04-28'),
-            InvestmentState.firstEffectiveDate(isodate('2016-04-28')))
-
-    def test_fistEffectiveDate_pioners(self):
-        self.assertEqual(isodate('2017-03-28'),
-            InvestmentState.firstEffectiveDate(isodate('2016-04-27')))
-
-    @unittest.skip("First investment didn't take into account bisixtile year")
-    def test_fistEffectiveDate_bisextile(self):
-        self.assertEqual(isodate('2021-01-28'),
-            InvestmentState.firstEffectiveDate(isodate('2020-01-28')))
 
     def test_unpay(self):
         inv = self.setupInvestment(
@@ -912,54 +1310,6 @@ class InvestmentState_Test(unittest.TestCase):
             "Partial divestment can be only applied to paid investments, "
             "try 'correct'")
 
-    def test_values_takesInitialValues(self):
-        inv = self.setupInvestment(
-            name = "GKWH00069",
-            log = 'my log',
-            )
-        self.assertNsEqual(inv.values(), """
-            name: GKWH00069
-            log: my log
-            actions_log: 'actions: []'
-            """)
-
-    def test_values_avoidsAliasing(self):
-        inv = self.setupInvestment(
-            name = "GKWH00069",
-            log = 'my log',
-            )
-        values = inv.values()
-        values.newAttribute = 'value'
-        self.assertNsEqual(inv.values(), """
-            name: GKWH00069
-            log: my log
-            actions_log: 'actions: []'
-            """)
-
-    def test_values_mergesChanges(self):
-        inv = self.setupInvestment(
-            name = "GKWH00069",
-            nominal_amount = 200.,
-            paid_amount = 0.,
-            log = 'my log',
-            )
-        inv.correct(
-            from_amount= 200.0,
-            to_amount = 300.0,
-        )
-        values = inv.values()
-        values.pop('actions_log')
-        self.assertNsEqual(values, """
-            name: GKWH00069
-            nominal_amount: 300.0
-            paid_amount: 0.0
-            log: '[2000-01-01 00:00:00.123435 MyUser] CORRECTED: Quantitat canviada abans del
-              pagament de 200.0 € a 300.0 €
-
-              my log'
-
-            """)
-
     def test_cancel(self):
         inv = self.setupInvestment(
             purchase_date = False,
@@ -993,77 +1343,6 @@ class InvestmentState_Test(unittest.TestCase):
     # TODO: cancel invoiced
 
 
-    def test_erpChanges(self):
-        inv = self.setupInvestment(log='previous value\n')
-
-        inv.pact(
-            date = isodate('2016-05-01'),
-            comment = "lo dice el jefe",
-            name = 'GKWH00069',
-            order_date = isodate('2000-01-01'),
-            purchase_date = isodate('2000-01-02'),
-            first_effective_date = isodate('2000-01-03'),
-            last_effective_date = isodate('2000-01-04'),
-            active = False,
-        )
-        changes=inv.erpChanges()
-        log = changes.pop('log')
-        actions = changes.pop('actions_log')
-        self.assertNsEqual(changes, """\
-            name: GKWH00069
-            order_date: 2000-01-01
-            purchase_date: 2000-01-02
-            first_effective_date: 2000-01-03
-            last_effective_date: 2000-01-04
-            active: False
-            """)
-
-        self.assertMultiLineEqual(log,
-            self.logprefix + 
-            u"PACT: Pacte amb l'inversor. "
-            "active: False, first_effective_date: 2000-01-03, last_effective_date: 2000-01-04, name: GKWH00069, order_date: 2000-01-01, purchase_date: 2000-01-02 "
-            "Motiu: lo dice el jefe\n"
-            u"previous value\n")
-
-    def test_erpChanges_changinAmounts(self):
-        inv = self.setupInvestment(
-            nominal_amount = 100,
-            paid_amount = 0,
-            )
-
-        inv.correct(
-            from_amount = 100,
-            to_amount = 200,
-        )
-        changes=inv.erpChanges()
-        log = changes.pop('log')
-        actions = changes.pop('actions_log')
-        self.assertNsEqual(changes, """\
-            nominal_amount: 200
-            nshares: 2
-            """)
-
-    def test_erpChanges_clearsPaidAmount(self):
-        inv = self.setupInvestment(
-            nominal_amount = 100,
-            paid_amount = 0,
-            draft = False,
-            )
-
-        inv.pay(
-            date = isodate('2016-05-01'),
-            amount = 100,
-            move_line_id = 666,
-        )
-        changes=inv.erpChanges()
-        log = changes.pop('log')
-        actions = changes.pop('actions_log')
-        self.assertNsEqual(changes, """\
-            #paid_amount: 100 # Excpect this one to be removed
-            purchase_date: 2016-05-01
-            first_effective_date: 2017-05-01
-            last_effective_date: 2041-05-01 # TODO Add this
-            """)
 
     def test_amortize_noPreviousAmortization(self):
         inv = self.setupInvestment(
@@ -1109,186 +1388,6 @@ class InvestmentState_Test(unittest.TestCase):
             )
 
 
-    def test_hasEffectivePeriod_whenUnstarted(self):
-        result = InvestmentState.hasEffectivePeriod(
-            first_date = None,
-            last_date = isodate('2018-01-01'),
-            )
-        self.assertEqual(result, False)
-
-    def test_hasEffectivePeriod_whenUnfinished(self):
-        result = InvestmentState.hasEffectivePeriod(
-            first_date = isodate('2018-01-01'),
-            last_date = None,
-            )
-        self.assertEqual(result, True)
-
-    def test_hasEffectivePeriod_whenSameDay(self):
-        result = InvestmentState.hasEffectivePeriod(
-            first_date = isodate('2018-01-01'),
-            last_date = isodate('2018-01-01'),
-            )
-        self.assertEqual(result, True)
-
-    def test_hasEffectivePeriod_whenOrdered(self):
-        result = InvestmentState.hasEffectivePeriod(
-            first_date = isodate('2018-01-01'),
-            last_date = isodate('2018-02-01'),
-            )
-        self.assertEqual(result, True)
-
-    def test_hasEffectivePeriod_whenCrossed(self):
-        result = InvestmentState.hasEffectivePeriod(
-            first_date = isodate('2018-01-02'),
-            last_date = isodate('2018-01-01'),
-            )
-        self.assertEqual(result, False)
-
-    def test_getattr(self):
-        inv = self.setupInvestment(
-            nominal_amount = 100,
-            paid_amount = 0,
-            )
-        self.assertEqual(inv.nominal_amount, 100)
-
-
-    def test_getattr_badattr(self):
-        inv = self.setupInvestment(
-            nominal_amount = 100,
-            paid_amount = 0,
-            )
-        with self.assertRaises(AttributeError) as ctx:
-            inv.badattrib
-        self.assertEqual(ctx.exception.message,
-            "badattrib")
-
-    def test_setattr_fails(self):
-        inv = self.setupInvestment(
-            nominal_amount = 100,
-            paid_amount = 0,
-            )
-        with self.assertRaises(AttributeError) as ctx:
-            inv.paid_amount = 5
-        self.assertEqual(ctx.exception.message,
-            "paid_amount")
-
-    def pendingAmortizations(self, purchase_date, current_date, investment_amount, amortized_amount):
-        inv = self.setupInvestment(
-            purchase_date=purchase_date and isodate(purchase_date),
-            nominal_amount=investment_amount,
-            amortized_amount=amortized_amount,
-        )
-        return inv.pendingAmortizations(isodate(current_date))
-
-
-    def test_pendingAmortizations_unpaid(self):
-        self.assertEqual(
-            self.pendingAmortizations(
-                purchase_date=False,
-                current_date='2002-01-01',
-                investment_amount=1000,
-                amortized_amount=0,
-                ), [
-            ])
-
-    def test_pendingAmortizations_justFirstAmortization(self):
-        self.assertEqual(
-            self.pendingAmortizations(
-                purchase_date='2000-01-01',
-                current_date='2002-01-01',
-                investment_amount=1000,
-                amortized_amount=0,
-                ), [
-                (1, 24, '2002-01-01', 40),
-            ])
-
-    def test_pendingAmortizations_justBeforeFirstOne(self):
-        self.assertEqual(
-            self.pendingAmortizations(
-                purchase_date='2000-01-01',
-                current_date='2001-12-31',
-                investment_amount=1000,
-                amortized_amount=0,
-                ), [])
-
-    def test_pendingAmortizations_justSecondOne(self):
-        self.assertEqual(
-            self.pendingAmortizations(
-                purchase_date='2000-01-01',
-                current_date='2003-01-01',
-                investment_amount=1000,
-                amortized_amount=0,
-                ), [
-                (1, 24, '2002-01-01', 40),
-                (2, 24, '2003-01-01', 40),
-            ])
-
-    def test_pendingAmortizations_alreadyAmortized(self):
-        self.assertEqual(
-            self.pendingAmortizations(
-                purchase_date='2000-01-01',
-                current_date='2003-01-01',
-                investment_amount=1000,
-                amortized_amount=40,
-                ), [
-                (2, 24, '2003-01-01', 40),
-            ])
-
-    def test_pendingAmortizations_lastDouble(self):
-        self.assertEqual(
-            self.pendingAmortizations(
-                purchase_date='2000-01-01',
-                current_date='2025-01-01',
-                investment_amount=1000,
-                amortized_amount=920,
-                ), [
-                (24, 24, '2025-01-01', 80),
-            ])
-
-    def test_pendingAmortizations_allDone(self):
-        self.assertEqual(
-            self.pendingAmortizations(
-                purchase_date='2000-01-01',
-                current_date='2050-01-01',
-                investment_amount=1000,
-                amortized_amount=1000,
-                ), [
-            ])
-
-    def test_pendingAmortizations_allPending(self):
-        self.assertEqual(
-            self.pendingAmortizations(
-                purchase_date='2000-01-01',
-                current_date='2040-01-01',
-                investment_amount=1000,
-                amortized_amount=0,
-                ), [
-                ( 1, 24, '2002-01-01', 40),
-                ( 2, 24, '2003-01-01', 40),
-                ( 3, 24, '2004-01-01', 40),
-                ( 4, 24, '2005-01-01', 40),
-                ( 5, 24, '2006-01-01', 40),
-                ( 6, 24, '2007-01-01', 40),
-                ( 7, 24, '2008-01-01', 40),
-                ( 8, 24, '2009-01-01', 40),
-                ( 9, 24, '2010-01-01', 40),
-                (10, 24, '2011-01-01', 40),
-                (11, 24, '2012-01-01', 40),
-                (12, 24, '2013-01-01', 40),
-                (13, 24, '2014-01-01', 40),
-                (14, 24, '2015-01-01', 40),
-                (15, 24, '2016-01-01', 40),
-                (16, 24, '2017-01-01', 40),
-                (17, 24, '2018-01-01', 40),
-                (18, 24, '2019-01-01', 40),
-                (19, 24, '2020-01-01', 40),
-                (20, 24, '2021-01-01', 40),
-                (21, 24, '2022-01-01', 40),
-                (22, 24, '2023-01-01', 40),
-                (23, 24, '2024-01-01', 40),
-                (24, 24, '2025-01-01', 80),
-            ])
-
 
     def test_migrate(self):
         inv = self.setupInvestment(
@@ -1314,95 +1413,6 @@ class InvestmentState_Test(unittest.TestCase):
                 user = self.user,
                 timestamp = self.timestamp,
             ))
-
-
-    def test_addAction_firstAction(self):
-        inv = InvestmentState(self.user, self.timestamp)
-        actions = inv.addAction(
-            param = 'value'
-            )
-        self.assertNsEqual(actions, """
-            actions:
-            - timestamp: '{0.timestamp}'
-              user: {0.user}
-              param: value
-            """.format(self))
-
-    def test_addAction_secondAction(self):
-        inv = InvestmentState(self.user, self.timestamp,
-            actions_log = """
-                actions:
-                - timestamp: 'asdafs'
-                  user: Fulanito
-                  param1: value1
-                """,
-        )
-        actions = inv.addAction( param2 = 'value2')
-        self.assertNsEqual(actions, """
-            actions:
-            - timestamp: 'asdafs'
-              user: Fulanito
-              param1: value1
-            - timestamp: '{0.timestamp}'
-              user: {0.user}
-              param2: value2
-            """.format(self))
-
-    def test_addAction_unparseable(self):
-        inv = InvestmentState(self.user, self.timestamp,
-            actions_log = " : badcontent",
-        )
-        actions = inv.addAction( param2 = 'value2')
-        self.assertNsEqual(actions, """
-            actions:
-            - content: " : badcontent"
-              type: unparseable
-            - timestamp: '{0.timestamp}'
-              user: {0.user}
-              param2: value2
-            """.format(self))
-
-    def test_addAction_notADict(self):
-        inv = InvestmentState(self.user, self.timestamp,
-            actions_log = "badcontent",
-        )
-        actions = inv.addAction( param2 = 'value2')
-        self.assertNsEqual(actions, """
-            actions:
-            - content: "badcontent"
-              type: badcontent
-            - timestamp: '{0.timestamp}'
-              user: {0.user}
-              param2: value2
-            """.format(self))
-
-    def test_addAction_badRootKey(self):
-        inv = InvestmentState(self.user, self.timestamp,
-            actions_log = "badroot: lala",
-        )
-        actions = inv.addAction( param2 = 'value2')
-        self.assertNsEqual(actions, """
-            actions:
-            - content: "badroot: lala"
-              type: badroot
-            - timestamp: '{0.timestamp}'
-              user: {0.user}
-              param2: value2
-            """.format(self))
-
-    def test_addAction_notInnerList(self):
-        inv = InvestmentState(self.user, self.timestamp,
-            actions_log = "actions: notalist",
-        )
-        actions = inv.addAction( param2 = 'value2')
-        self.assertNsEqual(actions, """
-            actions:
-            - content: "actions: notalist"
-              type: badcontent
-            - timestamp: '{0.timestamp}'
-              user: {0.user}
-              param2: value2
-            """.format(self))
 
 
 
