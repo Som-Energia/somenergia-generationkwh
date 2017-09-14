@@ -45,6 +45,7 @@ class InvestmentState(object):
 
     def __init__(self, user=None, timestamp=None, **values):
         self._checkAttribs(**values)
+        values = ns(values)
         self._prev=ns(values)
         self._vals=ns(values)
         self._changed=ns()
@@ -80,6 +81,42 @@ class InvestmentState(object):
             if key in self.allowedParams: continue
             raise Exception(
                 "Investments have no '{}' attribute".format(key))
+
+    def addAction(self, **kwds):
+        from yaml.parser import ParserError
+
+        yaml = 'actions: []'
+        if 'actions' in self._vals:
+            yaml = self.actions
+        try:
+            actions = ns.loads(yaml)
+        except ParserError as error:
+            actions = ns(actions=[ns(
+                content = yaml,
+                type='unparseable',
+            )])
+        if type(actions) != ns:
+            actions = ns(actions=[ns(
+                content = yaml,
+                type='badcontent',
+            )])
+        if 'actions' not in actions:
+            actions = ns(actions=[ns(
+                content = yaml,
+                type='badroot',
+            )])
+        if type(actions.actions) != list:
+            actions = ns(actions=[ns(
+                content = yaml,
+                type='badcontent',
+            )])
+
+        actions.actions.append(ns(
+            kwds,
+            timestamp=self._timestamp,
+            user=self._user,
+            ))
+        return actions.dump()
 
     def changed(self):
         self._checkAttribs(**self._changed)

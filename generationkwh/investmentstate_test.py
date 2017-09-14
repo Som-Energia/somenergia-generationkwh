@@ -1142,6 +1142,94 @@ class InvestmentState_Test(unittest.TestCase):
             )
 
 
+    def test_addAction_firstAction(self):
+        inv = InvestmentState(self.user, self.timestamp)
+        actions = inv.addAction(
+            param = 'value'
+            )
+        self.assertNsEqual(actions, """
+            actions:
+            - param: value
+              timestamp: '{0.timestamp}'
+              user: {0.user}
+            """.format(self))
+
+    def test_addAction_secondAction(self):
+        inv = InvestmentState(self.user, self.timestamp,
+            actions = """
+                actions:
+                - param1: value1
+                  user: Fulanito
+                  timestamp: 'asdafs'
+                """,
+        )
+        actions = inv.addAction( param2 = 'value2')
+        self.assertNsEqual(actions, """
+            actions:
+            - param1: value1
+              user: Fulanito
+              timestamp: 'asdafs'
+            - param2: value2
+              timestamp: '{0.timestamp}'
+              user: {0.user}
+            """.format(self))
+
+    def test_addAction_unparseable(self):
+        inv = InvestmentState(self.user, self.timestamp,
+            actions = " : badcontent",
+        )
+        actions = inv.addAction( param2 = 'value2')
+        self.assertNsEqual(actions, """
+            actions:
+            - content: " : badcontent"
+              type: unparseable
+            - param2: value2
+              timestamp: '{0.timestamp}'
+              user: {0.user}
+            """.format(self))
+
+    def test_addAction_notADict(self):
+        inv = InvestmentState(self.user, self.timestamp,
+            actions = "badcontent",
+        )
+        actions = inv.addAction( param2 = 'value2')
+        self.assertNsEqual(actions, """
+            actions:
+            - content: "badcontent"
+              type: badcontent
+            - param2: value2
+              timestamp: '{0.timestamp}'
+              user: {0.user}
+            """.format(self))
+
+    def test_addAction_badRootKey(self):
+        inv = InvestmentState(self.user, self.timestamp,
+            actions = "badroot: lala",
+        )
+        actions = inv.addAction( param2 = 'value2')
+        self.assertNsEqual(actions, """
+            actions:
+            - content: "badroot: lala"
+              type: badroot
+            - param2: value2
+              timestamp: '{0.timestamp}'
+              user: {0.user}
+            """.format(self))
+
+    def test_addAction_notInnerList(self):
+        inv = InvestmentState(self.user, self.timestamp,
+            actions = "actions: notalist",
+        )
+        actions = inv.addAction( param2 = 'value2')
+        self.assertNsEqual(actions, """
+            actions:
+            - content: "actions: notalist"
+              type: badcontent
+            - param2: value2
+              timestamp: '{0.timestamp}'
+              user: {0.user}
+            """.format(self))
+
 
 
 # vim: ts=4 sw=4 et
