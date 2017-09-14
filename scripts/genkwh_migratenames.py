@@ -1461,7 +1461,7 @@ def solveInactiveInvestment(cr, payment):
         logMovement(cr, attributes, investment, movelineid, what)
 
     # Consider any unpaid, also resigned
-    if 'DIVEST' not in attributes.log and 'DIVESTEDBYTRANSFER' not in attributes:
+    if 'DIVEST' not in attributes.log and 'DIVESTEDBYTRANSFER' not in attributes.log:
         try:
             logResign(cr, attributes)
         except Exception as e:
@@ -1484,8 +1484,7 @@ def solveInactiveInvestment(cr, payment):
             name = %(name)s,
             log = %(log)s,
             order_date = %(order_date)s,
-            purchase_date = CASE WHEN %(has_purchase_date)s THEN purchase_date ELSE NULL END,
-            active = false
+            purchase_date = CASE WHEN %(has_purchase_date)s THEN purchase_date ELSE NULL END
         WHERE
             inv.id = %(investment)s
     """, dict(
