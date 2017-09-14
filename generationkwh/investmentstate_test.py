@@ -169,6 +169,32 @@ class InvestmentState_Test(unittest.TestCase):
             ))
 
 
+    def test_invoice(self):
+        inv = self.setupInvestment(
+            draft = True,
+        )
+
+        inv.invoice()
+        self.assertChangesEqual(inv, """\
+            draft: false
+            """,
+            u"INVOICED: Facturada i remesada\n"
+            )
+
+    def test_invoice_notDraft(self):
+        inv = self.setupInvestment(
+            draft = False,
+        )
+        with self.assertRaises(Exception) as ctx:
+            inv.invoice()
+        self.assertEqual(ctx.exception.message,
+            "Already invoiced")
+        self.assertChangesEqual(inv, """\
+            {}
+            """
+            # TODO: Log Error
+            )
+
     def test_pay(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
@@ -1086,32 +1112,6 @@ class InvestmentState_Test(unittest.TestCase):
                 (24, 24, '2025-01-01', 80),
             ])
 
-
-    def test_invoice(self):
-        inv = self.setupInvestment(
-            draft = True,
-        )
-
-        inv.invoice()
-        self.assertChangesEqual(inv, """\
-            draft: false
-            """,
-            u"INVOICED: Facturada i remesada\n"
-            )
-
-    def test_invoice_notDraft(self):
-        inv = self.setupInvestment(
-            draft = False,
-        )
-        with self.assertRaises(Exception) as ctx:
-            inv.invoice()
-        self.assertEqual(ctx.exception.message,
-            "Already invoiced")
-        self.assertChangesEqual(inv, """\
-            {}
-            """
-            # TODO: Log Error
-            )
 
     def test_migrate(self):
         inv = self.setupInvestment(
