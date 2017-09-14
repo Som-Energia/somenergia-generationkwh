@@ -261,7 +261,12 @@ class InvestmentState(object):
             raise Exception("No pending amount to unpay")
 
         if amount != self.paid_amount:
-            raise Exception("Unpaying wrong amount")
+            raise Exception(
+                "Unpaying wrong amount, was {given} expected {expected}"
+                .format(
+                    given=amount,
+                    expected=self.paid_amount,
+                ))
 
         return ns(
             purchase_date = None,

@@ -325,7 +325,7 @@ class InvestmentState_Test(unittest.TestCase):
                 move_line_id = 666,
             )
         self.assertEqual(ctx.exception.message,
-            "Unpaying wrong amount")
+            "Unpaying wrong amount, was 200.0 expected 300.0")
         self.assertChangesEqual(inv, """\
             {}
             """
