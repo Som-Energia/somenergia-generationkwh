@@ -148,7 +148,7 @@ class InvestmentState(object):
                 iban = iban or None,
                 ip = ip,
             ),
-        ])
+        ]).dump()
 
         return ns(
             name = name,
@@ -160,7 +160,7 @@ class InvestmentState(object):
             nominal_amount = amount,
             paid_amount = Decimal("0.0"),
             log = log,
-            actions = actions.dump(),
+            actions = actions,
             draft = True,
         )
 
@@ -170,9 +170,18 @@ class InvestmentState(object):
         if not self.draft:
             raise Exception("Already invoiced")
 
+        actions = ns(actions=[
+            ns(
+                timestamp = self._timestamp,
+                user = self._user,
+                type = 'invoice',
+            ),
+        ]).dump()
+
         return ns(
             draft=False,
-            log = self._log("INVOICED: Facturada i remesada\n")
+            log = self._log("INVOICED: Facturada i remesada\n"),
+            actions = actions,
             )
 
     @action
