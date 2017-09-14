@@ -791,7 +791,10 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
         )
 
+        self.Investment.mark_as_invoiced(id1)
+        self.Investment.mark_as_invoiced(id2)
         self.Investment.mark_as_paid([id1, id2], '2017-01-03')
+
         self.Investment.mark_as_unpaid([id1, id2])
 
         result = self.Investment.read(
@@ -976,6 +979,24 @@ class Investment_Test(unittest.TestCase):
             investment_id=id,
             mandate_id = mandate_id,
             ))
+
+    def test__create_initial_invoices__notDraft(self):
+
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+
+        result = self.Investment.create_initial_invoices([id])
+
+        inv = self.Investment.read(id, ['name'])
+        self.assertEqual(result, [[], [
+            "Investment {name} already invoiced".format(**inv)
+            ]])
 
     def test__create_initial_invoices__twice(self):
 
