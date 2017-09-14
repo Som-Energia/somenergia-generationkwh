@@ -226,6 +226,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
           quantity: 40.0
           ref: {investment_name}-FACT
+          move_state: posted
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: -4000.0
           credit: 0.0
@@ -237,6 +238,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: false
           quantity: 1.0
           ref: {investment_name}-FACT
+          move_state: posted
         """.format(
             investment_name = investment_name,
             **self.personalData
@@ -270,6 +272,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
           quantity: 40.0
           ref: {investment_name}-FACT
+          move_state: posted
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 0.0 # TURNED ZERO
           credit: 0.0
@@ -281,6 +284,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: false
           quantity: 1.0
           ref: {investment_name}-FACT
+          move_state: posted
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 0.0
           credit: 4000.0
@@ -292,6 +296,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: false
           quantity: false
           ref: {investment_name}-FACT
+          move_state: posted
         - account_id: 555000000004 CAIXA GKWH
           amount_to_pay: -4000.0
           credit: 0.0
@@ -303,6 +308,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: false
           quantity: false
           ref: {investment_name}-FACT
+          move_state: posted
         """.format(
             investment_name = investment_name,
             **self.personalData
@@ -339,6 +345,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
           quantity: 40.0
           ref: {investment_name}-FACT
+          move_state: posted
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 0.0
           credit: 0.0
@@ -350,6 +357,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: false
           quantity: 1.0
           ref: {investment_name}-FACT
+          move_state: posted
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 0.0
           credit: 4000.0
@@ -361,6 +369,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: false
           quantity: false
           ref: {investment_name}-FACT
+          move_state: posted
         - account_id: 555000000004 CAIXA GKWH
           amount_to_pay: -4000.0
           credit: 0.0
@@ -372,6 +381,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: false
           quantity: false
           ref: {investment_name}-FACT
+          move_state: posted
         - account_id: 555000000004 CAIXA GKWH
           amount_to_pay: 4000.0
           credit: 4000.0
@@ -383,6 +393,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: false
           quantity: false
           ref: {investment_name}-FACT
+          move_state: posted
         - account_id: 410000001620 {surname}, {name}
           amount_to_pay: -4000.0
           credit: 0.0
@@ -394,6 +405,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: false
           quantity: false
           ref: {investment_name}-FACT
+          move_state: posted
 
         """.format(
             investment_name = investment_name,
@@ -497,6 +509,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: '[GENKWH_AMOR] Amortització Generation kWh'
           quantity: 1.0
           ref: {investment_name}-AMOR2019
+          move_state: posted
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 160.0
           credit: 160.0
@@ -508,6 +521,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: false
           quantity: 1.0
           ref: {investment_name}-AMOR2019
+          move_state: posted
         """.format(
             investment_name = investment_name,
             **self.personalData
@@ -544,6 +558,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: '[GENKWH_AMOR] Amortització Generation kWh'
           quantity: 1.0
           ref: {investment_name}-AMOR2019
+          move_state: posted
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 0.0 # CHANGED!!
           credit: 160.0
@@ -555,6 +570,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: false
           quantity: 1.0
           ref: {investment_name}-AMOR2019
+          move_state: posted
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 0.0
           credit: 0.0
@@ -566,6 +582,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: false
           quantity: false
           ref: {investment_name}-AMOR2019
+          move_state: posted
         - account_id: 555000000004 CAIXA GKWH
           amount_to_pay: 160.0
           credit: 160.0
@@ -577,6 +594,7 @@ class Account_Invoice_Test(unittest.TestCase):
           product_id: false
           quantity: false
           ref: {investment_name}-AMOR2019
+          move_state: posted
         """.format(
             investment_name = investment_name,
             **self.personalData
@@ -608,6 +626,7 @@ class Account_Invoice_Test(unittest.TestCase):
             "product_id",
             "quantity",
             "ref",
+            "move_id",
             ]
         fks = [
             "invoice",
@@ -624,6 +643,9 @@ class Account_Invoice_Test(unittest.TestCase):
         for line in lines:
             moveline = ns(sorted(line.items()))
             del moveline.id
+            move = self.erp.AccountMove.read(moveline.move_id[0], ['state'])
+            moveline.move_state = move['state']
+            del moveline.move_id
             for field in fks:
                 moveline[field]=moveline[field] and moveline[field][1]
             movelines.append(moveline)
