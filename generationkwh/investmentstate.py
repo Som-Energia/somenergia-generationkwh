@@ -124,7 +124,20 @@ class InvestmentState(object):
         if not first_date: return False # never started
         if not last_date: return True # started but no end
         return first_date<=last_date # not crossed dates
-
+    
+    @action
+    def migrate(self, oldVersion, newVersion):
+        """
+        Change investment state to migrate
+        """
+        return ns( 
+            log = self._log(
+                u"MIGRATED: "
+                u"Migració de la versió {oldVersion} a {newVersion}\n",
+                oldVersion=oldVersion,
+                newVersion=newVersion,
+            )
+        )
     @action
     def order(self, name, date, ip, amount, iban):
         """

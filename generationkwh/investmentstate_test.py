@@ -190,6 +190,21 @@ class InvestmentState_Test(unittest.TestCase):
             u"PAID: Pagament de 300 € efectuat "
             u"[666]\n"
             )
+    
+    def test_migrate(self):
+        inv = self.setupInvestment(
+            name = "GENKWH0001",
+        )
+        inv.migrate(
+            oldVersion = "1.0",
+            newVersion = "2.0",
+        )
+        self.assertChangesEqual(inv, """\
+            {}
+            """,
+            u"MIGRATED: "
+            u"Migració de la versió 1.0 a 2.0\n"
+            )
 
     def test_pay_alreadyPaid(self):
         inv = self.setupInvestment(
