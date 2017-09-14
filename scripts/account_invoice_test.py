@@ -653,7 +653,7 @@ class Account_Invoice_Test(unittest.TestCase):
 
 
 
-    def test__last_moveline__paid(self):
+    def test__investment_last_moveline__paid(self):
         investment_id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
@@ -676,7 +676,7 @@ class Account_Invoice_Test(unittest.TestCase):
             """.format(id=ml_id))
 
 
-    def test__last_moveline__unpaid(self):
+    def test__investment_last_moveline__unpaid(self):
         investment_id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
@@ -701,7 +701,7 @@ class Account_Invoice_Test(unittest.TestCase):
             credit: 0.0
             """.format(id=ml_id))
 
-    def test__last_moveline__repaid(self):
+    def test__investment_last_moveline__repaid(self):
         investment_id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
