@@ -667,7 +667,7 @@ class Account_Invoice_Test(unittest.TestCase):
         self.erp.GenerationkwhPaymentWizardTesthelper.pay(
             invoice_ids[0], 'payment 1')
 
-        ml_id = self.Investment.last_moveline(invoice_ids[0])
+        ml_id = self.Invoice.investment_last_moveline(invoice_ids[0])
         self.assertMoveLineEqual(ml_id, """
             id: {id}
             name: payment 1
@@ -693,7 +693,7 @@ class Account_Invoice_Test(unittest.TestCase):
         self.erp.GenerationkwhPaymentWizardTesthelper.unpay(
             invoice_ids[0], 'unpayment 1')
 
-        ml_id = self.Investment.last_moveline(invoice_ids[0])
+        ml_id = self.Invoice.investment_last_moveline(invoice_ids[0])
         self.assertMoveLineEqual(ml_id, """
             id: {id}
             name: unpayment 1
@@ -721,7 +721,7 @@ class Account_Invoice_Test(unittest.TestCase):
         self.erp.GenerationkwhPaymentWizardTesthelper.pay(
             invoice_ids[0], 'payment 2')
 
-        ml_id = self.Investment.last_moveline(invoice_ids[0])
+        ml_id = self.Invoice.investment_last_moveline(invoice_ids[0])
         self.assertMoveLineEqual(ml_id, """
             id: {id}
             name: payment 2
