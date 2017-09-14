@@ -893,7 +893,6 @@ class Investment_Test(unittest.TestCase):
         log = investment.pop('log')
 
         self.assertLogEquals(log,
-            u'INVOICED: Facturada i remesada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
