@@ -1147,7 +1147,8 @@ def logPaid(cr, attributes, investment, move_line_id):
     inv.pay(
         date=ml.create_date.date(),
         amount=ml.amount,
-        move_line_id=move_line_id)
+        move_line_id=move_line_id,
+        )
     attributes.update(inv.changed())
 
 def logUnpay(cr, attributes, move_line_id):
@@ -1159,8 +1160,7 @@ def logUnpay(cr, attributes, move_line_id):
         amount=-ml.amount,
         move_line_id=move_line_id,
         )
-    attributes.update(inv.changed(),
-        active=False) # In erp don't but in migration yes
+    attributes.update(inv.changed())
 
 def logResign(cr, attributes):
     # TODO: Never should be today but in order to b2b properly
@@ -1168,18 +1168,6 @@ def logResign(cr, attributes):
         **attributes
         )
     inv.cancel()
-    attributes.update(inv.changed())
-
-def logRepaid(cr, attributes, move_line_id):
-    ml = unusedMovements.pop(move_line_id)
-    inv = InvestmentState(ml.user, ml.create_date,
-        **attributes
-        )
-    inv.repay(
-        date=ml.create_date.date(),
-        amount=ml.amount,
-        move_line_id=move_line_id,
-        )
     attributes.update(inv.changed())
 
 def logPartial(cr, attributes, investment, move_line_id):
@@ -1269,7 +1257,7 @@ def logMovement(cr, attributes, investment, movelineid, what):
     if type == 'unpaid':
         return logUnpay(cr, attributes, movelineid)
     if type == 'repaid':
-        return logRepaid(cr, attributes, movelineid)
+        return logPaid(cr, attributes, investment, movelineid)
     if type == 'partial':
         return logPartial(cr, attributes, investment, movelineid)
     if type == 'divested':

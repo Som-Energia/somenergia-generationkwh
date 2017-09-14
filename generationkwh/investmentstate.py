@@ -209,7 +209,6 @@ class InvestmentState(object):
             amount=amount,
             move_line_id=move_line_id,
             )
-        self._changed.update(active = True)
         return self._pay(date, amount, log)
 
     def _pay(self, date, amount, log):

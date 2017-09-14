@@ -675,7 +675,6 @@ class InvestmentState_Test(unittest.TestCase):
             first_effective_date: 2017-05-01
             last_effective_date: 2041-05-01 # TODO Add this
             paid_amount: 300.0
-            active: True
             """,
             u"REPAID: Pagament de 300 € rebut per transferència bancària [666]\n"
             )
@@ -889,7 +888,6 @@ class InvestmentState_Test(unittest.TestCase):
         changes=inv.erpChanges()
         log = changes.pop('log')
         self.assertNsEqual(changes, """\
-            active: True
             #paid_amount: 100 # Excpect this one to be removed
             purchase_date: 2016-05-01
             first_effective_date: 2017-05-01
