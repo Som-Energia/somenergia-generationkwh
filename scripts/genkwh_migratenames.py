@@ -1143,7 +1143,7 @@ def logCorrected(cr, attributes, investment, what):
         )
     attributes.update(inv.changed())
 
-def logPaid(cr, attributes, investment, move_line_id):
+def logPaid(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
     inv = InvestmentState(ml.user, ml.create_date,
         **attributes
@@ -1257,11 +1257,11 @@ def logMovement(cr, attributes, investment, movelineid, what):
     if type == 'pact':
         return logPact(cr, attributes, investment, what)
     if type == 'paid':
-        return logPaid(cr, attributes, investment, movelineid)
+        return logPaid(cr, attributes, movelineid)
     if type == 'unpaid':
         return logUnpay(cr, attributes, movelineid)
     if type == 'repaid':
-        return logPaid(cr, attributes, investment, movelineid)
+        return logPaid(cr, attributes, movelineid)
     if type == 'partial':
         return logPartial(cr, attributes, investment, movelineid)
     if type == 'divested':
@@ -1340,7 +1340,7 @@ def solveNormalCase(cr, investment, payment):
         for movelineid, what in case.iteritems():
             logMovement(cr, attributes, investment, movelineid, what)
     else:
-        logPaid(cr, attributes, investment, payment.movelineid)
+        logPaid(cr, attributes, payment.movelineid)
         False and displayPartnersMovements(cr, payment.partner_id)
 
     log = attributes.log
