@@ -405,7 +405,7 @@ class Investment_OLD_Test(unittest.TestCase):
             1, None)
         self.assertTrue(
             self.Investment.member_has_effective(1,'2015-07-01','2015-07-01'))
-    
+
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Investment_Test(unittest.TestCase):
 
@@ -456,14 +456,14 @@ class Investment_Test(unittest.TestCase):
                 u'\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d+ [^]]+\\] .*',
                 u"Linia de log con formato no estandard"
             )
-            
+
         logContent = ''.join(
                 x.split('] ')[1]+'\n'
                 for x in log.splitlines()
                 if u'] ' in x
                 )
         self.assertMultiLineEqual(logContent, expected)
-        
+
     def assertMailLogEqual(self, expected):
         self.assertNsEqual(ns.loads(self.MailMockup.log() or '{}'), expected)
 
@@ -481,12 +481,12 @@ class Investment_Test(unittest.TestCase):
         investment = ns(self.Investment.read(id, []))
         log = investment.pop('log')
         name = investment.pop('name')
-        
+
         self.assertLogEquals(log,
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 4000 €, IBAN: ES7712341234161234567890\n'
             )
-        
+
         self.assertRegexpMatches(name,r'^GKWH[0-9]{5}$')
         self.assertNsEqual(investment, """
             id: {id}
@@ -506,7 +506,7 @@ class Investment_Test(unittest.TestCase):
                 id=id,
                 **self.personalData
                 ))
-            
+
 
     @unittest.skip('Not implemented')
     def test__create_from_form__whenBadOrderDate(self):
@@ -583,7 +583,7 @@ class Investment_Test(unittest.TestCase):
     # TODO: mark_as_invoiced twice
 
     def test__mark_as_paid__singleInvestment(self):
-    
+
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
@@ -606,7 +606,7 @@ class Investment_Test(unittest.TestCase):
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
-        
+
         self.assertNsEqual(investment, """
             id: {id}
             member_id:
@@ -627,7 +627,7 @@ class Investment_Test(unittest.TestCase):
                 ))
 
     def test__mark_as_paid__samePurchaseDateSetToAll(self):
-    
+
         id1 = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
@@ -647,12 +647,12 @@ class Investment_Test(unittest.TestCase):
         self.Investment.mark_as_invoiced(id1)
         self.Investment.mark_as_invoiced(id2)
         self.Investment.mark_as_paid([id1,id2], '2017-01-03')
-        
+
         result = self.Investment.read(
             [id1,id2],
             ['purchase_date'],
             order='id')
-        
+
         self.assertNsEqual(ns(data=result), """\
             data:
             - purchase_date: '2017-01-03'
@@ -662,7 +662,7 @@ class Investment_Test(unittest.TestCase):
             """.format(id1=id1, id2=id2))
 
     def test__mark_as_paid__oldLogKept(self):
-    
+
         id1 = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
@@ -682,16 +682,16 @@ class Investment_Test(unittest.TestCase):
         self.Investment.mark_as_invoiced(id1)
         self.Investment.mark_as_invoiced(id2)
         self.Investment.mark_as_paid([id1,id2], '2017-01-03')
-        
+
         result = self.Investment.read([id1,id2], ['log'], order='id')
-        
+
         self.assertLogEquals(result[0]['log'],
             u'PAID: Pagament de 2000 € efectuat [None]\n'
             u'INVOICED: Facturada i remesada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
-        
+
         self.assertLogEquals(result[1]['log'],
             u'PAID: Pagament de 2000 € efectuat [None]\n'
             u'INVOICED: Facturada i remesada\n'
@@ -1259,7 +1259,7 @@ class Investment_Test(unittest.TestCase):
             2000,
             '10.10.23.1',
             'ES7712341234161234567890',
-            )       
+            )
         self.Partner.write(self.personalData.partnerid,dict(bank_inversions = False))
 
         invocie_id, errors = self.Investment.create_amortization_invoice(
