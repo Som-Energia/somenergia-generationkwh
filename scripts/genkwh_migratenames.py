@@ -1168,7 +1168,8 @@ def logUnpay(cr, attributes, move_line_id):
 
 def logResign(cr, attributes):
     # TODO: Never should be today but in order to b2b properly
-    inv = InvestmentState('Migration', datetime.datetime.now() if '--doit' in sys.argv else 'Never',
+    nowOrNever = datetime.datetime.now() if '--doit' in sys.argv else 'Never'
+    inv = InvestmentState('Migration', nowOrNever,
         **attributes
         )
     inv.cancel()
@@ -1241,6 +1242,17 @@ def logDivestment(cr, attributes, investment, move_line_id):
         date=ml.create_date.date(),
         amount = -ml.amount,
         move_line_id = move_line_id,
+        )
+    attributes.update(inv.changed())
+
+def logMigrated(cr, attributes):
+    nowOrNever = datetime.datetime.now() if '--doit' in sys.argv else 'Never'
+    inv = InvestmentState('Migration', nowOrNever,
+        **attributes
+        )
+    inv.migrate(
+        oldVersion = "1.6",
+        newVersion = "2.0",
         )
     attributes.update(inv.changed())
 
@@ -1342,6 +1354,7 @@ def solveNormalCase(cr, investment, payment):
     else:
         logPaid(cr, attributes, payment.movelineid)
         False and displayPartnersMovements(cr, payment.partner_id)
+    logMigrated(cr, attributes)
 
     log = attributes.log
     False and success(("\n"+log).encode('utf-8'))
@@ -1390,6 +1403,7 @@ def solveRepaidCase(cr, investment, payment):
     case = cases.repaidCases.pop(payment.ref)
     for movelineid, what in case.iteritems():
         logMovement(cr, attributes, investment, movelineid, what)
+    logMigrated(cr, attributes)
     False and displayPartnersMovements(cr, payment.partner_id)
     log = attributes.log
     False and success(("\n"+log).encode('utf-8'))
@@ -1431,6 +1445,7 @@ def solveUnnamedCases(cr, investment):
             ))
     attributes=ns()
     logBought(cr, attributes, investment)
+    logMigrated(cr, attributes)
     log = attributes.log
     False and success(("\n"+log).encode('utf-8'))
     cr.execute("""\
@@ -1477,6 +1492,7 @@ def solveInactiveInvestment(cr, payment):
         except Exception as e:
             consoleError("{}: {}".format(
                 name, e.message))
+    logMigrated(cr, attributes)
 
     True and success(
         "Solved inactive {investment.id} {payment.ref} {payment.order_date} {amount:=8}€ {payment.partner_name}"
