@@ -1323,29 +1323,29 @@ class InvestmentState_Test(unittest.TestCase):
             )
         self.assertNsEqual(actions, """
             actions:
-            - param: value
-              timestamp: '{0.timestamp}'
+            - timestamp: '{0.timestamp}'
               user: {0.user}
+              param: value
             """.format(self))
 
     def test_addAction_secondAction(self):
         inv = InvestmentState(self.user, self.timestamp,
             actions_log = """
                 actions:
-                - param1: value1
+                - timestamp: 'asdafs'
                   user: Fulanito
-                  timestamp: 'asdafs'
+                  param1: value1
                 """,
         )
         actions = inv.addAction( param2 = 'value2')
         self.assertNsEqual(actions, """
             actions:
-            - param1: value1
+            - timestamp: 'asdafs'
               user: Fulanito
-              timestamp: 'asdafs'
-            - param2: value2
-              timestamp: '{0.timestamp}'
+              param1: value1
+            - timestamp: '{0.timestamp}'
               user: {0.user}
+              param2: value2
             """.format(self))
 
     def test_addAction_unparseable(self):
@@ -1357,9 +1357,9 @@ class InvestmentState_Test(unittest.TestCase):
             actions:
             - content: " : badcontent"
               type: unparseable
-            - param2: value2
-              timestamp: '{0.timestamp}'
+            - timestamp: '{0.timestamp}'
               user: {0.user}
+              param2: value2
             """.format(self))
 
     def test_addAction_notADict(self):
@@ -1371,9 +1371,9 @@ class InvestmentState_Test(unittest.TestCase):
             actions:
             - content: "badcontent"
               type: badcontent
-            - param2: value2
-              timestamp: '{0.timestamp}'
+            - timestamp: '{0.timestamp}'
               user: {0.user}
+              param2: value2
             """.format(self))
 
     def test_addAction_badRootKey(self):
@@ -1385,9 +1385,9 @@ class InvestmentState_Test(unittest.TestCase):
             actions:
             - content: "badroot: lala"
               type: badroot
-            - param2: value2
-              timestamp: '{0.timestamp}'
+            - timestamp: '{0.timestamp}'
               user: {0.user}
+              param2: value2
             """.format(self))
 
     def test_addAction_notInnerList(self):
@@ -1399,9 +1399,9 @@ class InvestmentState_Test(unittest.TestCase):
             actions:
             - content: "actions: notalist"
               type: badcontent
-            - param2: value2
-              timestamp: '{0.timestamp}'
+            - timestamp: '{0.timestamp}'
               user: {0.user}
+              param2: value2
             """.format(self))
 
 
