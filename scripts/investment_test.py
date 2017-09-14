@@ -501,6 +501,7 @@ class Investment_Test(unittest.TestCase):
             amortized_amount: 0.0
             move_line_id: false
             active: true
+            draft: true
             """.format(
                 id=id,
                 **self.personalData
@@ -538,7 +539,49 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
         self.assertFalse(id)
-    
+
+    def test__mark_as_invoiced(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+
+        self.Investment.mark_as_invoiced(id)
+
+        investment = ns(self.Investment.read(id, []))
+        log = investment.pop('log')
+        name = investment.pop('name')
+
+        self.assertLogEquals(log,
+            u'INVOICED: Facturada i remesada\n'
+            u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
+            u' Quantitat: 4000 €, IBAN: ES7712341234161234567890\n'
+            )
+
+        self.assertNsEqual(investment, """
+            id: {id}
+            member_id:
+            - {member_id}
+            - {surname}, {name}
+            order_date: '2017-01-01'
+            purchase_date: false
+            first_effective_date: false
+            last_effective_date: false
+            nshares: 40
+            amortized_amount: 0.0
+            move_line_id: false
+            active: true
+            draft: false
+            """.format(
+                id=id,
+                **self.personalData
+                ))
+
+    # TODO: mark_as_invoiced twice
+
     def test__mark_as_paid__singleInvestment(self):
     
         id = self.Investment.create_from_form(
@@ -549,6 +592,7 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
 
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2017-01-03')
 
         investment = ns(self.Investment.read(id, []))
@@ -558,6 +602,7 @@ class Investment_Test(unittest.TestCase):
 
         self.assertLogEquals(log,
             u'PAID: Pagament de 2000 € efectuat [None]\n'
+            u'INVOICED: Facturada i remesada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
@@ -575,6 +620,7 @@ class Investment_Test(unittest.TestCase):
             amortized_amount: 0.0
             move_line_id: false
             active: true
+            draft: false
             """.format(
                 id=id,
                 **self.personalData
@@ -598,6 +644,8 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
 
+        self.Investment.mark_as_invoiced(id1)
+        self.Investment.mark_as_invoiced(id2)
         self.Investment.mark_as_paid([id1,id2], '2017-01-03')
         
         result = self.Investment.read(
@@ -631,18 +679,22 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
 
+        self.Investment.mark_as_invoiced(id1)
+        self.Investment.mark_as_invoiced(id2)
         self.Investment.mark_as_paid([id1,id2], '2017-01-03')
         
         result = self.Investment.read([id1,id2], ['log'], order='id')
         
         self.assertLogEquals(result[0]['log'],
             u'PAID: Pagament de 2000 € efectuat [None]\n'
+            u'INVOICED: Facturada i remesada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
         
         self.assertLogEquals(result[1]['log'],
             u'PAID: Pagament de 2000 € efectuat [None]\n'
+            u'INVOICED: Facturada i remesada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.2,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
@@ -657,6 +709,7 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
 
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2017-01-03')
         with self.assertRaises(Exception) as ctx:
             self.Investment.mark_as_paid([id], '2017-01-03')
@@ -669,6 +722,7 @@ class Investment_Test(unittest.TestCase):
 
         self.assertLogEquals(result['log'],
             u'PAID: Pagament de 2000 € efectuat [None]\n'
+            u'INVOICED: Facturada i remesada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
@@ -683,6 +737,7 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
         )
 
+        self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2017-01-03')
         self.Investment.mark_as_unpaid([id])
 
@@ -694,6 +749,7 @@ class Investment_Test(unittest.TestCase):
         self.assertLogEquals(log,
             u'UNPAID: Devolució del pagament de 2000 € [None]\n'
             u'PAID: Pagament de 2000 € efectuat [None]\n'
+            u'INVOICED: Facturada i remesada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
                              )
@@ -711,6 +767,7 @@ class Investment_Test(unittest.TestCase):
             amortized_amount: 0.0
             move_line_id: false
             active: true
+            draft: false
             """.format(
             id=id,
             **self.personalData
@@ -768,6 +825,8 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
         )
 
+        self.Investment.mark_as_invoiced(id1)
+        self.Investment.mark_as_invoiced(id2)
         self.Investment.mark_as_paid([id1, id2], '2017-01-03')
         self.Investment.mark_as_unpaid([id1, id2])
 
@@ -776,6 +835,7 @@ class Investment_Test(unittest.TestCase):
         self.assertLogEquals(result[0]['log'],
             u'UNPAID: Devoluci\xf3 del pagament de 2000 € [None]\n'
             u'PAID: Pagament de 2000 € efectuat [None]\n'
+            u'INVOICED: Facturada i remesada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
@@ -783,6 +843,7 @@ class Investment_Test(unittest.TestCase):
         self.assertLogEquals(result[1]['log'],
             u'UNPAID: Devoluci\xf3 del pagament de 2000 € [None]\n'
             u'PAID: Pagament de 2000 € efectuat [None]\n'
+            u'INVOICED: Facturada i remesada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.2,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
@@ -796,6 +857,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
         )
+        self.Investment.mark_as_invoiced(id)
         with self.assertRaises(Exception) as ctx:
             self.Investment.mark_as_unpaid([id])
 
@@ -803,6 +865,7 @@ class Investment_Test(unittest.TestCase):
         log = investment.pop('log')
 
         self.assertLogEquals(log,
+            u'INVOICED: Facturada i remesada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
                              )
@@ -880,7 +943,7 @@ class Investment_Test(unittest.TestCase):
               name: 'Inversió {investment_name} '
               invoice_id:
               - {id}
-              - 'CI: {investment_name}-FACT {investment_name}-FACT' 
+              - 'CI: {investment_name}-FACT {investment_name}-FACT'
               price_unit: 100.0
               price_subtotal: 2000.0
               invoice_line_tax_id: []
@@ -1123,7 +1186,7 @@ class Investment_Test(unittest.TestCase):
               name: 'Amortització fins a 30/01/2018 de {investment_name} '
               invoice_id:
               - {id}
-              - 'SI: {investment_name}-AMOR{year} {investment_name}-AMOR{year}' 
+              - 'SI: {investment_name}-AMOR{year} {investment_name}-AMOR{year}'
               price_unit: 80.0
               price_subtotal: 80.0
               invoice_line_tax_id: []
@@ -1289,6 +1352,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.1',
             'ES7712341234161234567890',
         )
+        self.Investment.mark_as_invoiced(investment_id)
         self.Investment.mark_as_paid([investment_id], '2000-01-05')
         self.Investment.amortize('2002-01-06', [investment_id])
 
@@ -1296,6 +1360,7 @@ class Investment_Test(unittest.TestCase):
         self.assertLogEquals(investment['log'],
             u'AMORTIZATION: Generada amortització de 80.00 € pel 2002-01-05\n'
             u'PAID: Pagament de 2000 € efectuat [None]\n'
+            u'INVOICED: Facturada i remesada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
@@ -1308,6 +1373,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.1',
             'ES7712341234161234567890',
         )
+        self.Investment.mark_as_invoiced(investment_id)
         self.Investment.mark_as_paid([investment_id], '2000-01-05')
         self.Investment.amortize('2003-01-06', [investment_id])
 
@@ -1316,6 +1382,7 @@ class Investment_Test(unittest.TestCase):
             u'AMORTIZATION: Generada amortització de 80.00 € pel 2003-01-05\n'
             u'AMORTIZATION: Generada amortització de 80.00 € pel 2002-01-05\n'
             u'PAID: Pagament de 2000 € efectuat [None]\n'
+            u'INVOICED: Facturada i remesada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
