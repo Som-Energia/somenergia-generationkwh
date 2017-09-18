@@ -544,6 +544,19 @@ class Investment_Test(unittest.TestCase):
             "Invalid amount"
             )
 
+    def test__create_from_form__withBadIban(self):
+        with self.assertRaises(Exception) as ctx:
+            id = self.Investment.create_from_form(
+                self.personalData.partnerid,
+                '2017-01-01', # order_date
+                3000,
+                '10.10.23.123',
+                'ES77123412341612345678ZZ',
+                )
+        self.assertEqual(ctx.exception.faultCode,
+            "Wrong iban"
+            )
+
     def test__mark_as_invoiced(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
