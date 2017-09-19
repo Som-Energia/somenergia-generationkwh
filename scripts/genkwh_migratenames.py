@@ -680,7 +680,7 @@ def displayPartnersMovements(cr, partner_id):
         error(investmentToString(inv), partner_id=partner_id)
 
 def investmentToString(inv):
-    return ("    inv {activeyesno} {order_date_or_not} {purchase_date_or_not} {first_effective_date_or_not} {last_effective_date_or_not} {id} {name_or_not} {partner_name} {amount}"
+    return ("    inv {activeyesno} {draftyesno} {order_date_or_not} {purchase_date_or_not} {first_effective_date_or_not} {last_effective_date_or_not} {id} {name_or_not} {partner_name} {amount}"
         .format(
             order_date_or_not = inv.order_date or '____-__-__',
             purchase_date_or_not = inv.purchase_date or '____-__-__',
@@ -688,6 +688,7 @@ def investmentToString(inv):
             last_effective_date_or_not = inv.last_effective_date or '____-__-__',
             name_or_not = inv.name or 'GKWH_____',
             activeyesno = 'y' if inv.active else 'n',
+            draftyesno = 'y' if inv.draft else 'n',
             amount = inv.nshares*gkwh.shareValue,
             **inv))
 
@@ -1364,6 +1365,7 @@ def solveNormalCase(cr, investment, payment):
             generationkwh_investment as inv
         SET
             name = %(name)s,
+            draft = false,
             log = %(log)s,
             actions_log = %(actions_log)s,
             order_date = %(order_date)s
@@ -1413,6 +1415,7 @@ def solveRepaidCase(cr, investment, payment):
             generationkwh_investment as inv
         SET
             name = %(name)s,
+            draft = false,
             log = %(log)s,
             actions_log = %(actions_log)s,
             order_date = %(order_date)s
@@ -1453,6 +1456,7 @@ def solveUnnamedCases(cr, investment):
             generationkwh_investment as inv
         SET
             name = %(name)s,
+            draft = false,
             log = %(log)s,
             actions_log = %(actions_log)s,
             order_date = %(order_date)s
@@ -1508,6 +1512,7 @@ def solveInactiveInvestment(cr, payment):
             generationkwh_investment as inv
         SET
             name = %(name)s,
+            draft = false,
             log = %(log)s,
             actions_log = %(actions_log)s,
             order_date = %(order_date)s,
