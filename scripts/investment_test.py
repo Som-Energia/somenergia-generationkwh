@@ -520,16 +520,18 @@ class Investment_Test(unittest.TestCase):
             )
         self.assertFalse(id) # ??
 
-    @unittest.skip('Not implemented')
     def test__create_from_form__whenNotAMember(self):
-        id = self.Investment.create_from_form(
-            self.personalData.partnerid,
-            '2017-01-01', # order_date
-            4000,
-            '10.10.23.123',
-            'ES7712341234161234567890',
+        with self.assertRaises(Exception) as ctx:
+            id = self.Investment.create_from_form(
+                1, # magic number, not member
+                '2017-01-01', # order_date
+                4000,
+                '10.10.23.123',
+                'ES7712341234161234567890',
+                )
+        self.assertEqual(ctx.exception.faultCode,
+            "Not a member"
             )
-        self.assertFalse(id) # ??
 
     def test__create_from_form__withNonDivisibleAmount(self):
         with self.assertRaises(Exception) as ctx:
