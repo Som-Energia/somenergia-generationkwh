@@ -30,11 +30,12 @@ class ProductionLoader_Test(unittest.TestCase):
         self.setUpAggregator()
         self.setUpMeasurements()
         self.setUpTemp()
+        self.clearRemainders() # db
 
     def tearDown(self):
-        #self.clearAggregator() # db
+        self.clearAggregator() # db
         self.clearMeasurements()
-        #self.clearRemainders() # db
+        self.clearRemainders() # db
         self.clearTemp()
         self.erp.rollback()
         self.erp.close()
