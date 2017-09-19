@@ -92,6 +92,10 @@ class ProductionLoader(object):
 
 
     def computeAvailableRights(self):
+        """
+        Recompute pending available rights whenever we have new production
+        readings.
+        """
         remainders = self.remainders.lastRemainders()
         recomputeStart, recomputeStop = self._recomputationInterval(remainders)
         aggregatedProduction = self.productionAggregator.get_kwh(recomputeStart, recomputeStop)

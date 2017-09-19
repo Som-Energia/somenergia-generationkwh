@@ -20,6 +20,13 @@ def config(filename):
         import dbconfig
     return dbconfig
 
+def erp():
+    if hasattr(erp,'value'):
+        return erp.value
+    dbconfig = config(args.get('config', None))
+    erp.value = erppeek.Client(**dbconfig.erppeek)
+    return erp.value
+
 
 def doPlot(columns, first, last):
     from pyqtgraph.Qt import QtGui, QtCore
@@ -67,26 +74,26 @@ def doPlot(columns, first, last):
 
 def compute(member, first, last, output=None, idmode='memberid', shares=None, show=False, **args):
     dbconfig = config(args.get('config', None))
-    erp = erppeek.Client(**dbconfig.erppeek)
-    member = preprocessMembers(erp,[member], idmode=idmode)[0]
+    O = erp()
+    member = preprocessMembers(O,[member], idmode=idmode)[0]
     first, last = str(first), str(last)
     columns=[]
     if args.get('dumpMemberShares',False):
         columns.append(['memberShares']+
-            erp.GenerationkwhTesthelper.member_shares(
+            O.GenerationkwhTesthelper.member_shares(
                 member, first, last))
     if args.get('dumpRights',True):
         columns.append(['rights']+
-            erp.GenerationkwhTesthelper.rights_kwh(
+            O.GenerationkwhTesthelper.rights_kwh(
                 member, first, last))
     if args.get('dumpUsage',True):
         columns.append(['usage']+
-            erp.GenerationkwhTesthelper.usage(
+            O.GenerationkwhTesthelper.usage(
                 member, first, last))
     if shares:
         for n in shares:
             columns.append(['{}share'.format(n)]+
-                erp.GenerationkwhTesthelper.rights_per_share(
+                O.GenerationkwhTesthelper.rights_per_share(
                     n, first, last))
 
     return columns
@@ -241,18 +248,18 @@ def parseArguments():
 
     return parser.parse_args(namespace=ns())
 
-def preprocessMembers(erp,members=None,idmode=None, all=None):
+def preprocessMembers(O,members=None,idmode=None, all=None):
     """Turns members in which ever format to the ones required by commands"""
 
     if all:
         return c.GenerationkwhAssignment.unassignedInvestors()
 
     if idmode=="partner":
-        idmap = dict(erp.GenerationkwhDealer.get_members_by_partners(members))
+        idmap = dict(O.GenerationkwhDealer.get_members_by_partners(members))
         return idmap.values()
 
     if idmode=="code":
-        idmap = dict(erp.GenerationkwhDealer.get_members_by_codes(members))
+        idmap = dict(O.GenerationkwhDealer.get_members_by_codes(members))
         return idmap.values()
 
     return members
