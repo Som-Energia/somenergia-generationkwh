@@ -544,6 +544,32 @@ class Investment_Test(unittest.TestCase):
             "Invalid amount"
             )
 
+    def test__create_from_form__withNegativeAmount(self):
+        with self.assertRaises(Exception) as ctx:
+            id = self.Investment.create_from_form(
+                self.personalData.partnerid,
+                '2017-01-01', # order_date
+                -400,
+                '10.10.23.123',
+                'ES7712341234161234567890',
+                )
+        self.assertEqual(ctx.exception.faultCode,
+            "Invalid amount"
+            )
+
+    def test__create_from_form__withZeroAmount(self):
+        with self.assertRaises(Exception) as ctx:
+            id = self.Investment.create_from_form(
+                self.personalData.partnerid,
+                '2017-01-01', # order_date
+                0,
+                '10.10.23.123',
+                'ES7712341234161234567890',
+                )
+        self.assertEqual(ctx.exception.faultCode,
+            "Invalid amount"
+            )
+
     def test__create_from_form__withBadIban(self):
         with self.assertRaises(Exception) as ctx:
             id = self.Investment.create_from_form(
