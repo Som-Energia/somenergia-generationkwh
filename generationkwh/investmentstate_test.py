@@ -143,8 +143,9 @@ class InvestmentState_Test(unittest.TestCase):
         inv = self.setupInvestment(
             name = "GKWH00069",
             nominal_amount = 200.,
-            paid_amount = 0.,
+            purchase_date = False,
             log = 'my log',
+            draft=True,
             )
         inv.correct(
             from_amount= 200.0,
@@ -156,6 +157,8 @@ class InvestmentState_Test(unittest.TestCase):
             name: GKWH00069
             nominal_amount: 300.0
             paid_amount: 0.0
+            purchase_date: False
+            draft: True
             log: '[2000-01-01 00:00:00.123435 MyUser] CORRECTED: Quantitat canviada abans del
               pagament de 200.0 € a 300.0 €
 
@@ -195,10 +198,11 @@ class InvestmentState_Test(unittest.TestCase):
             "Motiu: lo dice el jefe\n"
             u"previous value\n")
 
-    def test_erpChanges_changinAmounts(self):
+    def test_erpChanges_changingAmounts(self):
         inv = self.setupInvestment(
             nominal_amount = 100,
-            paid_amount = 0,
+            purchase_date=False,
+            draft=True,
             )
 
         inv.correct(
@@ -828,6 +832,7 @@ class InvestmentState_Test(unittest.TestCase):
             last_effective_date: 2001-08-01
             active: True
             paid_amount: 0.0
+            amortized_amount: 300.0
             """,
             u'DIVESTED: Desinversió total, tornats 300.0 € [666]\n'
         )
@@ -862,6 +867,7 @@ class InvestmentState_Test(unittest.TestCase):
             last_effective_date: 2000-08-01
             active: False
             paid_amount: 0.0
+            amortized_amount: 300.0
             """,
             u'DIVESTED: Desinversió total, tornats 300.0 € [666]\n'
         )
@@ -878,7 +884,7 @@ class InvestmentState_Test(unittest.TestCase):
             ))
 
 
-    def _test_divest_amortized(self):
+    def test_divest_amortized(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
             amortized_amount = 12.0,
@@ -897,14 +903,15 @@ class InvestmentState_Test(unittest.TestCase):
             last_effective_date: 2001-08-01
             active: True
             paid_amount: 0.0
+            amortized_amount: 300.0
             """,
-            u'DIVESTED: Desinversió total, tornats 300.0 € [666]\n'
+            u'DIVESTED: Desinversió total, tornats 288.0 € [666]\n'
         )
         self.assertActionsEqual(inv, u"""
             type: divest
             user: {user}
             timestamp: '{timestamp}'
-            amount: 300.0
+            amount: 288.0
             move_line_id: 666
             date: 2001-08-01
             """.format(

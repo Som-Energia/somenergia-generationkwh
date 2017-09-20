@@ -325,11 +325,16 @@ class InvestmentState(object):
             move_line_id=move_line_id,
             amount = amount,
             )
-        if self.nominal_amount != self.amortized_amount + amount:
+        amortized_amount = self.amortized_amount + amount
+        if self.nominal_amount != amortized_amount:
             raise Exception(
-                u"Divesting wrong amount, tried 300.0 €, unamortized 288.0 €")
+                u"Divesting wrong amount, tried {amount} €, unamortized {should} €"
+                .format(
+                    amount = amount,
+                    should = self.nominal_amount - self.amortized_amount,
+                )) # TODO format
 
-        paid_amount = self.paid_amount-amount
+        paid_amount = self.paid_amount-amount-self.amortized_amount
         if paid_amount:
             raise Exception(
                 u"Paid amount after divestment should be 0 but was {} €"
@@ -338,6 +343,7 @@ class InvestmentState(object):
             last_effective_date = date,
             active = self.hasEffectivePeriod(self.first_effective_date, date),
             paid_amount = paid_amount,
+            amortized_amount = self.amortized_amount + amount,
             log=log,
             actions_log = self.addAction(
                 type = 'divest',
@@ -468,7 +474,7 @@ class InvestmentState(object):
             raise Exception(
                 "Correction not matching the 'from' amount")
         # TODO: Not enough, also if it has unpaid invoices
-        if self.paid_amount:
+        if self.purchase_date:
             raise Exception("Correction can not be done with paid investments")
         log = self._log(
             u'CORRECTED: Quantitat canviada abans del pagament '
@@ -496,7 +502,7 @@ class InvestmentState(object):
         In modern investments you should split it to generate
         two brand new investments and then fully divest one of them.
         """
-        if not self.paid_amount:
+        if not self.purchase_date:
             raise Exception(
                 "Partial divestment can be only applied to paid investments, "
                 "try 'correct'")
@@ -529,9 +535,6 @@ class InvestmentState(object):
         refuses to pay it or cannot be contacted.
         """
         # TODO: if invoiced but still unpaid cannot be cancelled either
-        if self.paid_amount:
-            raise Exception(
-                "Only unpaid investments can be cancelled")
 
         if self.purchase_date:
             raise Exception(
