@@ -1558,8 +1558,8 @@ def showUnusedMovements(cr):
 def deleteNullNamedInvestments(cr):
     step("Managing Unnamed investments")
     step(" Generating the null named investments list")
-    csv_file_name = "DeletedNullNamedInvestments{0}.log".format(
-            datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+    csv_file_name = "DeletedNullNamedInvestments-{0}.log".format(
+            datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%S") if '--doit' in sys.argv else 'Never'
         )
 
     step(" Storing Null named investments at {0}".format(csv_file_name))
