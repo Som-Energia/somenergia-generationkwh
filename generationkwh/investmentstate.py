@@ -315,8 +315,9 @@ class InvestmentState(object):
         # TODO: Consider amortization
         # TODO: What about penalties
         log = self._log(
-            u'DIVESTED: Desinversió total [{move_line_id}]\n',
+            u'DIVESTED: Desinversió total, tornats {amount} € [{move_line_id}]\n',
             move_line_id=move_line_id,
+            amount = amount,
             )
         paid_amount = self.paid_amount-amount
         if paid_amount:

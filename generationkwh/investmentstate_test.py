@@ -814,6 +814,7 @@ class InvestmentState_Test(unittest.TestCase):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 300.0,
+            amortized_amount = 0.0,
             first_effective_date = isodate("2000-01-01"),
             last_effective_date = isodate("2024-01-01"),
             draft = False,
@@ -829,7 +830,7 @@ class InvestmentState_Test(unittest.TestCase):
             active: True
             paid_amount: 0.0
             """,
-            u'DIVESTED: Desinversió total [666]\n'
+            u'DIVESTED: Desinversió total, tornats 300.0 € [666]\n'
         )
         self.assertActionsEqual(inv, u"""
             type: divest
@@ -847,6 +848,7 @@ class InvestmentState_Test(unittest.TestCase):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 300.0,
+            amortized_amount = 0.0,
             first_effective_date = isodate("2001-01-01"),
             last_effective_date = isodate("2025-01-01"),
             draft = False,
@@ -862,7 +864,7 @@ class InvestmentState_Test(unittest.TestCase):
             active: False
             paid_amount: 0.0
             """,
-            u'DIVESTED: Desinversió total [666]\n'
+            u'DIVESTED: Desinversió total, tornats 300.0 € [666]\n'
         )
         self.assertActionsEqual(inv, u"""
             type: divest
@@ -881,6 +883,7 @@ class InvestmentState_Test(unittest.TestCase):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
             paid_amount = 0.0,
+            amortized_amount = 0.0,
             first_effective_date = None,
             last_effective_date = None,
             draft = False,
