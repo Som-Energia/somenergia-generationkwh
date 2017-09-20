@@ -560,6 +560,8 @@ class InvestmentState(object):
         """
         Annotates an amortization for the given amount at the given date
         """
+        if not self.purchase_date:
+            raise InvestmentStateError(u"Amortizing an unpaid investment")
         return ns(
             amortized_amount = to_be_amortized + self.amortized_amount,
             log = self._log(

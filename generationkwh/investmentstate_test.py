@@ -1411,6 +1411,7 @@ class InvestmentState_Test(unittest.TestCase):
 
     def test_amortize_noPreviousAmortization(self):
         inv = self.setupInvestment(
+            purchase_date=isodate('2016-01-01'),
             amortized_amount = 0.,
         )
 
@@ -1438,6 +1439,7 @@ class InvestmentState_Test(unittest.TestCase):
 
     def test_amortize_withPreviousAmortization(self):
         inv = self.setupInvestment(
+            purchase_date = isodate('2018-01-01'),
             amortized_amount = 40.,
         )
 
@@ -1453,6 +1455,19 @@ class InvestmentState_Test(unittest.TestCase):
             )
 
 
+    def test_amortize_unpaid(self):
+        inv = self.setupInvestment(
+            purchase_date=False,
+            amortized_amount = 1000.0,
+        )
+
+        with self.assertRaises(StateError) as ctx:
+            inv.amortize(
+                date=isodate('2018-01-01'),
+                to_be_amortized=40.0,
+            )
+        self.assertEqual(ctx.exception.message,
+            u"Amortizing an unpaid investment")
 
     def test_migrate(self):
         inv = self.setupInvestment(
