@@ -680,7 +680,7 @@ def displayPartnersMovements(cr, partner_id):
         error(investmentToString(inv), partner_id=partner_id)
 
 def investmentToString(inv):
-    return ("    inv {activeyesno} {draftyesno} {order_date_or_not} {purchase_date_or_not} {first_effective_date_or_not} {last_effective_date_or_not} {id} {name_or_not} {partner_name} {amount}"
+    return ("    inv {activeyesno} {draftyesno} {order_date_or_not} {purchase_date_or_not} {first_effective_date_or_not} {last_effective_date_or_not} {id} {name_or_not} {partner_name} {amount}{amortized}"
         .format(
             order_date_or_not = inv.order_date or '____-__-__',
             purchase_date_or_not = inv.purchase_date or '____-__-__',
@@ -690,6 +690,7 @@ def investmentToString(inv):
             activeyesno = 'y' if inv.active else 'n',
             draftyesno = 'y' if inv.draft else 'n',
             amount = inv.nshares*gkwh.shareValue,
+            amortized = " amortized {:.0f}".format(inv.amortized_amount) if inv.amortized_amount else '',
             **inv))
 
 def displayAllInvestments(cr):
@@ -1331,6 +1332,9 @@ def checkAttributes(real, computed):
         check(computed.paid_amount == 0,
             "Expired should have balance 0 and has {} €",
             computed.paid_amount)
+        check(computed.amortized_amount == computed.nominal_amount,
+            "Amortized amount {} € should equal to the nominal amount {} €",
+            computed.amortized_amount, computed.nominal_amount)
 
     return check.failed
 
@@ -1368,12 +1372,14 @@ def solveNormalCase(cr, investment, payment):
             draft = false,
             log = %(log)s,
             actions_log = %(actions_log)s,
+            amortized_amount = %(amortized_amount)s,
             order_date = %(order_date)s
         WHERE
             inv.id = %(id)s
         """, dict(
             id = investment.id,
             actions_log = attributes.actions_log,
+            amortized_amount = attributes.amortized_amount,
             order_date = payment.order_date,
             name = payment.ref,
             log = log,
@@ -1418,12 +1424,14 @@ def solveRepaidCase(cr, investment, payment):
             draft = false,
             log = %(log)s,
             actions_log = %(actions_log)s,
+            amortized_amount = %(amortized_amount)s,
             order_date = %(order_date)s
         WHERE
             inv.id = %(id)s
         """, dict(
             id = investment.id,
             actions_log = attributes.actions_log,
+            amortized_amount = attributes.amortized_amount,
             order_date = payment.order_date,
             name = payment.ref,
             log = log,
@@ -1459,11 +1467,13 @@ def solveUnnamedCases(cr, investment):
             draft = false,
             log = %(log)s,
             actions_log = %(actions_log)s,
+            amortized_amount = %(amortized_amount)s,
             order_date = %(order_date)s
         WHERE
             inv.id = %(investment)s
     """, dict(
         actions_log = attributes.actions_log,
+        amortized_amount = attributes.amortized_amount,
         order_date = attributes.order_date,
         name = name,
         log = log,
@@ -1515,12 +1525,14 @@ def solveInactiveInvestment(cr, payment):
             draft = false,
             log = %(log)s,
             actions_log = %(actions_log)s,
+            amortized_amount = %(amortized_amount)s,
             order_date = %(order_date)s,
             purchase_date = CASE WHEN %(has_purchase_date)s THEN purchase_date ELSE NULL END
         WHERE
             inv.id = %(investment)s
     """, dict(
         actions_log = attributes.actions_log,
+        amortized_amount = attributes.amortized_amount,
         order_date = payment.order_date,
         investment = investment.id,
         name = investment.name,

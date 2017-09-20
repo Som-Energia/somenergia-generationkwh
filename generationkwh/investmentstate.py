@@ -378,6 +378,7 @@ class InvestmentState(object):
             last_effective_date = date,
             active = self.hasEffectivePeriod(self.first_effective_date, date),
             paid_amount = self.paid_amount-amount,
+            amortized_amount = self.nominal_amount,
             log=log,
             actions_log = self.addAction(
                 type = 'transferout',

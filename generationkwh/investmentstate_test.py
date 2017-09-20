@@ -236,7 +236,7 @@ class InvestmentState_Test(unittest.TestCase):
             #paid_amount: 100 # Excpect this one to be removed
             purchase_date: 2016-05-01
             first_effective_date: 2017-05-01
-            last_effective_date: 2041-05-01 # TODO Add this
+            last_effective_date: 2041-05-01
             """)
 
     def test_addAction_firstAction(self):
@@ -635,7 +635,7 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertChangesEqual(inv, """\
             purchase_date: 2016-05-01
             first_effective_date: 2017-05-01
-            last_effective_date: 2041-05-01 # TODO Add this
+            last_effective_date: 2041-05-01
             paid_amount: 300.0
             """,
             u"PAID: Pagament de 300 € efectuat "
@@ -977,6 +977,7 @@ class InvestmentState_Test(unittest.TestCase):
             last_effective_date: 2006-08-01
             active: True
             paid_amount: 0.0
+            amortized_amount: 300.0
             """,
             u'DIVESTEDBYTRANSFER: Traspas cap a '
             u'Palotes, Perico amb codi GKWH00069 [666]\n'
@@ -1018,6 +1019,7 @@ class InvestmentState_Test(unittest.TestCase):
             last_effective_date: 2000-08-01
             active: False
             paid_amount: 0.0
+            amortized_amount: 300.0
             """,
             u'DIVESTEDBYTRANSFER: Traspas cap a '
             u'Palotes, Perico amb codi GKWH00069 [666]\n'
