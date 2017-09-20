@@ -17,6 +17,9 @@ def action(f, self, *args, **kwds):
     self._vals.update(result)
     return result
 
+class InvestmentStateError(Exception):
+    pass
+
 class InvestmentState(object):
     """
     InvestmentState keeps the state of an investment
@@ -82,7 +85,7 @@ class InvestmentState(object):
     def _checkAttribs(self, **kwds):
         for key in kwds:
             if key in self.allowedParams: continue
-            raise Exception(
+            raise InvestmentStateError(
                 "Investments have no '{}' attribute".format(key))
 
     def addAction(self, **kwds):
@@ -204,7 +207,7 @@ class InvestmentState(object):
     @action
     def invoice(self):
         if not self.draft:
-            raise Exception("Already invoiced")
+            raise InvestmentStateError("Already invoiced")
 
         return ns(
             draft=False,
@@ -234,7 +237,7 @@ class InvestmentState(object):
 
         if self.draft:
             # TODO: Concrete Exception class
-            raise Exception("Not invoiced yet")
+            raise InvestmentStateError("Not invoiced yet")
 
         paid_amount = self.paid_amount + amount
 
@@ -246,7 +249,7 @@ class InvestmentState(object):
 
         if amount != self.nominal_amount:
             # TODO: Concrete Exception class
-            raise Exception(
+            raise InvestmentStateError(
                 "Wrong payment, expected {expected}, given {given}"
                 .format(
                     expected=self.nominal_amount,
@@ -255,7 +258,7 @@ class InvestmentState(object):
 
         if self.paid_amount:
             # TODO: Concrete Exception class
-            raise Exception("Already paid")
+            raise InvestmentStateError("Already paid")
 
         return ns(
             log=log,
@@ -285,14 +288,14 @@ class InvestmentState(object):
             )
 
         if self.draft:
-            raise Exception("Not invoiced yet")
+            raise InvestmentStateError("Not invoiced yet")
 
         # TODO: also purchase date
         if not self.paid_amount:
-            raise Exception("No pending amount to unpay")
+            raise InvestmentStateError("No pending amount to unpay")
 
         if amount != self.paid_amount:
-            raise Exception(
+            raise InvestmentStateError(
                 "Unpaying wrong amount, was {given} expected {expected}"
                 .format(
                     given=amount,
@@ -327,7 +330,7 @@ class InvestmentState(object):
             )
         amortized_amount = self.amortized_amount + amount
         if self.nominal_amount != amortized_amount:
-            raise Exception(
+            raise InvestmentStateError(
                 u"Divesting wrong amount, tried {amount} €, unamortized {should} €"
                 .format(
                     amount = amount,
@@ -336,7 +339,7 @@ class InvestmentState(object):
 
         paid_amount = self.paid_amount-amount-self.amortized_amount
         if paid_amount:
-            raise Exception(
+            raise InvestmentStateError(
                 u"Paid amount after divestment should be 0 but was {} €"
                 .format(paid_amount))
         return ns(
@@ -372,7 +375,7 @@ class InvestmentState(object):
             to_name = to_name,
             )
         if not self.purchase_date:
-            raise Exception("Only paid investments can be transferred")
+            raise InvestmentStateError("Only paid investments can be transferred")
 
         return ns(
             last_effective_date = date,
@@ -413,7 +416,7 @@ class InvestmentState(object):
             ))
 
         if not old.purchase_date:
-            raise Exception("Only paid investments can be transferred")
+            raise InvestmentStateError("Only paid investments can be transferred")
 
         first_effective_date = old.first_effective_date
         if date >= first_effective_date:
@@ -443,7 +446,7 @@ class InvestmentState(object):
         """
         for param in kwds:
             if param in self.allowedParams: continue
-            raise Exception(
+            raise InvestmentStateError(
                 "Bad parameter changed in pact '{}'"
                 .format(param))
 
@@ -472,11 +475,11 @@ class InvestmentState(object):
         THIS ACTION IS JUST FOR MIGRATION.
         """
         if self.nominal_amount != from_amount:
-            raise Exception(
+            raise InvestmentStateError(
                 "Correction not matching the 'from' amount")
         # TODO: Not enough, also if it has unpaid invoices
         if self.purchase_date:
-            raise Exception("Correction can not be done with paid investments")
+            raise InvestmentStateError("Correction can not be done with paid investments")
         log = self._log(
             u'CORRECTED: Quantitat canviada abans del pagament '
             u'de {oldamount} € a {newamount} €\n',
@@ -504,7 +507,7 @@ class InvestmentState(object):
         two brand new investments and then fully divest one of them.
         """
         if not self.purchase_date:
-            raise Exception(
+            raise InvestmentStateError(
                 "Partial divestment can be only applied to paid investments, "
                 "try 'correct'")
 
@@ -538,7 +541,7 @@ class InvestmentState(object):
         # TODO: if invoiced but still unpaid cannot be cancelled either
 
         if self.purchase_date:
-            raise Exception(
+            raise InvestmentStateError(
                 "Only unpaid investments can be cancelled")
 
         log = self._log(

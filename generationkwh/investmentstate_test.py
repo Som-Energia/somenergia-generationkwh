@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from generationkwh.investmentstate import InvestmentState
+from generationkwh.investmentstate import (
+    InvestmentState,
+    InvestmentStateError as StateError,
+    )
 import unittest
 from yamlns import namespace as ns
 from .isodates import isodate
@@ -83,7 +86,7 @@ class InvestmentState_Test(unittest.TestCase):
             """)
 
     def test_init_withBadParams(self):
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             self.setupInvestment(
                 badParameter = 'value',
                 )
@@ -610,7 +613,7 @@ class InvestmentState_Test(unittest.TestCase):
         inv = self.setupInvestment(
             draft = False,
         )
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             inv.invoice()
         self.assertEqual(ctx.exception.message,
             "Already invoiced")
@@ -660,7 +663,7 @@ class InvestmentState_Test(unittest.TestCase):
             draft = False,
         )
 
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             inv.pay(
                 date = isodate('2016-05-01'),
                 amount = 300.0,
@@ -683,7 +686,7 @@ class InvestmentState_Test(unittest.TestCase):
             draft = False,
         )
 
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             inv.pay(
                 date = isodate('2016-05-01'),
                 amount = 400.0, # Wrong!
@@ -706,7 +709,7 @@ class InvestmentState_Test(unittest.TestCase):
             draft = True, # Wrong!!
         )
 
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             inv.pay(
                 date = isodate('2016-05-01'),
                 amount = 300.0, # Wrong!
@@ -758,7 +761,7 @@ class InvestmentState_Test(unittest.TestCase):
             draft = False,
         )
 
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             inv.unpay(
                 amount = 300.0,
                 move_line_id = 666,
@@ -778,7 +781,7 @@ class InvestmentState_Test(unittest.TestCase):
             draft = False,
         )
 
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             inv.unpay(
                 amount = 200.0,
                 move_line_id = 666,
@@ -798,7 +801,7 @@ class InvestmentState_Test(unittest.TestCase):
             draft = True,
         )
 
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             inv.unpay(
                 amount = 300.0,
                 move_line_id = 666,
@@ -928,7 +931,7 @@ class InvestmentState_Test(unittest.TestCase):
             last_effective_date = isodate("2025-01-01"),
             draft = False,
         )
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             inv.divest(
                 date = isodate("2000-08-01"),
                 amount = 300.,
@@ -946,7 +949,7 @@ class InvestmentState_Test(unittest.TestCase):
             last_effective_date = False,
             draft = False,
         )
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             inv.divest(
                 date = isodate("2000-08-01"),
                 amount = 300.,
@@ -1050,7 +1053,7 @@ class InvestmentState_Test(unittest.TestCase):
             draft = False,
         )
 
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             inv.emitTransfer(
                 date = isodate("2000-08-01"),
                 move_line_id = 666,
@@ -1176,7 +1179,7 @@ class InvestmentState_Test(unittest.TestCase):
             draft = False,
             )
         inv = self.setupInvestment()
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             inv.receiveTransfer(
                 name = 'GKWH00666',
                 date = isodate("2000-08-01"),
@@ -1263,7 +1266,7 @@ class InvestmentState_Test(unittest.TestCase):
             nominal_amount = 300.0,
         )
 
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             inv.pact(
                 date = isodate('2016-05-01'),
                 comment = "lo dice el jefe",
@@ -1306,7 +1309,7 @@ class InvestmentState_Test(unittest.TestCase):
             purchase_date = False,
         )
 
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             inv.correct(
                 from_amount= 100.0,
                 to_amount = 300.0,
@@ -1321,7 +1324,7 @@ class InvestmentState_Test(unittest.TestCase):
             purchase_date = isodate('2000-01-01'),
         )
 
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             inv.correct(
                 from_amount= 200.0,
                 to_amount = 300.0,
@@ -1362,7 +1365,7 @@ class InvestmentState_Test(unittest.TestCase):
             purchase_date = False,
         )
 
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             inv.partial(
                 amount= 100.0,
                 move_line_id = 666,
@@ -1396,7 +1399,7 @@ class InvestmentState_Test(unittest.TestCase):
             nominal_amount = 200.0,
             purchase_date = isodate('2001-01-02'),
             )
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(StateError) as ctx:
             inv.cancel()
         self.assertEqual(ctx.exception.message,
             "Only unpaid investments can be cancelled")
