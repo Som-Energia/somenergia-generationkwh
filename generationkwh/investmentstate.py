@@ -191,6 +191,7 @@ class InvestmentState(object):
             purchase_date = None,
             first_effective_date = None,
             last_effective_date = None,
+            amortized_amount = Decimal("0.0"),
             active = True,
             nominal_amount = amount,
             paid_amount = Decimal("0.0"),

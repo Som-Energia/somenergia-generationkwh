@@ -516,6 +516,7 @@ class InvestmentState_Test(unittest.TestCase):
             last_effective_date: null
             active: True
             nominal_amount: 300.0
+            amortized_amount: 0.0
             paid_amount: 0.0
             draft: True
             """)
@@ -557,6 +558,7 @@ class InvestmentState_Test(unittest.TestCase):
             last_effective_date: null
             active: True
             nominal_amount: 300.0
+            amortized_amount: 0.0
             paid_amount: 0.0
             draft: True
             """)
