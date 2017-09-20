@@ -1066,6 +1066,7 @@ class InvestmentState_Test(unittest.TestCase):
             purchase_date = isodate("2000-01-02"),
             first_effective_date = isodate("2001-01-02"),
             last_effective_date = isodate("2025-01-02"),
+            amortized_amount = 0.0,
             draft = False,
             )
         inv.receiveTransfer(
@@ -1086,6 +1087,7 @@ class InvestmentState_Test(unittest.TestCase):
             active: True
             paid_amount: 300.0
             nominal_amount: 300.0
+            amortized_amount: 0.0
             draft: false
             """,
             u'CREATEDBYTRANSFER: Creada per traspàs de '
@@ -1112,6 +1114,7 @@ class InvestmentState_Test(unittest.TestCase):
             purchase_date = isodate("2000-01-02"),
             first_effective_date = isodate("2001-01-02"),
             last_effective_date = isodate("2025-01-02"),
+            amortized_amount = 0.0,
             draft = False,
             )
         inv = self.setupInvestment()
@@ -1133,6 +1136,7 @@ class InvestmentState_Test(unittest.TestCase):
             active: True
             paid_amount: 300.0
             nominal_amount: 300.0
+            amortized_amount: 0.0
             draft: False
             """,
             u'CREATEDBYTRANSFER: Creada per traspàs de '
