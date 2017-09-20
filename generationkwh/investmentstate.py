@@ -45,6 +45,9 @@ class InvestmentState(object):
 
     def __init__(self, user=None, timestamp=None, **values):
         self._checkAttribs(**values)
+        if 'purchase_date' in values and 'nominal_amount' in values:
+            values.setdefault('paid_amount',
+                values['nominal_amount'] if values['purchase_date'] else 0.0)
         values = ns(values)
         self._prev=ns(values)
         self._vals=ns(values)
@@ -232,8 +235,9 @@ class InvestmentState(object):
             # TODO: Concrete Exception class
             raise Exception("Not invoiced yet")
 
-        paid_amount = self._vals.paid_amount + amount
+        paid_amount = self.paid_amount + amount
 
+        # TODO: Is this still useful?? Remove it!!
         self._changed.update(
             log=log,
             paid_amount = paid_amount,
@@ -251,6 +255,7 @@ class InvestmentState(object):
         if self.paid_amount:
             # TODO: Concrete Exception class
             raise Exception("Already paid")
+
         return ns(
             log=log,
             paid_amount = paid_amount,
@@ -319,6 +324,10 @@ class InvestmentState(object):
             move_line_id=move_line_id,
             amount = amount,
             )
+        if self.nominal_amount != self.amortized_amount + amount:
+            raise Exception(
+                u"Divesting wrong amount, tried 300.0 €, unamortized 288.0 €")
+
         paid_amount = self.paid_amount-amount
         if paid_amount:
             raise Exception(

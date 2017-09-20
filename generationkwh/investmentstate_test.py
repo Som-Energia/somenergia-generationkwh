@@ -93,7 +93,6 @@ class InvestmentState_Test(unittest.TestCase):
     def test_getattr(self):
         inv = self.setupInvestment(
             nominal_amount = 100,
-            paid_amount = 0,
             )
         self.assertEqual(inv.nominal_amount, 100)
 
@@ -101,7 +100,6 @@ class InvestmentState_Test(unittest.TestCase):
     def test_getattr_badattr(self):
         inv = self.setupInvestment(
             nominal_amount = 100,
-            paid_amount = 0,
             )
         with self.assertRaises(AttributeError) as ctx:
             inv.badattrib
@@ -111,12 +109,11 @@ class InvestmentState_Test(unittest.TestCase):
     def test_setattr_fails(self):
         inv = self.setupInvestment(
             nominal_amount = 100,
-            paid_amount = 0,
             )
         with self.assertRaises(AttributeError) as ctx:
-            inv.paid_amount = 5
+            inv.nominal_amount = 5
         self.assertEqual(ctx.exception.message,
-            "paid_amount")
+            "nominal_amount")
 
     def test_values_takesInitialValues(self):
         inv = self.setupInvestment(
@@ -620,7 +617,7 @@ class InvestmentState_Test(unittest.TestCase):
     def test_pay(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 0.0,
+            purchase_date = False,
             draft = False,
         )
 
@@ -653,7 +650,7 @@ class InvestmentState_Test(unittest.TestCase):
     def test_pay_alreadyPaid(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 300.0,
+            purchase_date = '2000-01-01',
             draft = False,
         )
 
@@ -676,7 +673,7 @@ class InvestmentState_Test(unittest.TestCase):
     def test_pay_wrongAmount(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 0.0,
+            purchase_date = False,
             draft = False,
         )
 
@@ -699,7 +696,7 @@ class InvestmentState_Test(unittest.TestCase):
     def test_pay_draft(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 0.0,
+            purchase_date = False,
             draft = True, # Wrong!!
         )
 
@@ -721,7 +718,7 @@ class InvestmentState_Test(unittest.TestCase):
     def test_unpay(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 300.0,
+            purchase_date = '2000-01-01',
             draft = False,
         )
 
@@ -751,7 +748,7 @@ class InvestmentState_Test(unittest.TestCase):
     def test_unpay_unpaid(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 0.0,
+            purchase_date = False,
             draft = False,
         )
 
@@ -771,7 +768,7 @@ class InvestmentState_Test(unittest.TestCase):
     def test_unpay_wrongAmount(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 300.0,
+            purchase_date = '2000-01-01',
             draft = False,
         )
 
@@ -791,7 +788,7 @@ class InvestmentState_Test(unittest.TestCase):
     def test_unpay_draft(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 0.0,
+            purchase_date = False,
             draft = True,
         )
 
@@ -813,8 +810,8 @@ class InvestmentState_Test(unittest.TestCase):
     def test_divest_effective(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 300.0,
             amortized_amount = 0.0,
+            purchase_date = isodate("2000-01-01"),
             first_effective_date = isodate("2000-01-01"),
             last_effective_date = isodate("2024-01-01"),
             draft = False,
@@ -847,7 +844,7 @@ class InvestmentState_Test(unittest.TestCase):
     def test_divest_beforeEffectiveDate(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 300.0,
+            purchase_date = isodate("2001-01-01"),
             amortized_amount = 0.0,
             first_effective_date = isodate("2001-01-01"),
             last_effective_date = isodate("2025-01-01"),
@@ -879,13 +876,65 @@ class InvestmentState_Test(unittest.TestCase):
             ))
 
 
+    def _test_divest_amortized(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            amortized_amount = 12.0,
+            purchase_date = isodate("2000-01-01"),
+            first_effective_date = isodate("2000-01-01"),
+            last_effective_date = isodate("2024-01-01"),
+            draft = False,
+        )
+
+        inv.divest(
+            date = isodate("2001-08-01"),
+            move_line_id = 666,
+            amount = 288.,
+        )
+        self.assertChangesEqual(inv, """\
+            last_effective_date: 2001-08-01
+            active: True
+            paid_amount: 0.0
+            """,
+            u'DIVESTED: Desinversió total, tornats 300.0 € [666]\n'
+        )
+        self.assertActionsEqual(inv, u"""
+            type: divest
+            user: {user}
+            timestamp: '{timestamp}'
+            amount: 300.0
+            move_line_id: 666
+            date: 2001-08-01
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
+
+    def test_divest_amortizedRequiresUnamortizedAmount(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            amortized_amount = 12.0,
+            purchase_date = isodate("2000-01-01"),
+            first_effective_date = isodate("2001-01-01"),
+            last_effective_date = isodate("2025-01-01"),
+            draft = False,
+        )
+        with self.assertRaises(Exception) as ctx:
+            inv.divest(
+                date = isodate("2000-08-01"),
+                amount = 300.,
+                move_line_id = 666,
+            )
+        self.assertEqual(ctx.exception.message,
+            u"Divesting wrong amount, tried 300.0 €, unamortized 288.0 €")
+
     def test_divest_unpaid(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 0.0,
             amortized_amount = 0.0,
-            first_effective_date = None,
-            last_effective_date = None,
+            purchase_date = False,
+            first_effective_date = False,
+            last_effective_date = False,
             draft = False,
         )
         with self.assertRaises(Exception) as ctx:
@@ -900,7 +949,6 @@ class InvestmentState_Test(unittest.TestCase):
     def test_emitTransfer(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 300.0,
             order_date = isodate("2000-01-01"),
             purchase_date = isodate("2000-01-02"),
             first_effective_date = isodate("2001-01-02"),
@@ -942,7 +990,6 @@ class InvestmentState_Test(unittest.TestCase):
     def test_emitTransfer_beforeEffectiveDate(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 300.0,
             order_date = isodate("2000-01-01"),
             purchase_date = isodate("2000-01-02"),
             first_effective_date = isodate("2001-01-02"),
@@ -985,11 +1032,10 @@ class InvestmentState_Test(unittest.TestCase):
     def test_emitTransfer_unpaid(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 0.0,
             order_date = isodate("2000-01-01"),
-            purchase_date = None,
-            first_effective_date = None,
-            last_effective_date = None,
+            purchase_date = False,
+            first_effective_date = False,
+            last_effective_date = False,
             draft = False,
         )
 
@@ -1137,7 +1183,6 @@ class InvestmentState_Test(unittest.TestCase):
     def test_pact_singleParam(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 0.0,
         )
 
         inv.pact(
@@ -1168,7 +1213,6 @@ class InvestmentState_Test(unittest.TestCase):
     def test_pact_manyParams(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 0.0,
         )
 
         inv.pact(
@@ -1202,7 +1246,6 @@ class InvestmentState_Test(unittest.TestCase):
     def test_pact_badParams(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 0.0,
         )
 
         with self.assertRaises(Exception) as ctx:
@@ -1219,7 +1262,7 @@ class InvestmentState_Test(unittest.TestCase):
     def test_correct(self):
         inv = self.setupInvestment(
             nominal_amount = 200.0,
-            paid_amount = 0.0,
+            purchase_date = False,
         )
 
         inv.correct(
@@ -1245,7 +1288,7 @@ class InvestmentState_Test(unittest.TestCase):
     def test_correct_badFromAmount(self):
         inv = self.setupInvestment(
             nominal_amount = 200.0,
-            paid_amount = 0.0,
+            purchase_date = False,
         )
 
         with self.assertRaises(Exception) as ctx:
@@ -1260,7 +1303,7 @@ class InvestmentState_Test(unittest.TestCase):
     def test_correct_alreadyPaid(self):
         inv = self.setupInvestment(
             nominal_amount = 200.0,
-            paid_amount = 200.0,
+            purchase_date = isodate('2000-01-01'),
         )
 
         with self.assertRaises(Exception) as ctx:
@@ -1274,7 +1317,7 @@ class InvestmentState_Test(unittest.TestCase):
     def test_partial(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 300.0,
+            purchase_date = isodate('2000-01-01'),
         )
 
         inv.partial(
@@ -1301,7 +1344,7 @@ class InvestmentState_Test(unittest.TestCase):
     def test_partial_unpaid(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
-            paid_amount = 0.0,
+            purchase_date = False,
         )
 
         with self.assertRaises(Exception) as ctx:
@@ -1315,8 +1358,8 @@ class InvestmentState_Test(unittest.TestCase):
 
     def test_cancel(self):
         inv = self.setupInvestment(
+            nominal_amount = 200.0,
             purchase_date = False,
-            paid_amount = 0.,
             )
         inv.cancel()
         self.assertChangesEqual(inv, """
@@ -1335,8 +1378,8 @@ class InvestmentState_Test(unittest.TestCase):
 
     def test_cancel_paid(self):
         inv = self.setupInvestment(
+            nominal_amount = 200.0,
             purchase_date = isodate('2001-01-02'),
-            paid_amount = 300.,
             )
         with self.assertRaises(Exception) as ctx:
             inv.cancel()
@@ -1346,6 +1389,7 @@ class InvestmentState_Test(unittest.TestCase):
     # TODO: cancel invoiced
 
 
+    # TODO: amortize should check 
 
     def test_amortize_noPreviousAmortization(self):
         inv = self.setupInvestment(
