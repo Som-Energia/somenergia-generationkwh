@@ -1016,7 +1016,7 @@ class Investment_Test(unittest.TestCase):
               name: 'Inversió {investment_name} '
               invoice_id:
               - {id}
-              - 'CI: {investment_name}-FACT {investment_name}-FACT'
+              - 'CI: {investment_name}-JUST {investment_name}-JUST'
               price_unit: 100.0
               price_subtotal: 2000.0
               invoice_line_tax_id: []
@@ -1027,8 +1027,8 @@ class Investment_Test(unittest.TestCase):
               product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
             journal_id: Factures GenerationkWh
             mandate_id: {mandate_id}
-            name: {investment_name}-FACT
-            number: {investment_name}-FACT
+            name: {investment_name}-JUST
+            number: {investment_name}-JUST
             origin: {investment_name}
             partner_bank: {iban}
             partner_id:
@@ -1085,7 +1085,7 @@ class Investment_Test(unittest.TestCase):
         result = self.Investment.create_initial_invoices([id])
 
         self.assertEqual(result, [[], [
-            "Initial Invoice {name}-FACT already exists".format(**inv)
+            "Initial Invoice {name}-JUST already exists".format(**inv)
             ]])
 
     def test__create_initial_invoices__withUnnamedInvestment(self):
@@ -1105,7 +1105,7 @@ class Investment_Test(unittest.TestCase):
 
         invoice = self.Invoice.browse(invoice_ids[0])
         self.assertEqual(invoice.name,
-            "GENKWHID{}-FACT".format(id))
+            "GENKWHID{}-JUST".format(id))
 
     def test__create_initial_invoices__errorWhenNoBank(self):
         id = self.Investment.create_from_form(

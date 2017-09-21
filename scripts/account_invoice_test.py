@@ -182,25 +182,25 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: 4000.0
           credit: 4000.0
           debit: 0.0
-          invoice: 'CI: {investment_name}-FACT {investment_name}-FACT'
+          invoice: 'CI: {investment_name}-JUST {investment_name}-JUST'
           journal_id: Factures GenerationkWh
           name: 'Inversió {investment_name} '
           payment_type: Recibo domiciliado
           product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
           quantity: 40.0
-          ref: {investment_name}-FACT
+          ref: {investment_name}-JUST
           move_state: posted
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: -4000.0
           credit: 0.0
           debit: 4000.0
-          invoice: 'CI: {investment_name}-FACT {investment_name}-FACT'
+          invoice: 'CI: {investment_name}-JUST {investment_name}-JUST'
           journal_id: Factures GenerationkWh
-          name: {investment_name}-FACT
+          name: {investment_name}-JUST
           payment_type: Recibo domiciliado
           product_id: false
           quantity: 1.0
-          ref: {investment_name}-FACT
+          ref: {investment_name}-JUST
           move_state: posted
         """.format(
             investment_name = investment_name,
@@ -228,25 +228,25 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: 4000.0
           credit: 4000.0
           debit: 0.0
-          invoice: 'CI: {investment_name}-FACT {investment_name}-FACT'
+          invoice: 'CI: {investment_name}-JUST {investment_name}-JUST'
           journal_id: Factures GenerationkWh
           name: 'Inversió {investment_name} '
           payment_type: Recibo domiciliado
           product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
           quantity: 40.0
-          ref: {investment_name}-FACT
+          ref: {investment_name}-JUST
           move_state: posted
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 0.0 # TURNED ZERO
           credit: 0.0
           debit: 4000.0
-          invoice: 'CI: {investment_name}-FACT {investment_name}-FACT'
+          invoice: 'CI: {investment_name}-JUST {investment_name}-JUST'
           journal_id: Factures GenerationkWh
-          name: {investment_name}-FACT
+          name: {investment_name}-JUST
           payment_type: Recibo domiciliado
           product_id: false
           quantity: 1.0
-          ref: {investment_name}-FACT
+          ref: {investment_name}-JUST
           move_state: posted
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 0.0
@@ -258,7 +258,7 @@ class Account_Invoice_Test(unittest.TestCase):
           payment_type: []
           product_id: false
           quantity: false
-          ref: {investment_name}-FACT
+          ref: {investment_name}-JUST
           move_state: posted
         - account_id: 555000000004 CAIXA GKWH
           amount_to_pay: -4000.0
@@ -270,7 +270,7 @@ class Account_Invoice_Test(unittest.TestCase):
           payment_type: []
           product_id: false
           quantity: false
-          ref: {investment_name}-FACT
+          ref: {investment_name}-JUST
           move_state: posted
         """.format(
             investment_name = investment_name,
@@ -307,7 +307,7 @@ class Account_Invoice_Test(unittest.TestCase):
           payment_type: [] # CHANGED
           product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
           quantity: 40.0
-          ref: {investment_name}-FACT
+          ref: {investment_name}-JUST
           move_state: posted
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 0.0
@@ -315,11 +315,11 @@ class Account_Invoice_Test(unittest.TestCase):
           debit: 4000.0
           invoice: false # CHANGED
           journal_id: Factures GenerationkWh
-          name: {investment_name}-FACT
+          name: {investment_name}-JUST
           payment_type: [] # CHANGED
           product_id: false
           quantity: 1.0
-          ref: {investment_name}-FACT
+          ref: {investment_name}-JUST
           move_state: posted
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 0.0
@@ -331,7 +331,7 @@ class Account_Invoice_Test(unittest.TestCase):
           payment_type: []
           product_id: false
           quantity: false
-          ref: {investment_name}-FACT
+          ref: {investment_name}-JUST
           move_state: posted
         - account_id: 555000000004 CAIXA GKWH
           amount_to_pay: -4000.0
@@ -343,31 +343,31 @@ class Account_Invoice_Test(unittest.TestCase):
           payment_type: []
           product_id: false
           quantity: false
-          ref: {investment_name}-FACT
+          ref: {investment_name}-JUST
           move_state: posted
         - account_id: 555000000004 CAIXA GKWH
           amount_to_pay: 4000.0
           credit: 4000.0
           debit: 0.0
-          invoice: 'CI: {investment_name}-FACT {investment_name}-FACT'
+          invoice: 'CI: {investment_name}-JUST {investment_name}-JUST'
           journal_id: Factures GenerationkWh
           name: an unpayment
           payment_type: Recibo domiciliado
           product_id: false
           quantity: false
-          ref: {investment_name}-FACT
+          ref: {investment_name}-JUST
           move_state: posted
         - account_id: 410000001620 {surname}, {name}
           amount_to_pay: -4000.0
           credit: 0.0
           debit: 4000.0
-          invoice: 'CI: {investment_name}-FACT {investment_name}-FACT'
+          invoice: 'CI: {investment_name}-JUST {investment_name}-JUST'
           journal_id: Factures GenerationkWh
           name: an unpayment
           payment_type: Recibo domiciliado
           product_id: false
           quantity: false
-          ref: {investment_name}-FACT
+          ref: {investment_name}-JUST
           move_state: posted
 
         """.format(
