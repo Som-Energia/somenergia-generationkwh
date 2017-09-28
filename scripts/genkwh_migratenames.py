@@ -177,7 +177,7 @@ def investmentPointingSomeoneElsesAccount(cr):
         on
             acc.id = ml.account_id
         where
-            acc.code <> '1635' || right('000'||right(p.ref,-1),8)
+            acc.code <> ('1635' || right('000'||right(p.ref,-1),8))
         """,dict(
             shareValue=gkwh.shareValue,
         ))
