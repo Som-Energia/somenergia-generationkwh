@@ -3,7 +3,7 @@ description = """
 Generates investments from the accounting logs.
 """
 
-from erppeek_wst import ClientWST as ErpPeekClient
+from erppeek_wst import Client as ErpPeekClient
 import datetime
 from dateutil.relativedelta import relativedelta
 from yamlns import namespace as ns
