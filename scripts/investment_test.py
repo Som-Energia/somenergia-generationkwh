@@ -2009,6 +2009,22 @@ class Investment_Test(unittest.TestCase):
                 **self.personalData
                 ))
 
+    def test__cancel__twice(self):
+        with self.assertRaises(Exception) as ctx:
+            id = self.Investment.create_from_form(
+                self.personalData.partnerid,
+                '2017-01-01', # order_date
+                4000,
+                '10.10.23.123',
+                'ES7712341234161234567890',
+                )
+
+            self.Investment.cancel([id])
+            self.Investment.cancel([id])
+
+        self.assertEqual(ctx.exception.faultCode,
+            "Inactive investments can not be cancelled"
+            )
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 

@@ -540,6 +540,10 @@ class InvestmentState(object):
         """
         # TODO: if invoiced but still unpaid cannot be cancelled either
 
+        if not self.active:
+            raise InvestmentStateError(
+                "Inactive investments can not be cancelled")
+
         if self.purchase_date:
             raise InvestmentStateError(
                 "Only unpaid investments can be cancelled")

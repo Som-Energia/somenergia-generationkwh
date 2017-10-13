@@ -1378,6 +1378,7 @@ class InvestmentState_Test(unittest.TestCase):
         inv = self.setupInvestment(
             nominal_amount = 200.0,
             purchase_date = False,
+            active = True,
             )
         inv.cancel()
         self.assertChangesEqual(inv, """
@@ -1398,11 +1399,23 @@ class InvestmentState_Test(unittest.TestCase):
         inv = self.setupInvestment(
             nominal_amount = 200.0,
             purchase_date = isodate('2001-01-02'),
+            active = True,
             )
         with self.assertRaises(StateError) as ctx:
             inv.cancel()
         self.assertEqual(ctx.exception.message,
             "Only unpaid investments can be cancelled")
+
+    def test_cancel_inactive(self):
+        inv = self.setupInvestment(
+            nominal_amount = 200.0,
+            purchase_date = False,
+            active = False,
+            )
+        with self.assertRaises(StateError) as ctx:
+            inv.cancel()
+        self.assertEqual(ctx.exception.message,
+            "Inactive investments can not be cancelled")
 
     # TODO: cancel invoiced
 
