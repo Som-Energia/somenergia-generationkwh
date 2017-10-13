@@ -1978,18 +1978,11 @@ class Investment_Test(unittest.TestCase):
             )
 
         self.Investment.cancel([id])
-
-        investment = ns(self.Investment.read(id, []))
-        log = investment.pop('log')
-        name = investment.pop('name')
-        actions_log = investment.pop('actions_log') # TODO: Test
-
         self.assertLogEquals(log,
             u'CANCEL: La inversió ha estat cancel·lada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 4000 €, IBAN: ES7712341234161234567890\n'
             )
-
         self.assertNsEqual(investment, """
             id: {id}
             member_id:
@@ -2009,6 +2002,7 @@ class Investment_Test(unittest.TestCase):
                 **self.personalData
                 ))
 
+
     def test__cancel__twice(self):
         with self.assertRaises(Exception) as ctx:
             id = self.Investment.create_from_form(
@@ -2024,7 +2018,45 @@ class Investment_Test(unittest.TestCase):
 
         self.assertEqual(ctx.exception.faultCode,
             "Inactive investments can not be cancelled"
+
             )
+
+    def test__divest__beforeEffective(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2015-11-20')
+
+        self.Investment.divest()
+        investment = ns(self.Investment.read(id, []))
+        log = investment.pop('log')
+        name = investment.pop('name')
+        actions_log = investment.pop('actions_log') 
+
+        self.assertNsEqual(investment, """
+            id: {id}
+            member_id:
+            - {member_id}
+            - {surname}, {name}
+            order_date: '2017-01-01'
+            purchase_date: '2015-11-20'
+            first_effective_date: '2016-10-20'
+            last_effective_date: '2040-11-20'
+            nshares: 10
+            amortized_amount: 0.0
+            move_line_id: false
+            active: true
+            draft: false
+            """.format(
+                id=id,
+                **self.personalData
+                ))
+
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
