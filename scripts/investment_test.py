@@ -1978,6 +1978,11 @@ class Investment_Test(unittest.TestCase):
             )
 
         self.Investment.cancel([id])
+        investment = ns(self.Investment.read(id, []))
+        log = investment.pop('log')
+        name = investment.pop('name')
+        actions_log = investment.pop('actions_log') # TODO: Test
+
         self.assertLogEquals(log,
             u'CANCEL: La inversió ha estat cancel·lada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
@@ -2032,7 +2037,7 @@ class Investment_Test(unittest.TestCase):
         self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2015-11-20')
 
-        self.Investment.divest()
+        self.Investment.divest([id])
         investment = ns(self.Investment.read(id, []))
         log = investment.pop('log')
         name = investment.pop('name')
