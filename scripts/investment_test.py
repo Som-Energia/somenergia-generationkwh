@@ -2051,9 +2051,9 @@ class Investment_Test(unittest.TestCase):
             order_date: '2017-01-01'
             purchase_date: '2015-11-20'
             first_effective_date: '2016-10-20'
-            last_effective_date: '2040-11-20'
+            last_effective_date: '2017-10-13'
             nshares: 10
-            amortized_amount: 0.0
+            amortized_amount: 1000.0
             move_line_id: false
             active: true
             draft: false
