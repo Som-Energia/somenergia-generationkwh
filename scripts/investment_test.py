@@ -9,7 +9,7 @@ try:
 except ImportError:
     pass
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from yamlns import namespace as ns
 import erppeek_wst
 import generationkwh.investmentmodel as gkwh
@@ -2097,7 +2097,8 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
         self.Investment.mark_as_invoiced(id)
-        self.Investment.mark_as_paid([id], '2015-11-20')
+        self.Investment.mark_as_paid([id], '2017-10-02')
+        date_today = str(date.today())
 
         self.Investment.divest([id])
         investment = ns(self.Investment.read(id, []))
@@ -2111,16 +2112,17 @@ class Investment_Test(unittest.TestCase):
             - {member_id}
             - {surname}, {name}
             order_date: '2017-01-01'
-            purchase_date: '2015-11-20'
-            first_effective_date: '2016-10-20'
-            last_effective_date: '2017-10-13'
+            purchase_date: '2017-10-02'
+            first_effective_date: '2018-10-02'
+            last_effective_date: '{date_today}'
             nshares: 10
             amortized_amount: 1000.0
             move_line_id: false
-            active: true
+            active: false
             draft: false
             """.format(
                 id=id,
+                date_today = date_today,
                 **self.personalData
                 ))
 
