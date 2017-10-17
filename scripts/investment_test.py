@@ -2097,23 +2097,23 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
         self.Investment.mark_as_invoiced(id)
-        self.Investment.mark_as_paid([id], '2017-10-02')
+        self.Investment.mark_as_paid([id], '2017-09-02')
         date_today = str(date.today())
 
         self.Investment.divest([id])
+
         investment = ns(self.Investment.read(id, []))
         log = investment.pop('log')
         name = investment.pop('name')
         actions_log = investment.pop('actions_log') 
-
         self.assertNsEqual(investment, """
             id: {id}
             member_id:
             - {member_id}
             - {surname}, {name}
             order_date: '2017-01-01'
-            purchase_date: '2017-10-02'
-            first_effective_date: '2018-10-02'
+            purchase_date: '2017-09-02'
+            first_effective_date: '2018-09-02'
             last_effective_date: '{date_today}'
             nshares: 10
             amortized_amount: 1000.0
@@ -2139,11 +2139,11 @@ class Investment_Test(unittest.TestCase):
         date_today = str(date.today())
 
         self.Investment.divest([id])
+
         investment = ns(self.Investment.read(id, []))
         log = investment.pop('log')
         name = investment.pop('name')
         actions_log = investment.pop('actions_log')
-
         self.assertNsEqual(investment, """
             id: {id}
             member_id:
@@ -2163,6 +2163,31 @@ class Investment_Test(unittest.TestCase):
                 date_today = date_today,
                 **self.personalData
                 ))
+
+    def test__divest__beforeReturnPaymentOrderPeriod(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        date_paid = date.today() - timedelta(days=20)
+        self.Investment.mark_as_paid([id], str(date_paid))
+
+        invoice_ids, errors = self.Investment.divest([id])
+
+        investment = ns(self.Investment.read(id, []))
+        name = investment.pop('name')
+        response = ns(error = errors)
+        self.assertNsEqual(response, """
+            error:
+            - '{name}: Too early to divest (< 30 days from purchase)'
+            """.format(
+                name = name,
+                ))
+
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
