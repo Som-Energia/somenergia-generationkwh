@@ -2188,6 +2188,77 @@ class Investment_Test(unittest.TestCase):
                 name = name,
                 ))
 
+    def test__create_divestment_invoice__allOk(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        invoice_date = datetime.today().strftime("%Y-%m-%d")
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2017-01-01')
+
+        invoice_id, errors = self.Investment.create_divestment_invoice(
+            id, invoice_date, 2000)
+
+        self.assertTrue(invoice_id)
+        investment = self.Investment.browse(id)
+        self.assertInvoiceInfoEqual(invoice_id, """\
+            account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
+            amount_total: 2000.0
+            amount_untaxed: 2000.0
+            check_total: 2000.0
+            date_invoice: '{invoice_date}'
+            id: {id}
+            invoice_line:
+            - origin: false
+              uos_id: PCE
+              account_id: 163500{p.nsoci:0>6s} {p.surname}, {p.name}
+              name: 'Desinversió total de GKWH03192 a {invoice_date} '
+              invoice_id:
+              - {id}
+              - 'SI: GKWH03192-DES GKWH03192-DES'
+              price_unit: 2000.0
+              price_subtotal: 2000.0
+              invoice_line_tax_id: []
+              note:
+                pendingCapital: 0.0
+                divestmentDate: '{invoice_date}'
+                investmentId: {investment_id}
+                investmentName: {investment_name}
+                investmentPurchaseDate: '2017-01-01'
+                investmentLastEffectiveDate: '2042-01-01'
+                investmentInitialAmount: 2000
+              discount: 0.0
+              account_analytic_id: false
+              quantity: 1.0
+              product_id: '[GENKWH_AMOR] Amortització Generation kWh'
+            journal_id: Factures GenerationkWh
+            mandate_id: {mandate_id}
+            name: {investment_name}-DES
+            number: {investment_name}-DES
+            origin: {investment_name}
+            partner_bank: {iban}
+            partner_id:
+            - {p.partnerid}
+            - {p.surname}, {p.name}
+            payment_type:
+            - 2
+            - Transferencia
+            sii_to_send: false
+            type: in_invoice
+            """.format(
+                invoice_date = datetime.today().strftime("%Y-%m-%d"),
+                id = invoice_id,
+                iban = 'ES77 1234 1234 1612 3456 7890',
+                year = 2018,
+                investment_name = investment.name,
+                p = self.personalData,
+                investment_id = id,
+                mandate_id = False,
+            ))
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
