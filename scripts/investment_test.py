@@ -2188,6 +2188,32 @@ class Investment_Test(unittest.TestCase):
                 name = name,
                 ))
 
+    def test__divest__alreadyDivested(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        date_paid = date.today() - timedelta(days=160)
+        self.Investment.mark_as_paid([id], str(date_paid))
+
+        invoice_ids, errors = self.Investment.divest([id])
+        invoice_ids2, errors2 = self.Investment.divest([id])
+
+        investment = ns(self.Investment.read(id, []))
+        name = investment.pop('name')
+        response = ns(error = errors2)
+        self.assertNsEqual(response, """
+            error:
+            - 'Inversió {id}: La desinversió {name}-DES ja existeix'
+            """.format(
+                name = name,
+                id = id,
+                ))
+
     def test__divest__invoiceAfterAmortization(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
