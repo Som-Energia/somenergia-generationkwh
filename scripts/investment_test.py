@@ -2188,6 +2188,100 @@ class Investment_Test(unittest.TestCase):
                 name = name,
                 ))
 
+    def test__divest__invoiceAfterAmortization(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2015-09-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2015-09-01')
+        date_today = str(date.today())
+        self.Investment.amortize('2017-09-02',[id])
+
+        invoice_ids, error = self.Investment.divest([id])
+
+        invoice_id = invoice_ids[0]
+        investment = ns(self.Investment.read(id, []))
+        log = investment.pop('log')
+        investment_name = investment.pop('name')
+        actions_log = investment.pop('actions_log')
+        self.assertNsEqual(investment, """
+            id: {id}
+            member_id:
+            - {member_id}
+            - {surname}, {name}
+            order_date: '2015-09-01'
+            purchase_date: '2015-09-01'
+            first_effective_date: '2016-08-01'
+            last_effective_date: '{date_today}'
+            nshares: 10
+            amortized_amount: 1000.0
+            move_line_id: false
+            active: true
+            draft: false
+            """.format(
+                id=id,
+                date_today = date_today,
+                **self.personalData
+                ))
+        self.assertInvoiceInfoEqual(invoice_id, """\
+            account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
+            amount_total: 960.0
+            amount_untaxed: 960.0
+            check_total: 960.0
+            date_invoice: '{invoice_date}'
+            id: {id}
+            invoice_line:
+            - origin: false
+              uos_id: PCE
+              account_id: 163500{p.nsoci:0>6s} {p.surname}, {p.name}
+              name: 'Desinversió total de {investment_name} a {invoice_date} '
+              invoice_id:
+              - {id}
+              - 'SI: {investment_name}-DES {investment_name}-DES'
+              price_unit: 960.0
+              price_subtotal: 960.0
+              invoice_line_tax_id: []
+              note:
+                pendingCapital: 0.0
+                divestmentDate: '{invoice_date}'
+                investmentId: {investment_id}
+                investmentName: {investment_name}
+                investmentPurchaseDate: '2015-09-01'
+                investmentLastEffectiveDate: '2040-09-01'
+                investmentInitialAmount: 1000
+              discount: 0.0
+              account_analytic_id: false
+              quantity: 1.0
+              product_id: '[GENKWH_AMOR] Amortització Generation kWh'
+            journal_id: Factures GenerationkWh
+            mandate_id: {mandate_id}
+            name: {investment_name}-DES
+            number: {investment_name}-DES
+            origin: {investment_name}
+            partner_bank: {iban}
+            partner_id:
+            - {p.partnerid}
+            - {p.surname}, {p.name}
+            payment_type:
+            - 2
+            - Transferencia
+            sii_to_send: false
+            type: in_invoice
+            """.format(
+                invoice_date = datetime.today().strftime("%Y-%m-%d"),
+                id = invoice_id,
+                iban = 'ES77 1234 1234 1612 3456 7890',
+                year = 2018,
+                investment_name = investment_name,
+                p = self.personalData,
+                investment_id = id,
+                mandate_id = False,
+            ))
+
     def test__create_divestment_invoice__allOk(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -2216,10 +2310,10 @@ class Investment_Test(unittest.TestCase):
             - origin: false
               uos_id: PCE
               account_id: 163500{p.nsoci:0>6s} {p.surname}, {p.name}
-              name: 'Desinversió total de GKWH03192 a {invoice_date} '
+              name: 'Desinversió total de {investment_name} a {invoice_date} '
               invoice_id:
               - {id}
-              - 'SI: GKWH03192-DES GKWH03192-DES'
+              - 'SI: {investment_name}-DES {investment_name}-DES'
               price_unit: 2000.0
               price_subtotal: 2000.0
               invoice_line_tax_id: []
