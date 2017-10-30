@@ -970,6 +970,7 @@ class Investment_Test(unittest.TestCase):
             'origin',
             'sii_to_send',
             'mandate_id',
+            'state',
         ]))
         invoice.journal_id = invoice.journal_id[1]
         invoice.mandate_id = invoice.mandate_id and invoice.mandate_id[0]
@@ -1039,6 +1040,7 @@ class Investment_Test(unittest.TestCase):
             - Recibo domiciliado
             sii_to_send: false
             type: out_invoice
+            state: draft
             """.format(
             invoice_date=datetime.today().strftime("%Y-%m-%d"),
             id=invoice_ids[0],
@@ -1313,6 +1315,7 @@ class Investment_Test(unittest.TestCase):
             - Transferencia
             sii_to_send: false
             type: in_invoice
+            state: draft
             """.format(
                 invoice_date = datetime.today().strftime("%Y-%m-%d"),
                 id = invoice_id,
@@ -2149,6 +2152,84 @@ class Investment_Test(unittest.TestCase):
             - No remesables
             sii_to_send: false
             type: in_invoice
+            state: draft
+            """.format(
+                invoice_date = datetime.today().strftime("%Y-%m-%d"),
+                id = invoice_id,
+                iban = 'ES77 1234 1234 1612 3456 7890',
+                year = 2018,
+                investment_name = investment.name,
+                p = self.personalData,
+                investment_id = id,
+                mandate_id = False,
+            ))
+
+    def test__pay_resign_invoice__createOpenAndPayOk(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        invoice_date = datetime.today().strftime("%Y-%m-%d")
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2017-01-01')
+
+        invoice_id, errors = self.Investment.create_resign_invoice(
+            id)
+
+        self.Investment.open_invoices([invoice_id])
+
+        self.Investment.pay_resign_invoice(invoice_id)
+
+        self.assertTrue(invoice_id)
+        investment = self.Investment.browse(id)
+        self.assertInvoiceInfoEqual(invoice_id, """\
+            account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
+            amount_total: 2000.0
+            amount_untaxed: 2000.0
+            check_total: 2000.0
+            date_invoice: '{invoice_date}'
+            id: {id}
+            invoice_line:
+            - origin: false
+              uos_id: PCE
+              account_id: 163500{p.nsoci:0>6s} {p.surname}, {p.name}
+              name: 'Renúncia total de {investment_name} '
+              invoice_id:
+              - {id}
+              - 'SI: {investment_name}-RES {investment_name}-RES'
+              price_unit: 2000.0
+              price_subtotal: 2000.0
+              invoice_line_tax_id: []
+              note:
+                pendingCapital: 0.0
+                resigningDate: '{invoice_date}'
+                investmentId: {investment_id}
+                investmentName: {investment_name}
+                investmentPurchaseDate: '2017-01-01'
+                investmentLastEffectiveDate: '2042-01-01'
+                investmentInitialAmount: 2000
+              discount: 0.0
+              account_analytic_id: false
+              quantity: 1.0
+              product_id: '[GENKWH_AMOR] Amortització Generation kWh'
+            journal_id: Factures GenerationkWh
+            mandate_id: {mandate_id}
+            name: {investment_name}-RES
+            number: {investment_name}-RES
+            origin: {investment_name}
+            partner_bank: {iban}
+            partner_id:
+            - {p.partnerid}
+            - {p.surname}, {p.name}
+            payment_type:
+            - 3
+            - No remesables
+            sii_to_send: false
+            type: in_invoice
+            state: paid
             """.format(
                 invoice_date = datetime.today().strftime("%Y-%m-%d"),
                 id = invoice_id,
@@ -2369,6 +2450,7 @@ class Investment_Test(unittest.TestCase):
             - Transferencia
             sii_to_send: false
             type: in_invoice
+            state: open
             """.format(
                 invoice_date = datetime.today().strftime("%Y-%m-%d"),
                 id = invoice_id,
@@ -2441,6 +2523,7 @@ class Investment_Test(unittest.TestCase):
             - Transferencia
             sii_to_send: false
             type: in_invoice
+            state: draft
             """.format(
                 invoice_date = datetime.today().strftime("%Y-%m-%d"),
                 id = invoice_id,
