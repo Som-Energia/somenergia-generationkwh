@@ -2196,12 +2196,8 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.1',
             'ES7712341234161234567890',
             )
-        invoice_date = datetime.today().strftime("%Y-%m-%d")
-        self.Investment.mark_as_invoiced(id)
-        self.Investment.mark_as_paid([id], '2017-01-01')
-
-        invoice_id, errors = self.Investment.create_resign_invoice(
-            id)
+        invoice_ids, errs =  self.Investment.create_initial_invoices([id])
+        invoice_id, errors = self.Investment.create_resign_invoice(id)
 
         self.assertTrue(invoice_id)
         investment = self.Investment.browse(id)
@@ -2209,28 +2205,21 @@ class Investment_Test(unittest.TestCase):
             account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
             amount_total: 2000.0
             amount_untaxed: 2000.0
-            check_total: 2000.0
+            check_total: 0.0
             date_invoice: '{invoice_date}'
             id: {id}
             invoice_line:
             - origin: false
               uos_id: PCE
               account_id: 163500{p.nsoci:0>6s} {p.surname}, {p.name}
-              name: 'Renúncia total de {investment_name} '
+              name: 'Inversió {investment_name} '
               invoice_id:
               - {id}
               - 'OR: {investment_name}-RES {investment_name}-RES'
               price_unit: 100.0
               price_subtotal: 2000.0
               invoice_line_tax_id: []
-              note:
-                pendingCapital: 0.0
-                resigningDate: '{invoice_date}'
-                investmentId: {investment_id}
-                investmentName: {investment_name}
-                investmentPurchaseDate: '2017-01-01'
-                investmentLastEffectiveDate: '2042-01-01'
-                investmentInitialAmount: 2000
+              note: false
               discount: 0.0
               account_analytic_id: false
               quantity: 20.0
@@ -2240,24 +2229,19 @@ class Investment_Test(unittest.TestCase):
             name: {investment_name}-RES
             number: {investment_name}-RES
             origin: {investment_name}
-            partner_bank: {iban}
+            partner_bank: None
             partner_id:
             - {p.partnerid}
             - {p.surname}, {p.name}
-            payment_type:
-            - 3
-            - No remesables
+            payment_type: false
             sii_to_send: false
             type: out_refund
             state: draft
             """.format(
                 invoice_date = datetime.today().strftime("%Y-%m-%d"),
                 id = invoice_id,
-                iban = 'ES77 1234 1234 1612 3456 7890',
-                year = 2018,
                 investment_name = investment.name,
                 p = self.personalData,
-                investment_id = id,
                 mandate_id = False,
             ))
 
@@ -2269,15 +2253,9 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.1',
             'ES7712341234161234567890',
             )
-        invoice_date = datetime.today().strftime("%Y-%m-%d")
-        self.Investment.mark_as_invoiced(id)
-        self.Investment.mark_as_paid([id], '2017-01-01')
-
-        invoice_id, errors = self.Investment.create_resign_invoice(
-            id)
-
+        invoice_ids, errs =  self.Investment.create_initial_invoices([id])
+        invoice_id, errors = self.Investment.create_resign_invoice(id)
         self.Investment.open_invoices([invoice_id])
-
         self.Investment.pay_resign_invoice(invoice_id)
 
         self.assertTrue(invoice_id)
@@ -2286,28 +2264,21 @@ class Investment_Test(unittest.TestCase):
             account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
             amount_total: 2000.0
             amount_untaxed: 2000.0
-            check_total: 2000.0
+            check_total: 0.0
             date_invoice: '{invoice_date}'
             id: {id}
             invoice_line:
             - origin: false
               uos_id: PCE
               account_id: 163500{p.nsoci:0>6s} {p.surname}, {p.name}
-              name: 'Renúncia total de {investment_name} '
+              name: 'Inversió {investment_name} '
               invoice_id:
               - {id}
               - 'OR: {investment_name}-RES {investment_name}-RES'
               price_unit: 100.0
               price_subtotal: 2000.0
               invoice_line_tax_id: []
-              note:
-                pendingCapital: 0.0
-                resigningDate: '{invoice_date}'
-                investmentId: {investment_id}
-                investmentName: {investment_name}
-                investmentPurchaseDate: '2017-01-01'
-                investmentLastEffectiveDate: '2042-01-01'
-                investmentInitialAmount: 2000
+              note: false
               discount: 0.0
               account_analytic_id: false
               quantity: 20.0
@@ -2317,24 +2288,19 @@ class Investment_Test(unittest.TestCase):
             name: {investment_name}-RES
             number: {investment_name}-RES
             origin: {investment_name}
-            partner_bank: {iban}
+            partner_bank: None
             partner_id:
             - {p.partnerid}
             - {p.surname}, {p.name}
-            payment_type:
-            - 3
-            - No remesables
+            payment_type: false
             sii_to_send: false
             type: out_refund
             state: paid
             """.format(
                 invoice_date = datetime.today().strftime("%Y-%m-%d"),
                 id = invoice_id,
-                iban = 'ES77 1234 1234 1612 3456 7890',
-                year = 2018,
                 investment_name = investment.name,
                 p = self.personalData,
-                investment_id = id,
                 mandate_id = False,
             ))
 
