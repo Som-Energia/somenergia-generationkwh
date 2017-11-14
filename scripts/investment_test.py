@@ -2137,6 +2137,57 @@ class Investment_Test(unittest.TestCase):
                 **self.personalData
                 ))
 
+    def test__resign__paid(self):
+        with self.assertRaises(Exception) as ctx:
+            id = self.Investment.create_from_form(
+                self.personalData.partnerid,
+                '2000-01-01',  # order_date
+                2000,
+                '10.10.23.1',
+                'ES7712341234161234567890',
+            )
+            self.Investment.investment_payment([id])
+            self.Investment.mark_as_paid([id], '2000-01-05')
+            self.Investment.resign([id])
+
+        self.assertEqual(ctx.exception.faultCode,
+            "Only unpaid investments can be cancelled"
+            )
+
+    def test__resign__alreadyCancelled(self):
+        with self.assertRaises(Exception) as ctx:
+            id = self.Investment.create_from_form(
+                self.personalData.partnerid,
+                '2000-01-01',  # order_date
+                2000,
+                '10.10.23.1',
+                'ES7712341234161234567890',
+            )
+            self.Investment.investment_payment([id])
+            self.Investment.mark_as_paid([id], '2000-01-05')
+            self.Investment.mark_as_unpaid([id])
+            self.Investment.resign([id])
+            self.Investment.resign([id])
+
+        self.assertEqual(ctx.exception.faultCode,
+            "Inactive investments can not be cancelled"
+            )
+
+    def test__resign__notInvoiced(self):
+        with self.assertRaises(Exception) as ctx:
+            id = self.Investment.create_from_form(
+                self.personalData.partnerid,
+                '2000-01-01',  # order_date
+                2000,
+                '10.10.23.1',
+                'ES7712341234161234567890',
+            )
+            self.Investment.resign([id])
+
+        self.assertEqual(ctx.exception.faultCode,
+            "Inversion without initial invoice, cannot resign"
+            )
+
     def test__create_resign_invoice__allOk(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
