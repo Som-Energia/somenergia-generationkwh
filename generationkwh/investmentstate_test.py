@@ -1383,6 +1383,10 @@ class InvestmentState_Test(unittest.TestCase):
         inv.cancel()
         self.assertChangesEqual(inv, """
             active: False
+            purchase_date: null
+            first_effective_date: null
+            last_effective_date: null
+            paid_amount: 0
             """,
             u'CANCEL: La inversió ha estat cancel·lada\n'
             )
@@ -1405,6 +1409,10 @@ class InvestmentState_Test(unittest.TestCase):
         inv.cancel()
         self.assertChangesEqual(inv, """
             active: False
+            purchase_date: null
+            first_effective_date: null
+            last_effective_date: null
+            paid_amount: 0
             """,
             u'CANCEL: La inversió ha estat cancel·lada\n'
             )
@@ -1447,6 +1455,10 @@ class InvestmentState_Test(unittest.TestCase):
         inv.cancel()
         self.assertChangesEqual(inv, """
             active: False
+            purchase_date: null
+            first_effective_date: null
+            last_effective_date: null
+            paid_amount: 0
             """,
             u'CANCEL: La inversió ha estat cancel·lada\n'
             )

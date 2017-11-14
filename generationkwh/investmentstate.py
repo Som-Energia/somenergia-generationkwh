@@ -553,6 +553,10 @@ class InvestmentState(object):
             )
         return ns(
             active=False,
+            purchase_date = None,
+            first_effective_date = None,
+            last_effective_date = None,
+            paid_amount = 0,
             log=log,
             actions_log = self.addAction(
                 type = 'cancel',
