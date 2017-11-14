@@ -2122,8 +2122,8 @@ class Investment_Test(unittest.TestCase):
               name: 'Renúncia total de {investment_name} '
               invoice_id:
               - {id}
-              - 'SI: {investment_name}-RES {investment_name}-RES'
-              price_unit: 2000.0
+              - 'OR: {investment_name}-RES {investment_name}-RES'
+              price_unit: 100.0
               price_subtotal: 2000.0
               invoice_line_tax_id: []
               note:
@@ -2136,8 +2136,8 @@ class Investment_Test(unittest.TestCase):
                 investmentInitialAmount: 2000
               discount: 0.0
               account_analytic_id: false
-              quantity: 1.0
-              product_id: '[GENKWH_AMOR] Amortització Generation kWh'
+              quantity: 20.0
+              product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
             journal_id: Factures GenerationkWh
             mandate_id: {mandate_id}
             name: {investment_name}-RES
@@ -2151,7 +2151,7 @@ class Investment_Test(unittest.TestCase):
             - 3
             - No remesables
             sii_to_send: false
-            type: in_invoice
+            type: out_refund
             state: draft
             """.format(
                 invoice_date = datetime.today().strftime("%Y-%m-%d"),
@@ -2199,8 +2199,8 @@ class Investment_Test(unittest.TestCase):
               name: 'Renúncia total de {investment_name} '
               invoice_id:
               - {id}
-              - 'SI: {investment_name}-RES {investment_name}-RES'
-              price_unit: 2000.0
+              - 'OR: {investment_name}-RES {investment_name}-RES'
+              price_unit: 100.0
               price_subtotal: 2000.0
               invoice_line_tax_id: []
               note:
@@ -2213,8 +2213,8 @@ class Investment_Test(unittest.TestCase):
                 investmentInitialAmount: 2000
               discount: 0.0
               account_analytic_id: false
-              quantity: 1.0
-              product_id: '[GENKWH_AMOR] Amortització Generation kWh'
+              quantity: 20.0
+              product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
             journal_id: Factures GenerationkWh
             mandate_id: {mandate_id}
             name: {investment_name}-RES
@@ -2228,7 +2228,7 @@ class Investment_Test(unittest.TestCase):
             - 3
             - No remesables
             sii_to_send: false
-            type: in_invoice
+            type: out_refund
             state: paid
             """.format(
                 invoice_date = datetime.today().strftime("%Y-%m-%d"),
