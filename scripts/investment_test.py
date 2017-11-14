@@ -2091,6 +2091,52 @@ class Investment_Test(unittest.TestCase):
                 **self.personalData
                 ))
 
+    def test__resign__unpaid(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2000-01-01',  # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+        )
+        self.Investment.investment_payment([id])
+        self.Investment.mark_as_paid([id], '2000-01-05')
+        self.Investment.mark_as_unpaid([id])
+        self.Investment.resign([id])
+
+        investment = ns(self.Investment.read(id, []))
+        log = investment.pop('log')
+        name = investment.pop('name')
+        actions_log = investment.pop('actions_log') # TODO: Test
+
+        self.assertLogEquals(log,
+            u'CANCEL: La inversió ha estat cancel·lada\n'
+            u'UNPAID: Devolució del pagament de 2000 € [None]\n'
+            u'PAID: Pagament de 2000 € efectuat [None]\n'
+            u'INVOICED: Facturada i remesada\n'
+            u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
+            u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
+            )
+
+        self.assertNsEqual(investment, """
+            id: {id}
+            member_id:
+            - {member_id}
+            - {surname}, {name}
+            order_date: '2000-01-01'
+            purchase_date: False
+            first_effective_date: False
+            last_effective_date: False
+            nshares: 20
+            amortized_amount: 0.0
+            move_line_id: false
+            active: false
+            draft: false
+            """.format(
+                id=id,
+                **self.personalData
+                ))
+
     def test__create_resign_invoice__allOk(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
