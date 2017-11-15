@@ -1374,14 +1374,19 @@ class InvestmentState_Test(unittest.TestCase):
             "Partial divestment can be only applied to paid investments, "
             "try 'correct'")
 
-    def test_cancel(self):
+    def test_cancel_unpaid(self):
         inv = self.setupInvestment(
             nominal_amount = 200.0,
             purchase_date = False,
+            active = True,
             )
         inv.cancel()
         self.assertChangesEqual(inv, """
             active: False
+            purchase_date: null
+            first_effective_date: null
+            last_effective_date: null
+            paid_amount: 0
             """,
             u'CANCEL: La inversió ha estat cancel·lada\n'
             )
@@ -1394,18 +1399,77 @@ class InvestmentState_Test(unittest.TestCase):
                 timestamp = self.timestamp,
             ))
 
+    def test_cancel_draft(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            purchase_date = False,
+            draft = True,
+            active = True,
+        )
+        inv.cancel()
+        self.assertChangesEqual(inv, """
+            active: False
+            purchase_date: null
+            first_effective_date: null
+            last_effective_date: null
+            paid_amount: 0
+            """,
+            u'CANCEL: La inversió ha estat cancel·lada\n'
+            )
+        self.assertActionsEqual(inv, u"""
+            type: cancel
+            user: {user}
+            timestamp: '{timestamp}'
+            """.format(
+                user=self.user,
+                timestamp=self.timestamp,
+            ))
+
     def test_cancel_paid(self):
         inv = self.setupInvestment(
             nominal_amount = 200.0,
             purchase_date = isodate('2001-01-02'),
+            active = True,
             )
         with self.assertRaises(StateError) as ctx:
             inv.cancel()
         self.assertEqual(ctx.exception.message,
             "Only unpaid investments can be cancelled")
 
-    # TODO: cancel invoiced
+    def test_cancel_inactive(self):
+        inv = self.setupInvestment(
+            active = False,
+            )
+        with self.assertRaises(StateError) as ctx:
+            inv.cancel()
+        self.assertEqual(ctx.exception.message,
+            "Inactive investments can not be cancelled")
 
+    def test_cancel_invoiced(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            purchase_date = False,
+            draft = False,
+            active = True,
+            )
+        inv.cancel()
+        self.assertChangesEqual(inv, """
+            active: False
+            purchase_date: null
+            first_effective_date: null
+            last_effective_date: null
+            paid_amount: 0
+            """,
+            u'CANCEL: La inversió ha estat cancel·lada\n'
+            )
+        self.assertActionsEqual(inv, u"""
+            type: cancel
+            user: {user}
+            timestamp: '{timestamp}'
+            """.format(
+                user=self.user,
+                timestamp=self.timestamp,
+            ))
 
     # TODO: amortize should check 
 

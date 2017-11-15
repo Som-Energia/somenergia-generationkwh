@@ -9,7 +9,7 @@ try:
 except ImportError:
     pass
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from yamlns import namespace as ns
 import erppeek_wst
 import generationkwh.investmentmodel as gkwh
@@ -970,6 +970,7 @@ class Investment_Test(unittest.TestCase):
             'origin',
             'sii_to_send',
             'mandate_id',
+            'state',
         ]))
         invoice.journal_id = invoice.journal_id[1]
         invoice.mandate_id = invoice.mandate_id and invoice.mandate_id[0]
@@ -1039,6 +1040,7 @@ class Investment_Test(unittest.TestCase):
             - Recibo domiciliado
             sii_to_send: false
             type: out_invoice
+            state: draft
             """.format(
             invoice_date=datetime.today().strftime("%Y-%m-%d"),
             id=invoice_ids[0],
@@ -1313,6 +1315,7 @@ class Investment_Test(unittest.TestCase):
             - Transferencia
             sii_to_send: false
             type: in_invoice
+            state: draft
             """.format(
                 invoice_date = datetime.today().strftime("%Y-%m-%d"),
                 id = invoice_id,
@@ -1968,6 +1971,632 @@ class Investment_Test(unittest.TestCase):
         self.assertEqual([1,40],
             self.pendingAmortizationSummary(id, '2003-01-02'))
 
+    def test__cancel__ok(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+
+        self.Investment.cancel([id])
+        investment = ns(self.Investment.read(id, []))
+        log = investment.pop('log')
+        name = investment.pop('name')
+        actions_log = investment.pop('actions_log') # TODO: Test
+
+        self.assertLogEquals(log,
+            u'CANCEL: La inversió ha estat cancel·lada\n'
+            u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
+            u' Quantitat: 4000 €, IBAN: ES7712341234161234567890\n'
+            )
+        self.assertNsEqual(investment, """
+            id: {id}
+            member_id:
+            - {member_id}
+            - {surname}, {name}
+            order_date: '2017-01-01'
+            purchase_date: false
+            first_effective_date: false
+            last_effective_date: false
+            nshares: 40
+            amortized_amount: 0.0
+            move_line_id: false
+            active: false
+            draft: true
+            """.format(
+                id=id,
+                **self.personalData
+                ))
+
+
+    def test__cancel__twice(self):
+        with self.assertRaises(Exception) as ctx:
+            id = self.Investment.create_from_form(
+                self.personalData.partnerid,
+                '2017-01-01', # order_date
+                4000,
+                '10.10.23.123',
+                'ES7712341234161234567890',
+                )
+
+            self.Investment.cancel([id])
+            self.Investment.cancel([id])
+
+        self.assertEqual(ctx.exception.faultCode,
+            "Inactive investments can not be cancelled"
+            )
+
+    def test__cancel__paid(self):
+        with self.assertRaises(Exception) as ctx:
+            id = self.Investment.create_from_form(
+                self.personalData.partnerid,
+                '2000-01-01',  # order_date
+                2000,
+                '10.10.23.1',
+                'ES7712341234161234567890',
+            )
+            self.Investment.mark_as_invoiced(id)
+            self.Investment.mark_as_paid([id], '2000-01-05')
+            self.Investment.cancel([id])
+
+        self.assertEqual(ctx.exception.faultCode,
+            "Only unpaid investments can be cancelled"
+            )
+
+    def test__cancel__unpaid(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2000-01-01',  # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+        )
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2000-01-05')
+        self.Investment.mark_as_unpaid([id])
+        self.Investment.cancel([id])
+
+        investment = ns(self.Investment.read(id, []))
+        log = investment.pop('log')
+        name = investment.pop('name')
+        actions_log = investment.pop('actions_log') # TODO: Test
+
+        self.assertLogEquals(log,
+            u'CANCEL: La inversió ha estat cancel·lada\n'
+            u'UNPAID: Devolució del pagament de 2000 € [None]\n'
+            u'PAID: Pagament de 2000 € efectuat [None]\n'
+            u'INVOICED: Facturada i remesada\n'
+            u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
+            u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
+            )
+
+        self.assertNsEqual(investment, """
+            id: {id}
+            member_id:
+            - {member_id}
+            - {surname}, {name}
+            order_date: '2000-01-01'
+            purchase_date: false
+            first_effective_date: false
+            last_effective_date: false
+            nshares: 20
+            amortized_amount: 0.0
+            move_line_id: false
+            active: false
+            draft: false
+            """.format(
+                id=id,
+                **self.personalData
+                ))
+
+    def test__resign__unpaid(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2000-01-01',  # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+        )
+        self.Investment.investment_payment([id])
+        self.Investment.mark_as_paid([id], '2000-01-05')
+        self.Investment.mark_as_unpaid([id])
+        self.Investment.resign([id])
+
+        investment = ns(self.Investment.read(id, []))
+        log = investment.pop('log')
+        name = investment.pop('name')
+        actions_log = investment.pop('actions_log') # TODO: Test
+
+        self.assertLogEquals(log,
+            u'CANCEL: La inversió ha estat cancel·lada\n'
+            u'UNPAID: Devolució del pagament de 2000 € [None]\n'
+            u'PAID: Pagament de 2000 € efectuat [None]\n'
+            u'INVOICED: Facturada i remesada\n'
+            u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
+            u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
+            )
+
+        self.assertNsEqual(investment, """
+            id: {id}
+            member_id:
+            - {member_id}
+            - {surname}, {name}
+            order_date: '2000-01-01'
+            purchase_date: False
+            first_effective_date: False
+            last_effective_date: False
+            nshares: 20
+            amortized_amount: 0.0
+            move_line_id: false
+            active: false
+            draft: false
+            """.format(
+                id=id,
+                **self.personalData
+                ))
+
+    def test__resign__paid(self):
+        with self.assertRaises(Exception) as ctx:
+            id = self.Investment.create_from_form(
+                self.personalData.partnerid,
+                '2000-01-01',  # order_date
+                2000,
+                '10.10.23.1',
+                'ES7712341234161234567890',
+            )
+            self.Investment.investment_payment([id])
+            self.Investment.mark_as_paid([id], '2000-01-05')
+            self.Investment.resign([id])
+
+        self.assertEqual(ctx.exception.faultCode,
+            "Only unpaid investments can be cancelled"
+            )
+
+    def test__resign__alreadyCancelled(self):
+        with self.assertRaises(Exception) as ctx:
+            id = self.Investment.create_from_form(
+                self.personalData.partnerid,
+                '2000-01-01',  # order_date
+                2000,
+                '10.10.23.1',
+                'ES7712341234161234567890',
+            )
+            self.Investment.investment_payment([id])
+            self.Investment.mark_as_paid([id], '2000-01-05')
+            self.Investment.mark_as_unpaid([id])
+            self.Investment.resign([id])
+            self.Investment.resign([id])
+
+        self.assertEqual(ctx.exception.faultCode,
+            "Inactive investments can not be cancelled"
+            )
+
+    def test__resign__notInvoiced(self):
+        with self.assertRaises(Exception) as ctx:
+            id = self.Investment.create_from_form(
+                self.personalData.partnerid,
+                '2000-01-01',  # order_date
+                2000,
+                '10.10.23.1',
+                'ES7712341234161234567890',
+            )
+            self.Investment.resign([id])
+
+        self.assertEqual(ctx.exception.faultCode,
+            "Inversion without initial invoice, cannot resign"
+            )
+
+    def test__create_resign_invoice__allOk(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        invoice_ids, errs =  self.Investment.create_initial_invoices([id])
+        invoice_id, errors = self.Investment.create_resign_invoice(id)
+
+        self.assertTrue(invoice_id)
+        investment = self.Investment.browse(id)
+        self.assertInvoiceInfoEqual(invoice_id, """\
+            account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
+            amount_total: 2000.0
+            amount_untaxed: 2000.0
+            check_total: 0.0
+            date_invoice: '{invoice_date}'
+            id: {id}
+            invoice_line:
+            - origin: false
+              uos_id: PCE
+              account_id: 163500{p.nsoci:0>6s} {p.surname}, {p.name}
+              name: 'Inversió {investment_name} '
+              invoice_id:
+              - {id}
+              - 'OR: {investment_name}-RES {investment_name}-RES'
+              price_unit: 100.0
+              price_subtotal: 2000.0
+              invoice_line_tax_id: []
+              note: false
+              discount: 0.0
+              account_analytic_id: false
+              quantity: 20.0
+              product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
+            journal_id: Factures GenerationkWh
+            mandate_id: {mandate_id}
+            name: {investment_name}-RES
+            number: {investment_name}-RES
+            origin: {investment_name}
+            partner_bank: None
+            partner_id:
+            - {p.partnerid}
+            - {p.surname}, {p.name}
+            payment_type: false
+            sii_to_send: false
+            type: out_refund
+            state: draft
+            """.format(
+                invoice_date = datetime.today().strftime("%Y-%m-%d"),
+                id = invoice_id,
+                investment_name = investment.name,
+                p = self.personalData,
+                mandate_id = False,
+            ))
+
+    def test__pay_resign_invoice__createOpenAndPayOk(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        invoice_ids, errs =  self.Investment.create_initial_invoices([id])
+        invoice_id, errors = self.Investment.create_resign_invoice(id)
+        self.Investment.open_invoices([invoice_id])
+        self.Investment.pay_resign_invoice(invoice_id)
+
+        self.assertTrue(invoice_id)
+        investment = self.Investment.browse(id)
+        self.assertInvoiceInfoEqual(invoice_id, """\
+            account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
+            amount_total: 2000.0
+            amount_untaxed: 2000.0
+            check_total: 0.0
+            date_invoice: '{invoice_date}'
+            id: {id}
+            invoice_line:
+            - origin: false
+              uos_id: PCE
+              account_id: 163500{p.nsoci:0>6s} {p.surname}, {p.name}
+              name: 'Inversió {investment_name} '
+              invoice_id:
+              - {id}
+              - 'OR: {investment_name}-RES {investment_name}-RES'
+              price_unit: 100.0
+              price_subtotal: 2000.0
+              invoice_line_tax_id: []
+              note: false
+              discount: 0.0
+              account_analytic_id: false
+              quantity: 20.0
+              product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
+            journal_id: Factures GenerationkWh
+            mandate_id: {mandate_id}
+            name: {investment_name}-RES
+            number: {investment_name}-RES
+            origin: {investment_name}
+            partner_bank: None
+            partner_id:
+            - {p.partnerid}
+            - {p.surname}, {p.name}
+            payment_type: false
+            sii_to_send: false
+            type: out_refund
+            state: paid
+            """.format(
+                invoice_date = datetime.today().strftime("%Y-%m-%d"),
+                id = invoice_id,
+                investment_name = investment.name,
+                p = self.personalData,
+                mandate_id = False,
+            ))
+
+    def test__divest__beforeEffectivePeriod(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2017-09-02')
+        date_today = str(date.today())
+
+        self.Investment.divest([id])
+
+        investment = ns(self.Investment.read(id, []))
+        log = investment.pop('log')
+        name = investment.pop('name')
+        actions_log = investment.pop('actions_log') 
+        self.assertNsEqual(investment, """
+            id: {id}
+            member_id:
+            - {member_id}
+            - {surname}, {name}
+            order_date: '2017-01-01'
+            purchase_date: '2017-09-02'
+            first_effective_date: '2018-09-02'
+            last_effective_date: '{date_today}'
+            nshares: 10
+            amortized_amount: 1000.0
+            move_line_id: false
+            active: false
+            draft: false
+            """.format(
+                id=id,
+                date_today = date_today,
+                **self.personalData
+                ))
+
+    def test__divest__inEffectivePeriod(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2015-09-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2015-09-01')
+        date_today = str(date.today())
+
+        self.Investment.divest([id])
+
+        investment = ns(self.Investment.read(id, []))
+        log = investment.pop('log')
+        name = investment.pop('name')
+        actions_log = investment.pop('actions_log')
+        self.assertNsEqual(investment, """
+            id: {id}
+            member_id:
+            - {member_id}
+            - {surname}, {name}
+            order_date: '2015-09-01'
+            purchase_date: '2015-09-01'
+            first_effective_date: '2016-08-01'
+            last_effective_date: '{date_today}'
+            nshares: 10
+            amortized_amount: 1000.0
+            move_line_id: false
+            active: true
+            draft: false
+            """.format(
+                id=id,
+                date_today = date_today,
+                **self.personalData
+                ))
+
+    def test__divest__beforeReturnPaymentOrderPeriod(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        date_paid = date.today() - timedelta(days=20)
+        self.Investment.mark_as_paid([id], str(date_paid))
+
+        invoice_ids, errors = self.Investment.divest([id])
+
+        investment = ns(self.Investment.read(id, []))
+        name = investment.pop('name')
+        response = ns(error = errors)
+        self.assertNsEqual(response, """
+            error:
+            - '{name}: Too early to divest (< 30 days from purchase)'
+            """.format(
+                name = name,
+                ))
+
+    def test__divest__alreadyDivested(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        date_paid = date.today() - timedelta(days=160)
+        self.Investment.mark_as_paid([id], str(date_paid))
+
+        invoice_ids, errors = self.Investment.divest([id])
+        invoice_ids2, errors2 = self.Investment.divest([id])
+
+        investment = ns(self.Investment.read(id, []))
+        name = investment.pop('name')
+        response = ns(error = errors2)
+        self.assertNsEqual(response, """
+            error:
+            - 'Inversió {id}: La desinversió {name}-DES ja existeix'
+            """.format(
+                name = name,
+                id = id,
+                ))
+
+    def test__divest__invoiceAfterAmortization(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2015-09-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2015-09-01')
+        date_today = str(date.today())
+        self.Investment.amortize('2017-09-02',[id])
+
+        invoice_ids, error = self.Investment.divest([id])
+
+        invoice_id = invoice_ids[0]
+        investment = ns(self.Investment.read(id, []))
+        log = investment.pop('log')
+        investment_name = investment.pop('name')
+        actions_log = investment.pop('actions_log')
+        self.assertNsEqual(investment, """
+            id: {id}
+            member_id:
+            - {member_id}
+            - {surname}, {name}
+            order_date: '2015-09-01'
+            purchase_date: '2015-09-01'
+            first_effective_date: '2016-08-01'
+            last_effective_date: '{date_today}'
+            nshares: 10
+            amortized_amount: 1000.0
+            move_line_id: false
+            active: true
+            draft: false
+            """.format(
+                id=id,
+                date_today = date_today,
+                **self.personalData
+                ))
+        self.assertInvoiceInfoEqual(invoice_id, """\
+            account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
+            amount_total: 960.0
+            amount_untaxed: 960.0
+            check_total: 960.0
+            date_invoice: '{invoice_date}'
+            id: {id}
+            invoice_line:
+            - origin: false
+              uos_id: PCE
+              account_id: 163500{p.nsoci:0>6s} {p.surname}, {p.name}
+              name: 'Desinversió total de {investment_name} a {invoice_date} '
+              invoice_id:
+              - {id}
+              - 'SI: {investment_name}-DES {investment_name}-DES'
+              price_unit: 960.0
+              price_subtotal: 960.0
+              invoice_line_tax_id: []
+              note:
+                pendingCapital: 0.0
+                divestmentDate: '{invoice_date}'
+                investmentId: {investment_id}
+                investmentName: {investment_name}
+                investmentPurchaseDate: '2015-09-01'
+                investmentLastEffectiveDate: '2040-09-01'
+                investmentInitialAmount: 1000
+              discount: 0.0
+              account_analytic_id: false
+              quantity: 1.0
+              product_id: '[GENKWH_AMOR] Amortització Generation kWh'
+            journal_id: Factures GenerationkWh
+            mandate_id: {mandate_id}
+            name: {investment_name}-DES
+            number: {investment_name}-DES
+            origin: {investment_name}
+            partner_bank: {iban}
+            partner_id:
+            - {p.partnerid}
+            - {p.surname}, {p.name}
+            payment_type:
+            - 2
+            - Transferencia
+            sii_to_send: false
+            type: in_invoice
+            state: open
+            """.format(
+                invoice_date = datetime.today().strftime("%Y-%m-%d"),
+                id = invoice_id,
+                iban = 'ES77 1234 1234 1612 3456 7890',
+                year = 2018,
+                investment_name = investment_name,
+                p = self.personalData,
+                investment_id = id,
+                mandate_id = False,
+            ))
+
+    def test__create_divestment_invoice__allOk(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        invoice_date = datetime.today().strftime("%Y-%m-%d")
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2017-01-01')
+
+        invoice_id, errors = self.Investment.create_divestment_invoice(
+            id, invoice_date, 2000)
+
+        self.assertTrue(invoice_id)
+        investment = self.Investment.browse(id)
+        self.assertInvoiceInfoEqual(invoice_id, """\
+            account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
+            amount_total: 2000.0
+            amount_untaxed: 2000.0
+            check_total: 2000.0
+            date_invoice: '{invoice_date}'
+            id: {id}
+            invoice_line:
+            - origin: false
+              uos_id: PCE
+              account_id: 163500{p.nsoci:0>6s} {p.surname}, {p.name}
+              name: 'Desinversió total de {investment_name} a {invoice_date} '
+              invoice_id:
+              - {id}
+              - 'SI: {investment_name}-DES {investment_name}-DES'
+              price_unit: 2000.0
+              price_subtotal: 2000.0
+              invoice_line_tax_id: []
+              note:
+                pendingCapital: 0.0
+                divestmentDate: '{invoice_date}'
+                investmentId: {investment_id}
+                investmentName: {investment_name}
+                investmentPurchaseDate: '2017-01-01'
+                investmentLastEffectiveDate: '2042-01-01'
+                investmentInitialAmount: 2000
+              discount: 0.0
+              account_analytic_id: false
+              quantity: 1.0
+              product_id: '[GENKWH_AMOR] Amortització Generation kWh'
+            journal_id: Factures GenerationkWh
+            mandate_id: {mandate_id}
+            name: {investment_name}-DES
+            number: {investment_name}-DES
+            origin: {investment_name}
+            partner_bank: {iban}
+            partner_id:
+            - {p.partnerid}
+            - {p.surname}, {p.name}
+            payment_type:
+            - 2
+            - Transferencia
+            sii_to_send: false
+            type: in_invoice
+            state: draft
+            """.format(
+                invoice_date = datetime.today().strftime("%Y-%m-%d"),
+                id = invoice_id,
+                iban = 'ES77 1234 1234 1612 3456 7890',
+                year = 2018,
+                investment_name = investment.name,
+                p = self.personalData,
+                investment_id = id,
+                mandate_id = False,
+            ))
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
