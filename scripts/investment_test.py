@@ -2632,6 +2632,28 @@ class Investment_Test(unittest.TestCase):
             "Investment in draft, so not transferible"
             )
 
+    def test__create_from_transfer__whenInvestmentInactive(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.deactivate(id)
+
+        with self.assertRaises(Exception) as ctx:
+            id_new = self.Investment.create_from_transfer(
+                id, # magic number, existing investment
+                self.personalData.partnerid,
+                '2017-01-26', # order_date
+                )
+        self.assertEqual(ctx.exception.faultCode,
+            "Investment not active"
+            )
+
+
 unittest.TestCase.__str__ = unittest.TestCase.id
 
 if __name__=='__main__':
