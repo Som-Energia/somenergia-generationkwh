@@ -2613,6 +2613,25 @@ class Investment_Test(unittest.TestCase):
             "Destination partner is not a member"
             )
 
+    def test__create_from_transfer__whenInvestmentDraft(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+
+        with self.assertRaises(Exception) as ctx:
+            id_new = self.Investment.create_from_transfer(
+                id, # magic number, existing investment
+                1, # magic number, not member
+                '2017-01-01', # order_date
+                )
+        self.assertEqual(ctx.exception.faultCode,
+            "Investment in draft, so not transferible"
+            )
+
 unittest.TestCase.__str__ = unittest.TestCase.id
 
 if __name__=='__main__':
