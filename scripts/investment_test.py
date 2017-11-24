@@ -86,6 +86,9 @@ class Investment_OLD_Test(unittest.TestCase):
                 [1, '2015-07-29', False,  1],
                 [1, '2015-11-20', False, 30],
                 [1, '2015-11-20', False, 30],
+                [1, '2017-09-21', False, -1],
+                [1, '2017-09-26', False, -1],
+                [1, '2017-09-28', False, -1]
                 #[1, '2016-05-19', False, -86], #Fiscal year closing
                 #[1, '2016-05-19', False, 86]  #Fiscal year closing
             ])
@@ -2597,6 +2600,18 @@ class Investment_Test(unittest.TestCase):
                 investment_id = id,
                 mandate_id = False,
             ))
+
+
+    def test__create_from_transfer__whenNotAMember(self):
+        with self.assertRaises(Exception) as ctx:
+            id = self.Investment.create_from_transfer(
+                1436, # magic number, existing investment
+                1, # magic number, not member
+                '2017-01-01', # order_date
+                )
+        self.assertEqual(ctx.exception.faultCode,
+            "Destination partner is not a member"
+            )
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
