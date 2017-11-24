@@ -2653,6 +2653,30 @@ class Investment_Test(unittest.TestCase):
             "Investment not active"
             )
 
+    def test__create_from_transfer__whenFullAmortized(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+
+        self.Investment.mark_as_paid([id], '2017-01-03')
+        invoice,errors = self.Investment.amortize('2042-11-20',[id])
+
+        with self.assertRaises(Exception) as ctx:
+            id_new = self.Investment.create_from_transfer(
+                id, # magic number, existing investment
+                self.personalData.partnerid,
+                '2017-01-26', # order_date
+                )
+        self.assertEqual(ctx.exception.faultCode,
+            "Amount to return = 0, not transferible"
+            )
+
+
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
