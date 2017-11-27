@@ -426,6 +426,7 @@ class Investment_Test(unittest.TestCase):
         self.PaymentMandate = self.erp.PaymentMandate
         self.ResPartnerAddress = self.erp.ResPartnerAddress
         self.ResPartner = self.erp.ResPartner
+        self.AccountMove = self.erp.AccountMove
         self.MailMockup = self.erp.GenerationkwhMailmockup
         self.MailMockup.activate()
 
@@ -2722,6 +2723,36 @@ class Investment_Test(unittest.TestCase):
                 **self.personalData
                 ))
 
+    def test__move_line_when_tranfer__allOk(self):
+        id = self.Investment.create_from_form(
+            self.personalData.newpartnerid,
+            '2017-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2017-09-02')
+
+        move_id = self.Investment.move_line_when_tranfer(32693,32653,35513,36144, 1000)
+
+        move = ns(self.AccountMove.read(move_id, []))
+        id_move = move.pop('id')
+        id_move_lines = move.pop('line_id')
+        id_period = move.pop('period_id')
+        date = move.pop('date')
+        self.assertNsEqual(move,"""
+            amount: 1000.0
+            journal_id:
+            - 46
+            - Factures GenerationkWh
+            name: Transfer
+            partner_id: false
+            ref: '0000'
+            state: posted
+            to_check: false
+            type: journal_voucher
+            """)
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
