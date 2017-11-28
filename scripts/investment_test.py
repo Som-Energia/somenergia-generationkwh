@@ -427,6 +427,7 @@ class Investment_Test(unittest.TestCase):
         self.ResPartnerAddress = self.erp.ResPartnerAddress
         self.ResPartner = self.erp.ResPartner
         self.AccountMove = self.erp.AccountMove
+        self.AccountPeriod = self.erp.AccountPeriod
         self.MailMockup = self.erp.GenerationkwhMailmockup
         self.MailMockup.activate()
 
@@ -2725,7 +2726,7 @@ class Investment_Test(unittest.TestCase):
 
     def test__move_line_when_tranfer__allOk(self):
         id = self.Investment.create_from_form(
-            self.personalData.newpartnerid,
+            self.personalData.partnerid,
             '2017-01-01', # order_date
             1000,
             '10.10.23.123',
@@ -2733,15 +2734,18 @@ class Investment_Test(unittest.TestCase):
             )
         self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2017-09-02')
+        partner = self.ResPartner.browse(self.personalData.partnerid)
+        newpartner = self.ResPartner.browse(self.personalData.newpartnerid)
 
-        move_id = self.Investment.move_line_when_tranfer(32693,32653,35513,36144, 1000)
+        move_id, moveline_debit, moveline_credit = self.Investment.move_line_when_tranfer(partner.id, newpartner.id, partner.property_account_gkwh.id, newpartner.property_account_gkwh.id, 1000)
 
+        period_name = datetime.today().strftime('%m/%Y')
+        period_id = self.AccountPeriod.search([
+            ('name', '=', period_name),
+            ])[0]
         move = ns(self.AccountMove.read(move_id, []))
-        id_move = move.pop('id')
-        id_move_lines = move.pop('line_id')
-        id_period = move.pop('period_id')
-        date = move.pop('date')
         self.assertNsEqual(move,"""
+            id: {move_id}
             amount: 1000.0
             journal_id:
             - 46
@@ -2752,7 +2756,21 @@ class Investment_Test(unittest.TestCase):
             state: posted
             to_check: false
             type: journal_voucher
-            """)
+            date: '{date}'
+            period_id:
+            - {period_id}
+            - {period_name}
+            line_id:
+            - {moveline_credit}
+            - {moveline_debit}
+            """.format(
+            date=datetime.today().strftime("%Y-%m-%d"),
+            period_id= period_id,
+            period_name = period_name,
+            moveline_debit = moveline_debit,
+            moveline_credit = moveline_credit,
+            move_id = move_id,
+            ))
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
