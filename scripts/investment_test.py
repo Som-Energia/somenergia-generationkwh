@@ -2691,15 +2691,38 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
         self.Investment.mark_as_invoiced(id)
-        self.Investment.mark_as_paid([id], '2017-09-02')
+        self.Investment.mark_as_paid([id], '2017-01-02')
         date_today = str(date.today())
 
-        new_investment_id = self.Investment.create_from_transfer(
+        old_investment_id, new_investment_id = self.Investment.create_from_transfer(
             id,
             self.personalData.partnerid,
-            '2017-11-01',
+            '2019-05-01',
             'ES7712341234161234567890',
             )
+
+        old_investment = ns(self.Investment.read(old_investment_id, []))
+        log = old_investment.pop('log')
+        name = old_investment.pop('name')
+        actions_log = old_investment.pop('actions_log')
+        self.assertNsEqual(old_investment, """
+            id: {id}
+            member_id:
+            - {newmemberid}
+            - {newsurname}, {newname}
+            order_date: '2017-01-01'
+            purchase_date: '2017-01-02'
+            first_effective_date: '2018-01-02'
+            last_effective_date: '2019-05-01'
+            nshares: 10
+            amortized_amount: 1000.0
+            move_line_id: false
+            active: true
+            draft: false
+            """.format(
+                id=old_investment_id,
+                **self.personalData
+                ))
 
         investment = ns(self.Investment.read(new_investment_id, []))
         log = investment.pop('log')
@@ -2711,11 +2734,77 @@ class Investment_Test(unittest.TestCase):
             - {member_id}
             - {surname}, {name}
             order_date: '2017-01-01'
-            purchase_date: '2017-09-02'
-            first_effective_date: '2018-09-02'
-            last_effective_date: '2042-09-02'
+            purchase_date: '2017-01-02'
+            first_effective_date: '2019-05-02'
+            last_effective_date: '2042-01-02'
             nshares: 10
             amortized_amount: 0.0
+            move_line_id: false
+            active: true
+            draft: false
+            """.format(
+                id=new_investment_id,
+                **self.personalData
+                ))
+
+    def test__create_from_transfer__partialAmortizedAllOk(self):
+        id = self.Investment.create_from_form(
+            self.personalData.newpartnerid,
+            '2017-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2017-01-02')
+        date_today = str(date.today())
+        self.Investment.amortize('2019-04-30', [id])
+
+        old_investment_id, new_investment_id = self.Investment.create_from_transfer(
+            id,
+            self.personalData.partnerid,
+            '2019-05-01',
+            'ES7712341234161234567890',
+            )
+
+        old_investment = ns(self.Investment.read(old_investment_id, []))
+        log = old_investment.pop('log')
+        name = old_investment.pop('name')
+        actions_log = old_investment.pop('actions_log')
+        self.assertNsEqual(old_investment, """
+            id: {id}
+            member_id:
+            - {newmemberid}
+            - {newsurname}, {newname}
+            order_date: '2017-01-01'
+            purchase_date: '2017-01-02'
+            first_effective_date: '2018-01-02'
+            last_effective_date: '2019-05-01'
+            nshares: 10
+            amortized_amount: 1000.0
+            move_line_id: false
+            active: true
+            draft: false
+            """.format(
+                id=old_investment_id,
+                **self.personalData
+                ))
+
+        investment = ns(self.Investment.read(new_investment_id, []))
+        log = investment.pop('log')
+        name = investment.pop('name')
+        actions_log = investment.pop('actions_log')
+        self.assertNsEqual(investment, """
+            id: {id}
+            member_id:
+            - {member_id}
+            - {surname}, {name}
+            order_date: '2017-01-01'
+            purchase_date: '2017-01-02'
+            first_effective_date: '2019-05-02'
+            last_effective_date: '2042-01-02'
+            nshares: 10
+            amortized_amount: 40.0
             move_line_id: false
             active: true
             draft: false
