@@ -3,7 +3,7 @@
 
 from yamlns import namespace as ns
 from .isodates import isodate
-from datetime import timedelta
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import generationkwh.investmentmodel as gkwh
 from decimal import Decimal
@@ -279,6 +279,7 @@ class InvestmentState(object):
         A previous payment has been returned by the bank
         so the investment is set as unpaid.
         """
+        amount = abs(amount)
         log = self._log(
             u'UNPAID: '
             u'Devolució del pagament de {amount} € '
@@ -376,7 +377,6 @@ class InvestmentState(object):
             )
         if not self.purchase_date:
             raise InvestmentStateError("Only paid investments can be transferred")
-
         return ns(
             last_effective_date = date,
             active = self.hasEffectivePeriod(self.first_effective_date, date),
