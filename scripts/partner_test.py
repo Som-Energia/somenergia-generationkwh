@@ -12,7 +12,7 @@ import datetime
 from yamlns import namespace as ns
 import erppeek_wst
 import generationkwh.investmentmodel as gkwh
-
+from generationkwh.testutils import assertNsEqual
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Partner_Test(unittest.TestCase):
@@ -33,24 +33,7 @@ class Partner_Test(unittest.TestCase):
         self.erp.rollback()
         self.erp.close()
 
-
-    def assertNsEqual(self, dict1, dict2):
-        def parseIfString(nsOrString):
-            if type(nsOrString) in (dict, ns):
-                return nsOrString
-            return ns.loads(nsOrString)
-
-        def sorteddict(d):
-            if type(d) not in (dict, ns):
-                return d
-            return ns(sorted(
-                (k, sorteddict(v))
-                for k,v in d.items()
-                ))
-        dict1 = sorteddict(parseIfString(dict1))
-        dict2 = sorteddict(parseIfString(dict2))
-
-        return self.assertMultiLineEqual(dict1.dump(), dict2.dump())
+    assertNsEqual=assertNsEqual
 
     def test__get_or_create_payment_order__badName(self):
         order_id = self.Investment.get_or_create_open_payment_order("BAD MODE")
@@ -86,7 +69,7 @@ class Partner_Test(unittest.TestCase):
         ]))
         order.user_id = order.user_id[0]
         order.mode = order.mode[1]
-        self.assertNsEqual(order, ns.loads("""\
+        self.assertNsEqual(order, """\
              id: {}
              create_account_moves: direct-payment
              date_prefered: fixed
@@ -97,7 +80,7 @@ class Partner_Test(unittest.TestCase):
             """.format(
                 second_order_id,
                 order.user_id,
-            )))
+            ))
 
 
     def test__get_or_create_payment_order__receivableInvoice(self):
@@ -114,10 +97,10 @@ class Partner_Test(unittest.TestCase):
 
         order = (self.PaymentOrder.read(order_id, ['create_account_moves','type']))
         order.pop('id')
-        self.assertNsEqual(order, ns.loads("""\
+        self.assertNsEqual(order, """\
                 create_account_moves: bank-statement
                 type: receivable
-                """))
+                """)
 
     def test__get_or_create_payment_order__payableInvoice(self):
         previous_order_id = self.Investment.get_or_create_open_payment_order(self.payMode)
@@ -132,10 +115,10 @@ class Partner_Test(unittest.TestCase):
 
         order = (self.PaymentOrder.read(order_id, ['create_account_moves','type']))
         order.pop('id')
-        self.assertNsEqual(order, ns.loads("""\
+        self.assertNsEqual(order, """\
                 create_account_moves: bank-statement
                 type: payable
-                """))
+                """)
 
 
     def test__get_or_create_partner_bank__whenExists(self):

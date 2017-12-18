@@ -12,6 +12,7 @@ from datetime import date
 from yamlns import namespace as ns
 import erppeek_wst
 import generationkwh.investmentmodel as gkwh
+from generationkwh.testutils import assertNsEqual
 
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
@@ -33,25 +34,7 @@ class Account_Invoice_Test(unittest.TestCase):
         self.erp.rollback()
         self.erp.close()
 
-
-    #TODO: Implemented in Investment_Amortization_Test
-    def assertNsEqual(self, dict1, dict2):
-        def parseIfString(nsOrString):
-            if type(nsOrString) in (dict, ns):
-                return nsOrString
-            return ns.loads(nsOrString)
-
-        def sorteddict(d):
-            if type(d) not in (dict, ns):
-                return d
-            return ns(sorted(
-                (k, sorteddict(v))
-                for k,v in d.items()
-                ))
-        dict1 = sorteddict(parseIfString(dict1))
-        dict2 = sorteddict(parseIfString(dict2))
-
-        return self.assertMultiLineEqual(dict1.dump(), dict2.dump())
+    assertNsEqual=assertNsEqual
 
     def test__get_investment__found(self):
         investment_id = self.Investment.create_from_form(
@@ -692,11 +675,11 @@ class Account_Invoice_Test(unittest.TestCase):
 
 
     def assertMoveLineEqual(self, ml_id, expected):
-        self.assertNsEqual(ns(self.erp.AccountMoveLine.read(ml_id, [
+        self.assertNsEqual(self.erp.AccountMoveLine.read(ml_id, [
             'name',
             'debit',
             'credit',
-            ])), expected)
+            ]), expected)
 
 
 

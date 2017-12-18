@@ -13,6 +13,7 @@ from datetime import datetime, timedelta, date
 from yamlns import namespace as ns
 import erppeek_wst
 import generationkwh.investmentmodel as gkwh
+from generationkwh.testutils import assertNsEqual
 
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
@@ -33,6 +34,8 @@ class Investment_OLD_Test(unittest.TestCase):
         self.erp.rollback()
         self.erp.close()
 
+    assertNsEqual=assertNsEqual
+
     #TODO: move this in a utils class (copy pasted from Investment_Amortization_Test
     def assertLogEquals(self, log, expected):
         for x in log.splitlines():
@@ -47,25 +50,6 @@ class Investment_OLD_Test(unittest.TestCase):
                 if u'] ' in x
                 )
         self.assertMultiLineEqual(logContent, expected)
-
-    #TODO: Implemented in Investment_Amortization_Test
-    def assertNsEqual(self, dict1, dict2):
-        def parseIfString(nsOrString):
-            if type(nsOrString) in (dict, ns):
-                return nsOrString
-            return ns.loads(nsOrString)
-
-        def sorteddict(d):
-            if type(d) not in (dict, ns):
-                return d
-            return ns(sorted(
-                (k, sorteddict(v))
-                for k,v in d.items()
-                ))
-        dict1 = sorteddict(parseIfString(dict1))
-        dict2 = sorteddict(parseIfString(dict2))
-
-        return self.assertMultiLineEqual(dict1.dump(), dict2.dump())
 
     def test__effective_investments_tuple__noInvestments(self):
         self.assertEqual(
@@ -436,24 +420,7 @@ class Investment_Test(unittest.TestCase):
         self.erp.rollback()
         self.erp.close()
 
-
-    def assertNsEqual(self, dict1, dict2):
-        def parseIfString(nsOrString):
-            if type(nsOrString) in (dict, ns):
-                return nsOrString
-            return ns.loads(nsOrString)
-
-        def sorteddict(d):
-            if type(d) not in (dict, ns):
-                return d
-            return ns(sorted(
-                (k, sorteddict(v))
-                for k,v in d.items()
-                ))
-        dict1 = sorteddict(parseIfString(dict1))
-        dict2 = sorteddict(parseIfString(dict2))
-
-        return self.assertMultiLineEqual(dict1.dump(), dict2.dump())
+    assertNsEqual=assertNsEqual
 
     def assertLogEquals(self, log, expected):
         for x in log.splitlines():
@@ -470,7 +437,7 @@ class Investment_Test(unittest.TestCase):
         self.assertMultiLineEqual(logContent, expected)
 
     def assertMailLogEqual(self, expected):
-        self.assertNsEqual(ns.loads(self.MailMockup.log() or '{}'), expected)
+        self.assertNsEqual(self.MailMockup.log() or '{}', expected)
 
     def test__create_from_form__allOk(self):
         id = self.Investment.create_from_form(
@@ -1665,7 +1632,7 @@ class Investment_Test(unittest.TestCase):
             mandate.creditor_id = mandate.creditor_id[1]
             partner = self.ResPartner.browse(self.personalData.partnerid)
             nom_complet = self.personalData.surname + ", " + self.personalData.name
-            self.assertNsEqual(mandate, ns.loads("""\
+            self.assertNsEqual(mandate, """\
                 creditor_address: CL. PIC DE PEGUERA, 11 A 2 8  17003 GIRONA (ESPAÑA)
                 creditor_code: CREDITORCODE
                 creditor_id: SOM ENERGIA SCCL
@@ -1695,7 +1662,7 @@ class Investment_Test(unittest.TestCase):
                     format_iban=' '.join(
                         iban[n:n+4] for n in xrange(0,len(iban),4)),
                     today=datetime.today().strftime("%Y-%m-%d"),
-                )))
+                ))
 
     def test__create_from_form__sendsCreationEmail(self):
         id = self.Investment.create_from_form(

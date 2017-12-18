@@ -19,7 +19,7 @@ setup(
         'scripts/genkwh_investments.py',
 		],
 	install_requires=[
-		'yamlns',
+		'yamlns>=0.6',
 		'b2btest',
 		'numpy',
 		'plantmeter',
