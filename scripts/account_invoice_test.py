@@ -165,7 +165,7 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: 4000.0
           credit: 4000.0
           debit: 0.0
-          invoice: 'CI: {investment_name}-JUST {investment_name}-JUST'
+          invoice: 'CI: {investment_name}-JUST'
           journal_id: Factures GenerationkWh
           name: 'Inversió {investment_name} '
           payment_type: Recibo domiciliado
@@ -177,7 +177,7 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: -4000.0
           credit: 0.0
           debit: 4000.0
-          invoice: 'CI: {investment_name}-JUST {investment_name}-JUST'
+          invoice: 'CI: {investment_name}-JUST'
           journal_id: Factures GenerationkWh
           name: {investment_name}-JUST
           payment_type: Recibo domiciliado
@@ -211,7 +211,7 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: 4000.0
           credit: 4000.0
           debit: 0.0
-          invoice: 'CI: {investment_name}-JUST {investment_name}-JUST'
+          invoice: 'CI: {investment_name}-JUST'
           journal_id: Factures GenerationkWh
           name: 'Inversió {investment_name} '
           payment_type: Recibo domiciliado
@@ -223,7 +223,7 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: 0.0 # TURNED ZERO
           credit: 0.0
           debit: 4000.0
-          invoice: 'CI: {investment_name}-JUST {investment_name}-JUST'
+          invoice: 'CI: {investment_name}-JUST'
           journal_id: Factures GenerationkWh
           name: {investment_name}-JUST
           payment_type: Recibo domiciliado
@@ -332,7 +332,7 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: 4000.0
           credit: 4000.0
           debit: 0.0
-          invoice: 'CI: {investment_name}-JUST {investment_name}-JUST'
+          invoice: 'CI: {investment_name}-JUST'
           journal_id: Factures GenerationkWh
           name: an unpayment
           payment_type: Recibo domiciliado
@@ -344,7 +344,7 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: -4000.0
           credit: 0.0
           debit: 4000.0
-          invoice: 'CI: {investment_name}-JUST {investment_name}-JUST'
+          invoice: 'CI: {investment_name}-JUST'
           journal_id: Factures GenerationkWh
           name: an unpayment
           payment_type: Recibo domiciliado
@@ -445,7 +445,7 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: -160.0
           credit: 0.0
           debit: 160.0
-          invoice: 'SI: {investment_name}-AMOR2019 {investment_name}-AMOR2019'
+          invoice: 'SI: {investment_name}'
           journal_id: Factures GenerationkWh
           name: 'Amortització fins a 02/01/2019 de {investment_name} '
           payment_type: Transferencia
@@ -457,7 +457,7 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: 160.0
           credit: 160.0
           debit: 0.0
-          invoice: 'SI: {investment_name}-AMOR2019 {investment_name}-AMOR2019'
+          invoice: 'SI: {investment_name}'
           journal_id: Factures GenerationkWh
           name: {investment_name}-AMOR2019
           payment_type: Transferencia
@@ -495,7 +495,7 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: -160.0
           credit: 0.0
           debit: 160.0
-          invoice: 'SI: {investment_name}-AMOR2019 {investment_name}-AMOR2019'
+          invoice: 'SI: {investment_name}'
           journal_id: Factures GenerationkWh
           name: 'Amortització fins a 02/01/2019 de {investment_name} '
           payment_type: Transferencia
@@ -507,7 +507,7 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: 0.0 # CHANGED!!
           credit: 160.0
           debit: 0.0
-          invoice: 'SI: {investment_name}-AMOR2019 {investment_name}-AMOR2019'
+          invoice: 'SI: {investment_name}'
           journal_id: Factures GenerationkWh
           name: {investment_name}-AMOR2019
           payment_type: Transferencia
