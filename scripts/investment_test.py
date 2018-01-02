@@ -26,8 +26,6 @@ class Investment_OLD_Test(unittest.TestCase):
         self.erp.begin()
         self.Soci = self.erp.SomenergiaSoci
         self.Investment = self.erp.GenerationkwhInvestment
-        self.AccountInvoice = self.erp.AccountInvoice
-        self.PaymentLine = self.erp.PaymentLine
         self.Investment.dropAll()
 
     def tearDown(self):
@@ -2827,6 +2825,161 @@ class Investment_Test(unittest.TestCase):
             moveline_credit = moveline_credit,
             move_id = move_id,
             ))
+
+
+
+class InvestmentList_Test(unittest.TestCase):
+
+    from generationkwh.testutils import assertNsEqual
+
+    def setUp(self):
+        self.maxDiff=None
+        self.b2bdatapath="b2bdata"
+        self.personalData = ns(dbconfig.personaldata)
+        self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
+        self.erp.begin()
+        self.Soci = self.erp.SomenergiaSoci
+        self.Investment = self.erp.GenerationkwhInvestment
+        self.AccountInvoice = self.erp.AccountInvoice
+        self.PaymentLine = self.erp.PaymentLine
+        self.Investment.dropAll()
+
+    def tearDown(self):
+        self.erp.rollback()
+        self.erp.close()
+
+    def list(self, member_id):
+        return self.Investment.list(member_id)
+
+    def test_list_noInvestment(self):
+        result = self.list(member_id=self.personalData.member_id)
+        self.assertNsEqual(ns(data=result), dict(data=[]))
+
+    def test_list_singleInvestment(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        result = self.list(member_id=self.personalData.member_id)
+        self.assertNsEqual(ns(data=result), """\
+            data:
+            - name: GKWH03481
+              id: {id}
+              member_id:
+              - {member_id}
+              - {surname}, {name}
+              order_date: '2017-01-01'
+              purchase_date: false
+              first_effective_date: false
+              last_effective_date: false
+              draft: true
+              active: true
+              nshares: 40
+              nominal_amount: 4000.0
+              amortized_amount: 0.0
+            """.format(
+                id = id,
+                **self.personalData
+            ))
+
+    def test_list_manyInvestments(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        id2 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-02-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        result = self.list(member_id=self.personalData.member_id)
+        self.assertNsEqual(ns(data=result), """\
+            data:
+            - name: GKWH03481
+              id: {id}
+              member_id:
+              - {member_id}
+              - {surname}, {name}
+              order_date: '2017-01-01'
+              purchase_date: false
+              first_effective_date: false
+              last_effective_date: false
+              draft: true
+              active: true
+              nshares: 20
+              nominal_amount: 2000.0
+              amortized_amount: 0.0
+            - name: GKWH03482
+              id: {id2}
+              member_id:
+              - {member_id}
+              - {surname}, {name}
+              order_date: '2017-02-01'
+              purchase_date: false
+              first_effective_date: false
+              last_effective_date: false
+              draft: true
+              active: true
+              nshares: 40
+              nominal_amount: 4000.0
+              amortized_amount: 0.0
+            """.format(
+                id = id,
+                id2 = id2,
+                **self.personalData
+            ))
+
+    def test_list_otherInvestmentsIgnored(self):
+        partner_nonInvestorAndMember = 2 # TODO: Fragile
+        id = self.Investment.create_from_form(
+            partner_nonInvestorAndMember,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        result = self.list(member_id=self.personalData.member_id)
+        self.assertNsEqual(ns(data=result), dict(data=[]))
+
+    def test_list_notFilteringByMember(self):
+        partner_nonInvestorAndMember = 2 # TODO: Fragile
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        result = self.list(member_id=None)
+        self.assertNsEqual(ns(data=result), """\
+            data:
+            - name: GKWH03481
+              id: {id}
+              member_id:
+              - {member_id}
+              - {surname}, {name}
+              order_date: '2017-01-01'
+              purchase_date: false
+              first_effective_date: false
+              last_effective_date: false
+              draft: true
+              active: true
+              nshares: 40
+              nominal_amount: 4000.0
+              amortized_amount: 0.0
+            """.format(
+                id = id,
+                **self.personalData
+            ))
+
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
