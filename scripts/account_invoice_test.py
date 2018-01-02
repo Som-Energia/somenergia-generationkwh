@@ -340,7 +340,7 @@ class Account_Invoice_Test(unittest.TestCase):
           quantity: false
           ref: {investment_name}-JUST
           move_state: posted
-        - account_id: 410000001620 {surname}, {name}
+        - account_id: 4100{nsoci:>08} {surname}, {name}
           amount_to_pay: -4000.0
           credit: 0.0
           debit: 4000.0
