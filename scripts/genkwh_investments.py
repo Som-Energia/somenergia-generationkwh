@@ -34,6 +34,9 @@ def parseArgumments():
         title="Subcommands",
         dest='subcommand',
         )
+    ls = subparsers.add_parser('ls',
+        help="list active investments objects",
+        )
     listactive = subparsers.add_parser('listactive',
         help="list active investments objects",
         )
@@ -49,20 +52,20 @@ def parseArgumments():
     extend = subparsers.add_parser('extend',
         help="extend the expiration date of a set of investments",
         )
-    for sub in effective,create: 
+    for sub in effective,create:
         sub.add_argument(
             '--force',
             action='store_true',
             help="do it even if they where already computed",
             )
-    for sub in listactive,: 
+    for sub in listactive,ls:
         sub.add_argument(
             '--member',
             type=int,
             metavar='MEMBERID',
             help="filter by member",
             )
-    for sub in effective,create,clear,listactive: 
+    for sub in effective,create,clear,listactive,ls:
         sub.add_argument(
             '--start','--from','-f',
             type=isodate,
@@ -75,7 +78,7 @@ def parseArgumments():
             metavar='ISODATE',
             help="last purchase date to be considered",
             )
-    for sub in effective,create: 
+    for sub in effective,create:
         sub.add_argument(
             '--wait',
             '-w',
@@ -98,6 +101,31 @@ def parseArgumments():
 def clear(**args):
     ids = erp().GenerationkwhInvestment.dropAll()
 
+def buildcsv(data):
+    return u''.join((
+        u"\t".join((
+        unicode(c) for c in line
+        ))+'\n'
+        for line in data))
+
+def ls(member=None, start=None, stop=None, csv=False):
+    """
+        List investments for the member of for any member if member is None.
+    """
+    fields = (
+        "id name nshares nominal_amount amortized_amount "
+        "order_date purchase_date first_effective_date last_effective_date "
+        "draft active "
+        ).split()
+
+    csvdata = buildcsv((
+        [r[f] for f in fields]+r['member_id']
+        for r in erp().GenerationkwhInvestment.list(
+            member) #, start and str(start), stop and str(stop))
+        ))
+    if csv: return csvdata
+    print csvdata
+
 def listactive(member=None, start=None, stop=None, csv=False):
     """
         List active investments between start and stop, both included,
@@ -108,17 +136,12 @@ def listactive(member=None, start=None, stop=None, csv=False):
         If neither start or stop are specified all investments are listed
         active or not.
     """
-    def buildcsv(data):
-        return u''.join((
-            u"\t".join((
-                unicode(c) for c in line
-                ))+'\n'
-            for line in data))
-
-    csvdata = buildcsv(erp().GenerationkwhInvestment.effective_investments_tuple(
+    csvdata = buildcsv(
+            erp().GenerationkwhInvestment.effective_investments_tuple(
             member, start and str(start), stop and str(stop)))
     if csv: return csvdata
     print csvdata
+
 
 def create(start=None, stop=None,
         waitingDays=None,
