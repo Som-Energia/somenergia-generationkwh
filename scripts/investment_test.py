@@ -989,7 +989,7 @@ class Investment_Test(unittest.TestCase):
               name: 'Inversió {investment_name} '
               invoice_id:
               - {id}
-              - 'CI: {investment_name}-JUST {investment_name}-JUST'
+              - 'CI: {investment_name}-JUST'
               price_unit: 100.0
               price_subtotal: 2000.0
               invoice_line_tax_id: []
@@ -1255,7 +1255,7 @@ class Investment_Test(unittest.TestCase):
               name: 'Amortització fins a 30/01/2018 de {investment_name} '
               invoice_id:
               - {id}
-              - 'SI: {investment_name}-AMOR{year} {investment_name}-AMOR{year}'
+              - 'SI: {investment_name}'
               price_unit: 80.0
               price_subtotal: 80.0
               invoice_line_tax_id: []
@@ -1656,7 +1656,7 @@ class Investment_Test(unittest.TestCase):
                     partner_id=self.personalData.partnerid,
                     vat="ES"+self.personalData.nif,
                     debtor_name=nom_complet,
-                    address = partner.address[0].street.encode('utf-8'),
+                    address = partner.address[0].nv.encode('utf-8'),
                     state = partner.address[0].state_id.name.encode('utf-8'),
                     iban=iban,
                     format_iban=' '.join(
@@ -2187,7 +2187,7 @@ class Investment_Test(unittest.TestCase):
               name: 'Inversió {investment_name} '
               invoice_id:
               - {id}
-              - 'OR: {investment_name}-RES {investment_name}-RES'
+              - 'CR: {investment_name}-RES'
               price_unit: 100.0
               price_subtotal: 2000.0
               invoice_line_tax_id: []
@@ -2246,7 +2246,7 @@ class Investment_Test(unittest.TestCase):
               name: 'Inversió {investment_name} '
               invoice_id:
               - {id}
-              - 'OR: {investment_name}-RES {investment_name}-RES'
+              - 'CR: {investment_name}-RES'
               price_unit: 100.0
               price_subtotal: 2000.0
               invoice_line_tax_id: []
@@ -2455,7 +2455,7 @@ class Investment_Test(unittest.TestCase):
               name: 'Desinversió total de {investment_name} a {invoice_date} '
               invoice_id:
               - {id}
-              - 'SI: {investment_name}-DES {investment_name}-DES'
+              - 'SI: {investment_name}'
               price_unit: 960.0
               price_subtotal: 960.0
               invoice_line_tax_id: []
@@ -2528,7 +2528,7 @@ class Investment_Test(unittest.TestCase):
               name: 'Desinversió total de {investment_name} a {invoice_date} '
               invoice_id:
               - {id}
-              - 'SI: {investment_name}-DES {investment_name}-DES'
+              - 'SI: {investment_name}'
               price_unit: 2000.0
               price_subtotal: 2000.0
               invoice_line_tax_id: []
