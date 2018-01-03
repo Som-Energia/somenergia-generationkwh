@@ -400,7 +400,7 @@ class PartnerAssignments_Test(unittest.TestCase):
               contract_last_invoiced: '{contract.data_ultima_lectura}'
               contract_state: {contract.state}
               annual_use_kwh: {contract.annualUseKwh}
-              cups_direction: {contract.cups_direccio}
+              contract_address: {contract.cups_direccio}
             """.format(
                 id=id,
                 contract_id=self.contract_id,
@@ -440,7 +440,7 @@ class PartnerAssignments_Test(unittest.TestCase):
               contract_last_invoiced: '{contract2.data_ultima_lectura}'
               contract_state: {contract2.state}
               annual_use_kwh: {contract2.annualUseKwh}
-              cups_direction: {contract2.cups_direccio}
+              contract_address: {contract2.cups_direccio}
             - id: {id}
               end_date: false
               priority: 1
@@ -451,7 +451,7 @@ class PartnerAssignments_Test(unittest.TestCase):
               contract_last_invoiced: '{contract.data_ultima_lectura}'
               contract_state: {contract.state}
               annual_use_kwh: {contract.annualUseKwh}
-              cups_direction: {contract.cups_direccio}
+              contract_address: {contract.cups_direccio}
             """.format(
                 id=id,
                 contract_id=self.contract_id,
