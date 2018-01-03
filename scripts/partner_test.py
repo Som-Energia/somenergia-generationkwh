@@ -310,6 +310,12 @@ class PartnerInvestments_Test(unittest.TestCase):
                 **self.personalData
             ))
 
+    def test_investments_not_member(self):
+        partner_id=self.erp.ResPartner.search([('vat','=','ES'+self.personalData.nonMemberNif)])[0]
+        result = self.list(partner_id=partner_id)
+        self.assertNsEqual(ns(data=result), """\
+            data: []
+            """)
 
 
 unittest.TestCase.__str__ = unittest.TestCase.id
