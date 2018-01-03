@@ -288,10 +288,12 @@ class PartnerInvestments_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
+        name = self.Investment.read(id, ['name'])['name']
+
         result = self.list(partner_id=self.personalData.partnerid)
         self.assertNsEqual(ns(data=result), """\
             data:
-            - name: GKWH03481
+            - name: {investment_name}
               id: {id}
               member_id:
               - {member_id}
@@ -307,6 +309,7 @@ class PartnerInvestments_Test(unittest.TestCase):
               amortized_amount: 0.0
             """.format(
                 id = id,
+                investment_name=name,
                 **self.personalData
             ))
 

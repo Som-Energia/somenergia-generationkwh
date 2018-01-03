@@ -2864,10 +2864,12 @@ class InvestmentList_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
+        name = self.Investment.read(id, ['name'])['name']
+
         result = self.list(member_id=self.personalData.member_id)
         self.assertNsEqual(ns(data=result), """\
             data:
-            - name: GKWH03481
+            - name: {investment_name}
               id: {id}
               member_id:
               - {member_id}
@@ -2883,6 +2885,7 @@ class InvestmentList_Test(unittest.TestCase):
               amortized_amount: 0.0
             """.format(
                 id = id,
+                investment_name = name,
                 **self.personalData
             ))
 
@@ -2901,10 +2904,13 @@ class InvestmentList_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
+        name = self.Investment.read(id, ['name'])['name']
+        name2 = self.Investment.read(id2, ['name'])['name']
+
         result = self.list(member_id=self.personalData.member_id)
         self.assertNsEqual(ns(data=result), """\
             data:
-            - name: GKWH03481
+            - name: {investment_name}
               id: {id}
               member_id:
               - {member_id}
@@ -2918,7 +2924,7 @@ class InvestmentList_Test(unittest.TestCase):
               nshares: 20
               nominal_amount: 2000.0
               amortized_amount: 0.0
-            - name: GKWH03482
+            - name: {investment_name2}
               id: {id2}
               member_id:
               - {member_id}
@@ -2933,6 +2939,8 @@ class InvestmentList_Test(unittest.TestCase):
               nominal_amount: 4000.0
               amortized_amount: 0.0
             """.format(
+                investment_name=name,
+                investment_name2=name2,
                 id = id,
                 id2 = id2,
                 **self.personalData
@@ -2959,10 +2967,12 @@ class InvestmentList_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
+        name = self.Investment.read(id, ['name'])['name']
+
         result = self.list(member_id=None)
         self.assertNsEqual(ns(data=result), """\
             data:
-            - name: GKWH03481
+            - name: {investment_name}
               id: {id}
               member_id:
               - {member_id}
@@ -2977,6 +2987,7 @@ class InvestmentList_Test(unittest.TestCase):
               nominal_amount: 4000.0
               amortized_amount: 0.0
             """.format(
+                investment_name=name,
                 id = id,
                 **self.personalData
             ))
