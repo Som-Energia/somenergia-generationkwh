@@ -391,7 +391,6 @@ class PartnerAssignments_Test(unittest.TestCase):
         self.assertNsEqual(ns(data=result), """\
             data:
             - id: {id}
-              end_date: false
               priority: 1
               member_id: {member_id}
               member_name: {surname}, {name}
@@ -448,7 +447,6 @@ class PartnerAssignments_Test(unittest.TestCase):
         self.assertNsEqual(ns(data=result), """\
             data:
             - id: {id2}
-              end_date: false
               priority: 0
               member_id: {member_id}
               member_name: {surname}, {name}
@@ -459,7 +457,6 @@ class PartnerAssignments_Test(unittest.TestCase):
               annual_use_kwh: {contract2.annualUseKwh}
               contract_address: {contract2.cups_direccio}
             - id: {id}
-              end_date: false
               priority: 1
               member_id: {member_id}
               member_name: {surname}, {name}
