@@ -408,6 +408,23 @@ class PartnerAssignments_Test(unittest.TestCase):
                 **self.personalData
             ))
 
+    def test_assignments_expired(self):
+
+        id = self.Assignment.create(dict(
+            contract_id=self.contract_id,
+            member_id=self.personalData.member_id,
+            priority=1,
+            )).id
+
+        contract = self.contractInfo(self.contract_id)
+
+        self.Assignment.expire(self.contract_id, self.personalData.member_id)
+
+        result = self.list(partner_id=self.personalData.partnerid)
+        self.assertNsEqual(ns(data=result), """\
+            data: []
+            """)
+
     def test_assignments_many(self):
 
         id = self.Assignment.create(dict(
