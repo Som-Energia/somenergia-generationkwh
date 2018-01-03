@@ -2828,6 +2828,7 @@ class Investment_Test(unittest.TestCase):
 
 
 
+@unittest.skipIf(not dbconfig, "depends on ERP")
 class InvestmentList_Test(unittest.TestCase):
 
     from generationkwh.testutils import assertNsEqual
