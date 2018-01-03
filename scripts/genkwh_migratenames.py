@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-import configdb
+import dbconfig
 import psycopg2
 import dbutils
 import contextlib
@@ -1596,7 +1596,7 @@ def deleteNullNamedInvestments(cr):
 
 cases = ns.load('migration.yaml')
 
-with psycopg2.connect(**configdb.psycopg) as db:
+with psycopg2.connect(**dbconfig.psycopg) as db:
     with db.cursor() as cr:
         with transaction(cr, discarded='--doit' not in sys.argv):
             cleanUp(cr)
