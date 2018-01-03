@@ -321,7 +321,147 @@ class PartnerInvestments_Test(unittest.TestCase):
             """)
 
 
-unittest.TestCase.__str__ = unittest.TestCase.id
+
+@unittest.skipIf(not dbconfig, "depends on ERP")
+class PartnerAssignments_Test(unittest.TestCase):
+
+    from generationkwh.testutils import assertNsEqual
+
+    def setUp(self):
+        self.maxDiff=None
+        self.b2bdatapath="b2bdata"
+        self.personalData = ns(dbconfig.personaldata)
+        self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
+        self.erp.begin()
+        self.Soci = self.erp.SomenergiaSoci
+        self.ResPartner = self.erp.ResPartner
+        self.Investment = self.erp.GenerationkwhInvestment
+        self.Investment.dropAll()
+        self.Assignment = self.erp.GenerationkwhAssignment
+        self.Contract = self.erp.GiscedataPolissa
+        self.Cups = self.erp.GiscedataCupsPs
+        self.Assignment.dropAll()
+
+        self.contract_id = 300
+        self.contract_id2 = 301
+
+    def tearDown(self):
+        self.erp.rollback()
+        self.erp.close()
+
+    def list(self, partner_id):
+        return self.ResPartner.www_generationkwh_assignments(partner_id)
+
+    def test_assignments_whenNotAMember(self):
+        partner_id=self.erp.ResPartner.search([('vat','=','ES'+self.personalData.nonMemberNif)])[0]
+        result = self.list(partner_id=partner_id)
+        self.assertNsEqual(ns(data=result), """\
+            data: []
+            """)
+
+    def test_assignments_none(self):
+        result = self.list(partner_id=self.personalData.partnerid)
+        self.assertNsEqual(ns(data=result), """\
+            data: []
+            """)
+
+    def contractInfo(self, contract_id):
+        contract = ns(self.Contract.read(contract_id,[
+            'name',
+            'data_ultima_lectura',
+            'state',
+            'cups_direccio',
+            'cups',
+            ]))
+        cups = self.Cups.read(contract.cups[0], ['conany_kwh'])
+        contract.annualUseKwh = cups['conany_kwh']
+        return contract
+
+    def test_assignments_single(self):
+
+        id = self.Assignment.create(dict(
+            contract_id=self.contract_id,
+            member_id=self.personalData.member_id,
+            priority=1,
+            )).id
+
+        contract = self.contractInfo(self.contract_id)
+
+        result = self.list(partner_id=self.personalData.partnerid)
+        self.assertNsEqual(ns(data=result), """\
+            data:
+            - id: {id}
+              end_date: false
+              priority: 1
+              member_id: {member_id}
+              member_name: {surname}, {name}
+              contract_id: {contract_id}
+              contract_name: '{contract.name}'
+              contract_last_invoiced: '{contract.data_ultima_lectura}'
+              contract_state: {contract.state}
+              cups_anual_use: {contract.annualUseKwh}
+              cups_direction: {contract.cups_direccio}
+            """.format(
+                id=id,
+                contract_id=self.contract_id,
+                contract=contract,
+                **self.personalData
+            ))
+
+    def test_assignments_many(self):
+
+        id = self.Assignment.create(dict(
+            contract_id=self.contract_id,
+            member_id=self.personalData.member_id,
+            priority=1,
+            )).id
+
+        contract = self.contractInfo(self.contract_id)
+
+        id2 = self.Assignment.create(dict(
+            contract_id=self.contract_id2,
+            member_id=self.personalData.member_id,
+            priority=0,
+            )).id
+
+        contract2 = self.contractInfo(self.contract_id2)
+
+
+        result = self.list(partner_id=self.personalData.partnerid)
+        self.assertNsEqual(ns(data=result), """\
+            data:
+            - id: {id2}
+              end_date: false
+              priority: 0
+              member_id: {member_id}
+              member_name: {surname}, {name}
+              contract_id: {contract_id2}
+              contract_name: '{contract2.name}'
+              contract_last_invoiced: '{contract2.data_ultima_lectura}'
+              contract_state: {contract2.state}
+              cups_anual_use: {contract2.annualUseKwh}
+              cups_direction: {contract2.cups_direccio}
+            - id: {id}
+              end_date: false
+              priority: 1
+              member_id: {member_id}
+              member_name: {surname}, {name}
+              contract_id: {contract_id}
+              contract_name: '{contract.name}'
+              contract_last_invoiced: '{contract.data_ultima_lectura}'
+              contract_state: {contract.state}
+              cups_anual_use: {contract.annualUseKwh}
+              cups_direction: {contract.cups_direccio}
+            """.format(
+                id=id,
+                contract_id=self.contract_id,
+                contract=contract,
+                id2=id2,
+                contract_id2=self.contract_id2,
+                contract2=contract2,
+                **self.personalData
+            ))
+
 
 
 if __name__=='__main__':
