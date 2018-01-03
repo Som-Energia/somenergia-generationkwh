@@ -399,7 +399,7 @@ class PartnerAssignments_Test(unittest.TestCase):
               contract_name: '{contract.name}'
               contract_last_invoiced: '{contract.data_ultima_lectura}'
               contract_state: {contract.state}
-              cups_anual_use: {contract.annualUseKwh}
+              annual_use_kwh: {contract.annualUseKwh}
               cups_direction: {contract.cups_direccio}
             """.format(
                 id=id,
@@ -439,7 +439,7 @@ class PartnerAssignments_Test(unittest.TestCase):
               contract_name: '{contract2.name}'
               contract_last_invoiced: '{contract2.data_ultima_lectura}'
               contract_state: {contract2.state}
-              cups_anual_use: {contract2.annualUseKwh}
+              annual_use_kwh: {contract2.annualUseKwh}
               cups_direction: {contract2.cups_direccio}
             - id: {id}
               end_date: false
@@ -450,7 +450,7 @@ class PartnerAssignments_Test(unittest.TestCase):
               contract_name: '{contract.name}'
               contract_last_invoiced: '{contract.data_ultima_lectura}'
               contract_state: {contract.state}
-              cups_anual_use: {contract.annualUseKwh}
+              annual_use_kwh: {contract.annualUseKwh}
               cups_direction: {contract.cups_direccio}
             """.format(
                 id=id,
