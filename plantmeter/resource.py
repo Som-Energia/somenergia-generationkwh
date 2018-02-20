@@ -28,7 +28,7 @@ class Resource(object):
 
 class ProductionAggregator(Resource):
     def __init__(self, *args, **kwargs):
-        self.plants = kwargs.pop('plants') if 'plants' in kwargs else []
+        self.plants = kwargs.pop('plants', [])
         super(ProductionAggregator, self).__init__(*args, **kwargs)
 
     def get_kwh(self, start, end):
@@ -65,7 +65,7 @@ class ProductionAggregator(Resource):
 
 class ProductionPlant(Resource):
     def __init__(self, *args, **kwargs):
-        self.meters = kwargs.pop('meters') if 'meters' in kwargs else []
+        self.meters = kwargs.pop('meters', [])
         super(ProductionPlant, self).__init__(*args, **kwargs)
 
     def get_kwh(self, start, end):
@@ -101,11 +101,11 @@ class ProductionPlant(Resource):
 
 class ProductionMeter(Resource):
     def __init__(self, *args, **kwargs):
-        self.uri = kwargs.pop('uri') if 'uri' in kwargs else None
-        self.lastcommit = kwargs.pop('lastcommit') if 'lastcommit' in kwargs else None
+        self.uri = kwargs.pop('uri', None)
+        self.lastcommit = kwargs.pop('lastcommit', None)
         if self.lastcommit:
             self.lastcommit = localisodate(self.lastcommit).date() + datetime.timedelta(days=1)
-        self.curveProvider = kwargs.pop('curveProvider') if 'curveProvider' in kwargs else None
+        self.curveProvider = kwargs.pop('curveProvider', None)
         super(ProductionMeter, self).__init__(*args, **kwargs)
 
     def get_kwh(self, start, end):
