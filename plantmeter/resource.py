@@ -24,12 +24,14 @@ class Resource(object):
         self.name = name
         self.description = description
         self.enabled = enabled
+        self.children = []
 
 
 class ProductionAggregator(Resource):
     def __init__(self, *args, **kwargs):
-        self.plants = kwargs.pop('plants', [])
         super(ProductionAggregator, self).__init__(*args, **kwargs)
+        self.children = kwargs.pop('plants', [])
+        self.plants = self.children
 
     def get_kwh(self, start, end):
 
@@ -38,7 +40,7 @@ class ProductionAggregator(Resource):
 
         return np.sum([
             plant.get_kwh(start, end)
-            for plant in self.plants
+            for plant in self.children
             if plant.enabled
             ], axis=0)
     
@@ -47,19 +49,19 @@ class ProductionAggregator(Resource):
         assertDateOrNone('start', start)
         assertDateOrNone('end', end)
 
-        return [(plant.id, plant.update_kwh(start, end, notifier)) for plant in self.plants]
+        return [(plant.id, plant.update_kwh(start, end, notifier)) for plant in self.children]
 
     def firstMeasurementDate(self):
         return min([
             plant.firstMeasurementDate()
-            for plant in self.plants
+            for plant in self.children
             if plant.enabled
             ])
 
     def lastMeasurementDate(self):
         return max([
             plant.lastMeasurementDate()
-            for plant in self.plants
+            for plant in self.children
             if plant.enabled
             ])
 
