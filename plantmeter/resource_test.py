@@ -27,6 +27,7 @@ class Resource_Test(unittest.TestCase):
         self.connection.drop_database('generationkwh_test')
 
     def setupMeter(self, n, uri, lastcommit=None):
+        uri = 'csv:/' + local_file('data/manlleu_{}.csv'.format(uri))
         return ProductionMeter(
             id=n,
             name = 'meterName{}'.format(n),
@@ -39,8 +40,7 @@ class Resource_Test(unittest.TestCase):
 
 
     def test_getEmpty(self):
-        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m = self.setupMeter(1, uri)
+        m = self.setupMeter(1, '20150904')
 
         p = ProductionPlant(1,'plantName','plantDescription',True, meters=[m])
         aggr = ProductionAggregator(1,'aggrName','eggrDescription',True, plants=[p])
@@ -53,8 +53,7 @@ class Resource_Test(unittest.TestCase):
                 )
       
     def test_update_onePlantOneMeter(self):
-        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m = self.setupMeter(1, uri)
+        m = self.setupMeter(1, '20150904')
 
         p = ProductionPlant(1,'plantName','plantDescription',True, meters=[m])
         aggr = ProductionAggregator(1,'aggrName','aggrDescription',True, plants=[p])
@@ -72,9 +71,8 @@ class Resource_Test(unittest.TestCase):
             ])
 
     def test_update_onePlantTwoMeters(self):
-        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m1 = self.setupMeter(1,uri)
-        m2 = self.setupMeter(2,uri)
+        m1 = self.setupMeter(1,'20150904')
+        m2 = self.setupMeter(2,'20150904')
 
         p = ProductionPlant(1,'plantName','plantDescription',True, meters=[m1,m2])
         aggr = ProductionAggregator(1,'aggrName','aggrDescription',True, plants=[p])
@@ -91,8 +89,7 @@ class Resource_Test(unittest.TestCase):
             ])
 
     def test_update_twoPlantsOneMeter(self):
-        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m1 = self.setupMeter(1, uri)
+        m1 = self.setupMeter(1, '20150904')
         p1 = ProductionPlant(1,'plantName1','plantDescription1',True, meters=[m1])
         p2 = ProductionPlant(2,'plantName2','plantDescription2',True)
 
@@ -109,11 +106,10 @@ class Resource_Test(unittest.TestCase):
             ])
 
     def test_update_twoPlantsTwoMeters(self):
-        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m1 = self.setupMeter(1, uri)
+        m1 = self.setupMeter(1, '20150904')
         p1 = ProductionPlant(1,'plantName1','plantDescription1',True, meters=[m1])
 
-        m2 = self.setupMeter(2, uri)
+        m2 = self.setupMeter(2, '20150904')
         p2 = ProductionPlant(2,'plantName2','plantDescription2',True, meters=[m2])
 
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True,
@@ -131,8 +127,7 @@ class Resource_Test(unittest.TestCase):
             ])
 
     def test_update_startMissing(self):
-        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m = self.setupMeter(1, uri, lastcommit='2015-09-04')
+        m = self.setupMeter(1, '20150904', lastcommit='2015-09-04')
 
         p = ProductionPlant(1,'plantName','plantDescription',True, meters=[m])
         aggr = ProductionAggregator(1,'aggrName','aggrDescription',True,
@@ -142,8 +137,7 @@ class Resource_Test(unittest.TestCase):
         self.assertEqual(updated[0][1][0][1], localisodatetime('2015-09-05 23:00:00'))
 
     def test_update_outofdate(self):
-        uri = 'csv:/' + local_file('data/manlleu_20150804.csv')
-        m = self.setupMeter(1, uri, lastcommit='2015-09-04')
+        m = self.setupMeter(1, '20150804', lastcommit='2015-09-04')
 
         p = ProductionPlant(1,'plantName','plantDescription',True, meters=[m])
         aggr = ProductionAggregator(1,'aggrName','aggrDescription',True,
@@ -153,8 +147,7 @@ class Resource_Test(unittest.TestCase):
         self.assertEqual(updated[0][1][0][1], None)
 
     def test_lastDate_empty(self):
-        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m = self.setupMeter(1, uri)
+        m = self.setupMeter(1, '20150904')
         p = ProductionPlant(1,'plantName','plantDescription',True, meters=[m])
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True,
             plants=[p])
@@ -162,16 +155,14 @@ class Resource_Test(unittest.TestCase):
         self.assertEqual(aggr.lastMeasurementDate(), None)
     
     def test_firstDate_empty(self):
-        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m = self.setupMeter(1, uri)
+        m = self.setupMeter(1, '20150904')
         p = ProductionPlant(1,'plantName','plantDescription',True, meters=[m])
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True, plants=[p])
 
         self.assertEqual(aggr.firstMeasurementDate(), None)
 
     def test_lastDate_onePlantOneMeter(self):
-        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m = self.setupMeter(1, uri)
+        m = self.setupMeter(1, '20150904')
         p = ProductionPlant(1,'plantName','plantDescription',True, meters=[m])
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True, plants=[p])
         m.update_kwh(date(2015,9,4), date(2015,9,5))
@@ -179,8 +170,7 @@ class Resource_Test(unittest.TestCase):
         self.assertEqual(aggr.lastMeasurementDate(), date(2015,9,5))
 
     def test_firstDate_onePlantOneMeter(self):
-        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m = self.setupMeter(1, uri)
+        m = self.setupMeter(1, '20150904')
         p = ProductionPlant(1,'plantName','plantDescription',True, meters=[m])
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True, plants=[p])
         m.update_kwh(date(2015,9,4), date(2015,9,5))
@@ -188,10 +178,8 @@ class Resource_Test(unittest.TestCase):
         self.assertEqual(aggr.firstMeasurementDate(), date(2015,9,4))
 
     def test_lastDate_onePlantTwoMeters(self):
-        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m1 = self.setupMeter(1, uri)
-        uri = 'csv:/' + local_file('data/manlleu_20150804.csv')
-        m2 = self.setupMeter(2, uri)
+        m1 = self.setupMeter(1, '20150904')
+        m2 = self.setupMeter(2, '20150804')
 
         p = ProductionPlant(1,'plantName','plantDescription',True, meters=[m1,m2])
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True, plants=[p])
@@ -201,10 +189,8 @@ class Resource_Test(unittest.TestCase):
         self.assertEqual(aggr.lastMeasurementDate(), date(2015,9,5))
 
     def test_firstDate_onePlantTwoMeters(self):
-        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m1 = self.setupMeter(1, uri)
-        uri = 'csv:/' + local_file('data/manlleu_20150804.csv')
-        m2 = self.setupMeter(2, uri)
+        m1 = self.setupMeter(1, '20150904')
+        m2 = self.setupMeter(2, '20150804')
         p = ProductionPlant(1,'plantName','plantDescription',True, meters=[m1,m2])
         aggr = ProductionAggregator(1,'aggrName','aggreDescription',True, plants=[p])
         m1.update_kwh(date(2015,9,4), date(2015,9,5))
@@ -213,10 +199,8 @@ class Resource_Test(unittest.TestCase):
         self.assertEqual(aggr.firstMeasurementDate(), date(2015,8,4))
 
     def test_lastDate_twoPlantsTwoMeters(self):
-        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m1 = self.setupMeter(1, uri)
-        uri = 'csv:/' + local_file('data/manlleu_20150804.csv')
-        m2 = self.setupMeter(2, uri)
+        m1 = self.setupMeter(1, '20150904')
+        m2 = self.setupMeter(2, '20150804')
 
         p1 = ProductionPlant(1,'plantName1','plantDescription1',True, meters=[m1])
         p2 = ProductionPlant(2,'plantName2','plantDescription2',True, meters=[m2])
@@ -227,10 +211,8 @@ class Resource_Test(unittest.TestCase):
         self.assertEqual(aggr.lastMeasurementDate(), date(2015,9,5))
 
     def test_firstDate_twoPlantsTwoMeters(self):
-        uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-        m1 = self.setupMeter(1, uri)
-        uri = 'csv:/' + local_file('data/manlleu_20150804.csv')
-        m2 = self.setupMeter(2, uri)
+        m1 = self.setupMeter(1, '20150904')
+        m2 = self.setupMeter(2, '20150804')
 
         p1 = ProductionPlant(1,'plantName1','plantDescription1',True, meters=[m1])
         p2 = ProductionPlant(2,'plantName2','plantDescription2',True, meters=[m2])
