@@ -39,8 +39,7 @@ class Resource_Test(unittest.TestCase):
 
         p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m)
-        aggr = ProductionAggregator(1,'aggrName','eggrDescription',True)
-        aggr.plants.append(p)
+        aggr = ProductionAggregator(1,'aggrName','eggrDescription',True, plants=[p])
 
         self.assertEqual(
             list(aggr.get_kwh(
@@ -62,8 +61,7 @@ class Resource_Test(unittest.TestCase):
 
         p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m)
-        aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
-        aggr.plants.append(p)
+        aggr = ProductionAggregator(1,'aggrName','aggrDescription',True, plants=[p])
         m.update_kwh(
             date(2015,9,4),
             date(2015,9,5))
@@ -99,8 +97,7 @@ class Resource_Test(unittest.TestCase):
         p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m1)
         p.meters.append(m2)
-        aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
-        aggr.plants.append(p)
+        aggr = ProductionAggregator(1,'aggrName','aggrDescription',True, plants=[p])
         m1.update_kwh(date(2015,9,4),date(2015,9,5))
         m2.update_kwh(date(2015,9,4),date(2015,9,5))
 
@@ -127,9 +124,7 @@ class Resource_Test(unittest.TestCase):
         p1.meters.append(m1)
         p2 = ProductionPlant(2,'plantName2','plantDescription2',True)
 
-        aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
-        aggr.plants.append(p1)
-        aggr.plants.append(p2)
+        aggr = ProductionAggregator(1,'aggrName','aggrDescription',True,plants=[p1,p2])
         m1.update_kwh(date(2015,9,4),date(2015,9,5))
 
         self.assertEqual(
@@ -164,9 +159,8 @@ class Resource_Test(unittest.TestCase):
         p2 = ProductionPlant(2,'plantName2','plantDescription2',True)
         p2.meters.append(m2)
 
-        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
-        aggr.plants.append(p1)
-        aggr.plants.append(p2)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True,
+            plants=[p1, p2])
         m1.update_kwh(date(2015,9,4),date(2015,9,5))
         m2.update_kwh(date(2015,9,4),date(2015,9,5))
 
@@ -193,8 +187,8 @@ class Resource_Test(unittest.TestCase):
 
         p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m)
-        aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
-        aggr.plants.append(p)
+        aggr = ProductionAggregator(1,'aggrName','aggrDescription',True,
+            plants=[p])
         updated = aggr.update_kwh()
         # Check single aggregator, with single plant and meter
         self.assertEqual(updated[0][1][0][1], localisodatetime('2015-09-05 23:00:00'))
@@ -213,8 +207,8 @@ class Resource_Test(unittest.TestCase):
 
         p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m)
-        aggr = ProductionAggregator(1,'aggrName','aggrDescription',True)
-        aggr.plants.append(p)
+        aggr = ProductionAggregator(1,'aggrName','aggrDescription',True,
+            plants=[p])
         updated = aggr.update_kwh()
         # Check single aggregator, with single plant and meter
         self.assertEqual(updated[0][1][0][1], None)
@@ -230,8 +224,8 @@ class Resource_Test(unittest.TestCase):
             curveProvider = self.curveProvider)
         p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m)
-        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
-        aggr.plants.append(p)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True,
+            plants=[p])
 
         self.assertEqual(aggr.lastMeasurementDate(), None)
     
@@ -246,8 +240,7 @@ class Resource_Test(unittest.TestCase):
             curveProvider = self.curveProvider)
         p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m)
-        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
-        aggr.plants.append(p)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True, plants=[p])
 
         self.assertEqual(aggr.firstMeasurementDate(), None)
 
@@ -262,8 +255,7 @@ class Resource_Test(unittest.TestCase):
             curveProvider = self.curveProvider)
         p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m)
-        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
-        aggr.plants.append(p)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True, plants=[p])
         m.update_kwh(date(2015,9,4), date(2015,9,5))
 
         self.assertEqual(aggr.lastMeasurementDate(), date(2015,9,5))
@@ -279,8 +271,7 @@ class Resource_Test(unittest.TestCase):
             curveProvider = self.curveProvider)
         p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m)
-        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
-        aggr.plants.append(p)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True, plants=[p])
         m.update_kwh(date(2015,9,4), date(2015,9,5))
 
         self.assertEqual(aggr.firstMeasurementDate(), date(2015,9,4))
@@ -306,8 +297,7 @@ class Resource_Test(unittest.TestCase):
         p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m1)
         p.meters.append(m2)
-        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
-        aggr.plants.append(p)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True, plants=[p])
         m1.update_kwh(date(2015,9,4), date(2015,9,5))
         m2.update_kwh(date(2015,8,4), date(2015,8,5))
 
@@ -334,8 +324,7 @@ class Resource_Test(unittest.TestCase):
         p = ProductionPlant(1,'plantName','plantDescription',True)
         p.meters.append(m1)
         p.meters.append(m2)
-        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
-        aggr.plants.append(p)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True, plants=[p])
         m1.update_kwh(date(2015,9,4), date(2015,9,5))
         m2.update_kwh(date(2015,8,4), date(2015,8,5))
 
@@ -363,9 +352,7 @@ class Resource_Test(unittest.TestCase):
         p2 = ProductionPlant(2,'plantName2','plantDescription2',True)
         p1.meters.append(m1)
         p2.meters.append(m2)
-        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
-        aggr.plants.append(p1)
-        aggr.plants.append(p2)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True, plants=[p1,p2])
         m1.update_kwh(date(2015,9,4), date(2015,9,5))
         m2.update_kwh(date(2015,8,4), date(2015,8,5))
 
@@ -393,9 +380,7 @@ class Resource_Test(unittest.TestCase):
         p2 = ProductionPlant(2,'plantName2','plantDescription2',True)
         p1.meters.append(m1)
         p2.meters.append(m2)
-        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True)
-        aggr.plants.append(p1)
-        aggr.plants.append(p2)
+        aggr = ProductionAggregator(1,'aggrName','aggreDescription',True, plants=[p1,p2])
         m1.update_kwh(date(2015,9,4), date(2015,9,5))
         m2.update_kwh(date(2015,8,4), date(2015,8,5))
 

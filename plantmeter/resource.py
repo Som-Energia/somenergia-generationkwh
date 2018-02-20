@@ -29,9 +29,9 @@ class Resource(object):
 
 class ProductionAggregator(Resource):
     def __init__(self, *args, **kwargs):
+        items = kwargs.pop('plants', [])
         super(ProductionAggregator, self).__init__(*args, **kwargs)
-        self.children = kwargs.pop('plants', [])
-        self.plants = self.children
+        self.children = items
 
     def get_kwh(self, start, end):
 
