@@ -286,6 +286,9 @@ class Meter_Test(unittest.TestCase):
         m.update_kwh(date(2015,9,4), date(2015,9,5))
         self.assertEqual(m.firstMeasurementDate(), date(2015,9,4))
 
+    # TODO: Test update_kwh setting lastcommit
+    # TODO: the result of update_kwh is uses anywhere? if so, test it thoroughly if not drop it
+
 
 unittest.TestCase.__str__ = unittest.TestCase.id
 
