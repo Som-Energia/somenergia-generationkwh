@@ -24,14 +24,12 @@ class Resource(object):
         self.name = name
         self.description = description
         self.enabled = enabled
-        self.children = []
 
+class ParentResource(Resource):
 
-class ProductionAggregator(Resource):
-    def __init__(self, *args, **kwargs):
-        items = kwargs.pop('plants', [])
-        super(ProductionAggregator, self).__init__(*args, **kwargs)
-        self.children = items
+    def __init__(self, id, name, description, enabled, children=[]):
+        super(ParentResource, self).__init__(id, name, description, enabled)
+        self.children = children
 
     def get_kwh(self, start, end):
 
@@ -39,45 +37,9 @@ class ProductionAggregator(Resource):
         assertDate('end', end)
 
         return np.sum([
-            plant.get_kwh(start, end)
-            for plant in self.children
-            if plant.enabled
-            ], axis=0)
-    
-    def update_kwh(self, start=None, end=None, notifier=None):
-
-        assertDateOrNone('start', start)
-        assertDateOrNone('end', end)
-
-        return [(plant.id, plant.update_kwh(start, end, notifier)) for plant in self.children]
-
-    def firstMeasurementDate(self):
-        return min([
-            plant.firstMeasurementDate()
-            for plant in self.children
-            if plant.enabled
-            ])
-
-    def lastMeasurementDate(self):
-        return max([
-            plant.lastMeasurementDate()
-            for plant in self.children
-            if plant.enabled
-            ])
-
-class ProductionPlant(Resource):
-    def __init__(self, *args, **kwargs):
-        self.meters = kwargs.pop('meters', [])
-        super(ProductionPlant, self).__init__(*args, **kwargs)
-
-    def get_kwh(self, start, end):
-        assertDate('start', start)
-        assertDate('end', end)
-
-        return np.sum([
-            meter.get_kwh(start, end)
-            for meter in self.meters
-            if meter.enabled
+            child.get_kwh(start, end)
+            for child in self.children
+            if child.enabled
             ], axis=0)
 
     def update_kwh(self, start=None, end=None, notifier=None):
@@ -85,21 +47,35 @@ class ProductionPlant(Resource):
         assertDateOrNone('start', start)
         assertDateOrNone('end', end)
 
-        return [(meter.id, meter.update_kwh(start, end, notifier)) for meter in self.meters]
-
-    def lastMeasurementDate(self):
-        return max([
-            meter.lastMeasurementDate()
-            for meter in self.meters
-            if meter.enabled
-            ])
+        return [
+            # TODO: Untested you can mess up with ID
+            (meter.id, meter.update_kwh(start, end, notifier))
+            for meter in self.children
+            ]
 
     def firstMeasurementDate(self):
         return min([
-            meter.firstMeasurementDate()
-            for meter in self.meters
-            if meter.enabled
+            child.firstMeasurementDate()
+            for child in self.children
+            if child.enabled
             ])
+
+    def lastMeasurementDate(self):
+        return max([
+            child.lastMeasurementDate()
+            for child in self.children
+            if child.enabled
+            ])
+
+class ProductionAggregator(ParentResource):
+    def __init__(self, id, name, description, enabled, plants=[]):
+        super(ProductionAggregator, self).__init__(
+            id, name, description, enabled, children=plants)
+
+class ProductionPlant(ParentResource):
+    def __init__(self, id, name, description, enabled, meters=[]):
+        super(ProductionPlant, self).__init__(
+            id, name, description, enabled, children=meters)
 
 class ProductionMeter(Resource):
     def __init__(self, *args, **kwargs):
