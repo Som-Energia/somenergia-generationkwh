@@ -85,6 +85,7 @@ def list():
             enabled_tick=coloredCheck(aggr.enabled),
             **aggr
             )
+        if not aggr.plants: continue
         plants = plant_obj.read(aggr.plants, [])
         for plant in plants:    
             plant = ns(plant)
@@ -92,15 +93,17 @@ def list():
                 enabled_tick=coloredCheck(plant.enabled),
                 **plant
                 )
+            if not plant.meters: continue
             meters = meter_obj.read(plant.meters, [])
             for meter in meters:
                 meter=ns(meter)
                 print u"\t\t{enabled_tick} {id} - {name}: \"{description}\"".format(
-                    enabled_tick=coloredCheck(aggr.enabled),
+                    enabled_tick=coloredCheck(meter.enabled),
                     **meter
                     )
                 print u"\t\t\t{uri}".format(**meter)
                 print u"\t\t\tLast Commit: {lastcommit}".format(**meter)
+                #print plant.dump()
                 
 
 @aggregator.command(
@@ -124,6 +127,60 @@ def update_kwh(filename):
        aggr_name=ns.load(filename)['generationkwh']['name']
        aggr_id=getAggregator(aggr_name)
        aggr_obj.update_kwh(aggr_id)
+
+@aggregator.command(
+   help="Load measures from meters")
+@click.argument('meter_path',
+    default='',
+    )
+def load_measures(meter_path):
+    # TODO: Unfinished reimplementation of update_kwh
+    meterElements = meter_path.split('.')
+    mixes = meterElements[0:1]
+    plants = meterElements[1:2]
+    meters = meterElements[2:3]
+
+    aggr_id=getAggregator(mixes[0])
+    aggr_obj.update_kwh(aggr_id)
+
+@aggregator.command(
+   help="Creates a new plant mix")
+@click.argument('name')
+@click.argument('description')
+def addmix(name, description):
+    mix = aggr_obj.create(dict(
+        name=name,
+        description=description,
+        enabled=False,
+        ))
+    print mix.id
+
+@aggregator.command(
+   help="Creates a new plant")
+@click.argument('mix')
+@click.argument('name')
+@click.argument('description')
+@click.argument('nshares', type=int)
+def addplant(mix, name, description, nshares):
+    aggr_id = aggr_obj.search([
+        ('name','=',mix),
+        ])
+
+    if not aggr_id:
+        fail("Not such mix '{}'", mix)
+
+    aggr_id = aggr_id[0]
+
+    plant = plant_obj.create(dict(
+        name=name,
+        description=description,
+        enabled=False,
+        aggr_id=aggr_id,
+        nshares = nshares,
+        ))
+    print plant.id
+
+
 
 if __name__ == '__main__':
     aggregator(obj={})
