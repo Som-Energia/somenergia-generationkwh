@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 Manages production plants initialization
@@ -70,10 +71,37 @@ def setupMeter(plant_id, meter):
 def aggregator():
     ""
 
+def coloredCheck(enabled):
+    return u"\033[32;1m[✓]\033[0m" if enabled else u"\033[31;1m[✗]\033[0m"
+
 @aggregator.command(
         help="List aggregator platform objects")
 def list():
-    ""
+    aggr_ids = aggr_obj.search([])
+    aggrs = aggr_obj.read(aggr_ids, [])
+    for aggr in aggrs:
+        aggr = ns(aggr)
+        print u"{enabled_tick} {id} - {name}: \"{description}\" ".format(
+            enabled_tick=coloredCheck(aggr.enabled),
+            **aggr
+            )
+        plants = plant_obj.read(aggr.plants, [])
+        for plant in plants:    
+            plant = ns(plant)
+            print u"\t{enabled_tick} {id} - {name}: \"{description}\" ({nshares} shares)".format(
+                enabled_tick=coloredCheck(plant.enabled),
+                **plant
+                )
+            meters = meter_obj.read(plant.meters, [])
+            for meter in meters:
+                meter=ns(meter)
+                print u"\t\t{enabled_tick} {id} - {name}: \"{description}\"".format(
+                    enabled_tick=coloredCheck(aggr.enabled),
+                    **meter
+                    )
+                print u"\t\t\t{uri}".format(**meter)
+                print u"\t\t\tLast Commit: {lastcommit}".format(**meter)
+                
 
 @aggregator.command(
         help="Clear aggregator platftorm objects")
@@ -99,3 +127,6 @@ def update_kwh(filename):
 
 if __name__ == '__main__':
     aggregator(obj={})
+
+
+# vim: et ts=4 sw=4
