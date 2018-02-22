@@ -178,8 +178,46 @@ def addplant(mix, name, description, nshares):
         aggr_id=aggr_id,
         nshares = nshares,
         ))
-    print plant.id
 
+@aggregator.command(
+   help="Creates a new meter")
+@click.argument('mix')
+@click.argument('plant')
+@click.argument('name')
+@click.argument('description')
+@click.argument('uri')
+@click.argument('lastcommit',
+    default='',
+    )
+
+def addmeter(mix, plant, name, description, uri, lastcommit):
+    aggr_id = aggr_obj.search([
+        ('name','=',mix),
+        ])
+
+    if not aggr_id:
+        fail("Not such mix '{}'", mix)
+    aggr_id = aggr_id[0]
+
+    plant_id = plant_obj.search([
+        ('aggr_id','=',aggr_id),
+        ('name','=',plant),
+        ])
+
+    if not plant_id:
+        fail("Not such plant '{}'", mix)
+    plant_id = plant_id[0]
+
+    if lastcommit == '':
+        lastcommit = None
+    meter = meter_obj.create(dict(
+        plant_id=plant_id,
+        name=name,
+        description=description,
+        uri=uri,
+        lastcommit=lastcommit,
+        enabled=False,
+        ))
 
 
 if __name__ == '__main__':
