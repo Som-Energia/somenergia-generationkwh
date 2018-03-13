@@ -20,10 +20,9 @@ def config(filename):
         import dbconfig
     return dbconfig
 
-def erp():
+def erp(dbconfig=None):
     if hasattr(erp,'value'):
         return erp.value
-    dbconfig = config(args.get('config', None))
     erp.value = erppeek.Client(**dbconfig.erppeek)
     return erp.value
 
@@ -74,7 +73,7 @@ def doPlot(columns, first, last):
 
 def compute(member, first, last, output=None, idmode='memberid', shares=None, show=False, **args):
     dbconfig = config(args.get('config', None))
-    O = erp()
+    O = erp(dbconfig)
     member = preprocessMembers(O,[member], idmode=idmode)[0]
     first, last = str(first), str(last)
     columns=[]
