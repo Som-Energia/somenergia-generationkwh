@@ -117,20 +117,20 @@ class MongoTimeCurve(object):
         data = numpy.zeros(ndays*hoursPerDay, numpy.int)
         if filling :
             filldata = numpy.zeros(ndays*hoursPerDay, numpy.bool)
-        filters = dict(
-            name = filter,
-            datetime = {
+        filters = {
+            'name': filter,
+            self.timestamp: {
                 '$gte': start,
                 '$lt': addDays(stop,1)
             }
-        )
+        }
 
         for x in (self.collection
-                .find(filters, [field,'datetime'])
+                .find(filters, [field,self.timestamp])
                 .sort(self.creation,pymongo.ASCENDING)
                 ):
             point = ns(x)
-            localTime = toLocal(asUtc(point.datetime))
+            localTime = toLocal(asUtc(point[self.timestamp]))
             timeindex = dateToCurveIndex (start, localTime)
             data[timeindex]=point.get(field)
             if filling: filldata[timeindex]=True
@@ -150,8 +150,10 @@ class MongoTimeCurve(object):
             {'_id': self.collectionName},
             {'$inc': {'counter': 1}}
         )
+        timestamp = data.pop('datetime')
         data.update({
             self.creation: datetime.datetime.now(),
+            self.timestamp: timestamp,
             })
         return self.collection.insert(data)
 
@@ -160,10 +162,10 @@ class MongoTimeCurve(object):
         order = pymongo.ASCENDING if first else pymongo.DESCENDING
         for point in (self.collection
                 .find(dict(name=name))
-                .sort('datetime', order)
+                .sort(self.timestamp, order)
                 .limit(1)
                 ):
-            return toLocal(asUtc(ns(point).datetime)).replace(
+            return toLocal(asUtc(point[self.timestamp])).replace(
                     hour=0,minute=0,second=0)
         return None
 
