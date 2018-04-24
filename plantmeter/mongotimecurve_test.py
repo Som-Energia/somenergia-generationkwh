@@ -283,8 +283,11 @@ class MongoTimeCurve_Test(unittest.TestCase):
         c = pymongo.MongoClient()
         c.drop_database('generationkwh_test')
     
+    def curve(self):
+        return MongoTimeCurve(self.db, self.collection)
+
     def setupPoints(self, points):
-        mtc = MongoTimeCurve(self.db, self.collection)
+        mtc = self.curve()
         for datetime, plant, value in points:
             mtc.fillPoint(
                 datetime=localTime(datetime),
@@ -489,7 +492,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             [1,0,2,3]+20*[0]+[4])
 
     def test_fillPoint_complaintsMissingDatetime(self):
-        mtc = MongoTimeCurve(self.db, self.collection)
+        mtc = self.curve()
         with self.assertRaises(Exception) as ass:
             mtc.fillPoint(
                 name='miplanta',
@@ -499,7 +502,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             "Missing 'datetime'")
 
     def test_fillPoint_complaintsMissingName(self):
-        mtc = MongoTimeCurve(self.db, self.collection)
+        mtc = self.curve()
         with self.assertRaises(Exception) as ass:
             mtc.fillPoint(
                 datetime=localTime('2015-08-01 23:00:00'),
