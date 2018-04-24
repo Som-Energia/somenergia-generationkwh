@@ -96,12 +96,14 @@ def curveIndexToDate(start, index):
 
 
 class MongoTimeCurve(object):
-    """Consolidates curve data in a mongo database"""
+    """Consolidates curve data in a mongo database (old format)"""
 
     def __init__(self, mongodb, collection):
         self.db = mongodb
         self.collectionName = collection
         self.collection = self.db[collection]
+        self.timestamp = 'datetime'
+        self.creation = 'create_at'
 
     def get(self, start, stop, filter, field, filling=None):
 
@@ -125,7 +127,7 @@ class MongoTimeCurve(object):
 
         for x in (self.collection
                 .find(filters, [field,'datetime'])
-                .sort('create_at',pymongo.ASCENDING)
+                .sort(self.creation,pymongo.ASCENDING)
                 ):
             point = ns(x)
             localTime = toLocal(asUtc(point.datetime))
@@ -148,9 +150,9 @@ class MongoTimeCurve(object):
             {'_id': self.collectionName},
             {'$inc': {'counter': 1}}
         )
-        data.update(
-            create_at = datetime.datetime.now()
-            )
+        data.update({
+            self.creation: datetime.datetime.now(),
+            })
         return self.collection.insert(data)
 
     def _firstLastDate(self, name, first=False):
@@ -197,6 +199,13 @@ class MongoTimeCurve(object):
                 name=filter,
                 **dict([(field, bin)])
                 )
+
+class MongoTimeCurveNew(MongoTimeCurve):
+    """Consolidates curve data in a mongo database"""
+    def __init__(self, mongodb, collection):
+        super(MongoTimeCurveNew,self).__init__(mongodb, collection)
+        self.creation = 'create_date'
+        self.timestamp = 'timestamp'
 
 
 

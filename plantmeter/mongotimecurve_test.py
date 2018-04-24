@@ -2,6 +2,7 @@
 
 from .mongotimecurve import (
     MongoTimeCurve,
+    MongoTimeCurveNew,
     dateToCurveIndex,
     curveIndexToDate,
     parseLocalTime,
@@ -267,6 +268,7 @@ class CurveDatetimeMapper_Test(unittest.TestCase):
         self.assertDateEqual(
             curveIndexToDate(localisodate("2016-3-26"), 50),
             localTime("2016-3-28 00:00:00"))
+
 
 
 class MongoTimeCurve_Test(unittest.TestCase):
@@ -766,6 +768,47 @@ class MongoTimeCurve_Test(unittest.TestCase):
             list(filling),
             +24*[True]+[False]
             )
+
+class MongoTimeCurveNew_Test(MongoTimeCurve_Test):
+    def curve(self):
+        return MongoTimeCurveNew(self.db, self.collection)
+
+
+"""
+{
+        "_id" : ObjectId("5a846ed9c5a395531d1a78c1"),
+        "create_date" : ISODate("2018-02-14T18:16:09.567Z"),
+        "create_uid" : 1,
+        "name" : "501600324",
+        "timestamp" : ISODate("2018-01-25T23:00:00Z"),
+        "season" : "W",
+        "id" : 602,
+        "magn" : 1000,
+        "ae" : 0,
+        "ai" : 3,
+        "r1" : 0,
+        "r2" : 0,
+        "r3" : 0,
+        "r4" : 6,
+        "quality_ai" : 130,
+        "quality_ae" : 130,
+        "quality_r1" : 130,
+        "quality_r2" : 130,
+        "quality_r3" : 130,
+        "quality_r4" : 130,
+        "ae_fact" : 0,
+        "ai_fact" : 0,
+        "r1_fact" : 0,
+        "r2_fact" : 0,
+        "r3_fact" : 0,
+        "r4_fact" : 0,
+        "cch_fact" : false,
+        "firm_fact" : false,
+        "cch_bruta" : false,
+        "valid" : false
+        "valid_date" : false,
+}
+"""
 
 
 
