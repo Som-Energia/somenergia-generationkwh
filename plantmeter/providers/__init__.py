@@ -1,8 +1,12 @@
 from __future__ import absolute_import
 
 from urlparse import urlparse as std_urlparse
-from plantmeter.providers.base import BaseProvider, \
-        BaseProviderConnectionError, BaseProviderDownloadError, BaseProviderSyntaxError
+from .base import (
+    BaseProvider,
+    BaseProviderConnectionError,
+    BaseProviderDownloadError,
+    BaseProviderSyntaxError,
+    )
 
 _AVAILABLE_PROVIDERS = {}
 
@@ -43,6 +47,6 @@ def get_provider(uri):
     return _AVAILABLE_PROVIDERS[provider]
 
 # Import providers 
-from plantmeter.providers.tfm import TFMProvider
-from plantmeter.providers.csv import CSVProvider
-from plantmeter.providers.monsol import MonsolProvider
+from .tfm import TFMProvider
+from .csv import CSVProvider
+from .monsol import MonsolProvider
