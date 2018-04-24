@@ -199,7 +199,7 @@ class MongoTimeCurve(object):
             self.fillPoint(
                 datetime=curveDate,
                 name=filter,
-                **dict([(field, bin)])
+                **{field: bin}
                 )
 
 class MongoTimeCurveNew(MongoTimeCurve):
