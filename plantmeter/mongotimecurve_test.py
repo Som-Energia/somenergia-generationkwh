@@ -771,7 +771,12 @@ class MongoTimeCurve_Test(unittest.TestCase):
 
 class MongoTimeCurveNew_Test(MongoTimeCurve_Test):
     def curve(self):
-        return MongoTimeCurveNew(self.db, self.collection)
+        return MongoTimeCurve(self.db, self.collection,
+            creationField = 'create_date', 
+            timestampField = 'timestamp',
+            )
+
+    # TODO: Insert an object like the ones from gisce and read it
 
 
 """

@@ -98,12 +98,15 @@ def curveIndexToDate(start, index):
 class MongoTimeCurve(object):
     """Consolidates curve data in a mongo database (old format)"""
 
-    def __init__(self, mongodb, collection):
+    def __init__(self, mongodb, collection, 
+            timestampField='datetime',
+            creationField='create_at',
+        ):
         self.db = mongodb
         self.collectionName = collection
         self.collection = self.db[collection]
-        self.timestamp = 'datetime'
-        self.creation = 'create_at'
+        self.timestamp = timestampField
+        self.creation = creationField
 
     def get(self, start, stop, filter, field, filling=None):
 
@@ -201,13 +204,6 @@ class MongoTimeCurve(object):
                 name=filter,
                 **{field: bin}
                 )
-
-class MongoTimeCurveNew(MongoTimeCurve):
-    """Consolidates curve data in a mongo database"""
-    def __init__(self, mongodb, collection):
-        super(MongoTimeCurveNew,self).__init__(mongodb, collection)
-        self.creation = 'create_date'
-        self.timestamp = 'timestamp'
 
 
 
