@@ -106,23 +106,23 @@ def list():
                 #print plant.dump()
                 
 
-@aggregator.command(
-        help="Clear aggregator platftorm objects")
+@aggregator.command()
 def clear():
+    "Clear aggregator platftorm objects"
     clearAll()
 
-@aggregator.command(
-        help="Initialize aggregator objects")
+@aggregator.command()
 @click.argument('filename')
 def init(filename):
+    "Initialize aggregator objects"
     if filename:
        aggr = setupAggregator(ns.load(filename))
        aggr_obj.update_kwh(aggr['id'])
 
-@aggregator.command(
-        help="Update aggregator kWh")
+@aggregator.command()
 @click.argument('filename')
 def update_kwh(filename):
+    "Update aggregator kWh"
     if filename:
        aggr_name=ns.load(filename)['generationkwh']['name']
        aggr_id=getAggregator(aggr_name)
@@ -143,11 +143,11 @@ def load_measures(meter_path):
     aggr_id=getAggregator(mixes[0])
     aggr_obj.update_kwh(aggr_id)
 
-@aggregator.command(
-   help="Creates a new plant mix")
+@aggregator.command()
 @click.argument('name')
 @click.argument('description')
 def addmix(name, description):
+    "Creates a new plant mix"
     mix = aggr_obj.create(dict(
         name=name,
         description=description,
@@ -155,13 +155,13 @@ def addmix(name, description):
         ))
     print mix.id
 
-@aggregator.command(
-   help="Creates a new plant")
+@aggregator.command()
 @click.argument('mix')
 @click.argument('name')
 @click.argument('description')
 @click.argument('nshares', type=int)
 def addplant(mix, name, description, nshares):
+    "Creates a new plant"
     aggr_id = aggr_obj.search([
         ('name','=',mix),
         ])
@@ -179,8 +179,7 @@ def addplant(mix, name, description, nshares):
         nshares = nshares,
         ))
 
-@aggregator.command(
-   help="Creates a new meter")
+@aggregator.command()
 @click.argument('mix')
 @click.argument('plant')
 @click.argument('name')
@@ -189,8 +188,9 @@ def addplant(mix, name, description, nshares):
 @click.argument('lastcommit',
     default='',
     )
-
 def addmeter(mix, plant, name, description, uri, lastcommit):
+    "Creates a new meter"
+
     aggr_id = aggr_obj.search([
         ('name','=',mix),
         ])
