@@ -43,8 +43,8 @@ def get_kwh(meters, start, end):
             search_params.update({'datetime': {'$lt': end}})
 
     measures = [x for x in collection.find(
-        search_params,
-        {'datetime':1, 'ae':1},
+        filter=search_params,
+        projection={'datetime':1, 'ae':1},
         sort=[('datetime', pymongo.ASCENDING)])]
 
     return [(
