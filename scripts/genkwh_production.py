@@ -68,13 +68,13 @@ def setupMeter(plant_id, meter):
 
 
 @click.group()
-def aggregator():
-    ""
+def production():
+    "Manages production mixes"
 
 def coloredCheck(enabled):
     return u"\033[32;1m[✓]\033[0m" if enabled else u"\033[31;1m[✗]\033[0m"
 
-@aggregator.command(
+@production.command(
         help="List aggregator platform objects")
 def list():
     aggr_ids = aggr_obj.search([])
@@ -106,12 +106,12 @@ def list():
                 #print plant.dump()
                 
 
-@aggregator.command()
+@production.command()
 def clear():
     "Clear aggregator platftorm objects"
     clearAll()
 
-@aggregator.command()
+@production.command()
 @click.argument('filename')
 def init(filename):
     "Initialize aggregator objects"
@@ -119,7 +119,7 @@ def init(filename):
        aggr = setupAggregator(ns.load(filename))
        aggr_obj.update_kwh(aggr['id'])
 
-@aggregator.command()
+@production.command()
 @click.argument('filename')
 def update_kwh(filename):
     "Update aggregator kWh"
@@ -128,7 +128,7 @@ def update_kwh(filename):
        aggr_id=getAggregator(aggr_name)
        aggr_obj.update_kwh(aggr_id)
 
-@aggregator.command(
+@production.command(
    help="Load measures from meters")
 @click.argument('meter_path',
     default='',
@@ -143,7 +143,7 @@ def load_measures(meter_path):
     aggr_id=getAggregator(mixes[0])
     aggr_obj.update_kwh(aggr_id)
 
-@aggregator.command()
+@production.command()
 @click.argument('name')
 @click.argument('description')
 def addmix(name, description):
@@ -155,7 +155,7 @@ def addmix(name, description):
         ))
     print mix.id
 
-@aggregator.command()
+@production.command()
 @click.argument('mix')
 @click.argument('name')
 @click.argument('description')
@@ -179,7 +179,7 @@ def addplant(mix, name, description, nshares):
         nshares = nshares,
         ))
 
-@aggregator.command()
+@production.command()
 @click.argument('mix')
 @click.argument('plant')
 @click.argument('name')
@@ -252,7 +252,7 @@ sources = ns.loads("""
         creationfield: create_at
 """)
 
-@aggregator.command()
+@production.command()
 @click.argument('type', type=click.Choice(sources.keys()))
 @click.argument('name')
 @click.option('--database', '-d', default='somenergia')
@@ -284,7 +284,7 @@ def curve(database, type, name, **args):
 
 
 if __name__ == '__main__':
-    aggregator(obj={})
+    production(obj={})
 
 
 # vim: et ts=4 sw=4
