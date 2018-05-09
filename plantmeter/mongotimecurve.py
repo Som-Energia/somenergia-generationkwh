@@ -92,13 +92,13 @@ def curveIndexToDate(start, index):
     if hours == 24 and not toWinterDls: return None
     if hours == 23 and toSummerDls: return None
     return tz.normalize(localday+datetime.timedelta(hours=hours))
-   
+
 
 
 class MongoTimeCurve(object):
     """Consolidates curve data in a mongo database (old format)"""
 
-    def __init__(self, mongodb, collection, 
+    def __init__(self, mongodb, collection,
             timestampField='datetime',
             creationField='create_at',
         ):
@@ -186,7 +186,7 @@ class MongoTimeCurve(object):
     def firstFullDate(self,name):
         # TODO: dumb implementation, if there is a single point consider it filled
         return self.firstDate(name)
-    
+
     def update(self, start, filter, field, data):
         """Updates the curve with new data"""
 

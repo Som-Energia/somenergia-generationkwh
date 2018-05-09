@@ -11,7 +11,7 @@ from consolemsg import step, success
 from dateutil.relativedelta import relativedelta
 import dbconfig
 from yamlns import namespace as ns
-from generationkwh.isodates import naiveisodate 
+from generationkwh.isodates import naiveisodate
 
 import click
 
@@ -87,7 +87,7 @@ def list():
             )
         if not aggr.plants: continue
         plants = plant_obj.read(aggr.plants, [])
-        for plant in plants:    
+        for plant in plants:
             plant = ns(plant)
             print u"\t{enabled_tick} {id} - {name}: \"{description}\" ({nshares} shares)".format(
                 enabled_tick=coloredCheck(plant.enabled),
@@ -104,7 +104,7 @@ def list():
                 print u"\t\t\t{uri}".format(**meter)
                 print u"\t\t\tLast Commit: {lastcommit}".format(**meter)
                 #print plant.dump()
-                
+
 
 @production.command()
 def clear():
@@ -268,9 +268,9 @@ def curve(database, type, name, **args):
     mongodb = c[database]
     mtc = MongoTimeCurve(
         mongodb,
-        source.collection, 
-        source.timefield, 
-        source.creationfield, 
+        source.collection,
+        source.timefield,
+        source.creationfield,
         )
     curve = mtc.get(
         start=args.get('from',None),
