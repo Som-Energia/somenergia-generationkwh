@@ -224,42 +224,45 @@ from plantmeter.isodates import addDays
 from plantmeter.mongotimecurve import MongoTimeCurve
 import pymongo
 
-# scripts/genkwh_production.py curve gisce 501600324 --from 2018-05-07 --to 2018-05-07
-# scripts/genkwh_production.py curve oldproduction 1 --from 2018-03-26 --to 2018-03-26
-
-
-
 sources = ns.loads("""
-    oldproduction:
-        collection: generationkwh.production.measurement
-        datafield: ae
-        timefield: datetime
-        creationfield: create_at
     gisce:
         collection: tm_profile
         datafield: ae
         timefield: timestamp
         creationfield: create_date
+    production:
+        collection: generationkwh.production.measurement
+        datafield: ae
+        timefield: datetime
+        creationfield: create_at
     rightspershare:
         collection: rightspershare
-        datafield: ae
+        datafield: rights_kwh
         timefield: datetime
         creationfield: create_at
     memberrightusage:
         collection: memberrightusage
-        datafield: ae
+        datafield: usage_kwh
         timefield: datetime
         creationfield: create_at
+        intname: true
 """)
 
 @production.command()
 @click.argument('type', type=click.Choice(sources.keys()))
 @click.argument('name')
 @click.option('--database', '-d', default='somenergia')
-@click.option('--from','-f', type=localisodate)
-@click.option('--to','-t', type=localisodate)
+@click.option('--from','-f', type=localisodate, default="2016-05-01")
+@click.option('--to','-t', type=localisodate, default=str(datetime.date.today()))
 def curve(database, type, name, **args):
-    "Output the production curve"
+    """
+    Outputs in a tabular format a mongo time curve
+
+    $ scripts/genkwh_production.py curve gisce 501600324
+
+    $ scripts/genkwh_production.py curve production 1
+    """
+
     source = sources[type]
     c = pymongo.MongoClient()
     mongodb = c[database]
@@ -272,7 +275,7 @@ def curve(database, type, name, **args):
     curve = mtc.get(
         start=args.get('from',None),
         stop=args.get('to',None),
-        filter=name,
+        filter=long(name) if source.get('intname',False) else name,
         field=source.datafield,
         )
     import numpy
@@ -280,8 +283,9 @@ def curve(database, type, name, **args):
         print addDays(args['from'],day).date(),
         for x in measures:
             print format(x, ' 5d'),
-        print
+        print format(sum(measures), ' 7d')
 
+    print "Total", sum(curve)
 
 if __name__ == '__main__':
     production(obj={})
