@@ -219,6 +219,69 @@ def addmeter(mix, plant, name, description, uri, lastcommit):
         enabled=False,
         ))
 
+from plantmeter.isodates import localisodate
+from plantmeter.isodates import addDays
+from plantmeter.mongotimecurve import MongoTimeCurve
+import pymongo
+
+# scripts/genkwh_production.py curve gisce 501600324 --from 2018-05-07 --to 2018-05-07
+# scripts/genkwh_production.py curve oldproduction 1 --from 2018-03-26 --to 2018-03-26
+
+
+
+sources = ns.loads("""
+    oldproduction:
+        collection: generationkwh.production.measurement
+        datafield: ae
+        timefield: datetime
+        creationfield: create_at
+    gisce:
+        collection: tm_profile
+        datafield: ae
+        timefield: timestamp
+        creationfield: create_date
+    rightspershare:
+        collection: rightspershare
+        datafield: ae
+        timefield: datetime
+        creationfield: create_at
+    memberrightusage:
+        collection: memberrightusage
+        datafield: ae
+        timefield: datetime
+        creationfield: create_at
+""")
+
+@aggregator.command()
+@click.argument('type', type=click.Choice(sources.keys()))
+@click.argument('name')
+@click.option('--database', '-d', default='somenergia')
+@click.option('--from','-f', type=localisodate)
+@click.option('--to','-t', type=localisodate)
+def curve(database, type, name, **args):
+    "Output the production curve"
+    source = sources[type]
+    c = pymongo.MongoClient()
+    mongodb = c[database]
+    mtc = MongoTimeCurve(
+        mongodb,
+        source.collection, 
+        source.timefield, 
+        source.creationfield, 
+        )
+    curve = mtc.get(
+        start=args.get('from',None),
+        stop=args.get('to',None),
+        filter=name,
+        field=source.datafield,
+        )
+    import numpy
+    for day, measures in enumerate(numpy.reshape(curve,(-1,25))):
+        print addDays(args['from'],day).date(),
+        for x in measures:
+            print format(x, ' 5d'),
+        print
+
 
 if __name__ == '__main__':
     aggregator(obj={})
