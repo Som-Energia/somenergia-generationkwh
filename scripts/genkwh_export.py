@@ -14,7 +14,7 @@ import pymongo
 import click
 
 c = erppeek.Client(**dbconfig.erppeek)
-m = pymongo.Connection(*dbconfig.mongo)
+m = pymongo.MongoClient(*dbconfig.mongo)
 mdb = m['somenergia']
 collection = mdb['generationkwh.production.measurement']
 
