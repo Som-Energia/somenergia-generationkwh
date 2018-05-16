@@ -4,7 +4,7 @@ from plantmeter.providers import BaseProvider, register, urlparse
 from plantmeter.isodates import localisodatetime, assertDateOrNone, daterange
 import datetime
 import csv
-from ..mongotimecurve import parseLocalTime, toLocal
+from ..isodates import parseLocalTime, toLocal
 
 class CSVProvider(BaseProvider):
     """CSV provider

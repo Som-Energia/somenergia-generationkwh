@@ -5,7 +5,7 @@ import pytz
 from plantmeter.providers import BaseProvider, BaseProviderConnectionError, \
         BaseProviderDownloadError, BaseProviderSyntaxError, register, urlparse
 from plantmeter.isodates import daterange
-from ..mongotimecurve import toLocal, parseLocalTime as mtcParseLocalTime, addHours
+from ..isodates import toLocal, parseLocalTime as mtcParseLocalTime, addHours
 
 def parseLocalTime(string, isSummer):
     return mtcParseLocalTime(string, isSummer, format="%Y%m%d%H%M%S")

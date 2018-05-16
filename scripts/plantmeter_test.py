@@ -4,8 +4,8 @@
 import os
 import datetime
 import pytz
-from plantmeter.mongotimecurve import MongoTimeCurve, parseLocalTime, asUtc
-from plantmeter.isodates import naiveisodate, localisodate
+from plantmeter.mongotimecurve import MongoTimeCurve
+from plantmeter.isodates import naiveisodate, localisodate, parseLocalTime, asUtc
 from yamlns import namespace as ns
 
 import unittest

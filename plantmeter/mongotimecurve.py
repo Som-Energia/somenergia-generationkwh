@@ -22,11 +22,8 @@ import datetime
 from .isodates import (
     asUtc,
     toLocal,
-    parseLocalTime,
-    assertLocalDateTime,
     tz,
     addDays,
-    addHours
     )
 
 
