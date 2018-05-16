@@ -6,6 +6,7 @@ import datetime
 import pytz
 from plantmeter.mongotimecurve import MongoTimeCurve
 from plantmeter.isodates import naiveisodate, localisodate, parseLocalTime, asUtc
+from plantmeter.testutils import destructiveTest
 from yamlns import namespace as ns
 
 import unittest
@@ -151,6 +152,7 @@ class PlantMeterApiTestBase(unittest.TestCase):
     def getLastcommit(self, meter_id):
         return self.c.GenerationkwhProductionMeter.read(meter_id, ['lastcommit'])['lastcommit']
 
+@destructiveTest
 class GenerationkwhProductionAggregator_Test(PlantMeterApiTestBase):
 
     def test_get_kwh_onePlant_withNoPoints(self):
@@ -488,6 +490,7 @@ class GenerationkwhProductionAggregator_Test(PlantMeterApiTestBase):
             shares = self.helper.getNshares(aggr_id)
             self.assertEqual(shares, 3000)
 
+@destructiveTest
 class GenerationkwhProductionNotifier_Test(PlantMeterApiTestBase):
 
     def searchNotifications(self, search):
@@ -550,5 +553,7 @@ class GenerationkwhProductionNotifier_Test(PlantMeterApiTestBase):
                     ]
             self.assertNotEqual(
                     self.searchNotifications(search_params)[0], [])
+
+
 
 # vim: et ts=4 sw=4
