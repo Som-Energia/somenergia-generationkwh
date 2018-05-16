@@ -77,4 +77,18 @@ def addDays(date, ndays):
     naiveday = datetime.datetime.combine(resultday, datetime.time(0,0,0))
     return toLocal(naiveday)
 
+# TODO: TOTEST
+def daterange(start_date, end_date, **kwds):
+    """
+    Generates dates from start_date to end_date,
+    additional parameters provides paramenters for the
+    timedelta constructor to be used as step.
+    """
+    step = kwds or dict(days=1)
+    if not end_date:
+        end_date = start_date + datetime.timedelta(days=1)
+    for n in range(int ((end_date - start_date).days)):
+        yield start_date + n*datetime.timedelta(**step)
+
+
 

@@ -1,5 +1,5 @@
 from plantmeter.providers import BaseProvider, register, urlparse
-from plantmeter.utils import daterange
+from plantmeter.isodates import daterange
 import datetime
 import xlrd
 
