@@ -4,12 +4,15 @@ from datetime import datetime, timedelta
 import erppeek
 import dbconfig
 
-O = erppeek.Client(**dbconfig.erppeek)
 
-date_2 = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
+if __name__ == "__main__":
 
-last_pulls_ids = O.GenerationkwhProductionNotifier.search([('date_pull', '>', date_2)])
+    O = erppeek.Client(**dbconfig.erppeek)
 
-last_pulls = O.GenerationkwhProductionNotifier.read(last_pulls_ids)
+    date_2 = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
 
-print(json.dumps(last_pulls, indent=4, sort_keys=True))
+    last_pulls_ids = O.GenerationkwhProductionNotifier.search([('date_pull', '>', date_2)])
+
+    last_pulls = O.GenerationkwhProductionNotifier.read(last_pulls_ids)
+
+    print(json.dumps(last_pulls, indent=4, sort_keys=True))
