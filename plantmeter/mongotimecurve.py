@@ -106,7 +106,6 @@ class MongoTimeCurve(object):
         self.creation = creationField
 
     def get(self, start, stop, filter, field, filling=None):
-
         assert start.tzinfo is not None, (
             "MongoTimeCurve.get called with naive (no timezone) start date")
 
@@ -118,17 +117,39 @@ class MongoTimeCurve(object):
         if filling :
             filldata = numpy.zeros(ndays*hoursPerDay, numpy.bool)
         filters = {
-            'name': filter,
             self.timestamp: {
                 '$gte': start,
                 '$lt': addDays(stop,1)
             }
         }
+        if filter: filters.update(name=filter)
+        from bson.son import SON
 
-        for x in (self.collection
-                .find(filters, [field,self.timestamp])
-                .sort(self.creation,pymongo.ASCENDING)
-                ):
+        pipeline = [
+            {"$match":
+                filters,
+            },
+            {"$sort": SON([
+                (self.timestamp, 1),
+                ("name", 1),
+                (self.creation, -1),
+            ])},
+            {"$group": {
+                '_id': {
+                    self.timestamp: '$'+self.timestamp,
+                    'name': '$name',
+                },
+                self.timestamp: {'$last': '$'+self.timestamp},
+                field: {'$first': '$'+field}
+            }},
+            {"$group": {
+                '_id': '$'+self.timestamp,
+                self.timestamp: {'$first': '$'+self.timestamp},
+                field: {'$sum': '$'+field}
+            }},
+        ]
+
+        for x in self.collection.aggregate(pipeline,allowDiskUse=True)['result']:
             point = ns(x)
             localTime = toLocal(asUtc(point[self.timestamp]))
             timeindex = dateToCurveIndex (start, localTime)

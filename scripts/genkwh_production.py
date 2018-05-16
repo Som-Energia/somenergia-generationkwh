@@ -250,7 +250,7 @@ sources = ns.loads("""
 
 @production.command()
 @click.argument('type', type=click.Choice(sources.keys()))
-@click.argument('name')
+@click.argument('name', required=False)
 @click.option('--database', '-d', default='somenergia')
 @click.option('--from','-f', type=localisodate, default="2016-05-01")
 @click.option('--to','-t', type=localisodate, default=str(datetime.date.today()))
@@ -275,7 +275,7 @@ def curve(database, type, name, **args):
     curve = mtc.get(
         start=args.get('from',None),
         stop=args.get('to',None),
-        filter=long(name) if source.get('intname',False) else name,
+        filter=None if name is None else long(name) if source.get('intname',False) else name,
         field=source.datafield,
         )
     import numpy
@@ -286,6 +286,10 @@ def curve(database, type, name, **args):
         print format(sum(measures), ' 7d')
 
     print "Total", sum(curve)
+
+
+
+
 
 if __name__ == '__main__':
     production(obj={})

@@ -12,7 +12,7 @@ from .isodates import (
     parseLocalTime,
     assertLocalDateTime,
     )
-
+from . import testutils # proper ids
 import pymongo
 import datetime
 
@@ -290,7 +290,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             str(22*[0]+[10,0,0])
             )
 
-    def test_get_withOutsideData(self):
+    def test_get_outsideDates(self):
         mtc = self.setupPoints([
             ('2015-01-02 23:00:00', 'miplanta', 10),
             ])
@@ -321,7 +321,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             list(curve),
             [0,10]+21*[0]+[10,0])
 
-    def test_get_differentNameIgnored(self):
+    def test_get_differentName_ignored(self):
         mtc = self.setupPoints([
             ('2015-01-01 23:00:00', 'otraplanta', 10),
             ])
@@ -336,10 +336,43 @@ class MongoTimeCurve_Test(unittest.TestCase):
             list(curve),
             +25*[0])
 
+    def test_get_noNameFilter_getsBoth(self):
+        mtc = self.setupPoints([
+            ('2015-01-01 21:00:00', 'miplanta', 10),
+            ('2015-01-01 23:00:00', 'otraplanta', 20),
+            ])
 
-    def test_get_prioritizesNewest(self):
+        curve = mtc.get(
+            start=localisodate('2015-01-01'),
+            stop=localisodate('2015-01-01'),
+            filter=None,
+            field='ae',
+            )
+        self.assertEqual(
+            list(curve),
+            +21*[0]+[10,0,20,0])
+
+    def test_get_differentNames_added(self):
         mtc = self.setupPoints([
             ('2015-01-01 23:00:00', 'miplanta', 10),
+            ('2015-01-01 23:00:00', 'otraplanta', 20),
+            ])
+
+        curve = mtc.get(
+            start=localisodate('2015-01-01'),
+            stop=localisodate('2015-01-01'),
+            filter=None,
+            field='ae',
+            )
+        self.assertEqual(
+            list(curve),
+            +23*[0]+[30,0])
+
+    def test_get_sameNameAndDate_prioritizesNewest(self):
+        mtc = self.setupPoints([
+            ('2015-01-01 23:00:00', 'miplanta', 10),
+            ])
+        mtc = self.setupPoints([
             ('2015-01-01 23:00:00', 'miplanta', 30),
             ])
 
@@ -706,8 +739,9 @@ class MongoTimeCurveNew_Test(MongoTimeCurve_Test):
             timestampField = 'timestamp',
             )
 
-    # TODO: Insert an object like the ones from gisce and read it
 
+
+# TODO: Insert an object like the ones from gisce and read it
 
 """
 {
