@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
-
+from generationkwh import __version__
 readme = open("README.md").read()
 
 setup(
 	name = "somenergia-generationkwh",
-	version = "2.3",
+	version = __version__,
 	description =
 		"OpenERP module and library to manage Som Energia's Generation kWh",
 	author = "Som Energia SCCL",
