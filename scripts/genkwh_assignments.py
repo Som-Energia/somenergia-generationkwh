@@ -1,148 +1,145 @@
 #!/usr/bin/env python
-"""
-Manages recipient contracts of kWh rights for a Generation-kWh investor.
-"""
 
 import erppeek
 import datetime
-from consolemsg import step, success
+from consolemsg import step, success, warn
 from dateutil.relativedelta import relativedelta
 from yamlns import namespace as ns
 from generationkwh.isodates import isodate
+import click
+from generationkwh import __version__
 
-def parseArgumments():
-    import argparse
-    parser = argparse.ArgumentParser(description=__doc__)
+c = None
+def erp(config):
+    global c
+    if c: return
+    if config:
+        import imp
+        dbconfig = imp.load_source('config',config)
+    else:
+        import dbconfig
+    warn("Using server {server} as {user}", **dbconfig.erppeek)
+    c = erppeek.Client(**dbconfig.erppeek)
 
-    parser.add_argument(
-        '-C', '--config',
-        dest='config',
-        metavar='DBCONFIG.py',
-        help="use that DBCONFIG.py as configuration file "
-            "instead of default dbconfig.py at script location.",
-        )
 
-    subparsers = parser.add_subparsers(
-        title="Subcommands",
-        dest='subcommand',
-        )
-    unassigned = subparsers.add_parser('unassigned',
-        help="list members with investments but no assigments",
-        )
-    list = subparsers.add_parser('list',
-        help="list assignments",
-        )
-    assign = subparsers.add_parser('assign',
-        help="set assignment",
-        )
-    expire = subparsers.add_parser('expire',
-        help="expire assignments",
-        )
-    default = subparsers.add_parser('default',
-        help="create contract assignations using by default criteria",
-        )
-    clear = subparsers.add_parser('clear',
-        help="clear assignment objects",
-        )
-    price = subparsers.add_parser('price',
-        help="sends the price mail to the pioneers",
-        )
+@click.group()
+@click.help_option()
+@click.version_option(__version__)
+@click.option(
+    '-C', '--config',
+    help="use that DBCONFIG.py as configuration file "
+        "instead of default dbconfig.py at script location.",
+    metavar='DBCONFIG.py',
+    )
+@click.pass_context
+def cli(ctx, config):
+    """
+    Manages beneficiary contracts for a Generation kWh investor.
+    """
+    ctx.obj['cfg']=config
 
-    for sub in default, expire, assign, list, price:
-        sub.add_argument(
-            '-p','--partner',
-            dest='idmode',
-            action='store_const',
-            const='partner',
-            help="select members by its partner database id, "
-                "instead of member database id",
-            )
-        sub.add_argument(
-            '-n','--number',
-            dest='idmode',
-            action='store_const',
-            const='code',
-            default='memberid',
-            help="select members by its member code number, "
-                "instead of member database id",
-            )
-    for sub in expire, assign:
-        sub.add_argument(
-            '-r','--ref',
-            dest='contractMode',
-            action='store_const',
-            const='ref',
-            default='id',
-            help="select contracts by its reference number, "
-                "instead of contract database id",
-            )
-    for sub in default,:
-        sub.add_argument(
-            '--all',
-            action='store_true',
-            help='apply it to all members with investments',
-            )
-    for sub in default,list,price:
-        sub.add_argument(
-            dest='members',
-            type=int,
-            nargs='*',
-            help="investors of Generation-kWh (see --partner and --number)",
-            )
-    for sub in default, unassigned, price:
-        sub.add_argument(
-            '--effectiveon',
-            type=isodate,
-            metavar='YYYY-MM-DD',
-            help="filter out investments still not effective at the indicated "
-                "ISO date",
-            )
-        sub.add_argument(
-            '--purchaseduntil',
-            type=isodate,
-            metavar='YYYY-MM-DD',
-            help="filter out investments purchased after "
-                "the indicated ISO date",
-            )
-        sub.add_argument(
-            '--force',
-            action='store_true',
-            help="even if an assigment already exists ",
-            )
-        sub.add_argument(
-            '--insist',
-            action='store_true',
-            help="even if the notification has been sent",
-            )
-    for sub in default,price:
-        sub.add_argument(
-            '--mail',
-            action='store_true',
-            help='send notification email',
-            )
-    for sub in expire, assign,:
-        sub.add_argument(
-            'contract',
-            type=int,
-            help="contract database id (see also --ref)",
-            )
-        sub.add_argument(
-            'member',
-            type=int,
-            help="investor of Generation-kWh (see --partner and --number)",
-            )
-    for sub in assign,:
-        sub.add_argument(
-            'priority',
-            type=int,
-            help="a precedence number, ie. a contract with priority 2 "
-                "has to wait contracts with priority 1 to access "
-                "new production.",
-            )
 
-    return parser.parse_args(namespace=ns())
 
-def preprocessMembers(members=None,idmode=None, all=None, effectiveon=None, purchaseduntil=None, force=False, insist=False):
+partner_option=click.option(
+    '-p','--partner',
+    'idmode',
+    flag_value='partner',
+    help="select members by its partner database id, "
+        "instead of member database id",
+    )
+
+number_option=click.option(
+    '-m','--member',
+    'idmode',
+    flag_value='memberid',
+    default=True,
+    help="select members by its member id",
+    )
+
+number_option=click.option(
+    '-n','--number',
+    'idmode',
+    flag_value='code',
+    help="select members by its member code number, "
+        "instead of member database id",
+    )
+
+member_argument=click.argument(
+    'member',
+    type=int,
+#    help="investor of Generation-kWh (see --partner and --number)",
+    )
+
+members_argument=click.argument(
+    'members',
+    type=int,
+    nargs=-1,
+#    help="investors of Generation-kWh (see --partner and --number)",
+    )
+
+ref_option=click.option(
+    '-r','--ref',
+    'contractMode',
+    flag_value='ref',
+    default='id',
+    help="select contracts by its reference number, "
+        "instead of contract database id",
+    )
+
+contract_argument=click.argument(
+    'contract',
+    type=int,
+#    help="contract database id (see also --ref)",
+    )
+
+
+
+all_option=click.option(
+    '--all',
+    is_flag=True,
+    help='apply it to all members with investments',
+    )
+effectiveon_option = click.option(
+    '--effectiveon',
+    type=isodate,
+    metavar='YYYY-MM-DD',
+    help="filter out investments still not effective at the indicated "
+        "ISO date",
+    )
+purchaseduntil_option = click.option(
+    '--purchaseduntil',
+    type=isodate,
+    metavar='YYYY-MM-DD',
+    help="filter out investments purchased after "
+        "the indicated ISO date",
+    )
+force_option = click.option(
+    '--force',
+    is_flag=True,
+    help="even if an assigment already exists ",
+    )
+insist_option = click.option(
+    '--insist',
+    is_flag=True,
+    help="even if the notification has been sent",
+    )
+mail_option = click.option(
+    '--mail',
+    is_flag=True,
+    help='send notification email',
+    )
+priority_argument = click.argument(
+    'priority',
+    type=int,
+#    help="a precedence number, ie. a contract with priority 2 "
+#        "has to wait contracts with priority 1 to access "
+#        "new production.",
+    )
+
+
+def preprocessMembers(members=None,idmode=None, all=None, effectiveon=None,
+        purchaseduntil=None, force=False, insist=False):
+
     """Turns members in which ever format to the ones required by commands"""
 
     if all or effectiveon or purchaseduntil:
@@ -173,18 +170,33 @@ def preprocessContracts(contracts=None,contractMode=None):
     return contracts
 
 
+@cli.command()
+@click.confirmation_option(
+    prompt="This will sublimate the all the assignments of all investments",
+    )
+@click.confirmation_option(
+    prompt="Pero estas seguro de verdad de la buena?",
+    )
 def clear(**args):
+    "clear assignment objects"
     c.GenerationkwhAssignment.dropAll()
 
-def list(csv=False,members=None,idmode=None,**args):
-    """
-        List existing assignments.
-    """
+
+@cli.command('list')
+@members_argument
+@partner_option
+@number_option
+@click.pass_context
+def _list(ctx, members=None,idmode=None,csv=False):
+    "list assignments"
+
+    erp(ctx.obj['cfg'])
     members=preprocessMembers(members, idmode)
     assigments = []
     if members:
-        assigments = c.GenerationkwhAssignment.search(
-            [ ('member_id', 'in', members) ],)
+        assigments = c.GenerationkwhAssignment.search([
+            ('member_id', 'in', tuple(members)),
+            ])
         if not assigments: assigments = [-1]
 
     def buildcsv(data):
@@ -217,20 +229,47 @@ def list(csv=False,members=None,idmode=None,**args):
             ],)
         ])
     if csv: return csvdata
-    print csvdata
+    click.echo(csvdata)
 
+
+@cli.command()
+@member_argument
+@partner_option
+@number_option
+@contract_argument
+@ref_option
+@click.pass_context
 def expire(
+        ctx,
         member=None,
         contract=None,
         idmode=None,
+        contractMode=None,
         **_):
+    "expire assignments"
+
+    erp(ctx.obj['cfg'])
+    contract = preprocessContracts([contract], contractMode)[0]
     member = preprocessMembers([member], idmode)[0]
     step("Markin as expired assignation between contract {} and member {}"
         .format(contract, member))
     c.GenerationkwhAssignment.expire(contract, member)
     success("Done.")
 
-def price(
+
+@cli.command()
+@members_argument
+@all_option
+@partner_option
+@number_option
+@mail_option
+@force_option
+@insist_option
+@effectiveon_option
+@purchaseduntil_option
+@click.pass_context
+def prize(
+        ctx,
         members=None,
         force=False,
         insist=False,
@@ -240,6 +279,7 @@ def price(
         effectiveon=None,
         purchaseduntil=None,
         **_):
+    erp(ctx.obj['cfg'])
     members=preprocessMembers(members, idmode, all, effectiveon, purchaseduntil, force, insist)
     if mail:
         step("Sending advanced effectiveness notification for members: {}".format(
@@ -251,7 +291,21 @@ def price(
         step("Use --mail to send")
     success("Done.")
 
+
+
+@cli.command()
+@members_argument
+@all_option
+@partner_option
+@number_option
+@mail_option
+@force_option
+@insist_option
+@effectiveon_option
+@purchaseduntil_option
+@click.pass_context
 def default(
+        ctx,
         members=None,
         force=False,
         insist=False,
@@ -261,6 +315,9 @@ def default(
         effectiveon=None,
         purchaseduntil=None,
         **_):
+    "create contract assignations using by default criteria"
+
+    erp(ctx.obj['cfg'])
     members=preprocessMembers(members, idmode, all, effectiveon, purchaseduntil, force, insist)
     step("Generating default assignments for members: {}".format(
         ','.join(str(i) for i in members)))
@@ -271,19 +328,44 @@ def default(
         c.GenerationkwhAssignment.notifyAssignmentByMail(members)
     success("Done.")
 
-def assign(member=None,contract=None,priority=None, idmode=None, contractMode=None):
+
+@cli.command()
+@member_argument
+@partner_option
+@number_option
+@contract_argument
+@ref_option
+@priority_argument
+@click.pass_context
+def assign(ctx, member, contract, priority, idmode, contractMode):
+    "set assignment"
+
+    erp(ctx.obj['cfg'])
+    print "contract:", contract
+
     member = preprocessMembers([member], idmode)[0]
     contract = preprocessContracts([contract], contractMode)[0]
-    expire(member=member,contract=contract)
+    expire.callback(member=member,contract=contract)
     step("Assigning contract {} to member {}"
         .format(contract, member))
-    c.GenerationkwhAssignment.create({
+    result = c.GenerationkwhAssignment.create({
         'member_id': member,
         'contract_id': contract,
         'priority': priority
     })
+    click.echo(result)
 
-def unassigned(effectiveon=None, purchaseduntil=None, force=False, insist=False):
+
+@cli.command()
+@effectiveon_option
+@purchaseduntil_option
+@force_option
+@insist_option
+@click.pass_context
+def unassigned(ctx, effectiveon=None, purchaseduntil=None, force=False, insist=False):
+    "list members with investments but no assigments"
+
+    erp(ctx.obj['cfg'])
     members=preprocessMembers(
         members=[],
         idmode='memberid',
@@ -293,33 +375,11 @@ def unassigned(effectiveon=None, purchaseduntil=None, force=False, insist=False)
         force=force,
         insist=force,
         )
-    print u'\n'.join(str(i) for i in members)
-
-c = None
-
-def main():
-    import sys
-    args = parseArgumments()
-    print >> sys.stderr, args.dump()
-
-    if args.config:
-        import imp
-        dbconfig = imp.load_source('config',args.config)
-    else:
-        import dbconfig
-    del args.config
-
-    global c
-    c = c or erppeek.Client(**dbconfig.erppeek)
-
-    # Calls the function homonymous to the subcommand
-    # with the options as paramteres
-    subcommand = args.subcommand
-    del args.subcommand
-    globals()[subcommand](**args)
+    click.echo(u'\n'.join(str(i) for i in members))
 
 if __name__ == '__main__':
-    main()
+    cli(obj={})
+    #main()
 
 
 

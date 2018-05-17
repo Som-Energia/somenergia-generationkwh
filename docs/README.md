@@ -1,4 +1,4 @@
-Documentation of the generation project:
+Documentation:
 
 - [Staff introduction to Generation kWh](intro-ca.markdown) (Catalan)
 - [Analisis on the different types of investments in SomEnergia](inversions.markdown)
