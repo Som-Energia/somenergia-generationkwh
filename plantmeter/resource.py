@@ -2,7 +2,12 @@ import os
 import numpy as np
 
 from plantmeter.providers import get_provider
-from plantmeter.isodates import localisodate, assertDateOrNone, assertDate, dateToLocal
+from plantmeter.isodates import (
+    dateToLocal,
+    localisodate,
+    assertDateOrNone,
+    assertDate,
+    )
 import datetime
 
 """
