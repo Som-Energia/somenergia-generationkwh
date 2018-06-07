@@ -400,12 +400,12 @@ class PartnerAssignments_Test(unittest.TestCase):
               contract_state: {contract.state}
               annual_use_kwh: {contract.annualUseKwh}
               contract_address: {contract.cups_direccio}
-            """.format(
+            """.format(**dict(
+                self.personalData,
                 id=id,
                 contract_id=self.contract_id,
                 contract=contract,
-                **self.personalData
-            ))
+            )))
 
     def test_assignments_expired(self):
 
@@ -466,15 +466,15 @@ class PartnerAssignments_Test(unittest.TestCase):
               contract_state: {contract.state}
               annual_use_kwh: {contract.annualUseKwh}
               contract_address: {contract.cups_direccio}
-            """.format(
+            """.format(**dict(
+                self.personalData,
                 id=id,
                 contract_id=self.contract_id,
                 contract=contract,
                 id2=id2,
                 contract_id2=self.contract_id2,
                 contract2=contract2,
-                **self.personalData
-            ))
+            )))
 
 
 
