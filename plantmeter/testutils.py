@@ -13,12 +13,14 @@ def assertNsEqual(self, dict1, dict2):
         return ns.loads(nsOrString)
 
     def sorteddict(d):
-        if type(d) not in (dict, ns):
-            return d
-        return ns(sorted(
-            (k, sorteddict(v))
-            for k,v in d.items()
-            ))
+        if type(d) in (dict, ns):
+            return ns(sorted(
+                (k, sorteddict(v))
+                for k,v in d.items()
+                ))
+        if type(d) in (list, tuple):
+            return [sorteddict(x) for x in d]
+        return d
     dict1 = sorteddict(parseIfString(dict1))
     dict2 = sorteddict(parseIfString(dict2))
 
