@@ -7,6 +7,12 @@ from yamlns import namespace as ns
 unittest.TestCase.__str__ = unittest.TestCase.id
 
 def assertNsEqual(self, dict1, dict2):
+    """
+    Asserts that both dict have equivalent structure.
+    If parameters are strings they are parsed as yaml.
+    Comparation by comparing the result of turning them
+    to yaml sorting the keys of any dict within the structure.
+    """
     def parseIfString(nsOrString):
         if isinstance(nsOrString, dict):
             return nsOrString
