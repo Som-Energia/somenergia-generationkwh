@@ -228,7 +228,7 @@ sources = ns.loads("""
     gisce:
         collection: tm_profile
         datafield: ae
-        timefield: timestamp
+        timefield: utc_timestamp
         creationfield: create_date
     production:
         collection: generationkwh.production.measurement

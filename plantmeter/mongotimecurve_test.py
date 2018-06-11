@@ -736,7 +736,7 @@ class MongoTimeCurveNew_Test(MongoTimeCurve_Test):
     def curve(self):
         return MongoTimeCurve(self.db, self.collection,
             creationField = 'create_date', 
-            timestampField = 'timestamp',
+            timestampField = 'utc_timestamp',
             )
 
 
