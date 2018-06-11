@@ -246,6 +246,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         # pickup cases (commented out the original partner.id)
         self.member_noContracts = 537 # 629
         self.member_oneAsPayer = 4 # 5 
+        self.contract_oneAsPayer = 106369
         self.member_asOwnerButNotPayer = 8887 # 13846
         self.contract_asOwnerButNotPayer = 15212
         self.member_aPayerAndAnOwnerContract = 107 # 120
@@ -477,7 +478,7 @@ class AssignmentProvider_Test(unittest.TestCase):
 
     def test_sortedDefaultContractsForMember_oneAsPayer(self):
         self.assertContractForMember(self.member_oneAsPayer, [
-            (106369, self.member_oneAsPayer),
+            (self.contract_oneAsPayer, self.member_oneAsPayer),
             ])
 
     def test_sortedDefaultContractsForMember_oneAsOwnerButNotPayer(self):
