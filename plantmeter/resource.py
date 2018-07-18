@@ -97,10 +97,10 @@ class ProductionMeter(Resource):
         assertDate('end', end)
 
         return self.curveProvider.get(
-            dateToLocal(start),
-            dateToLocal(end),
-            self.name,
-            'ae'
+            start=dateToLocal(start),
+            stop=dateToLocal(end),
+            filter=self.name,
+            field='ae',
             )
 
     def update_kwh(self, start=None, end=None , notifier=None):
