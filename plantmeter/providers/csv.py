@@ -27,7 +27,7 @@ class CSVProvider(BaseProvider):
             items = line.rstrip().split(';')
             return {
                 'datetime': parseLocalTime(items[0]+':00', items[1]=='S'),
-                'ae': items[2]
+                'ae': int(items[2]),
                 }
 
         if not end:
