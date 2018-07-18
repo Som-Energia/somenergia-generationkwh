@@ -139,7 +139,7 @@ class MongoTimeCurve(object):
                     self.timestamp: '$'+self.timestamp,
                     'name': '$name',
                 },
-                self.timestamp: {'$last': '$'+self.timestamp},
+                self.timestamp: {'$first': '$'+self.timestamp},
                 field: {'$first': '$'+field}
             }},
             {"$group": {
