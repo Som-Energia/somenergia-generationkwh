@@ -12,6 +12,73 @@ import unittest
 def local_file(filename):
     return os.path.join(os.path.abspath(os.path.dirname(__file__)), filename)
 
+class Meter_Test(unittest.TestCase):
+    def setUp(self):
+        self.databasename = 'generationkwh_test'
+        self.collection = 'production'
+
+        self.connection = pymongo.MongoClient()
+        self.connection.drop_database(self.databasename)
+        self.db = self.connection[self.databasename]
+        self.curveProvider = MongoTimeCurve(self.db, self.collection)
+        self.uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
+
+    def tearDown(self):
+        self.connection.drop_database('generationkwh_test')
+
+    def setupMeter(self):
+        return ProductionMeter(
+            1,
+            'meterName',
+            'meterDescription',
+            True,
+            uri = self.uri,
+            curveProvider = self.curveProvider,
+            )
+
+    def test_get_empty(self):
+        m = self.setupMeter()
+        self.assertEqual(
+            list(m.get_kwh(
+                date(2015,9,4),
+                date(2015,9,5))),
+            2*25*[0]
+            )
+
+    def test_get_filled(self):
+        m = self.setupMeter()
+        m.update_kwh(date(2015,9,4), date(2015,9,5))
+
+        self.assertEqual(
+            list(m.get_kwh(
+                date(2015,9,4),
+                date(2015,9,5))),
+            [
+                0,0,0,0,0,0,0,0,3,6,5,4,8,17,34,12,12,5,3,1,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,4,7,6,5,9,18,35,13,13,6,4,2,0,0,0,0,0,
+            ])
+
+    def test_lastDate_empty(self):
+        m = self.setupMeter()
+        self.assertEqual(m.lastMeasurementDate(), None)
+
+    def test_lastDate_filled(self):
+        m = self.setupMeter()
+        m.update_kwh(date(2015,9,4), date(2015,9,5))
+        self.assertEqual(m.lastMeasurementDate(), date(2015,9,5))
+
+    def test_firstDate_empty(self):
+        m = self.setupMeter()
+        self.assertEqual(m.firstMeasurementDate(), None)
+
+    def test_firstDate_filled(self):
+        m = self.setupMeter()
+        m.update_kwh(date(2015,9,4), date(2015,9,5))
+        self.assertEqual(m.firstMeasurementDate(), date(2015,9,4))
+
+    # TODO: Test update_kwh setting lastcommit
+    # TODO: the result of update_kwh is uses anywhere? if so, test it thoroughly if not drop it
+
 class Resource_Test(unittest.TestCase):
 
     def setUp(self):
@@ -221,73 +288,6 @@ class Resource_Test(unittest.TestCase):
         m2.update_kwh(date(2015,8,4), date(2015,8,5))
 
         self.assertEqual(aggr.firstMeasurementDate(), date(2015,8,4))
-
-class Meter_Test(unittest.TestCase):
-    def setUp(self):
-        self.databasename = 'generationkwh_test'
-        self.collection = 'production'
-
-        self.connection = pymongo.MongoClient()
-        self.connection.drop_database(self.databasename)
-        self.db = self.connection[self.databasename]
-        self.curveProvider = MongoTimeCurve(self.db, self.collection)
-        self.uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
-
-    def tearDown(self):
-        self.connection.drop_database('generationkwh_test')
-
-    def setupMeter(self):
-        return ProductionMeter(
-            1,
-            'meterName',
-            'meterDescription',
-            True,
-            uri = self.uri,
-            curveProvider = self.curveProvider,
-            )
-
-    def test_get_empty(self):
-        m = self.setupMeter()
-        self.assertEqual(
-            list(m.get_kwh(
-                date(2015,9,4),
-                date(2015,9,5))),
-            2*25*[0]
-            )
-
-    def test_get_filled(self):
-        m = self.setupMeter()
-        m.update_kwh(date(2015,9,4), date(2015,9,5))
-
-        self.assertEqual(
-            list(m.get_kwh(
-                date(2015,9,4),
-                date(2015,9,5))),
-            [
-                0,0,0,0,0,0,0,0,3,6,5,4,8,17,34,12,12,5,3,1,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,4,7,6,5,9,18,35,13,13,6,4,2,0,0,0,0,0,
-            ])
-
-    def test_lastDate_empty(self):
-        m = self.setupMeter()
-        self.assertEqual(m.lastMeasurementDate(), None)
-
-    def test_lastDate_filled(self):
-        m = self.setupMeter()
-        m.update_kwh(date(2015,9,4), date(2015,9,5))
-        self.assertEqual(m.lastMeasurementDate(), date(2015,9,5))
-
-    def test_firstDate_empty(self):
-        m = self.setupMeter()
-        self.assertEqual(m.firstMeasurementDate(), None)
-
-    def test_firstDate_filled(self):
-        m = self.setupMeter()
-        m.update_kwh(date(2015,9,4), date(2015,9,5))
-        self.assertEqual(m.firstMeasurementDate(), date(2015,9,4))
-
-    # TODO: Test update_kwh setting lastcommit
-    # TODO: the result of update_kwh is uses anywhere? if so, test it thoroughly if not drop it
 
 
 unittest.TestCase.__str__ = unittest.TestCase.id
