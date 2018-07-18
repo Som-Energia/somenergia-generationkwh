@@ -126,14 +126,17 @@ class MongoTimeCurve(object):
         from bson.son import SON
 
         pipeline = [
+            # pick the ones matching the filters
             {"$match":
                 filters,
             },
+            # sort by timestamp, name and new firsts
             {"$sort": SON([
                 (self.timestamp, 1),
                 ("name", 1),
                 (self.creation, -1),
             ])},
+            # group all having the same timestamp and name, pick newest on collission
             {"$group": {
                 '_id': {
                     self.timestamp: '$'+self.timestamp,
@@ -142,10 +145,11 @@ class MongoTimeCurve(object):
                 self.timestamp: {'$first': '$'+self.timestamp},
                 field: {'$first': '$'+field}
             }},
+            # Suma tots els que tenen el mateix timestamp, diferent nom
             {"$group": {
                 '_id': '$'+self.timestamp,
                 self.timestamp: {'$first': '$'+self.timestamp},
-                field: {'$sum': '$'+field}
+                field: {'$sum': '$'+field},
             }},
         ]
 
