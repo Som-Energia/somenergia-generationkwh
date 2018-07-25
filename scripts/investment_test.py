@@ -1644,6 +1644,7 @@ class Investment_Test(unittest.TestCase):
                 debtor_state: {state}
                 debtor_vat: {vat}
                 id: {id}
+                mandate_scheme: core
                 name: {name}
                 notes: GENERATION kWh
                 payment_type: recurring
