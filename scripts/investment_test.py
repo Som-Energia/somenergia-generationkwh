@@ -1663,6 +1663,13 @@ class Investment_Test(unittest.TestCase):
                     today=datetime.today().strftime("%Y-%m-%d"),
                 ))
 
+    def _generationMailAccount(self):
+        PEAccounts = self.erp.PoweremailCore_accounts
+        return PEAccounts.search([
+           ('name','=','Generation kWh')
+            ])[0]
+        
+
     def test__create_from_form__sendsCreationEmail(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -1677,9 +1684,10 @@ class Investment_Test(unittest.TestCase):
             - model: generationkwh.investment
               id: {id}
               template: generationkwh_mail_creacio
-              from_id: [ 17 ] # TODO: magic number
+              from_id: [ {account_id} ]
             """.format(
                 id=id,
+                account_id = self._generationMailAccount(),
             ))
 
     def test__investment_payment__sendsPaymentEmail(self):
@@ -1700,9 +1708,10 @@ class Investment_Test(unittest.TestCase):
             - model: account.invoice
               id: {id}
               template: generationkwh_mail_pagament
-              from_id: [ 17 ] # TODO: magic number
+              from_id: [ {account_id} ]
             """.format(
                 id=invoice_ids[0],
+                account_id = self._generationMailAccount(),
             ))
 
     def test__mark_as_paid__sendsPaymentEmail(self):
@@ -1741,9 +1750,10 @@ class Investment_Test(unittest.TestCase):
             - model: account.invoice
               id: {id}
               template: generationkwh_mail_impagament
-              from_id: [ 17 ] # TODO: magic number
+              from_id: [ {account_id} ]
             """.format(
                 id=id,
+                account_id = self._generationMailAccount(),
             ))
 
 
@@ -1769,9 +1779,10 @@ class Investment_Test(unittest.TestCase):
             - model: account.invoice
               id: {id}
               template: generationkwh_mail_amortitzacio
-              from_id: [ 17 ] # TODO: magic number
+              from_id: [ {account_id} ]
             """.format(
                 id=amortization_ids[0],
+                account_id = self._generationMailAccount(),
             ))
 
     def test__amortized_amount__zeroByDefault(self):
