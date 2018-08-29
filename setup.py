@@ -25,6 +25,7 @@ setup(
 		'plantmeter',
 		'python-dateutil',
 		'decorator',
+		'python-dateutil',
 #		'libfacturacioatr',
 	],
 	include_package_data = True,
