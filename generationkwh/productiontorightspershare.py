@@ -14,9 +14,9 @@ class ProductionToRightsPerShare(object):
 
     def computeRights(self, production, activeShares, nshares=1, remainder_wh=0):
 
-        assert numpy.issubdtype(production.dtype, int), (
+        assert numpy.issubdtype(production.dtype, numpy.dtype(int)), (
             "Production base type is not integer")
-        assert numpy.issubdtype(activeShares.dtype,int), (
+        assert numpy.issubdtype(activeShares.dtype, numpy.dtype(int)), (
             "ActiveShares base type is not integer")
 
         with numpy.errstate(divide='ignore'):
