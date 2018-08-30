@@ -565,7 +565,7 @@ class MongoTimeCurve_Test(unittest.TestCase):
             )
         self.assertEqual(
             list(curve),
-            list(range(1,25) + [0]))
+            list(range(1,25)) + [0])
 
     def test_lastFullDate_withNoPoints(self):
         mtc = self.setupDatePoints('2015-01-01', 'miplanta', [1]*24)
