@@ -69,10 +69,20 @@ def setupMeter(plant_id, meter):
 
 @click.group()
 def production():
-    "Manages production mixes"
+    """
+    Manages the plant mix to be used in Generation kWh.
+
+    Production of the set of plants which form a plant mix
+    has to be aggregated as a single virtual plant.
+
+    Each plant may have several meters, each meter defines
+    an url which indicates how to fetch its measures.
+    """
 
 def coloredCheck(enabled):
-    return u"\033[32;1m[✓]\033[0m" if enabled else u"\033[31;1m[✗]\033[0m"
+    if enabled:
+        return u"\033[32;1m[✓]\033[0m"
+    return u"\033[31;1m[✗]\033[0m"
 
 @production.command(
         help="List aggregator platform objects")
@@ -122,14 +132,14 @@ def init(filename):
 @production.command()
 @click.argument('filename')
 def update_kwh(filename):
-    "Update aggregator kWh"
+    "Update aggregator kWh (deprecated)"
     if filename:
        aggr_name=ns.load(filename)['generationkwh']['name']
        aggr_id=getAggregator(aggr_name)
        aggr_obj.update_kwh(aggr_id)
 
 @production.command(
-   help="Load measures from meters")
+   help="Load measures from meters (unfinished rewrite of update_kwh command)")
 @click.argument('meter_path',
     default='',
     )
