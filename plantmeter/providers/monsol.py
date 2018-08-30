@@ -10,8 +10,12 @@ from . import (
     register,
     urlparse,
     )
-from ..isodates import daterange
-from ..isodates import toLocal, parseLocalTime as mtcParseLocalTime, addHours
+from ..isodates import (
+    daterange,
+    toLocal,
+    parseLocalTime as mtcParseLocalTime,
+    addHours,
+)
 
 def parseLocalTime(string, isSummer):
     return mtcParseLocalTime(string, isSummer, format="%Y%m%d%H%M%S")
