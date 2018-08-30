@@ -3,9 +3,10 @@
 from .mongotimecurve import MongoTimeCurve, tz
 from .resource import *
 from .isodates import localisodatetime,naiveisodatetime
-
+import os
 import pymongo
 from datetime import datetime, date
+from . import testutils
 
 import unittest
 
