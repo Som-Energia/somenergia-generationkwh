@@ -153,7 +153,7 @@ class MongoTimeCurve(object):
             }},
         ]
 
-        for x in self.collection.aggregate(pipeline,allowDiskUse=True)['result']:
+        for x in self.collection.aggregate(pipeline,cursor={},allowDiskUse=True):
             point = ns(x)
             localTime = toLocal(asUtc(point[self.timestamp]))
             timeindex = dateToCurveIndex (start, localTime)
