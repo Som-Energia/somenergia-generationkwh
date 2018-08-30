@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from plantmeter.providers import BaseProvider, register, urlparse
-from plantmeter.isodates import localisodatetime, assertDateOrNone, daterange
+from . import BaseProvider, register, urlparse
+from ..isodates import localisodatetime, assertDateOrNone, daterange
+from ..isodates import parseLocalTime, toLocal
 import datetime
 import csv
-from ..isodates import parseLocalTime, toLocal
 
 class CSVProvider(BaseProvider):
     """CSV provider

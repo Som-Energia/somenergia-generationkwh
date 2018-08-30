@@ -10,7 +10,7 @@ except Exception as e:
     VERSION = 'unknown'
 
 
-#from plantmeter.logging import setup_logging
+#from .logging import setup_logging
 #logging_config = config_from_environment('PLANETMETER_LOGGING')
 #logger = setup_logging(**logging_config)
 

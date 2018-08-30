@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 from .mongotimecurve import MongoTimeCurve, tz
-from plantmeter.resource import *
-from plantmeter.isodates import localisodatetime,naiveisodatetime
+from .resource import *
+from .isodates import localisodatetime,naiveisodatetime
 
 import pymongo
 from datetime import datetime, date

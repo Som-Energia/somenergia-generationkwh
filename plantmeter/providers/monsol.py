@@ -2,9 +2,15 @@ import datetime
 import ftplib
 import pytz
 
-from plantmeter.providers import BaseProvider, BaseProviderConnectionError, \
-        BaseProviderDownloadError, BaseProviderSyntaxError, register, urlparse
-from plantmeter.isodates import daterange
+from . import (
+    BaseProvider,
+    BaseProviderConnectionError,
+    BaseProviderDownloadError,
+    BaseProviderSyntaxError,
+    register,
+    urlparse,
+    )
+from ..isodates import daterange
 from ..isodates import toLocal, parseLocalTime as mtcParseLocalTime, addHours
 
 def parseLocalTime(string, isSummer):

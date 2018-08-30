@@ -1,8 +1,8 @@
 import os
 import numpy as np
 
-from plantmeter.providers import get_provider
-from plantmeter.isodates import (
+from .providers import get_provider
+from .isodates import (
     dateToLocal,
     localisodate,
     assertDateOrNone,
