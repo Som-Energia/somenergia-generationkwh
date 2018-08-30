@@ -1,6 +1,10 @@
 from __future__ import absolute_import
 
-from urlparse import urlparse as std_urlparse
+try:
+	from urlparse import urlparse as std_urlparse
+except ImportError: # Py3
+	from urllib.parse import urlparse as std_urlparse
+
 from .base import (
     BaseProvider,
     BaseProviderConnectionError,
