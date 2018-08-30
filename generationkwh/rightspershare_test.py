@@ -37,7 +37,7 @@ class RightsPerShare_Test(unittest.TestCase):
         provider.updateRightsPerShare(
             nshares='1',
             start=isodate('2015-08-15'),
-            data=range(1,25)+[0],
+            data=list(range(1,25))+[0],
             )
         rightsPerShare = provider.rightsPerShare(
             nshares='1',
@@ -45,7 +45,7 @@ class RightsPerShare_Test(unittest.TestCase):
             stop=isodate('2015-08-15'),
             )
         self.assertEqual(
-            range(1,25)+[0],
+            list(range(1,25))+[0],
             list(rightsPerShare),
             )
 

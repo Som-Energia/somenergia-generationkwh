@@ -36,7 +36,7 @@ class MemberRightsUsage_Test(unittest.TestCase):
         usage = provider.updateUsage(
             member='1',
             start=isodate('2015-08-15'),
-            data=range(1,25)+[0],
+            data=list(range(1,25))+[0],
             )
         usage = provider.usage(
             member='1',
@@ -44,7 +44,7 @@ class MemberRightsUsage_Test(unittest.TestCase):
             stop=isodate('2015-08-15'),
             )
         self.assertEqual(
-            range(1,25)+[0],
+            list(range(1,25))+[0],
             list(usage),
             )
 
