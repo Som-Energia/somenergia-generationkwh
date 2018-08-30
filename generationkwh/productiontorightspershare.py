@@ -20,7 +20,8 @@ class ProductionToRightsPerShare(object):
             "ActiveShares base type is not integer")
 
         with numpy.errstate(divide='ignore'):
-            fraction = production*1000*nshares/activeShares
+            fraction = production*1000*nshares / activeShares
+            fraction[~numpy.isfinite(fraction) ] = 0
         fraction = numpy.concatenate( ([remainder_wh],fraction) )
         integral = fraction.cumsum()
 
