@@ -31,56 +31,56 @@ class CurveDatetimeMapper_Test(unittest.TestCase):
         self.assertEqual(str(result), str(expected))
 
     def test_dateToCurveIndex_inSummer(self):
-       self.assertEquals(
+       self.assertEqual(
             dateToCurveIndex(
                 localisodate("2016-08-15"),
                 localTime("2016-08-15 00:00:00")
                 ), 0)
 
     def test_dateToCurveIndex_inSummer_secondHour(self):
-       self.assertEquals(
+       self.assertEqual(
             dateToCurveIndex(
                 localisodate("2016-08-15"),
                 localTime("2016-08-15 01:00:00")
                 ), 1)
 
     def test_dateToCurveIndex_inSummer_nextDay(self):
-       self.assertEquals(
+       self.assertEqual(
             dateToCurveIndex(
                 localisodate("2016-08-15"),
                 localTime("2016-08-16 00:00:00")
                 ), 25)
 
     def test_dateToCurveIndex_inWinter(self):
-       self.assertEquals(
+       self.assertEqual(
             dateToCurveIndex(
                 localisodate("2016-12-25"),
                 localTime("2016-12-25 00:00:00")
                 ), 0)
 
     def test_dateToCurveIndex_beforeSummerToWinterChange(self):
-       self.assertEquals(
+       self.assertEqual(
             dateToCurveIndex(
                 localisodate("2016-10-30"),
                 localTime("2016-10-30 02:00:00S")
                 ), 2)
 
     def test_dateToCurveIndex_afterSummerToWinterChange(self):
-       self.assertEquals(
+       self.assertEqual(
             dateToCurveIndex(
                 localisodate("2016-10-30"),
                 localTime("2016-10-30 02:00:00")
                 ), 3)
 
     def test_dateToCurveIndex_beforeWinterToSummerChange(self):
-       self.assertEquals(
+       self.assertEqual(
             dateToCurveIndex(
                 localisodate("2016-03-27"),
                 localTime("2016-03-27 01:00:00")
                 ), 1)
 
     def test_dateToCurveIndex_afterWinterToSummerChange(self):
-       self.assertEquals(
+       self.assertEqual(
             dateToCurveIndex(
                 localisodate("2016-03-27"),
                 localTime("2016-03-27 03:00:00")
