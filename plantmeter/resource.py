@@ -116,6 +116,7 @@ class ProductionMeter(Resource):
         with provider(self.uri) as remote:
             status = 'done'
             message = None
+            # TODO: If zero production is the problem this catchall should be disabled
             try:
                 for day in remote.get(start, end):
                     for measurement in day:
