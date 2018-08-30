@@ -3,6 +3,7 @@
 from .investmentstate import (
     InvestmentState,
     InvestmentStateError as StateError,
+    forceUnicode,
     )
 import unittest
 from yamlns import namespace as ns
@@ -16,6 +17,9 @@ class InvestmentState_Test(unittest.TestCase):
     logprefix = "[{} {}] ".format(timestamp, user)
 
     assertNsEqual = assertNsEqual
+
+    def assertExceptionMessage(self, e, text):
+        self.assertEqual(forceUnicode(e.args[0]), text)
 
     def setUp(self):
         self.maxDiff = None
@@ -71,7 +75,7 @@ class InvestmentState_Test(unittest.TestCase):
             self.setupInvestment(
                 badParameter = 'value',
                 )
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "Investments have no 'badParameter' attribute")
 
     def test_getattr(self):
@@ -87,7 +91,7 @@ class InvestmentState_Test(unittest.TestCase):
             )
         with self.assertRaises(AttributeError) as ctx:
             inv.badattrib
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "badattrib")
 
     def test_setattr_fails(self):
@@ -96,7 +100,7 @@ class InvestmentState_Test(unittest.TestCase):
             )
         with self.assertRaises(AttributeError) as ctx:
             inv.nominal_amount = 5
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "nominal_amount")
 
     def test_values_takesInitialValues(self):
@@ -596,7 +600,7 @@ class InvestmentState_Test(unittest.TestCase):
         )
         with self.assertRaises(StateError) as ctx:
             inv.invoice()
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "Already invoiced")
         self.assertChangesEqual(inv, """\
             {}
@@ -650,7 +654,7 @@ class InvestmentState_Test(unittest.TestCase):
                 amount = 300.0,
                 move_line_id = 666,
             )
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "Already paid")
         self.assertChangesEqual(inv, """\
             paid_amount: 600.0
@@ -673,7 +677,7 @@ class InvestmentState_Test(unittest.TestCase):
                 amount = 400.0, # Wrong!
                 move_line_id = 666,
             )
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "Wrong payment, expected 300.0, given 400.0")
         self.assertChangesEqual(inv, """\
             paid_amount: 400.0
@@ -696,7 +700,7 @@ class InvestmentState_Test(unittest.TestCase):
                 amount = 300.0, # Wrong!
                 move_line_id = 666,
             )
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "Not invoiced yet")
         self.assertChangesEqual(inv, """\
             {}
@@ -747,7 +751,7 @@ class InvestmentState_Test(unittest.TestCase):
                 amount = 300.0,
                 move_line_id = 666,
             )
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "No pending amount to unpay")
         self.assertChangesEqual(inv, """\
             {}
@@ -767,7 +771,7 @@ class InvestmentState_Test(unittest.TestCase):
                 amount = 200.0,
                 move_line_id = 666,
             )
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "Unpaying wrong amount, was 200.0 expected 300.0")
         self.assertChangesEqual(inv, """\
             {}
@@ -787,7 +791,7 @@ class InvestmentState_Test(unittest.TestCase):
                 amount = 300.0,
                 move_line_id = 666,
             )
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "Not invoiced yet")
         self.assertChangesEqual(inv, """\
             {}
@@ -918,7 +922,7 @@ class InvestmentState_Test(unittest.TestCase):
                 amount = 300.,
                 move_line_id = 666,
             )
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             u"Divesting wrong amount, tried 300.0 €, unamortized 288.0 €")
 
     def test_divest_unpaid(self):
@@ -936,7 +940,7 @@ class InvestmentState_Test(unittest.TestCase):
                 amount = 300.,
                 move_line_id = 666,
             )
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             u"Paid amount after divestment should be 0 but was -300.0 €")
 
     def test_emitTransfer(self):
@@ -1042,7 +1046,7 @@ class InvestmentState_Test(unittest.TestCase):
                 to_partner_name = "Palotes, Perico",
                 amount = 300.0,
             )
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "Only paid investments can be transferred")
 
         self.assertChangesEqual(inv, """
@@ -1169,7 +1173,7 @@ class InvestmentState_Test(unittest.TestCase):
                 origin = origin,
                 origin_partner_name = "Palotes, Perico",
             )
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "Only paid investments can be transferred")
 
         self.assertChangesEqual(inv, """
@@ -1253,7 +1257,7 @@ class InvestmentState_Test(unittest.TestCase):
                 comment = "lo dice el jefe",
                 badparam = 'value',
             )
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "Bad parameter changed in pact 'badparam'")
 
     # TODO: PORAKI
@@ -1295,7 +1299,7 @@ class InvestmentState_Test(unittest.TestCase):
                 from_amount= 100.0,
                 to_amount = 300.0,
             )
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "Correction not matching the 'from' amount")
 
     # TODO: Not enough, also if it has unpaid invoices
@@ -1310,7 +1314,7 @@ class InvestmentState_Test(unittest.TestCase):
                 from_amount= 200.0,
                 to_amount = 300.0,
             )
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "Correction can not be done with paid investments")
 
     def test_partial(self):
@@ -1351,7 +1355,7 @@ class InvestmentState_Test(unittest.TestCase):
                 amount= 100.0,
                 move_line_id = 666,
             )
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "Partial divestment can be only applied to paid investments, "
             "try 'correct'")
 
@@ -1414,7 +1418,7 @@ class InvestmentState_Test(unittest.TestCase):
             )
         with self.assertRaises(StateError) as ctx:
             inv.cancel()
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "Only unpaid investments can be cancelled")
 
     def test_cancel_inactive(self):
@@ -1423,7 +1427,7 @@ class InvestmentState_Test(unittest.TestCase):
             )
         with self.assertRaises(StateError) as ctx:
             inv.cancel()
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             "Inactive investments can not be cancelled")
 
     def test_cancel_invoiced(self):
@@ -1511,7 +1515,7 @@ class InvestmentState_Test(unittest.TestCase):
                 date=isodate('2018-01-01'),
                 to_be_amortized=40.0,
             )
-        self.assertEqual(ctx.exception.message,
+        self.assertExceptionMessage(ctx.exception,
             u"Amortizing an unpaid investment")
 
     def test_migrate(self):

@@ -9,6 +9,16 @@ from dateutil.relativedelta import relativedelta
 from decimal import Decimal
 from decorator import decorator
 
+def forceUnicode(text):
+    try: unicode
+    except NameError: # python 3
+        if type(text) is bytes:
+            return text.decode('utf8')
+    else: # python 2
+        if type(text) is str:
+            return text.decode('utf8')
+    return text
+
 try: xrange
 except NameError:
     xrange=range
@@ -59,7 +69,7 @@ class InvestmentState(object):
         self._prev=ns(values)
         self._vals=ns(values)
         self._changed=ns()
-        self._user = user if type(user) is unicode else user.decode('utf-8')
+        self._user = forceUnicode(user)
         self._timestamp = timestamp
 
     def __getattr__(self, name):
@@ -415,8 +425,8 @@ class InvestmentState(object):
             u'[{move_line_id}]\n'
             .format(
                 move_line_id=move_line_id,
-                origin_partner_name = origin_partner_name.decode('utf-8'),
-                old = old
+                origin_partner_name = forceUnicode(origin_partner_name),
+                old = old,
             ))
 
         if not old.purchase_date:
