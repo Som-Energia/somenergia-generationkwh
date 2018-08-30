@@ -290,6 +290,5 @@ class Resource_Test(unittest.TestCase):
         self.assertEqual(aggr.firstMeasurementDate(), date(2015,8,4))
 
 
-unittest.TestCase.__str__ = unittest.TestCase.id
 
 # vim: et ts=4 sw=4
