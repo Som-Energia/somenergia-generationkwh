@@ -4,7 +4,7 @@ from . import BaseProvider, register, urlparse
 from ..isodates import localisodatetime, assertDateOrNone, daterange
 from ..isodates import parseLocalTime, toLocal
 import datetime
-import csv
+import io
 
 class CSVProvider(BaseProvider):
     """CSV provider
@@ -32,7 +32,7 @@ class CSVProvider(BaseProvider):
 
         if not end:
             end = toLocal(datetime.datetime.now()).date()
-        with open(self.res, 'rb') as csvfile:
+        with io.open(self.res, 'r') as csvfile:
             content = csvfile.readlines()
             return [
                 [
