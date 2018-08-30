@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from memberrightscurve import MemberRightsCurve
+from .memberrightscurve import MemberRightsCurve
 import unittest
 from .isodates import isodate, localisodate
 from plantmeter.mongotimecurve import dateToCurveIndex

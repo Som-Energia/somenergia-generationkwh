@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from productionloader import ProductionLoader
+from .productionloader import ProductionLoader
 import unittest
 import datetime
 import pymongo

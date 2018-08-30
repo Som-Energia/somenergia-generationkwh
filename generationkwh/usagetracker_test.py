@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from generationkwh.usagetracker import UsageTracker
+from .usagetracker import UsageTracker
 from .isodates import isodate
 import unittest
 

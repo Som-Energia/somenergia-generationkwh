@@ -2,9 +2,9 @@
 
 from plantmeter.isodates import isodate
 from dateutil.relativedelta import relativedelta
-import generationkwh.investmentmodel as gkwh
+from . import investmentmodel as gkwh
 
-from investmentstate import InvestmentState
+from .investmentstate import InvestmentState
 
 
 def pendingAmortizations(purchase_date, current_date, investment_amount, amortized_amount):

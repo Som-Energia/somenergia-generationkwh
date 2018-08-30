@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from generationkwh.investmentstate import (
+from .investmentstate import (
     InvestmentState,
     InvestmentStateError as StateError,
     )

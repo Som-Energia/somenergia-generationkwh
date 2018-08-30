@@ -2,10 +2,10 @@
 '''State tracker for investments'''
 
 from yamlns import namespace as ns
+from . import investmentmodel as gkwh
 from .isodates import isodate
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-import generationkwh.investmentmodel as gkwh
 from decimal import Decimal
 from decorator import decorator
 

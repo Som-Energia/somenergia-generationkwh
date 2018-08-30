@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from fareperiodcurve import FarePeriodCurve, libfacturacioatr
+from .fareperiodcurve import FarePeriodCurve, libfacturacioatr
 import unittest
 import datetime
 from .isodates import isodate

@@ -2,7 +2,7 @@
 
 import unittest
 
-from amortizations import pendingAmortizations
+from .amortizations import pendingAmortizations
 
 class Amortization_Test(unittest.TestCase):
 
