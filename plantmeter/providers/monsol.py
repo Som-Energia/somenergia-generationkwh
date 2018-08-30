@@ -70,9 +70,12 @@ class MonsolProvider(BaseProvider):
         except Exception as e:
             raise BaseProviderConnectionError(e)
 
-        import StringIO
+        try:
+            from StringIO import StringIO
+        except ImportError:
+            from io import StringIO
         from contextlib import closing
-        with closing(StringIO.StringIO()) as sio:
+        with closing(StringIO()) as sio:
             try:
                 client.cwd(self.res['path'])
                 client.retrbinary('RETR ' + filename, callback=sio.write)
