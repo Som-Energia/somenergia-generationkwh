@@ -84,7 +84,7 @@ class MonsolProvide_Test(unittest.TestCase):
         actual = m.extract(content, datetime.date(2016,3,26))
         expected = self.profileFromDate(
                 '20160326',
-                range(0,24),
+                list(range(0,24)),
                 [0,0,0,0,0,0,0,0,7,14,21,29,24,26,26,28,23,16,6,0,0,0,0,0],
                 ['W']*24)
         self.assertProfileEqual(actual, expected)
@@ -95,7 +95,7 @@ class MonsolProvide_Test(unittest.TestCase):
         actual = m.extract(content, datetime.date(2016,3,27))
         expected = self.profileFromDate(
                 '20160327',
-                [0,1]+range(3,24),
+                [0,1]+list(range(3,24)),
                 [0,1,2,3,4,5,6,9,15,20,27,29,31,31,30,26,11,8,0,0,0,0,0],
                 ['W']+['S']*22)
         self.assertProfileEqual(actual, expected)
@@ -106,7 +106,7 @@ class MonsolProvide_Test(unittest.TestCase):
         actual = m.extract(content, datetime.date(2016,10,30))
         expected = self.profileFromDate(
                 '20161030',
-                [0,1,2,2]+range(3,24),
+                [0,1,2,2]+list(range(3,24)),
                 range(1,26),
                 ['S']*3+['W']*22)
         self.assertProfileEqual(actual, expected)
