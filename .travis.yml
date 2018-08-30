@@ -6,7 +6,7 @@ services:
 install:
 - pip install -r requirements.txt
 - pip install coveralls
-- pip install pip install git+https://github.com/som-energia/plantmeter.git@master
+- pip install git+https://github.com/som-energia/plantmeter.git@master
 script: coverage run --source generationkwh ./setup.py test
 after_success:
 - coveralls
