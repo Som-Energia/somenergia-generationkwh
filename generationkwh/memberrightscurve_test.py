@@ -6,6 +6,9 @@ from .isodates import isodate, localisodate
 from plantmeter.mongotimecurve import dateToCurveIndex
 import numpy
 
+try: xrange
+except NameError: xrange=range
+
 class CurveProvider_MockUp(object):
     def __init__(self, value):
         self._value = value

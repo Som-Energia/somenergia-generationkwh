@@ -9,6 +9,10 @@ from dateutil.relativedelta import relativedelta
 from decimal import Decimal
 from decorator import decorator
 
+try: xrange
+except NameError:
+    xrange=range
+
 
 @decorator
 def action(f, self, *args, **kwds):

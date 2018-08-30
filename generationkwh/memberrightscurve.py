@@ -4,6 +4,9 @@ import numpy
 from .isodates import dateToLocal
 import datetime
 
+try: xrange
+except NameError: xrange=range
+
 class MemberRightsCurve(object):
     """
         Provides the hourly curve of kWh available for a given
