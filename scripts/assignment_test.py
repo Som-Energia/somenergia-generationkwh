@@ -4,6 +4,7 @@ import unittest
 import datetime
 from yamlns import namespace as ns
 from generationkwh.isodates import isodate
+import xmlrpclib
 dbconfig = None
 try:
     import dbconfig
@@ -53,8 +54,12 @@ class Assignment_Test(unittest.TestCase):
             ],expectation)
 
     def tearDown(self):
-        self.erp.rollback()
-        self.erp.close()
+        try:
+            self.erp.rollback()
+            self.erp.close()
+        except xmlrpclib.Fault as e:
+            if 'transaction block' not in e.faultCode:
+                raise
 
     def test_no_assignments(self):
         self.setupProvider()
