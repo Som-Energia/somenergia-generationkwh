@@ -113,7 +113,7 @@ class Account_Invoice_Test(unittest.TestCase):
 
         investment_id = self.Investment.create_from_form(
             self.personalData.partnerid,
-            '2017-01-01', # order_date
+            '2018-01-01', # order_date
             4000,
             '10.10.23.123',
             'ES7712341234161234567890',
@@ -361,7 +361,7 @@ class Account_Invoice_Test(unittest.TestCase):
     def test_invoiceState_paidInvestmentInvoice(self):
         investment_id = self.Investment.create_from_form(
             self.personalData.partnerid,
-            '2017-01-01', # order_date
+            '2018-01-01', # order_date
             4000,
             '10.10.23.123',
             'ES7712341234161234567890',
