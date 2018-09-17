@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 import datetime
+import xmlrpclib
 dbconfig = None
 try:
     import dbconfig
@@ -27,8 +28,12 @@ class Remainder_Test(unittest.TestCase):
         self.assertEqual([list(a) for a in expectation], result)
 
     def tearDown(self):
-        self.erp.rollback()
-        self.erp.close()
+        try:
+            self.erp.rollback()
+            self.erp.close()
+        except xmlrpclib.Fault as e:
+            if 'transaction block' not in e.faultCode:
+                raise
 
     def test_last_noRemainders(self):
         self.setupProvider()
