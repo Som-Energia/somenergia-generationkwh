@@ -271,8 +271,11 @@ class PartnerInvestments_Test(unittest.TestCase):
         self.ResPartner = self.erp.ResPartner
         self.Investment = self.erp.GenerationkwhInvestment
         self.Investment.dropAll()
+        self.MailMockup = self.erp.GenerationkwhMailmockup
+        self.MailMockup.activate()
 
     def tearDown(self):
+        self.MailMockup.deactivate()
         self.erp.rollback()
         self.erp.close()
 
