@@ -2684,9 +2684,14 @@ class Investment_Test(unittest.TestCase):
             "Amount to return = 0, not transferible"
             )
 
+    def getAMember(self):
+        return ns(self.erp.SomenergiaSoci.read(1))
+
     def test__create_from_transfer__allOk(self):
+        newMember = self.getAMember()
+
         id = self.Investment.create_from_form(
-            self.personalData.newpartnerid,
+            newMember.partner_id[0],
             '2017-01-01', # order_date
             1000,
             '10.10.23.123',
@@ -2710,8 +2715,8 @@ class Investment_Test(unittest.TestCase):
         self.assertNsEqual(old_investment, """
             id: {id}
             member_id:
-            - {newmemberid}
-            - {newsurname}, {newname}
+            - {newMember.id}
+            - {newMember.name}
             order_date: '2017-01-01'
             purchase_date: '2017-01-02'
             first_effective_date: '2018-01-02'
@@ -2723,6 +2728,7 @@ class Investment_Test(unittest.TestCase):
             draft: false
             """.format(
                 id=old_investment_id,
+                newMember = newMember,
                 **self.personalData
                 ))
 
@@ -2750,8 +2756,9 @@ class Investment_Test(unittest.TestCase):
                 ))
 
     def test__create_from_transfer__partialAmortizedAllOk(self):
+        newMember = self.getAMember()
         id = self.Investment.create_from_form(
-            self.personalData.newpartnerid,
+            newMember.partner_id[0],
             '2017-01-01', # order_date
             1000,
             '10.10.23.123',
@@ -2776,8 +2783,8 @@ class Investment_Test(unittest.TestCase):
         self.assertNsEqual(old_investment, """
             id: {id}
             member_id:
-            - {newmemberid}
-            - {newsurname}, {newname}
+            - {newMember.id}
+            - {newMember.name}
             order_date: '2017-01-01'
             purchase_date: '2017-01-02'
             first_effective_date: '2018-01-02'
@@ -2788,6 +2795,7 @@ class Investment_Test(unittest.TestCase):
             active: true
             draft: false
             """.format(
+                newMember = newMember,
                 id=old_investment_id,
                 **self.personalData
                 ))
@@ -2816,6 +2824,7 @@ class Investment_Test(unittest.TestCase):
                 ))
 
     def test__move_line_when_tranfer__allOk(self):
+        newMember = self.getAMember()
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
@@ -2826,9 +2835,13 @@ class Investment_Test(unittest.TestCase):
         self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2017-09-02')
         partner = self.ResPartner.browse(self.personalData.partnerid)
-        newpartner = self.ResPartner.browse(self.personalData.newpartnerid)
 
-        move_id, moveline_debit, moveline_credit = self.Investment.move_line_when_tranfer(partner.id, newpartner.id, partner.property_account_gkwh.id, newpartner.property_account_gkwh.id, 1000)
+        move_id, moveline_debit, moveline_credit = self.Investment.move_line_when_tranfer(
+            partner.id,
+            newMember.partner_id,
+            partner.property_account_gkwh.id,
+            newMember.property_account_gkwh[0],
+            1000)
 
         period_name = datetime.today().strftime('%m/%Y')
         period_id = self.AccountPeriod.search([
