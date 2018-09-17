@@ -2674,8 +2674,8 @@ class Investment_Test(unittest.TestCase):
         invoice,errors = self.Investment.amortize('2042-11-20',[id])
 
         with self.assertRaises(Exception) as ctx:
-            id_new = self.Investment.create_from_transfer(
-                id, # magic number, existing investment
+            self.Investment.create_from_transfer(
+                id,
                 self.personalData.partnerid,
                 '2017-01-26', # order_date
                 'ES7712341234161234567890',
