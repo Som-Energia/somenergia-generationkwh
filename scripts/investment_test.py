@@ -1743,16 +1743,22 @@ class Investment_Test(unittest.TestCase):
         self.MailMockup.deactivate()
         self.MailMockup.activate()
 
+        investmentName = self.Investment.read(id, ['name'])['name']
+        invoiceName = investmentName + '-JUST'
+        invoice_id = self.Invoice.search([
+            ('name', '=', invoiceName)
+        ])[0]
+
         self.Investment.mark_as_unpaid([id])
 
         self.assertMailLogEqual("""
             logs:
             - model: account.invoice
-              id: {id}
+              id: {invoice_id}
               template: generationkwh_mail_impagament
               from_id: [ {account_id} ]
             """.format(
-                id=id,
+                invoice_id=invoice_id,
                 account_id = self._generationMailAccount(),
             ))
 
