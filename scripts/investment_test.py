@@ -1896,7 +1896,7 @@ class Investment_Test(unittest.TestCase):
     def pendingAmortizationSummary(self, id, currentDate):
         return self.Investment.pending_amortization_summary(currentDate, [id])
 
-    def test__pending_amortitzation_summary__draft(self):
+    def test__pending_amortization_summary__draft(self):
         mid = self.personalData.member_id
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -1908,7 +1908,7 @@ class Investment_Test(unittest.TestCase):
         self.assertEqual([0, 0.0],
             self.pendingAmortizationSummary(id, '2017-11-20'))
 
-    def test__pending_amortitzation_summary__unpaid(self):
+    def test__pending_amortization_summary__unpaid(self):
         mid = self.personalData.member_id
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -1921,7 +1921,7 @@ class Investment_Test(unittest.TestCase):
         self.assertEqual([0, 0.0],
             self.pendingAmortizationSummary(id, '2017-11-20'))
 
-    def test__pending_amortitzation_summary__manyAmortizationsSameInvestment(self):
+    def test__pending_amortization_summary__manyAmortizationsSameInvestment(self):
         mid = self.personalData.member_id
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -1935,7 +1935,7 @@ class Investment_Test(unittest.TestCase):
         self.assertEqual([3,120.],
             self.pendingAmortizationSummary(id, '2004-01-04'))
 
-    def test__pending_amortitzation_summary__withDueInvestments(self):
+    def test__pending_amortization_summary__withDueInvestments(self):
         mid = self.personalData.member_id
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -1949,7 +1949,7 @@ class Investment_Test(unittest.TestCase):
         self.assertEqual([1, 40],
             self.pendingAmortizationSummary(id, '2002-01-02'))
 
-    def test__pending_amortitzation_summary__notDue(self):
+    def test__pending_amortization_summary__notDue(self):
         mid = self.personalData.member_id
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
@@ -1963,7 +1963,7 @@ class Investment_Test(unittest.TestCase):
         self.assertEqual([0,0.0],
             self.pendingAmortizationSummary(id, '2002-01-01'))
 
-    def test__pending_amortitzation_summary__whenPartiallyAmortized(self):
+    def test__pending_amortization_summary__whenPartiallyAmortized(self):
         mid = self.personalData.member_id
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
