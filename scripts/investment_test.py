@@ -789,7 +789,7 @@ class Investment_Test(unittest.TestCase):
             **self.personalData
         ))
 
-    def test__mark_as_unpaid__samePurchaseDateSetToAll(self):
+    def test__mark_as_unpaid__manyInvestments(self):
 
         id1 = self.Investment.create_from_form(
             self.personalData.partnerid,
