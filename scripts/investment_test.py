@@ -2264,6 +2264,7 @@ class Investment_Test(unittest.TestCase):
             'ES7712341234161234567890',
             )
         invoice_ids, errs =  self.Investment.create_initial_invoices([id])
+        self.Investment.open_invoices(invoice_ids)
         invoice_id, errors = self.Investment.create_resign_invoice(id)
         self.Investment.open_invoices([invoice_id])
         self.Investment.pay_resign_invoice(invoice_id)
