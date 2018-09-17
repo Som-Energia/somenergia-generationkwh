@@ -2898,8 +2898,11 @@ class InvestmentList_Test(unittest.TestCase):
         self.AccountInvoice = self.erp.AccountInvoice
         self.PaymentLine = self.erp.PaymentLine
         self.Investment.dropAll()
+        self.MailMockup = self.erp.GenerationkwhMailmockup
+        self.MailMockup.activate()
 
     def tearDown(self):
+        self.MailMockup.deactivate()
         self.erp.rollback()
         self.erp.close()
 
