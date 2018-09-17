@@ -1730,6 +1730,25 @@ class Investment_Test(unittest.TestCase):
 
         self.assertMailLogEqual('{}')
 
+    def test__mark_as_unpaid__skipsMailIfThereIsNoInvoice(self):
+        # This behaviour is needed just for the other test
+        # to work without emiting invoices (which are slow)
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id) # instead of investment_payment
+        self.Investment.mark_as_paid([id], datetime.today().strftime('%Y-%m-%d'))
+        self.MailMockup.deactivate()
+        self.MailMockup.activate()
+
+        self.Investment.mark_as_unpaid([id])
+
+        self.assertMailLogEqual('{}')
+
     def test__mark_as_unpaid__sendsMail(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
