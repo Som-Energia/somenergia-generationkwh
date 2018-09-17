@@ -1790,7 +1790,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
-        date_due_dt = datetime.today() + timedelta(730)
+        date_due_dt = datetime.today() + timedelta(731)
         date_due = date_due_dt.strftime('%Y-%m-%d')
         self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], datetime.today().strftime('%Y-%m-%d'))
