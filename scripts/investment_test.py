@@ -2632,7 +2632,7 @@ class Investment_Test(unittest.TestCase):
             )
 
         with self.assertRaises(Exception) as ctx:
-            id_new = self.Investment.create_from_transfer(
+            self.Investment.create_from_transfer(
                 id, # magic number, existing investment
                 1, # magic number, not member
                 '2017-01-01', # order_date
@@ -2654,7 +2654,7 @@ class Investment_Test(unittest.TestCase):
         self.Investment.deactivate(id)
 
         with self.assertRaises(Exception) as ctx:
-            id_new = self.Investment.create_from_transfer(
+            self.Investment.create_from_transfer(
                 id, # magic number, existing investment
                 self.personalData.partnerid,
                 '2017-01-26', # order_date
@@ -2694,25 +2694,25 @@ class Investment_Test(unittest.TestCase):
     def test__create_from_transfer__allOk(self):
         newMember = self.getAMember()
 
-        id = self.Investment.create_from_form(
+        old_id = self.Investment.create_from_form(
             newMember.partner_id[0],
             '2017-01-01', # order_date
             1000,
             '10.10.23.123',
             'ES7712341234161234567890',
             )
-        self.Investment.mark_as_invoiced(id)
-        self.Investment.mark_as_paid([id], '2017-01-02')
+        self.Investment.mark_as_invoiced(old_id)
+        self.Investment.mark_as_paid([old_id], '2017-01-02')
         date_today = str(date.today())
 
-        old_investment_id, new_investment_id = self.Investment.create_from_transfer(
-            id,
+        new_investment_id = self.Investment.create_from_transfer(
+            old_id,
             self.personalData.partnerid,
             '2019-05-01',
             'ES7712341234161234567890',
             )
 
-        old_investment = ns(self.Investment.read(old_investment_id, []))
+        old_investment = ns(self.Investment.read(old_id, []))
         log = old_investment.pop('log')
         name = old_investment.pop('name')
         actions_log = old_investment.pop('actions_log')
@@ -2731,7 +2731,7 @@ class Investment_Test(unittest.TestCase):
             active: true
             draft: false
             """.format(
-                id=old_investment_id,
+                id=old_id,
                 newMember = newMember,
                 **self.personalData
                 ))
@@ -2773,14 +2773,14 @@ class Investment_Test(unittest.TestCase):
         date_today = str(date.today())
         self.Investment.amortize('2019-04-30', [id])
 
-        old_investment_id, new_investment_id = self.Investment.create_from_transfer(
+        new_investment_id = self.Investment.create_from_transfer(
             id,
             self.personalData.partnerid,
             '2019-05-01',
             'ES7712341234161234567890',
             )
 
-        old_investment = ns(self.Investment.read(old_investment_id, []))
+        old_investment = ns(self.Investment.read(id, []))
         log = old_investment.pop('log')
         name = old_investment.pop('name')
         actions_log = old_investment.pop('actions_log')
@@ -2800,7 +2800,7 @@ class Investment_Test(unittest.TestCase):
             draft: false
             """.format(
                 newMember = newMember,
-                id=old_investment_id,
+                id=id,
                 **self.personalData
                 ))
 
