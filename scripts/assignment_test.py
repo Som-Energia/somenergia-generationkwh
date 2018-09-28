@@ -12,6 +12,81 @@ try:
 except ImportError:
     pass
 
+contract_stats="""
+create temporary table contract_stats as
+select
+    p.id as partner,
+    s.id as member,
+    p.ref as code,
+    s.id is not null as es_soci,  -- TODO: No mira si s'ha donat de baixa
+
+    count(c.id) FILTER (WHERE c.id IS NOT NULL) as related,
+    count(c.id) FILTER (WHERE p.id=c.titular AND p.id<>c.pagador) as nomes_titular,
+    count(c.id) FILTER (WHERE p.id<>titular AND p.id=c.pagador) as nomes_pagador,
+    count(c.id) FILTER (WHERE p.id=c.titular AND p.id=c.pagador) as titular_i_pagador,
+    count(c.id) FILTER (WHERE p.id<>c.titular AND p.id<>c.pagador AND p.id=c.soci) as ha_apadrinat,
+    count(c.id) FILTER (WHERE p.id<>c.soci) as ha_estat_apadrinat,
+
+    p.name,
+
+    array_agg(c.id) FILTER (WHERE p.id=c.titular AND p.id<>c.pagador) as contractes_nomes_titular,
+    array_agg(c.id) FILTER (WHERE p.id<>titular AND p.id=c.pagador) as contractes_nomes_pagador,
+    array_agg(c.id) FILTER (WHERE p.id=c.titular AND p.id=c.pagador) as contractes_titular_i_pagador,
+    array_agg(c.id) FILTER (WHERE p.id<>c.titular AND p.id<>c.pagador AND p.id=c.soci) as contractes_ha_apadrinat,
+    array_agg(c.id) FILTER (WHERE p.id<>c.soci) as contractes_ha_estat_apadrinat
+
+from
+    res_partner as p
+left join
+    somenergia_soci as s
+        on p.id = s.partner_id
+left join
+    giscedata_polissa as c
+        on p.id in (c.titular, c.soci, c.pagador)
+        and c.active
+        and c.state='activa'
+group by p.id, p.ref, s.id
+;
+"""
+
+caseLocator="""
+select * from contract_stats as data
+where %s
+order by
+    data.ha_apadrinat desc,
+    data.related desc,
+    data.partner asc
+limit 1
+;
+"""
+
+conditions = ns.loads("""
+noContracts:   data.member is not null and data.related=0
+oneAsPayer:  data.member is not null and data.related=1 and data.nomes_pagador=1
+oneAsOwnerButNotPayer:  data.member is not null and data.related=1 and data.nomes_titular=1
+oneAsPayerOtherAsOwner:  data.member is not null and data.related=2 and data.nomes_pagador=1 and data.nomes_titular=1
+manyAsPayerManyAsOwner:  data.member is not null and data.related=5 and data.titular_i_pagador=3 and data.nomes_titular=2
+manyAsPayer:  data.member is not null and data.related=2 and data.nomes_titular=2
+""")
+
+cases = ns()
+if dbconfig:
+    import dbutils
+    import psycopg2
+    with psycopg2.connect(**dbconfig.psycopg) as db:
+        with db.cursor() as cr:
+            cr.execute(contract_stats)
+            for key, condition in conditions.items():
+                cr.execute(caseLocator%condition)
+                result = dbutils.nsList(cr)
+                if not result:
+                    raise Exception("Cannot find a case for {}".format(key))
+                cases[key] = result[0]
+                cases[key].condition = condition
+
+#print cases.dump()
+
+
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class Assignment_Test(unittest.TestCase):
 
@@ -128,7 +203,7 @@ class Assignment_Test(unittest.TestCase):
             (self.contract, self.member, 1, self.today),
             (self.contract, self.member, 2, False),
             ])
-    
+
     def test_change_priority(self):
         self.setupProvider([
             (self.contract,self.member,1),
@@ -247,37 +322,6 @@ class AssignmentProvider_Test(unittest.TestCase):
                  ('state','=','activa')], limit=1)
         self.newContract = newContract.id
         self.newContractActivationDate = newContract.data_alta
-
-        # pickup cases (commented out the original partner.id)
-        self.member_noContracts = 537 # 629
-        self.member_oneAsPayer = 4 # 5 
-        self.contract_oneAsPayer = 106369
-        self.member_asOwnerButNotPayer = 8887 # 13846
-        self.contract_asOwnerButNotPayer = 15212
-        self.member_aPayerAndAnOwnerContract = 107 # 120
-        self.member_manyAsPayer = 54 # 61
-        self.member_manyAsPayerAndManyAsOwner = 351 # 400
-
-        # Sorted contracts for member_manyAsPayerAndManyAsOwner
-        # TODO: Sort them by annual use programatically, if not is fragile,
-        # since annual use depends on the database snapshot
-        manyAsPayerAndManyAsOwner_partner_id = self.erp.SomenergiaSoci.get(self.member_manyAsPayerAndManyAsOwner).partner_id.id
-        manyAsPayerAndManyAsOwner_payerContract_unorderedContract_ids = self.erp.GiscedataPolissa.search(
-            [
-             ('pagador','=',manyAsPayerAndManyAsOwner_partner_id),
-             ('state','=','activa'),
-             ('active','=',True),
-            ])
-        manyAsPayerAndManyAsOwner_ownerContract_unorderedContract_ids = self.erp.GiscedataPolissa.search(
-            ['&',
-                 ('titular','=', manyAsPayerAndManyAsOwner_partner_id),
-                 ('pagador', '!=', manyAsPayerAndManyAsOwner_partner_id),
-             ('state','=','activa'),
-             ('active','=',True),
-            ])
-
-        self.payerContracts = self.orderContractsByConany(manyAsPayerAndManyAsOwner_payerContract_unorderedContract_ids)
-        self.ownerContracts = self.orderContractsByConany(manyAsPayerAndManyAsOwner_ownerContract_unorderedContract_ids)
 
     def setupAssignments(self, assignments):
         for contract, member, priority in assignments:
@@ -400,7 +444,7 @@ class AssignmentProvider_Test(unittest.TestCase):
 
     def assertAssignmentsEqual(self,expectation):
         self.assertEqual([
-            (record.contract_id.id, record.member_id.id, record.priority) 
+            (record.contract_id.id, record.member_id.id, record.priority)
             for record in self.Assignment.browse([], order='id')
             ], expectation)
 
@@ -470,7 +514,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         result=self.Assignment.sortedDefaultContractsForMember(
             member_ids
         )
-        self.assertEqual([tuple(r) for r in result], expectation) 
+        self.assertEqual([tuple(r) for r in result], expectation)
 
 
     def test_sortedDefaultContractsForMember_noMembersSpecified(self):
@@ -478,88 +522,86 @@ class AssignmentProvider_Test(unittest.TestCase):
             ])
 
     def test_sortedDefaultContractsForMember_withoutContracts(self):
-        self.assertContractForMember(self.member_noContracts, [
+        member = cases.noContracts.member
+        self.assertContractForMember(member, [
             ])
 
     def test_sortedDefaultContractsForMember_oneAsPayer(self):
-        self.assertContractForMember(self.member_oneAsPayer, [
-            (self.contract_oneAsPayer, self.member_oneAsPayer),
+        member = cases.oneAsPayer.member
+        contract = cases.oneAsPayer.contractes_nomes_pagador[0]
+        self.assertContractForMember(member, [
+            (contract, member),
             ])
 
     def test_sortedDefaultContractsForMember_oneAsOwnerButNotPayer(self):
-        self.assertContractForMember(self.member_asOwnerButNotPayer, [
-            (
-                self.contract_asOwnerButNotPayer,
-                self.member_asOwnerButNotPayer,
-            ),
+        member = cases.oneAsOwnerButNotPayer.member
+        contract = cases.oneAsOwnerButNotPayer.contractes_nomes_titular[0]
+        self.assertContractForMember(member, [
+            (contract, member),
             ])
 
-    @unittest.skip("fragile case changed along time, FIX IT!!")
     def test_sortedDefaultContractsForMember_onePayerAndOneOwner_payerFirst(self):
-        self.assertContractForMember([
-            self.member_aPayerAndAnOwnerContract,
-            ], [
-            (50851, self.member_aPayerAndAnOwnerContract), # payer
-            (43,    self.member_aPayerAndAnOwnerContract), # owner
+        member = cases.oneAsPayerOtherAsOwner.member
+        contractAsPayer = cases.oneAsPayerOtherAsOwner.contractes_nomes_pagador[0]
+        contractAsOwner = cases.oneAsPayerOtherAsOwner.contractes_nomes_titular[0]
+        self.assertContractForMember(member, [
+            (contractAsPayer, member),
+            (contractAsOwner, member),
             ])
 
     def test_sortedDefaultContractsForMember_manyAsPayer_biggerFirst(self):
-        member_manyAsPayer_partnerId = self.erp.SomenergiaSoci.get(self.member_manyAsPayer).partner_id.id
-        member_manyAsPayer_unorderedContractIds = self.erp.GiscedataPolissa.search([
-            ('pagador', '=', member_manyAsPayer_partnerId),
-            ('state','=','activa'),
-            ('active','=',True)]
-        )
-        member_manyAsPayer_expectedContracts = self.orderContractsByConany(
-            member_manyAsPayer_unorderedContractIds
-        )
+        case = cases.manyAsPayer
+        member = case.member
+        contracts = self.orderContractsByConany(case.contractes_nomes_titular)
         self.assertContractForMember([
-            self.member_manyAsPayer,
-            ], [ (contract_id, self.member_manyAsPayer)
-                for contract_id in
-                    member_manyAsPayer_expectedContracts
+            member,
+            ], [
+                (contracts[0], member),
+                (contracts[1], member),
             ])
 
     def test_sortedDefaultContractsForMember_manyAsPayerAndManyAsOwner(self):
         # TODO: Check the order is right
+        case = cases.manyAsPayerManyAsOwner
+        member = case.member
+        payerContracts = self.orderContractsByConany(case.contractes_titular_i_pagador)
+        ownerContracts = self.orderContractsByConany(case.contractes_nomes_titular)
         self.assertContractForMember([
-            self.member_manyAsPayerAndManyAsOwner,
+            member,
             ], [
-            (self.payerContracts[0], self.member_manyAsPayerAndManyAsOwner),
-            (self.payerContracts[1], self.member_manyAsPayerAndManyAsOwner),
-            (self.payerContracts[2], self.member_manyAsPayerAndManyAsOwner),
-            (self.ownerContracts[0], self.member_manyAsPayerAndManyAsOwner),
-            (self.ownerContracts[1], self.member_manyAsPayerAndManyAsOwner),
+            (payerContracts[0], member),
+            (payerContracts[1], member),
+            (payerContracts[2], member),
+            (ownerContracts[0], member),
+            (ownerContracts[1], member),
             ])
 
     def test_sortedDefaultContractsForMember_severalMembers_doNotBlend(self):
-        # TODO: Check the order is right
-        member_manyAsPayer_partnerId = self.erp.SomenergiaSoci.get(self.member_manyAsPayer).partner_id.id
-        member_manyAsPayer_unorderedContractIds = self.erp.GiscedataPolissa.search([
-            ('pagador', '=', member_manyAsPayer_partnerId),
-            ('state','=','activa'),
-            ('active','=',True)]
-        )
-        member_manyAsPayer_expectedContracts = self.orderContractsByConany(
-            member_manyAsPayer_unorderedContractIds
-        )
+        case1 = cases.manyAsPayer
+        member1 = case1.member
+        contracts1 = self.orderContractsByConany(case1.contractes_nomes_titular)
+
+        case2 = cases.manyAsPayerManyAsOwner
+        member2 = case2.member
+        payerContracts = self.orderContractsByConany(case2.contractes_titular_i_pagador)
+        ownerContracts = self.orderContractsByConany(case2.contractes_nomes_titular)
         self.assertContractForMember([
-            self.member_manyAsPayer,
-            self.member_manyAsPayerAndManyAsOwner,
+            member1,
+            member2,
             ], [
-            (member_manyAsPayer_expectedContracts[0], self.member_manyAsPayer),
-            (member_manyAsPayer_expectedContracts[1], self.member_manyAsPayer),
-            (self.payerContracts[0], self.member_manyAsPayerAndManyAsOwner),
-            (self.payerContracts[1], self.member_manyAsPayerAndManyAsOwner),
-            (self.payerContracts[2], self.member_manyAsPayerAndManyAsOwner),
-            (self.ownerContracts[0], self.member_manyAsPayerAndManyAsOwner),
-            (self.ownerContracts[1], self.member_manyAsPayerAndManyAsOwner),
+            (contracts1[0], member1),
+            (contracts1[1], member1),
+            (payerContracts[0], member2),
+            (payerContracts[1], member2),
+            (payerContracts[2], member2),
+            (ownerContracts[0], member2),
+            (ownerContracts[1], member2),
             ])
 
     def test_anyForContract_noActiveContracts(self):
         result = self.Assignment.anyForContract(99999999)
         self.assertEqual(result,False)
-    
+
     def test_anyForContract_ActiveOtherContract(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
@@ -581,7 +623,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.Assignment.expire(self.contract,self.member)
         result = self.Assignment.anyForContract(self.contract)
         self.assertEqual(result,False)
-        
+
     def test_anyForContract_ExpiredAndActiveContract(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
@@ -602,7 +644,7 @@ class AssignmentProvider_Test(unittest.TestCase):
         self.Assignment.expire(self.contract,self.member)
         result = self.Assignment.anyForContract(self.contract2)
         self.assertEqual(result,True)
-        
+
     def test_anyForContract_OtherActiveExpiredContract(self):
         self.setupAssignments([
             (self.contract, self.member, 1),
