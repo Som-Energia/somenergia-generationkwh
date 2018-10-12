@@ -40,7 +40,7 @@ def cli(ctx, config):
 
 
 
-partner_option=click.option(
+option_partner=click.option(
     '-p','--partner',
     'idmode',
     flag_value='partner',
@@ -48,7 +48,7 @@ partner_option=click.option(
         "instead of member database id",
     )
 
-number_option=click.option(
+option_number=click.option(
     '-m','--member',
     'idmode',
     flag_value='memberid',
@@ -56,7 +56,7 @@ number_option=click.option(
     help="select members by its member id",
     )
 
-number_option=click.option(
+option_number=click.option(
     '-n','--number',
     'idmode',
     flag_value='code',
@@ -64,20 +64,20 @@ number_option=click.option(
         "instead of member database id",
     )
 
-member_argument=click.argument(
+argument_member=click.argument(
     'member',
     type=int,
 #    help="investor of Generation-kWh (see --partner and --number)",
     )
 
-members_argument=click.argument(
+argument_members=click.argument(
     'members',
     type=int,
     nargs=-1,
 #    help="investors of Generation-kWh (see --partner and --number)",
     )
 
-ref_option=click.option(
+option_ref=click.option(
     '-r','--ref',
     'contractMode',
     flag_value='ref',
@@ -86,7 +86,7 @@ ref_option=click.option(
         "instead of contract database id",
     )
 
-contract_argument=click.argument(
+argument_contract=click.argument(
     'contract',
     type=int,
 #    help="contract database id (see also --ref)",
@@ -94,41 +94,41 @@ contract_argument=click.argument(
 
 
 
-all_option=click.option(
+option_all=click.option(
     '--all',
     is_flag=True,
     help='apply it to all members with investments',
     )
-effectiveon_option = click.option(
+option_effectiveon = click.option(
     '--effectiveon',
     type=isodate,
     metavar='YYYY-MM-DD',
     help="filter out investments still not effective at the indicated "
         "ISO date",
     )
-purchaseduntil_option = click.option(
+option_purchaseduntil = click.option(
     '--purchaseduntil',
     type=isodate,
     metavar='YYYY-MM-DD',
     help="filter out investments purchased after "
         "the indicated ISO date",
     )
-force_option = click.option(
+option_force = click.option(
     '--force',
     is_flag=True,
     help="even if an assigment already exists ",
     )
-insist_option = click.option(
+option_insist = click.option(
     '--insist',
     is_flag=True,
     help="even if the notification has been sent",
     )
-mail_option = click.option(
+option_mail = click.option(
     '--mail',
     is_flag=True,
     help='send notification email',
     )
-priority_argument = click.argument(
+argument_priority = click.argument(
     'priority',
     type=int,
 #    help="a precedence number, ie. a contract with priority 2 "
@@ -183,9 +183,9 @@ def clear(**args):
 
 
 @cli.command('list')
-@members_argument
-@partner_option
-@number_option
+@argument_members
+@option_partner
+@option_number
 @click.pass_context
 def _list(ctx, members=None,idmode=None,csv=False):
     "list assignments"
@@ -233,11 +233,11 @@ def _list(ctx, members=None,idmode=None,csv=False):
 
 
 @cli.command()
-@member_argument
-@partner_option
-@number_option
-@contract_argument
-@ref_option
+@option_partner
+@option_number
+@argument_member
+@option_ref
+@argument_contract
 @click.pass_context
 def expire(
         ctx,
@@ -258,15 +258,15 @@ def expire(
 
 
 @cli.command()
-@members_argument
-@all_option
-@partner_option
-@number_option
-@mail_option
-@force_option
-@insist_option
-@effectiveon_option
-@purchaseduntil_option
+@argument_members
+@option_all
+@option_partner
+@option_number
+@option_mail
+@option_force
+@option_insist
+@option_effectiveon
+@option_purchaseduntil
 @click.pass_context
 def prize(
         ctx,
@@ -294,15 +294,15 @@ def prize(
 
 
 @cli.command()
-@members_argument
-@all_option
-@partner_option
-@number_option
-@mail_option
-@force_option
-@insist_option
-@effectiveon_option
-@purchaseduntil_option
+@argument_members
+@option_all
+@option_partner
+@option_number
+@option_mail
+@option_force
+@option_insist
+@option_effectiveon
+@option_purchaseduntil
 @click.pass_context
 def default(
         ctx,
@@ -330,12 +330,12 @@ def default(
 
 
 @cli.command()
-@member_argument
-@partner_option
-@number_option
-@contract_argument
-@ref_option
-@priority_argument
+@option_partner
+@option_number
+@argument_member
+@option_ref
+@argument_contract
+@argument_priority
 @click.pass_context
 def assign(ctx, member, contract, priority, idmode, contractMode):
     "set assignment"
@@ -357,10 +357,10 @@ def assign(ctx, member, contract, priority, idmode, contractMode):
 
 
 @cli.command()
-@effectiveon_option
-@purchaseduntil_option
-@force_option
-@insist_option
+@option_effectiveon
+@option_purchaseduntil
+@option_force
+@option_insist
 @click.pass_context
 def unassigned(ctx, effectiveon=None, purchaseduntil=None, force=False, insist=False):
     "list members with investments but no assigments"
