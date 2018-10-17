@@ -202,11 +202,12 @@ class Account_Invoice_Test(unittest.TestCase):
         invoice_ids, errors = self.Investment.investment_payment([investment_id])
 
         self.erp.GenerationkwhPaymentWizardTesthelper.pay(
-            invoice_ids[0], 'movement description')
+            invoice_ids[0], 'payment movement')
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
         self.assertAccountingByInvoice(invoice_ids[0], """
         movelines:
+        # Open
         - account_id: 1635000{nsoci:>05} {surname}, {name}
           amount_to_pay: 4000.0
           credit: 4000.0
@@ -231,13 +232,14 @@ class Account_Invoice_Test(unittest.TestCase):
           quantity: 1.0
           ref: {investment_name}-JUST
           move_state: posted
+        # Pay
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 0.0
           credit: 4000.0
           debit: 0.0
           invoice: false
           journal_id: Factures GenerationkWh
-          name: movement description
+          name: payment movement
           payment_type: []
           product_id: false
           quantity: false
@@ -249,7 +251,7 @@ class Account_Invoice_Test(unittest.TestCase):
           debit: 4000.0
           invoice: false
           journal_id: Factures GenerationkWh
-          name: movement description
+          name: payment movement
           payment_type: []
           product_id: false
           quantity: false
@@ -280,62 +282,65 @@ class Account_Invoice_Test(unittest.TestCase):
         investment_name = self.Investment.read(investment_id,['name'])['name']
         self.assertAccountingByInvoice(invoice_ids[0], """
         movelines:
+        # Open
         - account_id: 1635000{nsoci:>05} {surname}, {name}
-          amount_to_pay: 4000.0
-          credit: 4000.0
-          debit: 0.0
-          invoice: false # CHANGED
-          journal_id: Factures GenerationkWh
-          name: 'Inversió {investment_name} '
-          payment_type: [] # CHANGED
-          product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
-          quantity: 40.0
-          ref: {investment_name}-JUST
-          move_state: posted
-        - account_id: 4100000{nsoci:>05} {surname}, {name}
-          amount_to_pay: 0.0
-          credit: 0.0
-          debit: 4000.0
-          invoice: false # CHANGED
-          journal_id: Factures GenerationkWh
-          name: {investment_name}-JUST
-          payment_type: [] # CHANGED
-          product_id: false
-          quantity: 1.0
-          ref: {investment_name}-JUST
-          move_state: posted
-        - account_id: 4100000{nsoci:>05} {surname}, {name}
-          amount_to_pay: 0.0
-          credit: 4000.0
-          debit: 0.0
-          invoice: false
-          journal_id: Factures GenerationkWh
-          name: a payment
-          payment_type: []
-          product_id: false
-          quantity: false
-          ref: {investment_name}-JUST
-          move_state: posted
-        - account_id: 555000000004 CAIXA GKWH
-          amount_to_pay: -4000.0
-          credit: 0.0
-          debit: 4000.0
-          invoice: false
-          journal_id: Factures GenerationkWh
-          name: a payment
-          payment_type: []
-          product_id: false
-          quantity: false
-          ref: {investment_name}-JUST
-          move_state: posted
-        - account_id: 555000000004 CAIXA GKWH
           amount_to_pay: 4000.0
           credit: 4000.0
           debit: 0.0
           invoice: 'CI: {investment_name}-JUST'
           journal_id: Factures GenerationkWh
-          name: an unpayment
+          name: 'Inversió {investment_name} '
           payment_type: Recibo domiciliado
+          product_id: '[GENKWH_AE] Accions Energètiques Generation kWh'
+          quantity: 40.0
+          ref: {investment_name}-JUST
+          move_state: posted
+        - account_id: 4100000{nsoci:>05} {surname}, {name}
+          amount_to_pay: -4000.0 # CHANGED, Not zero anymore
+          credit: 0.0
+          debit: 4000.0
+          invoice: 'CI: {investment_name}-JUST'
+          journal_id: Factures GenerationkWh
+          name: {investment_name}-JUST
+          payment_type: Recibo domiciliado
+          product_id: false
+          quantity: 1.0
+          ref: {investment_name}-JUST
+          move_state: posted
+        # Pay
+        - account_id: 4100000{nsoci:>05} {surname}, {name}
+          amount_to_pay: -4000.0 # CHANGED, Not zero anymore
+          credit: 4000.0
+          debit: 0.0
+          invoice: false
+          journal_id: Factures GenerationkWh
+          name: a payment
+          payment_type: []
+          product_id: false
+          quantity: false
+          ref: {investment_name}-JUST
+          move_state: posted
+        - account_id: 555000000004 CAIXA GKWH
+          amount_to_pay: -4000.0 # CHANGED, Not zero anymore
+          credit: 0.0
+          debit: 4000.0
+          invoice: false
+          journal_id: Factures GenerationkWh
+          name: a payment
+          payment_type: []
+          product_id: false
+          quantity: false
+          ref: {investment_name}-JUST
+          move_state: posted
+        # Unpay
+        - account_id: 555000000004 CAIXA GKWH
+          amount_to_pay: 4000.0
+          credit: 4000.0
+          debit: 0.0
+          invoice: false
+          journal_id: Factures GenerationkWh
+          name: an unpayment
+          payment_type: []
           product_id: false
           quantity: false
           ref: {investment_name}-JUST
@@ -344,15 +349,14 @@ class Account_Invoice_Test(unittest.TestCase):
           amount_to_pay: -4000.0
           credit: 0.0
           debit: 4000.0
-          invoice: 'CI: {investment_name}-JUST'
+          invoice: false
           journal_id: Factures GenerationkWh
           name: an unpayment
-          payment_type: Recibo domiciliado
+          payment_type: []
           product_id: false
           quantity: false
           ref: {investment_name}-JUST
           move_state: posted
-
         """.format(
             investment_name = investment_name,
             **self.personalData
