@@ -10,6 +10,7 @@ except ImportError:
     pass
 
 from datetime import datetime, timedelta, date
+from dateutil.relativedelta import relativedelta
 from yamlns import namespace as ns
 import erppeek_wst
 import generationkwh.investmentmodel as gkwh
@@ -1793,7 +1794,7 @@ class Investment_Test(unittest.TestCase):
             '10.10.23.123',
             'ES7712341234161234567890',
             )
-        date_due_dt = datetime.today() + timedelta(days=731)
+        date_due_dt = datetime.today() + relativedelta(years=+2))
         date_due = date_due_dt.strftime('%Y-%m-%d')
         self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], datetime.today().strftime('%Y-%m-%d'))
