@@ -2328,7 +2328,8 @@ class Investment_Test(unittest.TestCase):
         self.Investment.mark_as_paid([id], '2017-09-02')
         date_today = str(date.today())
 
-        self.Investment.divest([id])
+        invoice_ids, errors = self.Investment.divest([id], '2018-09-01')
+        self.assertEqual([], errors)
 
         investment = ns(self.Investment.read(id, []))
         log = investment.pop('log')
@@ -2342,7 +2343,7 @@ class Investment_Test(unittest.TestCase):
             order_date: '2017-01-01'
             purchase_date: '2017-09-02'
             first_effective_date: '2018-09-02'
-            last_effective_date: '{date_today}'
+            last_effective_date: '{divestment_date}'
             nshares: 10
             amortized_amount: 1000.0
             move_line_id: false
@@ -2350,7 +2351,7 @@ class Investment_Test(unittest.TestCase):
             draft: false
             """.format(
                 id=id,
-                date_today = date_today,
+                divestment_date = '2018-09-01',
                 **self.personalData
                 ))
 
