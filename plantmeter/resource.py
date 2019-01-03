@@ -53,8 +53,8 @@ class ParentResource(Resource):
 
         return [
             # TODO: Untested you can mess up with ID
-            (meter.id, meter.update_kwh(start, end, notifier))
-            for meter in self.children
+            (child.id, child.update_kwh(start, end, notifier))
+            for child in self.children
             ]
 
     def firstMeasurementDate(self):
