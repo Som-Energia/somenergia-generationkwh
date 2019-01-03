@@ -7,7 +7,7 @@ Manages production plants initialization
 
 import erppeek
 import datetime
-from consolemsg import step, success
+from consolemsg import step, success, warn
 from dateutil.relativedelta import relativedelta
 import dbconfig
 from yamlns import namespace as ns
@@ -78,6 +78,9 @@ def production():
     Each plant may have several meters, each meter defines
     an url which indicates how to fetch its measures.
     """
+    privateconfig = ns(dbconfig.erppeek)
+    del privateconfig.password
+    warn("Using the following configuration:\n\n{}\n", privateconfig.dump())
 
 def coloredCheck(enabled):
     if enabled:
