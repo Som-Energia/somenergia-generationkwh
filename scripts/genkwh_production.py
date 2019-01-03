@@ -122,6 +122,10 @@ def list():
 @production.command()
 def clear():
     "Clear aggregator platftorm objects"
+    warn("YOU ARE ABOUT TO CLEAR ALL THE DATA RELATED TO GENERATION kWh!!")
+    click.confirm('Do you want to continue?', abort=True)
+    click.confirm('SERIOUSLY, do you want to continue?', abort=True)
+    click.confirm('REALLY REALLY SERIOUSLY, do you want to continue?', abort=True)
     clearAll()
 
 @production.command()
