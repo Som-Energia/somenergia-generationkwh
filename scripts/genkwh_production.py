@@ -281,7 +281,7 @@ def curve(database, type, name, **args):
     """
 
     source = sources[type]
-    c = pymongo.MongoClient()
+    c = pymongo.MongoClient(**dbconfig.mongo)
     mongodb = c[database]
     mtc = MongoTimeCurve(
         mongodb,
