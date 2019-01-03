@@ -37,6 +37,10 @@ def clearAll():
     meas_obj.unlink(meas_obj.search([]))
     warn_obj.unlink(warn_obj.search([]))
 
+def getAggregator(name):
+    ids=aggr_obj.search([('name','=',name)])
+    return ids[0] if ids else None
+
 def setupAggregator(aggr):
     plants = aggr.generationkwh.pop('plants')
     aggr = aggr_obj.create(dict(aggr.generationkwh))
@@ -45,10 +49,6 @@ def setupAggregator(aggr):
             id = aggr.id,
             plants = [setupPlant(aggr, plant) for plant in plants.items()]
             )
-
-def getAggregator(name):
-    ids=aggr_obj.search([('name','=',name)])
-    return ids[0] if ids else None
 
 def setupPlant(aggr_id, plant):
     plant = plant[1]
