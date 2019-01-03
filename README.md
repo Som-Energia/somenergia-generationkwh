@@ -35,4 +35,21 @@ In Debian/Ubuntu
 $ sudo apt-get build-dep python-numpy
 ```
 
+## CHANGES
+
+### 2.4.0
+
+- API for the OV to list investments and assignments for a member
+    - `ResPartner.www_generationkwh_assignments(partner_id)`
+    - `ResPartner.www_generationkwh_investments(partner_id)`
+- New verbose list command `genkwh_investment ls`
+- Python3 compatibility on the python module (not yet the erp one)
+- Travis coverage
+- Overall test desfragilization
+- `Investment.create_from_transfer` returns just the new id, not also the old one
+
+
+
+
+
 
