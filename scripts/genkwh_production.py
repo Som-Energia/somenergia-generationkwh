@@ -80,7 +80,7 @@ def production():
     """
     privateconfig = ns(dbconfig.erppeek)
     del privateconfig.password
-    warn("Using the following configuration:\n\n{}\n", privateconfig.dump())
+    warn("Using the following configuration {}:\n\n{}\n", dbconfig.__file__, privateconfig.dump())
 
 def coloredCheck(enabled):
     if enabled:
