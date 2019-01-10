@@ -66,3 +66,7 @@ target/
 
 # vim
 .*sw?
+
+# Data files
+*.csv
+*.ods
