@@ -4,11 +4,19 @@ import pytz
 tz = pytz.timezone('Europe/Madrid')
 
 def asUtc(date):
+    """
+    If date is a naive date, take it as being UTC.
+    If date is local, converts to the equivalent UTC.
+    """
     if date.tzinfo is None:
         return pytz.utc.localize(date)
     return date.astimezone(pytz.utc)
 
 def toLocal(date):
+    """
+    If date is a naive date, take it as being Madrid TZ.
+    If date is local, converts to the equivalent Madrid TZ.
+    """
     if date.tzinfo is None:
         return tz.localize(date)
     return date.astimezone(tz)
@@ -27,18 +35,23 @@ def addHours(normalized, hours):
     return tz.normalize(normalized + hours)
 
 def localisodate(string):
+    """Takes a date string and returns it as local datetime"""
     return string and toLocal(datetime.datetime.strptime(string, "%Y-%m-%d"))
 
 def naiveisodate(string):
+    """Takes a date string and returns it as naive datetime"""
     return string and datetime.datetime.strptime(string, "%Y-%m-%d")
 
 def isodate(string):
+    """Takes a date string and returns it as date (no time)"""
     return string and datetime.datetime.strptime(string, "%Y-%m-%d").date()
 
 def naiveisodatetime(string):
+    """Takes a date-time string and returns a naive date"""
     return string and datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
 
 def localisodatetime(string):
+    """Takes a date-time string and returns a local date"""
     return string and toLocal(datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S"))
 
 def dateToLocal(date):
