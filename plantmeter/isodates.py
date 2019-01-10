@@ -38,6 +38,10 @@ def localisodate(string):
     """Takes a date string and returns it as local datetime"""
     return string and toLocal(datetime.datetime.strptime(string, "%Y-%m-%d"))
 
+def utcisodate(string):
+    """Takes a date string and returns it as utc datetime"""
+    return string and asUtc(datetime.datetime.strptime(string, "%Y-%m-%d"))
+
 def naiveisodate(string):
     """Takes a date string and returns it as naive datetime"""
     return string and datetime.datetime.strptime(string, "%Y-%m-%d")
@@ -53,6 +57,10 @@ def naiveisodatetime(string):
 def localisodatetime(string):
     """Takes a date-time string and returns a local date"""
     return string and toLocal(datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S"))
+
+def utcisodatetime(string):
+    """Takes a date-time string and returns it as utc date"""
+    return string and asUtc(datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S"))
 
 def dateToLocal(date):
     # TODO: optimize dateToLocal
@@ -83,6 +91,14 @@ def assertLocalDateTime(name, value):
     assert value.tzinfo, (
         "{} should have timezone".format(name))
     assert value.tzname() in ('CET','CEST'), (
+        "{} has {} timezone".format(name, value.tzname()))
+
+def assertUtcDateTime(name, value):
+    assert isinstance(value, datetime.datetime), (
+        "{} should be a datetime".format(name))
+    assert value.tzinfo, (
+        "{} should have timezone".format(name))
+    assert value.tzname() == 'UTC', (
         "{} has {} timezone".format(name, value.tzname()))
 
 def addDays(date, ndays):
