@@ -79,10 +79,10 @@ def main():
 			name = meter_name,
 			valid = True,
 			valid_date =  datetime.datetime.now(), # TODO: De que campo es?
-			timestamp = localtime, # TODO: obtenerla a partir de utc_gkw_timestamp
-			season = season, # S,W # TODO: obtenerla a partir de utc_gkw_timestamp
-			#utc_timestamp = naiveisodatetime("2017-12-31 23:00:00"), # TODO: obtenerla a partir de utc_gkw_timestamp
-			#utc_gkwh_timestamp = utc_gkwh_timestamp,
+			timestamp = localtime,
+			season = season, # S,W
+			#utc_timestamp = naiveisodatetime("2017-12-31 23:00:00"), # Generada por erp
+			#utc_gkwh_timestamp = old.datetime, # Generada por erp, deberia de ser igual que old.datetime
 			magn = 1000, # All are 1000
 			ae = lectura,
 			ai = 0, # 0-8
