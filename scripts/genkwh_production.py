@@ -15,12 +15,12 @@ from generationkwh.isodates import naiveisodate
 
 import click
 
-c = erppeek.Client(**dbconfig.erppeek)
-aggr_obj = c.GenerationkwhProductionAggregator
-plant_obj = c.GenerationkwhProductionPlant
-meter_obj = c.GenerationkwhProductionMeter
-meas_obj = c.GenerationkwhProductionMeasurement
-warn_obj = c.GenerationkwhProductionNotifier
+erp = erppeek.Client(**dbconfig.erppeek)
+Mix = erp.GenerationkwhProductionAggregator
+Plant = erp.GenerationkwhProductionPlant
+Meter = erp.GenerationkwhProductionMeter
+Meassures = erp.GenerationkwhProductionMeasurement
+Logger = erp.GenerationkwhProductionNotifier
 
 
 def csv2ts(filename, dtindex, valindex, valtype):
@@ -31,30 +31,30 @@ def csv2ts(filename, dtindex, valindex, valtype):
                 ]
 
 def clearAll():
-    meter_obj.unlink(meter_obj.search([]))
-    plant_obj.unlink(plant_obj.search([]))
-    aggr_obj.unlink(aggr_obj.search([]))
-    meas_obj.unlink(meas_obj.search([]))
-    warn_obj.unlink(warn_obj.search([]))
+    Meter.unlink(Meter.search([]))
+    Plant.unlink(Plant.search([]))
+    Mix.unlink(Mix.search([]))
+    Meassures.unlink(Meassures.search([]))
+    Logger.unlink(Logger.search([]))
 
-def getAggregator(name):
-    ids=aggr_obj.search([('name','=',name)])
+def getMix(name):
+    ids=Mix.search([('name','=',name)])
     return ids[0] if ids else None
 
 def setupAggregator(aggr):
     plants = aggr.generationkwh.pop('plants')
-    aggr = aggr_obj.create(dict(aggr.generationkwh))
+    aggr = Mix.create(dict(aggr.generationkwh))
 
     return dict(
             id = aggr.id,
             plants = [setupPlant(aggr, plant) for plant in plants.items()]
             )
 
-def setupPlant(aggr_id, plant):
+def setupPlant(mix_id, plant):
     plant = plant[1]
     meters = plant.pop('meters')
-    plant.update(dict(aggr_id=aggr_id))
-    plant = plant_obj.create(dict(plant))
+    plant.update(dict(mix_id=mix_id))
+    plant = Plant.create(dict(plant))
 
     return dict(
             id = plant.id,
@@ -64,7 +64,7 @@ def setupPlant(aggr_id, plant):
 def setupMeter(plant_id, meter):
     meter = meter[1]
     meter.update(dict(plant_id=plant_id))
-    return meter_obj.create(dict(meter))
+    return Meter.create(dict(meter))
 
 
 @click.group()
@@ -90,8 +90,8 @@ def coloredCheck(enabled):
 @production.command(
         help="List aggregator platform objects")
 def list():
-    aggr_ids = aggr_obj.search([])
-    aggrs = aggr_obj.read(aggr_ids, [])
+    aggr_ids = Mix.search([])
+    aggrs = Mix.read(aggr_ids, [])
     for aggr in aggrs:
         aggr = ns(aggr)
         print u"{enabled_tick} {id} - {name}: \"{description}\" ".format(
@@ -99,7 +99,7 @@ def list():
             **aggr
             )
         if not aggr.plants: continue
-        plants = plant_obj.read(aggr.plants, [])
+        plants = Plant.read(aggr.plants, [])
         for plant in plants:
             plant = ns(plant)
             print u"\t{enabled_tick} {id} - {name}: \"{description}\" ({nshares} shares)".format(
@@ -107,7 +107,7 @@ def list():
                 **plant
                 )
             if not plant.meters: continue
-            meters = meter_obj.read(plant.meters, [])
+            meters = Meter.read(plant.meters, [])
             for meter in meters:
                 meter=ns(meter)
                 print u"\t\t{enabled_tick} {id} - {name}: \"{description}\"".format(
@@ -134,7 +134,7 @@ def init(filename):
     "Initialize aggregator objects"
     if filename:
        aggr = setupAggregator(ns.load(filename))
-       aggr_obj.update_kwh(aggr['id'])
+       Mix.update_kwh(aggr['id'])
 
 @production.command()
 @click.argument('filename')
@@ -142,8 +142,8 @@ def update_kwh(filename):
     "Update aggregator kWh (deprecated)"
     if filename:
        aggr_name=ns.load(filename)['generationkwh']['name']
-       aggr_id=getAggregator(aggr_name)
-       aggr_obj.update_kwh(aggr_id)
+       mix_id=getMix(aggr_name)
+       Mix.update_kwh(mix_id)
 
 @production.command(
    help="Load measures from meters (unfinished rewrite of update_kwh command)")
@@ -157,15 +157,15 @@ def load_measures(meter_path):
     plants = meterElements[1:2]
     meters = meterElements[2:3]
 
-    aggr_id=getAggregator(mixes[0])
-    aggr_obj.update_kwh(aggr_id)
+    mix_id=getMix(mixes[0])
+    Mix.update_kwh(mix_id)
 
 @production.command()
 @click.argument('name')
 @click.argument('description')
 def addmix(name, description):
     "Creates a new plant mix"
-    mix = aggr_obj.create(dict(
+    mix = Mix.create(dict(
         name=name,
         description=description,
         enabled=False,
@@ -179,20 +179,20 @@ def addmix(name, description):
 @click.argument('nshares', type=int)
 def addplant(mix, name, description, nshares):
     "Creates a new plant"
-    aggr_id = aggr_obj.search([
+    mix_id = Mix.search([
         ('name','=',mix),
         ])
 
-    if not aggr_id:
+    if not mix_id:
         fail("Not such mix '{}'", mix)
 
-    aggr_id = aggr_id[0]
+    mix_id = mix_id[0]
 
-    plant = plant_obj.create(dict(
+    plant = Plant.create(dict(
         name=name,
         description=description,
         enabled=False,
-        aggr_id=aggr_id,
+        mix_id=mix_id,
         nshares = nshares,
         ))
 
@@ -208,16 +208,16 @@ def addplant(mix, name, description, nshares):
 def addmeter(mix, plant, name, description, uri, lastcommit):
     "Creates a new meter"
 
-    aggr_id = aggr_obj.search([
+    mix_id = Mix.search([
         ('name','=',mix),
         ])
 
-    if not aggr_id:
+    if not mix_id:
         fail("Not such mix '{}'", mix)
-    aggr_id = aggr_id[0]
+    mix_id = mix_id[0]
 
-    plant_id = plant_obj.search([
-        ('aggr_id','=',aggr_id),
+    plant_id = Plant.search([
+        ('mix_id','=',mix_id),
         ('name','=',plant),
         ])
 
@@ -227,7 +227,7 @@ def addmeter(mix, plant, name, description, uri, lastcommit):
 
     if lastcommit == '':
         lastcommit = None
-    meter = meter_obj.create(dict(
+    meter = Meter.create(dict(
         plant_id=plant_id,
         name=name,
         description=description,
