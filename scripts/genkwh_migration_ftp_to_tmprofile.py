@@ -108,7 +108,10 @@ def main():
 		)
 		print new.dump()
 
-		#newid = erp.TmProfile.create(new)
+		continue
+
+		newid = erp.TmProfile.create(new)
+		assert erp.TmProfile.read(newid)["utc_gkwh_timestamp"] == old.datetime
 
 
 
