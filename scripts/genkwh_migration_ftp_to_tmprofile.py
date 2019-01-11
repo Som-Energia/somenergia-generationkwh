@@ -104,7 +104,7 @@ def main():
 			r4_fact = 0, # all 0
 			cch_fact = False, # All are false
 			firm_fact = False, # All are false
-			cch_bruta = False, # False, True
+			cch_bruta = True, # False, True
 		)
 		print new.dump()
 
