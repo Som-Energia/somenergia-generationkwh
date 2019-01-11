@@ -160,6 +160,30 @@ def load_measures(meter_path):
     mix_id=getMix(mixes[0])
     Mix.update_kwh(mix_id)
 
+@production.command(
+    help="Checks for failed production imports in the last days",
+    )
+def pull_status():
+    twoDaysAgo = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
+
+    last_pulls_ids = Logger.search([('date_pull', '>', twoDaysAgo)])
+    last_pulls = Logger.read(last_pulls_ids)
+
+    print(ns(imports=last_pulls).dump())
+
+    if not last_pulls:
+        fail("No data pull for the last 2 days")
+
+    for pull in last_pulls[::-1]:
+        if pull.status != 'done':
+            error('Pull at {date_pull} from meter {id[1]} failed: {status]: {message}', **pull)
+        else:
+            success('Pull at {date_pull} from meter {id[1]} successful: {message}', **pull)
+
+    if any(pull.status!=done for pull in last_pulls):
+        fail("Failed pulls detected")
+    success("The last imports were successfull")
+
 @production.command()
 @click.argument('name')
 @click.argument('description')
