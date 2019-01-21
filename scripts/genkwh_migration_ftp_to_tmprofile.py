@@ -5,37 +5,17 @@ import dbconfig
 import pymongo
 from plantmeter.isodates import naiveisodatetime
 from yamlns import namespace as ns
+from consolemsg import warn, step
 import datetime
 import erppeek
 
-
-client = pymongo.MongoClient("mongodb://localhost:27017/")
-print "client", client
-db = client["somenergia"]
-col_from = db["generationkwh.production.measurement"]
-col_to = db["tm_profile"]
-
-meter_name = '501600324' # Alcolea, para Matallana seria "68308479"
-
-oldest_date = col_to.find({
-	'name': meter_name,
-	}).sort([
-	('utc_gkwh_timestamp', pymongo.ASCENDING),
-	]).limit(1)[0]['utc_gkwh_timestamp']
-
-from plantmeter.isodates import (
-	assertNaiveTime,
-	toLocal,
-	addHours,
-	asUtc,
-)
-
-# The oldest date in tm_profile is 2017-12-02T19:00:00Z
-
 def genkwhutc2localtime(utcdatetime):
 	"""
-	Takes a utc-1 date and returns a tuple of localtime (tz naive)
-	plus the season 'W' or 'S'.
+	Converts dates as in ftp measures mongo collection which are
+	in UTC-1 because a former bug, and computes the meassure
+	local time as stored by gisce in tm_profile collection.
+	Returns a tuple containing a naive datetime version of the local
+	time and the season ('W' when CET, 'S' when CEST).
 
 	>>> from plantmeter.isodates import (
 	... 	naiveisodatetime,
@@ -56,33 +36,65 @@ def genkwhutc2localtime(utcdatetime):
 	deoffsetted = addHours(utcdatetime,1)
 	local = toLocal(deoffsetted)
 	season = "S" if local.tzname() == "CEST" else "W"
-	return local.replace(tzinfo=None),season
+	return local.replace(tzinfo=None),season,deoffsetted
 
+meter_name = '501600324' # Alcolea, para Matallana seria "68308479"
+
+
+from plantmeter.isodates import (
+	assertNaiveTime,
+	toLocal,
+	addHours,
+	asUtc,
+)
+
+# The oldest date in tm_profile is 2017-12-02T19:00:00Z
 
 def main():
-	erp = erppeek.Client(**dbconfig.erppeek)
+	client = pymongo.MongoClient("mongodb://localhost:27017/")
+	print "client", client
+	db = client["somenergia"]
+	col_from = db["generationkwh.production.measurement"]
+	col_to = db["tm_profile"]
+
+	oldest_date = col_to.find({
+		'name': meter_name,
+		}).sort([
+		('utc_gkwh_timestamp', pymongo.ASCENDING),
+		]).limit(1)[0]['utc_gkwh_timestamp']
+
+	lastid = col_to.find().sort([
+			('id', pymongo.DESCENDING),
+		]).limit(1)[0]['id']
+
+	step("Importing measures for {} up to {}", meter_name, oldest_date)
+
+	warn("ERP Configuration {}:\n\n{}\n", dbconfig.__file__, ns(dbconfig.erppeek).dump())
+	#erp = erppeek.Client(**dbconfig.erppeek)
 
 	for old in col_from.find({'datetime': {'$lt': oldest_date}}):
 		old = ns(old)
 
+		lastid+=1
+
 		name = old.name # TODO: apply this
 		creation_date = old.create_at # TODO: apply this
 		lectura = old.ae
-		localtime,season = genkwhutc2localtime(old.datetime)
+		localtime,season,utc = genkwhutc2localtime(old.datetime)
 
 		new = ns(
-			#create_uid = 1,
-			#create_date = datetime.datetime.now(),
-			#write_uid = 1,
-			#write_date = datetime.datetime.now(),
-			#id = 3, # Id sequencial
-			name = meter_name,
-			valid = True,
-			valid_date =  datetime.datetime.now(), # TODO: De que campo es?
+			create_uid = 1,
+			create_date = datetime.datetime.now(),
+			write_uid = 1,
+			write_date = datetime.datetime.now(),
+			id = lastid, # Id sequencial
+			name = meter_name.encode('utf8'),
+			valid = False,
+			valid_date =  False,
 			timestamp = localtime,
-			season = season, # S,W
-			#utc_timestamp = naiveisodatetime("2017-12-31 23:00:00"), # Generada por erp
-			#utc_gkwh_timestamp = old.datetime, # Generada por erp, deberia de ser igual que old.datetime
+			season = season.encode('utf8'), # S,W
+			utc_timestamp = utc,
+			utc_gkwh_timestamp = old.datetime,
 			magn = 1000, # All are 1000
 			ae = lectura,
 			ai = 0, # 0-8
@@ -107,11 +119,16 @@ def main():
 			cch_bruta = True, # False, True
 		)
 		print new.dump()
+		col_to.insert(dict(new))
 
-		continue
+		#newid = erp.TmProfile.create(dict(**new))
+		#assert erp.TmProfile.read(newid)["utc_gkwh_timestamp"] == old.datetime
 
-		newid = erp.TmProfile.create(new)
-		assert erp.TmProfile.read(newid)["utc_gkwh_timestamp"] == old.datetime
+	db['counters'].update(dict(
+		_id='tm_profile',
+		),dict(
+		counter=lastid+1,
+		))
 
 
 
