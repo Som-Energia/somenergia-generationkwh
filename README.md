@@ -4,7 +4,7 @@ OpenERP module and library to manage multisite energy generation
 
 ## CHANGES
 
-### Next
+### 1.6.2 2019-01-21
 
 - Deprecated `genkwh_pull_status.py` and `genkwh_pull_status.sh`
 - `genkwh_production.py`: added `pull_status` as subcommand
