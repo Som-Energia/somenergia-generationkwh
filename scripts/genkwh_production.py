@@ -180,7 +180,7 @@ def pull_status():
         else:
             success('Pull at {date_pull} from meter {id[1]} successful: {message}', **pull)
 
-    if any(pull.status!=done for pull in last_pulls):
+    if any(pull.status!='done' for pull in last_pulls):
         fail("Failed pulls detected")
     success("The last imports were successfull")
 
