@@ -7,7 +7,7 @@ Manages production plants initialization
 
 import erppeek
 import datetime
-from consolemsg import step, success, warn
+from consolemsg import step, success, warn, error, fail
 from dateutil.relativedelta import relativedelta
 import dbconfig
 from yamlns import namespace as ns
@@ -21,7 +21,6 @@ Plant = erp.GenerationkwhProductionPlant
 Meter = erp.GenerationkwhProductionMeter
 Meassures = erp.GenerationkwhProductionMeasurement
 Logger = erp.GenerationkwhProductionNotifier
-
 
 def csv2ts(filename, dtindex, valindex, valtype):
     with open(filename, 'rb') as f:
@@ -164,21 +163,27 @@ def load_measures(meter_path):
     help="Checks for failed production imports in the last days",
     )
 def pull_status():
-    twoDaysAgo = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
+    twoDaysAgo = (datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
+    step("Checking ftp pulls since {}", twoDaysAgo)
 
     last_pulls_ids = Logger.search([('date_pull', '>', twoDaysAgo)])
-    last_pulls = Logger.read(last_pulls_ids)
-
-    print(ns(imports=last_pulls).dump())
-
-    if not last_pulls:
+    if not last_pulls_ids and False:
         fail("No data pull for the last 2 days")
 
+    last_pulls = Logger.read(last_pulls_ids)
+
+    last_pulls = [ns(p) for p in last_pulls]
+    #print(ns(imports=last_pulls).dump())
+
     for pull in last_pulls[::-1]:
+        pull=ns(pull)
+        # avoid conflict among message is the first parameter for error and success
+        pull.msg = pull.pop('message') or '' 
+        if pull.msg: pull.msg=': '+pull.msg
         if pull.status != 'done':
-            error('Pull at {date_pull} from meter {id[1]} failed: {status]: {message}', **pull)
+            error('Pull at {date_pull} from meter {meter_id[0]} failed: {status}{msg}', **pull)
         else:
-            success('Pull at {date_pull} from meter {id[1]} successful: {message}', **pull)
+            success('Pull at {date_pull} from meter {meter_id[0]} successful{msg}', **pull)
 
     if any(pull.status!='done' for pull in last_pulls):
         fail("Failed pulls detected")

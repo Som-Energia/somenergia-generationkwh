@@ -16,12 +16,12 @@ if __name__ == "__main__":
     twoDaysAgo = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
 
     last_pulls_ids = O.GenerationkwhProductionNotifier.search([('date_pull', '>', twoDaysAgo)])
+    if not last_pulls_ids:
+        fail("No data pull for the last 2 days")
+
     last_pulls = O.GenerationkwhProductionNotifier.read(last_pulls_ids)
 
-    print(ns(imports=last_pulls).dump())
-
-    if not last_pulls:
-        fail("No data pull for the last 2 days")
+    #print(ns(imports=last_pulls).dump())
 
     for pull in last_pulls[::-1]:
         if pull.status != 'done':
