@@ -258,7 +258,7 @@ class Resource_Test(unittest.TestCase):
         m1.update_kwh(date(2015,9,4), date(2015,9,5))
         m2.update_kwh(date(2015,8,4), date(2015,8,5))
 
-        self.assertEqual(aggr.lastMeasurementDate(), date(2015,9,5))
+        self.assertEqual(aggr.lastMeasurementDate(), date(2015,8,5))
 
     def test_firstDate_onePlantTwoMeters(self):
         m1 = self.setupMeter(1, '20150904')
@@ -280,7 +280,7 @@ class Resource_Test(unittest.TestCase):
         m1.update_kwh(date(2015,9,4), date(2015,9,5))
         m2.update_kwh(date(2015,8,4), date(2015,8,5))
 
-        self.assertEqual(aggr.lastMeasurementDate(), date(2015,9,5))
+        self.assertEqual(aggr.lastMeasurementDate(), date(2015,8,5))
 
     def test_firstDate_twoPlantsTwoMeters(self):
         m1 = self.setupMeter(1, '20150904')

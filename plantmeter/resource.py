@@ -65,7 +65,7 @@ class ParentResource(Resource):
             ])
 
     def lastMeasurementDate(self):
-        return max([
+        return min([
             child.lastMeasurementDate()
             for child in self.children
             if child.enabled
