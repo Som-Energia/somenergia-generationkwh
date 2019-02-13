@@ -2,6 +2,16 @@
 
 OpenERP module and library to manage multisite energy generation
 
+## INSTALL
+
+```bash
+pip install -e .
+nosetests plantmeter # Run unit tests
+nosetests scripts # Run erp tests (require a working erp)
+```
+
+
+
 ## CHANGES
 
 ### 1.6.2 2019-01-21
