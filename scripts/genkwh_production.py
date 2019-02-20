@@ -38,7 +38,37 @@ def clearAll():
 
 def getMix(name):
     ids=Mix.search([('name','=',name)])
+    if not ids:
+        fail("Not such mix '{}'", mix)
     return ids[0] if ids else None
+
+def getPlant(mix, plant):
+    mix_id = getMix(mix)
+
+    plant_id = Plant.search([
+        ('aggr_id','=',mix_id),
+        ('name','=',plant),
+        ])
+
+    if not plant_id:
+        fail("Not such plant '{}'", mix)
+    plant_id = plant_id[0]
+
+    return plant_id
+
+def getMeter(mix, plant, meter):
+    plant_id = getPlant(mix, plant)
+
+    meter_id = Meter.search([
+        ('plant_id','=',plant_id),
+        ('name','=',meter),
+        ])
+
+    if not meter_id:
+        fail("Not such meter '{}'", meter)
+    meter_id = meter_id[0]
+
+    return meter_id
 
 def setupAggregator(aggr):
     plants = aggr.generationkwh.pop('plants')
@@ -237,22 +267,7 @@ def addplant(mix, name, description, nshares):
 def addmeter(mix, plant, name, description, uri, lastcommit):
     "Creates a new meter"
 
-    mix_id = Mix.search([
-        ('name','=',mix),
-        ])
-
-    if not mix_id:
-        fail("Not such mix '{}'", mix)
-    mix_id = mix_id[0]
-
-    plant_id = Plant.search([
-        ('mix_id','=',mix_id),
-        ('name','=',plant),
-        ])
-
-    if not plant_id:
-        fail("Not such plant '{}'", mix)
-    plant_id = plant_id[0]
+    plant_id = getPlant(mix, plant)
 
     if lastcommit == '':
         lastcommit = None
