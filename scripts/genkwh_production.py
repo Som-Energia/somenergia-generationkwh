@@ -251,7 +251,7 @@ def addplant(mix, name, description, nshares):
         name=name,
         description=description,
         enabled=False,
-        mix_id=mix_id,
+        aggr_id=mix_id,
         nshares = nshares,
         ))
 
