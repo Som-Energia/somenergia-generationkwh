@@ -51,7 +51,7 @@ def getPlant(mix, plant):
         ])
 
     if not plant_id:
-        fail("Not such plant '{}'", mix)
+        fail("Not such plant '{}'".format(plant))
     plant_id = plant_id[0]
 
     return plant_id
@@ -65,7 +65,7 @@ def getMeter(mix, plant, meter):
         ])
 
     if not meter_id:
-        fail("Not such meter '{}'", meter)
+        fail("Not such meter '{}'".format(meter))
     meter_id = meter_id[0]
 
     return meter_id
@@ -238,15 +238,7 @@ def addmix(name, description):
 @click.argument('nshares', type=int)
 def addplant(mix, name, description, nshares):
     "Creates a new plant"
-    mix_id = Mix.search([
-        ('name','=',mix),
-        ])
-
-    if not mix_id:
-        fail("Not such mix '{}'", mix)
-
-    mix_id = mix_id[0]
-
+    mix_id = getMix(mix)
     plant = Plant.create(dict(
         name=name,
         description=description,
@@ -266,7 +258,7 @@ def addplant(mix, name, description, nshares):
 def meterset(mix, plant, meter, parameter, value):
     meter_id = getMeter(mix, plant, meter)
     meter_data = Meter.read(meter_id, [parameter])
-    step("Changing plant parameter {} from '{}' to '{}'", parameter, meter_data[parameter], value)
+    step("Changing meter parameter {} from '{}' to '{}'", parameter, meter_data[parameter], value)
     Meter.write(meter_id, {parameter:value})
 
 
