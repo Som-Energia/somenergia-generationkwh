@@ -255,6 +255,21 @@ def addplant(mix, name, description, nshares):
         nshares = nshares,
         ))
 
+
+
+@production.command()
+@click.argument('mix')
+@click.argument('plant')
+@click.argument('meter')
+@click.argument('parameter')
+@click.argument('value')
+def meterset(mix, plant, meter, parameter, value):
+    meter_id = getMeter(mix, plant, meter)
+    meter_data = Meter.read(meter_id, [parameter])
+    step("Changing plant parameter {} from '{}' to '{}'", parameter, meter_data[parameter], value)
+    Meter.write(meter_id, {parameter:value})
+
+
 @production.command()
 @click.argument('mix')
 @click.argument('plant')
