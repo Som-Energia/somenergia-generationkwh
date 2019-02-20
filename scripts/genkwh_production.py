@@ -261,6 +261,17 @@ def meterset(mix, plant, meter, parameter, value):
     step("Changing meter parameter {} from '{}' to '{}'", parameter, meter_data[parameter], value)
     Meter.write(meter_id, {parameter:value})
 
+@production.command()
+@click.argument('mix')
+@click.argument('plant')
+@click.argument('parameter')
+@click.argument('value')
+def plantset(mix, plant, parameter, value):
+    plant_id = getPlant(mix, plant)
+    plant_data = Plant.read(plant_id, [parameter])
+    step("Changing plant parameter {} from '{}' to '{}'", parameter, plant_data[parameter], value)
+    Plant.write(plant_id, {parameter:value})
+
 
 @production.command()
 @click.argument('mix')
