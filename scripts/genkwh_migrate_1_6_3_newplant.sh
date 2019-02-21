@@ -4,7 +4,7 @@ function step() { echo -e '\033[34;1m'"$*"'\033[0m'; }
 function error() { echo -e '\033[31;1m'"$*"'\033[0m'; }
 function warn() { echo -e '\033[33m'"$*"'\033[0m'; }
 function fail() { error "$*"; exit -1; }
-function run() { echo -e '\033[33;1m'"$*"'\033[0m'; "$@"; }
+function run() { echo -e '\033[35;1m'Running: '\033[33;1m'"$*"'\033[0m'; "$@"; }
 
 ALCOLEA_COUNTER_SERIAL='501600324'
 FONTIVSOLAR_TOTAL_SHARES=20000 # TODO: review
