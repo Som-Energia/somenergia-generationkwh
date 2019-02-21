@@ -36,6 +36,32 @@ def clearAll():
     Meassures.unlink(Meassures.search([]))
     Logger.unlink(Logger.search([]))
 
+def setupAggregator(aggr):
+    plants = aggr.generationkwh.pop('plants')
+    aggr = Mix.create(dict(aggr.generationkwh))
+
+    return dict(
+        id = aggr.id,
+        plants = [setupPlant(aggr, plant) for plant in plants.items()]
+        )
+
+def setupPlant(mix_id, plant):
+    plant = plant[1]
+    meters = plant.pop('meters')
+    plant.update(dict(mix_id=mix_id))
+    plant = Plant.create(dict(plant))
+
+    return dict(
+        id = plant.id,
+        meters = [setupMeter(plant, meter) for meter in meters.items()]
+        )
+
+def setupMeter(plant_id, meter):
+    meter = meter[1]
+    meter.update(dict(plant_id=plant_id))
+    return Meter.create(dict(meter))
+
+
 def getMix(name):
     ids=Mix.search([('name','=',name)])
     if not ids:
@@ -69,31 +95,6 @@ def getMeter(mix, plant, meter):
     meter_id = meter_id[0]
 
     return meter_id
-
-def setupAggregator(aggr):
-    plants = aggr.generationkwh.pop('plants')
-    aggr = Mix.create(dict(aggr.generationkwh))
-
-    return dict(
-            id = aggr.id,
-            plants = [setupPlant(aggr, plant) for plant in plants.items()]
-            )
-
-def setupPlant(mix_id, plant):
-    plant = plant[1]
-    meters = plant.pop('meters')
-    plant.update(dict(mix_id=mix_id))
-    plant = Plant.create(dict(plant))
-
-    return dict(
-            id = plant.id,
-            meters = [setupMeter(plant, meter) for meter in meters.items()]
-            )
-
-def setupMeter(plant_id, meter):
-    meter = meter[1]
-    meter.update(dict(plant_id=plant_id))
-    return Meter.create(dict(meter))
 
 
 @click.group()
