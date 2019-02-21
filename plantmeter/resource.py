@@ -85,6 +85,7 @@ class ProductionMeter(Resource):
     def __init__(self, *args, **kwargs):
         self.uri = kwargs.pop('uri', None)
         self.lastcommit = kwargs.pop('lastcommit', None)
+        self.working_since = kwargs.pop('working_since', None)
         if self.lastcommit:
             self.lastcommit = localisodate(self.lastcommit).date() + datetime.timedelta(days=1)
         self.curveProvider = kwargs.pop('curveProvider', None)
@@ -95,12 +96,18 @@ class ProductionMeter(Resource):
         assertDate('start', start)
         assertDate('end', end)
 
-        return self.curveProvider.get(
+        data = self.curveProvider.get(
             start=dateToLocal(start),
             stop=dateToLocal(end),
             filter=self.name,
             field='ae',
             )
+
+        if self.working_since and self.working_since >= start:
+            nbins= (self.working_since-start).days * 25
+            data[:nbins] = 0
+
+        return data
 
     def update_kwh(self, start=None, end=None , notifier=None):
         import datetime

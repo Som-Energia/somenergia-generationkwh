@@ -27,11 +27,13 @@ class Meter_Test(unittest.TestCase):
         self.db = self.connection[self.databasename]
         self.curveProvider = MongoTimeCurve(self.db, self.collection)
         self.uri = 'csv:/' + local_file('data/manlleu_20150904.csv')
+        self.row1 = [0,0,0,0,0,0,0,0,3,6,5,4,8,17,34,12,12,5,3,1,0,0,0,0,0,]
+        self.row2 = [0,0,0,0,0,0,0,0,4,7,6,5,9,18,35,13,13,6,4,2,0,0,0,0,0,]
 
     def tearDown(self):
         self.connection.drop_database('generationkwh_test')
 
-    def setupMeter(self):
+    def setupMeter(self, **kwd):
         return ProductionMeter(
             1,
             'meterName',
@@ -39,6 +41,7 @@ class Meter_Test(unittest.TestCase):
             True,
             uri = self.uri,
             curveProvider = self.curveProvider,
+            **kwd
             )
 
     def test_get_empty(self):
@@ -58,10 +61,37 @@ class Meter_Test(unittest.TestCase):
             list(m.get_kwh(
                 date(2015,9,4),
                 date(2015,9,5))),
-            [
-                0,0,0,0,0,0,0,0,3,6,5,4,8,17,34,12,12,5,3,1,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,4,7,6,5,9,18,35,13,13,6,4,2,0,0,0,0,0,
-            ])
+            self.row1 + self.row2)
+
+    def test_get_filled__whenFiltered(self):
+        m = self.setupMeter(working_since=date(2015,9,5))
+        m.update_kwh(date(2015,9,4), date(2015,9,5))
+
+        self.assertEqual(
+            list(m.get_kwh(
+                date(2015,9,4),
+                date(2015,9,5))),
+            [0]*25 + self.row2)
+
+    def test_get_filled__whenFiltered_onStart(self):
+        m = self.setupMeter(working_since=date(2015,9,4))
+        m.update_kwh(date(2015,9,4), date(2015,9,5))
+
+        self.assertEqual(
+            list(m.get_kwh(
+                date(2015,9,4),
+                date(2015,9,5))),
+            self.row1 + self.row2)
+
+    def test_get_filled__whenFiltered_onEnd(self):
+        m = self.setupMeter(working_since=date(2015,9,6))
+        m.update_kwh(date(2015,9,4), date(2015,9,5))
+
+        self.assertEqual(
+            list(m.get_kwh(
+                date(2015,9,4),
+                date(2015,9,5))),
+            [0]*50)
 
     def test_lastDate_empty(self):
         m = self.setupMeter()

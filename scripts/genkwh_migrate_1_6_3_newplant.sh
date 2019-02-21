@@ -38,6 +38,10 @@ step "Enabling new meter"
 run scripts/genkwh_production.py meterset GenerationkWh Fontivsolar 68308479 enabled '1' ||
     fail "Unable to enable the new meter"
 
+step "Setting the first date working"
+run scripts/genkwh_production.py meterset GenerationkWh Fontivsolar 68308479 working_since "$FONTIVSOLAR_START_DATE" ||
+    fail "Unable to set the first date"
+
 step "Resulting state"
 run scripts/genkwh_production.py list
 
