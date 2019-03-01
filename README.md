@@ -37,6 +37,11 @@ $ sudo apt-get build-dep python-numpy
 
 ## CHANGES
 
+### 2.4.1
+
+- Fix: Error calling notification function on default assignments
+- `calculate_irpf_generation.py`: New script to compute the IRPF tax retention
+
 ### 2.4.0
 
 - API for the OV to list investments and assignments for a member
