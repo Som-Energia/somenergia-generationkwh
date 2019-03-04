@@ -248,6 +248,51 @@ def addplant(mix, name, description, nshares):
         nshares = nshares,
         ))
 
+@production.command()
+@click.argument('mix')
+@click.argument('plant')
+@click.argument('meter')
+@click.option('--force', '-f')
+def delmeter(mix, plant, meter, force=False):
+    "Removes a meter"
+    if not force:
+        warn("You are about to remove meter {}.{}.{}", mix, plant, meter)
+        meter_id = getMeter(mix, plant, meter)
+        click.confirm('Do you want to continue?', abort=True)
+        click.confirm('SERIOUSLY, do you want to continue?', abort=True)
+        click.confirm('REALLY REALLY SERIOUSLY, do you want to continue?', abort=True)
+    step("Removing meter {}.{}.{}", mix, plant, meter)
+    Meter.unlink(meter_id)
+
+@production.command()
+@click.argument('mix')
+@click.argument('plant')
+@click.option('--force', '-f')
+def delplant(mix, plant, force=False):
+    "Removes a plant"
+    if not force:
+        warn("You are about to remove plant {}.{}", mix, plant)
+        plant_id = getPlant(mix, plant)
+        click.confirm('Do you want to continue?', abort=True)
+        click.confirm('SERIOUSLY, do you want to continue?', abort=True)
+        click.confirm('REALLY REALLY SERIOUSLY, do you want to continue?', abort=True)
+    step("Removing plant {}.{}", mix, plant)
+    Plant.unlink(plant_id)
+
+@production.command()
+@click.argument('mix')
+@click.option('--force', '-f')
+def delmix(mix, force=False):
+    "Removes a mix"
+    if not force:
+        warn("You are about to remove mix {}", mix)
+        mix_id = getMix(mix)
+        click.confirm('Do you want to continue?', abort=True)
+        click.confirm('SERIOUSLY, do you want to continue?', abort=True)
+        click.confirm('REALLY REALLY SERIOUSLY, do you want to continue?', abort=True)
+    step("Removing mix {}", mix)
+    Mix.unlink(mix_id)
+
 
 
 @production.command()
