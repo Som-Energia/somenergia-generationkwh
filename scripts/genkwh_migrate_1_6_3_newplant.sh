@@ -15,7 +15,7 @@ step "Current state"
 run scripts/genkwh_production.py list
 
 step "Renaming Alcolea meter"
-run scripts/genkwh_production.py meterset \
+run scripts/genkwh_production.py editmeter \
     GenerationkWh Alcolea "1" name "$ALCOLEA_COUNTER_SERIAL"  ||
     fail "Unable to change the name"
 
@@ -31,15 +31,15 @@ run scripts/genkwh_production.py addmeter \
         fail "Unable to add the meter for Fontivsolar plant"
 
 step "Enabling new plant"
-run scripts/genkwh_production.py plantset GenerationkWh Fontivsolar enabled '1' ||
+run scripts/genkwh_production.py editplant GenerationkWh Fontivsolar enabled '1' ||
     fail "Unable to enable the new plant"
 
 step "Enabling new meter"
-run scripts/genkwh_production.py meterset GenerationkWh Fontivsolar 68308479 enabled '1' ||
+run scripts/genkwh_production.py editmeter GenerationkWh Fontivsolar 68308479 enabled '1' ||
     fail "Unable to enable the new meter"
 
 step "Setting the first date working"
-run scripts/genkwh_production.py meterset GenerationkWh Fontivsolar 68308479 working_since "$FONTIVSOLAR_START_DATE" ||
+run scripts/genkwh_production.py editmeter GenerationkWh Fontivsolar 68308479 working_since "$FONTIVSOLAR_START_DATE" ||
     fail "Unable to set the first date"
 
 step "Resulting state"

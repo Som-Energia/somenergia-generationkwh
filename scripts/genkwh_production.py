@@ -256,7 +256,8 @@ def addplant(mix, name, description, nshares):
 @click.argument('meter')
 @click.argument('parameter')
 @click.argument('value')
-def meterset(mix, plant, meter, parameter, value):
+def editmeter(mix, plant, meter, parameter, value):
+    "Changes a parameter on the meter"
     meter_id = getMeter(mix, plant, meter)
     meter_data = Meter.read(meter_id, [parameter])
     step("Changing meter parameter {} from '{}' to '{}'", parameter, meter_data[parameter], value)
@@ -267,7 +268,8 @@ def meterset(mix, plant, meter, parameter, value):
 @click.argument('plant')
 @click.argument('parameter')
 @click.argument('value')
-def plantset(mix, plant, parameter, value):
+def editplant(mix, plant, parameter, value):
+    "Changes a parameter on the plant"
     plant_id = getPlant(mix, plant)
     plant_data = Plant.read(plant_id, [parameter])
     step("Changing plant parameter {} from '{}' to '{}'", parameter, plant_data[parameter], value)
