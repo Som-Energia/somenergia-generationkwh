@@ -9,9 +9,9 @@ class AdditiveShareCurve(object):
         You need to feed this object with an investment
         provider.
     """
-    def __init__(self, investments):
-        self._provider = investments
-        self._filterAttribute = 'member'
+    def __init__(self, items, filterAttribute):
+        self._provider = items
+        self._filterAttribute = filterAttribute
 
     def atDay(self, day, member=None):
         assert type(day) == datetime.date
@@ -59,12 +59,12 @@ class AdditiveShareCurve(object):
 
 
 class MemberSharesCurve(AdditiveShareCurve):
-    ''
+    def __init__(self, investments):
+        super(MemberSharesCurve, self).__init__(investments, 'member')
 
 class MixTotalSharesCurve(AdditiveShareCurve):
     def __init__(self, plants):
-        super(MixTotalSharesCurve, self).__init__(plants)
-        self._filterAttribute = 'mix'
+        super(MixTotalSharesCurve, self).__init__(plants, 'mix')
 
 
 

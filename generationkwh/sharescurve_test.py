@@ -1,10 +1,30 @@
 # -*- coding: utf-8 -*-
 
-from .sharescurve import MemberSharesCurve, PlantSharesCurve, MixTotalSharesCurve
+from .sharescurve import (
+    MemberSharesCurve,
+    PlantSharesCurve,
+    MixTotalSharesCurve,
+    AdditiveShareCurve,
+    )
 
 import unittest
 from yamlns import namespace as ns
 from .isodates import isodate
+
+class BaseProvider_MockUp(object):
+    def __init__(self, effectiveInvestments):
+        self._items = [
+            ns(
+                myattribute=itemattribute,
+                firstEffectiveDate=isodate(start),
+                lastEffectiveDate=isodate(end),
+                shares=shares,
+                )
+            for itemattribute, start, end, shares in effectiveInvestments
+            ]
+
+    def effectiveInvestments(self):
+        return self._items
 
 class InvestmentProvider_MockUp(object):
     def __init__(self, effectiveInvestments):
@@ -269,6 +289,26 @@ class MemberSharesCurve_Test(unittest.TestCase):
             +25*[11] # 24
             +25*381*[0] # 25 and so
             )
+
+class AdditiveShareCurve_Test(MemberSharesCurve_Test):
+
+    def assert_atDay_equal(self, filterValue, day, items, expectation):
+        itemProvider = BaseProvider_MockUp(items)
+        curve = AdditiveShareCurve(
+            items = itemProvider,
+            filterAttribute = 'myattribute',
+            )
+        self.assertEqual(expectation, curve.atDay(isodate(day),filterValue))
+
+    def assertActiveSharesEqual(self, filterValue, start, end, items, expected):
+        itemProvider = BaseProvider_MockUp(items)
+        curve = AdditiveShareCurve(
+            items = itemProvider,
+            filterAttribute = 'myattribute',
+            )
+        result = curve.hourly(isodate(start), isodate(end),filterValue)
+        self.assertEqual(list(result), expected)
+
 
 class TotalMixShareCurve_Test(MemberSharesCurve_Test):
 
