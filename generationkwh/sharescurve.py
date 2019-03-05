@@ -3,7 +3,7 @@
 import datetime
 import numpy
 
-class MemberSharesCurve(object):
+class AdditiveShareCurve(object):
     """ Provides the shares that are active at a give
         day, or either daily or hourly in a date span.
         You need to feed this object with an investment
@@ -58,14 +58,17 @@ class MemberSharesCurve(object):
         return result
 
 
-class MixTotalSharesCurve(MemberSharesCurve):
+class MemberSharesCurve(AdditiveShareCurve):
+    ''
+
+class MixTotalSharesCurve(AdditiveShareCurve):
     def __init__(self, plants):
         super(MixTotalSharesCurve, self).__init__(plants)
         self._filterAttribute = 'mix'
 
 
 
-class PlantSharesCurve(MemberSharesCurve):
+class PlantSharesCurve(AdditiveShareCurve):
     def __init__(self,shares):
         self.shares = shares
 
