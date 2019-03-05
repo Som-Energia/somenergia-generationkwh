@@ -58,6 +58,13 @@ class MemberSharesCurve(object):
         return result
 
 
+class MixTotalSharesCurve(MemberSharesCurve):
+    def __init__(self, plants):
+        super(MixTotalSharesCurve, self).__init__(plants)
+        self._filterAttribute = 'mix'
+
+
+
 class PlantSharesCurve(MemberSharesCurve):
     def __init__(self,shares):
         self.shares = shares

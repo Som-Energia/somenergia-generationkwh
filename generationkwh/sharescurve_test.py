@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .sharescurve import MemberSharesCurve, PlantSharesCurve
+from .sharescurve import MemberSharesCurve, PlantSharesCurve, MixTotalSharesCurve
 
 import unittest
 from yamlns import namespace as ns
@@ -20,6 +20,21 @@ class InvestmentProvider_MockUp(object):
 
     def effectiveInvestments(self):
         return self._contracts
+
+class PlantProvider_MockUp(object):
+    def __init__(self, effectiveInvestments):
+        self._plants = [
+            ns(
+                mix=mix,
+                firstEffectiveDate=isodate(start),
+                lastEffectiveDate=isodate(end),
+                shares=shares,
+                )
+            for mix, start, end, shares in effectiveInvestments
+            ]
+
+    def effectiveInvestments(self):
+        return self._plants
 
 class MemberSharesCurve_Test(unittest.TestCase):
 
@@ -254,6 +269,20 @@ class MemberSharesCurve_Test(unittest.TestCase):
             +25*[11] # 24
             +25*381*[0] # 25 and so
             )
+
+class TotalMixShareCurve_Test(MemberSharesCurve_Test):
+
+    def assert_atDay_equal(self, member, day, investments, expectation):
+        investmentsProvider = InvestmentProvider_MockUp(investments)
+        curve = MemberSharesCurve(investments = investmentsProvider)
+        self.assertEqual(expectation, curve.atDay(isodate(day),member))
+
+    def assertActiveSharesEqual(self, mix, start, end, plants, expected):
+        provider = PlantProvider_MockUp(plants)
+        curve = MixTotalSharesCurve(plants = provider)
+        result = curve.hourly(isodate(start), isodate(end),mix)
+        self.assertEqual(list(result), expected)
+
 
 
 class PlantSharesCurve_Test(unittest.TestCase):
