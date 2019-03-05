@@ -11,6 +11,7 @@ class MemberSharesCurve(object):
     """
     def __init__(self, investments):
         self._provider = investments
+        self._filterAttribute = 'member'
 
     def atDay(self, day, member=None):
         assert type(day) == datetime.date
@@ -18,7 +19,7 @@ class MemberSharesCurve(object):
         return sum(
             investment.shares
             for investment in self._provider.effectiveInvestments()
-            if (member is None or investment['member'] == member)
+            if (member is None or investment[self._filterAttribute] == member)
             and investment.lastEffectiveDate >= day
             and investment.firstEffectiveDate <= day
         )
@@ -35,7 +36,7 @@ class MemberSharesCurve(object):
 
         for investment in self._provider.effectiveInvestments():
             if member is not None:
-                if investment['member'] != member:
+                if investment[self._filterAttribute] != member:
                     continue
             if investment.lastEffectiveDate:
                 if investment.lastEffectiveDate < start: continue
