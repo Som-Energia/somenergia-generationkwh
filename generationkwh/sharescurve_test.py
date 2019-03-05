@@ -4,14 +4,14 @@ from .sharescurve import (
     MemberSharesCurve,
     PlantSharesCurve,
     MixTotalSharesCurve,
-    AdditiveShareCurve,
+    LayeredShareCurve,
     )
 
 import unittest
 from yamlns import namespace as ns
 from .isodates import isodate
 
-class BaseProvider_MockUp(object):
+class ItemProvider_MockUp(object):
     def __init__(self, effectiveInvestments):
         self._items = [
             ns(
@@ -56,12 +56,25 @@ class PlantProvider_MockUp(object):
     def effectiveInvestments(self):
         return self._plants
 
-class MemberSharesCurve_Test(unittest.TestCase):
+class LayeredShareCurve_Test(unittest.TestCase):
 
-    def assert_atDay_equal(self, member, day, investments, expectation):
-        investmentsProvider = InvestmentProvider_MockUp(investments)
-        curve = MemberSharesCurve(investments = investmentsProvider)
-        self.assertEqual(expectation, curve.atDay(isodate(day),member))
+    def assert_atDay_equal(self, filterValue, day, items, expectation):
+        provider = ItemProvider_MockUp(items)
+        curve = LayeredShareCurve(
+            items = provider,
+            filterAttribute = 'myattribute',
+            )
+        self.assertEqual(expectation, curve.atDay(isodate(day),filterValue))
+
+    def assertActiveSharesEqual(self, filterValue, start, end, items, expected):
+        provider = ItemProvider_MockUp(items)
+        curve = LayeredShareCurve(
+            items = provider,
+            filterAttribute = 'myattribute',
+            )
+        result = curve.hourly(isodate(start), isodate(end),filterValue)
+        self.assertEqual(list(result), expected)
+
 
     def test_atDay_noShares(self):
         self.assert_atDay_equal(
@@ -129,12 +142,6 @@ class MemberSharesCurve_Test(unittest.TestCase):
             3
             )
 
-
-    def assertActiveSharesEqual(self, member, start, end, investments, expected):
-        provider = InvestmentProvider_MockUp(investments)
-        curve = MemberSharesCurve(investments = provider)
-        result = curve.hourly(isodate(start), isodate(end),member)
-        self.assertEqual(list(result), expected)
 
     def test_hourly_singleDay_noShares(self):
         self.assertActiveSharesEqual(
@@ -290,31 +297,26 @@ class MemberSharesCurve_Test(unittest.TestCase):
             +25*381*[0] # 25 and so
             )
 
-class AdditiveShareCurve_Test(MemberSharesCurve_Test):
 
-    def assert_atDay_equal(self, filterValue, day, items, expectation):
-        itemProvider = BaseProvider_MockUp(items)
-        curve = AdditiveShareCurve(
-            items = itemProvider,
-            filterAttribute = 'myattribute',
-            )
-        self.assertEqual(expectation, curve.atDay(isodate(day),filterValue))
+class MemberSharesCurve_Test(LayeredShareCurve_Test):
 
-    def assertActiveSharesEqual(self, filterValue, start, end, items, expected):
-        itemProvider = BaseProvider_MockUp(items)
-        curve = AdditiveShareCurve(
-            items = itemProvider,
-            filterAttribute = 'myattribute',
-            )
-        result = curve.hourly(isodate(start), isodate(end),filterValue)
+    def assert_atDay_equal(self, member, day, investments, expectation):
+        provider = InvestmentProvider_MockUp(investments)
+        curve = MemberSharesCurve(investments = provider)
+        self.assertEqual(expectation, curve.atDay(isodate(day),member))
+
+    def assertActiveSharesEqual(self, member, start, end, investments, expected):
+        provider = InvestmentProvider_MockUp(investments)
+        curve = MemberSharesCurve(investments = provider)
+        result = curve.hourly(isodate(start), isodate(end),member)
         self.assertEqual(list(result), expected)
 
 
-class TotalMixShareCurve_Test(MemberSharesCurve_Test):
+class TotalMixShareCurve_Test(LayeredShareCurve_Test):
 
-    def assert_atDay_equal(self, member, day, investments, expectation):
-        investmentsProvider = InvestmentProvider_MockUp(investments)
-        curve = MemberSharesCurve(investments = investmentsProvider)
+    def assert_atDay_equal(self, member, day, plants, expectation):
+        provider = PlantProvider_MockUp(plants)
+        curve = MixTotalSharesCurve(plants = provider)
         self.assertEqual(expectation, curve.atDay(isodate(day),member))
 
     def assertActiveSharesEqual(self, mix, start, end, plants, expected):

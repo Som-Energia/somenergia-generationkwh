@@ -3,28 +3,31 @@
 import datetime
 import numpy
 
-class AdditiveShareCurve(object):
-    """ Provides the shares that are active at a give
-        day, or either daily or hourly in a date span.
-        You need to feed this object with an investment
-        provider.
+class LayeredShareCurve(object):
+    """
+    Provides a time curve of shares by adding a series of temporary bounded items
+    adding each one a fixed amount of shares.
+    Items is a list of namespaces with
+    `firstEffectiveDate`,
+    `lastEffectiveDate`,
+    `nshares` and a definible filter attribute.
     """
     def __init__(self, items, filterAttribute):
         self._provider = items
         self._filterAttribute = filterAttribute
 
-    def atDay(self, day, member=None):
+    def atDay(self, day, filterValue=None):
         assert type(day) == datetime.date
 
         return sum(
             investment.shares
             for investment in self._provider.effectiveInvestments()
-            if (member is None or investment[self._filterAttribute] == member)
+            if (filterValue is None or investment[self._filterAttribute] == filterValue)
             and investment.lastEffectiveDate >= day
             and investment.firstEffectiveDate <= day
         )
 
-    def hourly(self, start, end, member=None):
+    def hourly(self, start, end, filterValue=None):
         assert type(start) == datetime.date
         assert type(end) == datetime.date
 
@@ -35,8 +38,8 @@ class AdditiveShareCurve(object):
         result = numpy.zeros(nDays*hoursADay, dtype=numpy.int)
 
         for investment in self._provider.effectiveInvestments():
-            if member is not None:
-                if investment[self._filterAttribute] != member:
+            if filterValue is not None:
+                if investment[self._filterAttribute] != filterValue:
                     continue
             if investment.lastEffectiveDate:
                 if investment.lastEffectiveDate < start: continue
@@ -58,17 +61,35 @@ class AdditiveShareCurve(object):
         return result
 
 
-class MemberSharesCurve(AdditiveShareCurve):
+class MemberSharesCurve(LayeredShareCurve):
+    """
+    Provides a time curve of active shares from the investments
+    of a given member.
+    You need to feed this object with an investment
+    provider returning a list of namespaces with attributes
+    `firstEffectiveDate`,
+    `lastEffectiveDate`,
+    `nshares` and `member`
+    """
     def __init__(self, investments):
         super(MemberSharesCurve, self).__init__(investments, 'member')
 
-class MixTotalSharesCurve(AdditiveShareCurve):
+class MixTotalSharesCurve(LayeredShareCurve):
+    """
+    Provides a time curve of active built shares from the plants
+    of a given mix (pe. GenerationkWh).
+    You need to feed this object with an investment
+    provider returning a list of namespaces with attributes
+    `firstEffectiveDate`,
+    `lastEffectiveDate`,
+    `nshares` and `mix`
+    """
     def __init__(self, plants):
         super(MixTotalSharesCurve, self).__init__(plants, 'mix')
 
 
 
-class PlantSharesCurve(AdditiveShareCurve):
+class PlantSharesCurve(LayeredShareCurve):
     def __init__(self,shares):
         self.shares = shares
 
