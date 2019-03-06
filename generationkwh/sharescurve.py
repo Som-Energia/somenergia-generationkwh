@@ -21,7 +21,7 @@ class LayeredShareCurve(object):
 
         return sum(
             investment.shares
-            for investment in self._provider.effectiveItems()
+            for investment in self._provider.items()
             if (filterValue is None or investment[self._filterAttribute] == filterValue)
             and investment.lastEffectiveDate >= day
             and investment.firstEffectiveDate <= day
@@ -37,7 +37,7 @@ class LayeredShareCurve(object):
         nDays=(end-start).days+1 # To Review
         result = numpy.zeros(nDays*hoursADay, dtype=numpy.int)
 
-        for investment in self._provider.effectiveItems():
+        for investment in self._provider.items():
             if filterValue is not None:
                 if investment[self._filterAttribute] != filterValue:
                     continue

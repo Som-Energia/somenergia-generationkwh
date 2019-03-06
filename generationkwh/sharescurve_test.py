@@ -12,7 +12,7 @@ from yamlns import namespace as ns
 from .isodates import isodate
 
 class ItemProvider_MockUp(object):
-    def __init__(self, effectiveItems):
+    def __init__(self, items):
         self._items = [
             ns(
                 myattribute=itemattribute,
@@ -20,14 +20,14 @@ class ItemProvider_MockUp(object):
                 lastEffectiveDate=isodate(end),
                 shares=shares,
                 )
-            for itemattribute, start, end, shares in effectiveItems
+            for itemattribute, start, end, shares in items
             ]
 
-    def effectiveItems(self):
+    def items(self):
         return self._items
 
 class InvestmentProvider_MockUp(object):
-    def __init__(self, effectiveItems):
+    def __init__(self, items):
         self._contracts = [
             ns(
                 member=member,
@@ -35,14 +35,14 @@ class InvestmentProvider_MockUp(object):
                 lastEffectiveDate=isodate(end),
                 shares=shares,
                 )
-            for member, start, end, shares in effectiveItems
+            for member, start, end, shares in items
             ]
 
-    def effectiveItems(self):
+    def items(self):
         return self._contracts
 
 class PlantProvider_MockUp(object):
-    def __init__(self, effectiveItems):
+    def __init__(self, items):
         self._plants = [
             ns(
                 mix=mix,
@@ -50,10 +50,10 @@ class PlantProvider_MockUp(object):
                 lastEffectiveDate=isodate(end),
                 shares=shares,
                 )
-            for mix, start, end, shares in effectiveItems
+            for mix, start, end, shares in items
             ]
 
-    def effectiveItems(self):
+    def items(self):
         return self._plants
 
 class LayeredShareCurve_Test(unittest.TestCase):
