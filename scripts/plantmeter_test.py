@@ -82,6 +82,20 @@ class PlantMeterApiTestBase(unittest.TestCase):
         for filename in os.listdir(self.tempdir):
             os.remove(os.path.join(self.tempdir, filename))
 
+    def setupAggregator(self, nplants, nmeters, lastcommit=None):
+        aggr_obj = self.c.model('generationkwh.production.aggregator')
+        aggr = aggr_obj.create(dict(
+            name='myaggr',
+            description='myaggr',
+            enabled=True))
+
+        meters = []
+        for plant in range(nplants):
+            plant_id = self.setupPlant(aggr, plant)
+            for meter in range(nmeters):
+                meters.append(self.setupMeter(plant_id, plant, meter, lastcommit))
+        return aggr, meters
+
     def setupPlant(self, aggr_id, plant):
         plant_obj = self.c.model('generationkwh.production.plant')
         return plant_obj.create(dict(
@@ -102,20 +116,6 @@ class PlantMeterApiTestBase(unittest.TestCase):
             uri='csv://%s/mymeter%d%d' % (self.tempdir, plant, meter),
             lastcommit=lastcommit,
             enabled=True))
-
-    def setupAggregator(self, nplants, nmeters, lastcommit=None):
-        aggr_obj = self.c.model('generationkwh.production.aggregator')
-        aggr = aggr_obj.create(dict(
-            name='myaggr',
-            description='myaggr',
-            enabled=True))
-
-        meters = []
-        for plant in range(nplants):
-            plant_id = self.setupPlant(aggr, plant)
-            for meter in range(nmeters):
-                meters.append(self.setupMeter(plant_id, plant, meter, lastcommit))
-        return aggr, meters
 
     def setupPointsByDay(self, points):
 
