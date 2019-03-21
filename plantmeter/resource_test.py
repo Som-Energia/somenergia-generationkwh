@@ -64,7 +64,7 @@ class Meter_Test(unittest.TestCase):
             self.row1 + self.row2)
 
     def test_get_filled__whenFiltered(self):
-        m = self.setupMeter(working_since=date(2015,9,5))
+        m = self.setupMeter(first_active_date=date(2015,9,5))
         m.update_kwh(date(2015,9,4), date(2015,9,5))
 
         self.assertEqual(
@@ -74,7 +74,7 @@ class Meter_Test(unittest.TestCase):
             [0]*25 + self.row2)
 
     def test_get_filled__whenFiltered_onStart(self):
-        m = self.setupMeter(working_since=date(2015,9,4))
+        m = self.setupMeter(first_active_date=date(2015,9,4))
         m.update_kwh(date(2015,9,4), date(2015,9,5))
 
         self.assertEqual(
@@ -84,7 +84,7 @@ class Meter_Test(unittest.TestCase):
             self.row1 + self.row2)
 
     def test_get_filled__whenFiltered_onEnd(self):
-        m = self.setupMeter(working_since=date(2015,9,6))
+        m = self.setupMeter(first_active_date=date(2015,9,6))
         m.update_kwh(date(2015,9,4), date(2015,9,5))
 
         self.assertEqual(

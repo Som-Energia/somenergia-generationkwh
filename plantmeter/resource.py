@@ -85,7 +85,7 @@ class ProductionMeter(Resource):
     def __init__(self, *args, **kwargs):
         self.uri = kwargs.pop('uri', None)
         self.lastcommit = kwargs.pop('lastcommit', None)
-        self.working_since = kwargs.pop('working_since', None)
+        self.first_active_date = kwargs.pop('first_active_date', None)
         if self.lastcommit:
             self.lastcommit = localisodate(self.lastcommit).date() + datetime.timedelta(days=1)
         self.curveProvider = kwargs.pop('curveProvider', None)
@@ -103,8 +103,8 @@ class ProductionMeter(Resource):
             field='ae',
             )
 
-        if self.working_since and self.working_since >= start:
-            nbins= (self.working_since-start).days * 25
+        if self.first_active_date and self.first_active_date >= start:
+            nbins= (self.first_active_date-start).days * 25
             data[:nbins] = 0
 
         return data

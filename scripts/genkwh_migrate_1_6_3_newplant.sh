@@ -22,7 +22,7 @@ run scripts/genkwh_production.py editmeter \
 
 step "Setting Alcolea start date"
 run scripts/genkwh_production.py editplant \
-    GenerationkWh Alcolea working_since "$ALCOLEA_START_DATE" ||
+    GenerationkWh Alcolea first_active_date "$ALCOLEA_START_DATE" ||
         fail "Unable to set Alcolea start date"
 
 step "Adding the new plant"
@@ -45,13 +45,13 @@ run scripts/genkwh_production.py editmeter GenerationkWh Fontivsolar "$FONTIVSOL
     fail "Unable to enable the new meter"
 
 step "Setting Fontivsolar plant start date"
-run scripts/genkwh_production.py editplant GenerationkWh Fontivsolar working_since "$FONTIVSOLAR_START_DATE" ||
+run scripts/genkwh_production.py editplant GenerationkWh Fontivsolar first_active_date "$FONTIVSOLAR_START_DATE" ||
     fail "Unable to set Fontivsolar start date"
 
 step "Setting Fontivsolar meter start date"
 run scripts/genkwh_production.py editmeter \
     GenerationkWh Fontivsolar "$FONTIVSOLAR_COUNTER_SERIAL" \
-    working_since "$FONTIVSOLAR_START_DATE" ||
+    first_active_date "$FONTIVSOLAR_START_DATE" ||
         fail "Unable to set meter first date"
 
 step "Resulting state"
