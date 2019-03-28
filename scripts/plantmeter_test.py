@@ -85,8 +85,69 @@ class PlantShareProvider_Test(unittest.TestCase):
             items:
             - mix: testmix
               shares: 10
-              lastEffectiveDate: '2019-03-02'
-              firstEffectiveDate: '2019-03-03'
+              firstEffectiveDate: '2019-03-02'
+              lastEffectiveDate: '2019-03-03'
+        """)
+
+
+    def test_items_withManyPlant(self):
+        self.setupMix('testmix', [
+            dict(
+                name='plant1',
+                nshares=10,
+                first_active_date='2019-03-02',
+                last_active_date='2019-03-03',
+                meters=[]
+            ),
+            dict(
+                name='plant2',
+                nshares=20,
+                first_active_date='2019-02-02',
+                last_active_date='2019-02-03',
+                meters=[]
+            ),
+        ])
+        items = self.helper.plantShareItems('testmix')
+
+        self.assertNsEqual(ns(items=items), """
+            items:
+            - mix: testmix
+              shares: 10
+              firstEffectiveDate: '2019-03-02'
+              lastEffectiveDate: '2019-03-03'
+            - mix: testmix
+              shares: 20
+              firstEffectiveDate: '2019-02-02'
+              lastEffectiveDate: '2019-02-03'
+        """)
+
+    def test_items_filtersOtherMixes(self):
+        self.setupMix('testmix', [
+            dict(
+                name='plant1',
+                nshares=10,
+                first_active_date='2019-03-02',
+                last_active_date='2019-03-03',
+                meters=[]
+            ),
+        ])
+        self.setupMix('othermix', [
+            dict(
+                name='plant2',
+                nshares=20,
+                first_active_date='2019-02-02',
+                last_active_date='2019-02-03',
+                meters=[]
+            ),
+        ])
+        items = self.helper.plantShareItems('testmix')
+
+        self.assertNsEqual(ns(items=items), """
+            items:
+            - mix: testmix
+              shares: 10
+              firstEffectiveDate: '2019-03-02'
+              lastEffectiveDate: '2019-03-03'
         """)
 
 
@@ -183,6 +244,7 @@ class PlantMeterApiTestBase(unittest.TestCase):
             description='mymeter%d%d' % (plant, meter),
             uri='csv://%s/mymeter%d%d' % (self.tempdir, plant, meter),
             lastcommit=lastcommit,
+            first_active_date='2000-01-01',
             enabled=True))
 
     def setupPointsByDay(self, points):
