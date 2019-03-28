@@ -57,17 +57,6 @@ class PlantShareProvider_Test(unittest.TestCase):
                 meters.append(self.setupMeter(plant_id, plant, meter, lastcommit))
         return aggr, meters
 
-    def setupPlant(self, aggr_id, plant, **kwds):
-        values = dict(
-            aggr_id=aggr_id,
-            name='myplant%d' % plant,
-            description='myplant%d' % plant,
-            enabled=True,
-            nshares=1000*(plant+1),
-        )
-        values.update(kwds)
-        return self.Plant.create(values)
-
     def setupMeter(self, plant_id, plant, meter, lastcommit=None):
         if lastcommit:
             lastcommit=lastcommit.strftime('%Y-%m-%d')
@@ -79,32 +68,51 @@ class PlantShareProvider_Test(unittest.TestCase):
             lastcommit=lastcommit,
             enabled=True))
 
+    def setupMix(self, name, plants=[], description=None, enabled=True):
+
+        mix_id = self.Mix.create(dict(
+            name=name,
+            description=description or name+' description',
+            enabled=enabled,
+            ))
+
+        return mix_id, [
+            self.Plant.create(dict(
+                plant,
+                aggr_id = mix_id,
+                description=plant['name']+' description',
+                enabled=True,
+                ))
+            for plantIndex, plant in enumerate(plants)
+        ]
 
     def test_items_withZeroPlants(self):
-        self.setupAggregator(1,0)
-
-        items = self.helper.plantShareItems("testmix")
+        self.setupMix('testmix', [])
+        items = self.helper.plantShareItems('testmix')
 
         self.assertNsEqual(ns(items=items), """
             items: []
-            """)
+        """)
 
+    def test_items_withOnePlant(self):
+        self.setupMix('testmix', [
+            dict(
+                name='plant1',
+                nshares=10,
+                first_active_date='2019-03-02',
+                last_active_date='2019-03-03',
+                meters=[]
+            ),
+        ])
+        items = self.helper.plantShareItems('testmix')
 
-        """
+        self.assertNsEqual(ns(items=items), """
             items:
-            - mix: 1
+            - mix: testmix
               shares: 10
-              lastEffectiveDate: 2019-03-02
-              firstEffectiveDate: 2019-03-02
-            - mix: 1
-              shares: 10
-              lastEffectiveDate: 2019-03-02
-              firstEffectiveDate: 2019-03-02
-            - mix: 1
-              shares: 10
-              lastEffectiveDate: 2019-03-02
-              firstEffectiveDate: 2019-03-02
-        """
+              lastEffectiveDate: '2019-03-02'
+              firstEffectiveDate: '2019-03-03'
+        """)
 
 
 
