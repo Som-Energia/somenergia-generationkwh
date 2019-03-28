@@ -45,8 +45,7 @@ class PlantShareProvider_Test(unittest.TestCase):
 
 
     def setupAggregator(self, nplants, nmeters, lastcommit=None):
-        aggr_obj = self.c.model('generationkwh.production.aggregator')
-        aggr = aggr_obj.create(dict(
+        aggr = self.Mix.create(dict(
             name='testmix',
             description='testmix',
             enabled=True))
@@ -70,10 +69,9 @@ class PlantShareProvider_Test(unittest.TestCase):
         return self.Plant.create(values)
 
     def setupMeter(self, plant_id, plant, meter, lastcommit=None):
-        meter_obj = self.c.model('generationkwh.production.meter')
         if lastcommit:
             lastcommit=lastcommit.strftime('%Y-%m-%d')
-        return meter_obj.create(dict(
+        return self.Meter.create(dict(
             plant_id=plant_id,
             name='mymeter%d%d' % (plant, meter),
             description='mymeter%d%d' % (plant, meter),
@@ -82,7 +80,7 @@ class PlantShareProvider_Test(unittest.TestCase):
             enabled=True))
 
 
-    def test_items(self):
+    def test_items_withZeroPlants(self):
         self.setupAggregator(1,0)
 
         items = self.helper.plantShareItems("testmix")
