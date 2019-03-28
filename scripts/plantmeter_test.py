@@ -602,7 +602,7 @@ class GenerationkwhProductionAggregator_Test(PlantMeterApiTestBase):
                     aggr_id, '2015-08-16', '2015-08-17')
 
             date = self.helper.lastMeasurementDate(aggr_id)
-            self.assertEqual(date, '2015-08-17')
+            self.assertEqual(date, '2015-08-16')
 
     def test_getNshares_onePlant(self):
             aggr,meters = self.setupAggregator(
