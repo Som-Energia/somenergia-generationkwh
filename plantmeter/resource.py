@@ -77,7 +77,7 @@ class ProductionAggregator(ParentResource):
             id, name, description, enabled, children=plants)
 
 class ProductionPlant(ParentResource):
-    def __init__(self, id, name, description, enabled, meters=[]):
+    def __init__(self, id, name, description, enabled, first_active_date=None, last_active_date=None, meters=[]):
         super(ProductionPlant, self).__init__(
             id, name, description, enabled, children=meters)
 

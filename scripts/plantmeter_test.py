@@ -23,6 +23,93 @@ def datespan(startDate, endDate):
         yield currentDate
         currentDate += delta
 
+class PlantShareProvider_Test(unittest.TestCase):
+    def setUp(self):
+        import erppeek_wst
+        import dbconfig
+
+        self.maxDiff = None
+
+        self.c = erppeek_wst.ClientWST(**dbconfig.erppeek)
+        self.c.begin()
+        self.Mix = self.c.GenerationkwhProductionAggregator
+        self.Plant = self.c.GenerationkwhProductionPlant
+        self.Meter = self.c.GenerationkwhProductionMeter
+        self.helper = self.c.GenerationkwhProductionAggregatorTesthelper
+
+    def tearDown(self):
+        self.c.rollback()
+        self.c.close()
+
+    from plantmeter.testutils import assertNsEqual
+
+
+    def setupAggregator(self, nplants, nmeters, lastcommit=None):
+        aggr_obj = self.c.model('generationkwh.production.aggregator')
+        aggr = aggr_obj.create(dict(
+            name='testmix',
+            description='testmix',
+            enabled=True))
+
+        meters = []
+        for plant in range(nplants):
+            plant_id = self.setupPlant(aggr, plant)
+            for meter in range(nmeters):
+                meters.append(self.setupMeter(plant_id, plant, meter, lastcommit))
+        return aggr, meters
+
+    def setupPlant(self, aggr_id, plant, **kwds):
+        values = dict(
+            aggr_id=aggr_id,
+            name='myplant%d' % plant,
+            description='myplant%d' % plant,
+            enabled=True,
+            nshares=1000*(plant+1),
+        )
+        values.update(kwds)
+        return self.Plant.create(values)
+
+    def setupMeter(self, plant_id, plant, meter, lastcommit=None):
+        meter_obj = self.c.model('generationkwh.production.meter')
+        if lastcommit:
+            lastcommit=lastcommit.strftime('%Y-%m-%d')
+        return meter_obj.create(dict(
+            plant_id=plant_id,
+            name='mymeter%d%d' % (plant, meter),
+            description='mymeter%d%d' % (plant, meter),
+            uri='',
+            lastcommit=lastcommit,
+            enabled=True))
+
+
+    def test_items(self):
+        self.setupAggregator(1,0)
+
+        items = self.helper.plantShareItems("testmix")
+
+        self.assertNsEqual(ns(items=items), """
+            items: []
+            """)
+
+
+        """
+            items:
+            - mix: 1
+              shares: 10
+              lastEffectiveDate: 2019-03-02
+              firstEffectiveDate: 2019-03-02
+            - mix: 1
+              shares: 10
+              lastEffectiveDate: 2019-03-02
+              firstEffectiveDate: 2019-03-02
+            - mix: 1
+              shares: 10
+              lastEffectiveDate: 2019-03-02
+              firstEffectiveDate: 2019-03-02
+        """
+
+
+
 class PlantMeterApiTestBase(unittest.TestCase):
 
     def setUp(self):
