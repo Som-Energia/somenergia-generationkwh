@@ -43,31 +43,6 @@ class PlantShareProvider_Test(unittest.TestCase):
 
     from plantmeter.testutils import assertNsEqual
 
-
-    def setupAggregator(self, nplants, nmeters, lastcommit=None):
-        aggr = self.Mix.create(dict(
-            name='testmix',
-            description='testmix',
-            enabled=True))
-
-        meters = []
-        for plant in range(nplants):
-            plant_id = self.setupPlant(aggr, plant)
-            for meter in range(nmeters):
-                meters.append(self.setupMeter(plant_id, plant, meter, lastcommit))
-        return aggr, meters
-
-    def setupMeter(self, plant_id, plant, meter, lastcommit=None):
-        if lastcommit:
-            lastcommit=lastcommit.strftime('%Y-%m-%d')
-        return self.Meter.create(dict(
-            plant_id=plant_id,
-            name='mymeter%d%d' % (plant, meter),
-            description='mymeter%d%d' % (plant, meter),
-            uri='',
-            lastcommit=lastcommit,
-            enabled=True))
-
     def setupMix(self, name, plants=[], description=None, enabled=True):
 
         mix_id = self.Mix.create(dict(
