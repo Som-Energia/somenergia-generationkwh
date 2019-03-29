@@ -25,7 +25,7 @@ class Remainder_Test(unittest.TestCase):
 
     def assertLastEquals(self, expectation):
         result = self.RemainderHelper.lastRemainders()
-        self.assertEqual([list(a) for a in expectation], result)
+        self.assertEqual([list(a) for a in expectation], sorted(result))
 
     def tearDown(self):
         try:
