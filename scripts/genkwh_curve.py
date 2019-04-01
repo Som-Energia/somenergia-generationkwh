@@ -1,10 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-from plantmeter.mongotimecurve import MongoTimeCurve
 from generationkwh.isodates import isodate
-from generationkwh.memberrightsusage import MemberRightsUsage
-import pymongo
-import csv
 from yamlns import namespace as ns
 from sequence import sequence
 import datetime
