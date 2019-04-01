@@ -102,8 +102,9 @@ class ProductionLoader_Test(unittest.TestCase):
         remainder = self.erp.model('generationkwh.remainder')
         remainder.clean()
 
-    def setupLocalMeter(self, filename, points):
+    def setupLocalMeter(self, name, points):
         import csv
+        filename = os.path.join(self.tempdir,name),[
         def toStr(date):
             return date.strftime('%Y-%m-%d %H:%M')
 
@@ -123,7 +124,7 @@ class ProductionLoader_Test(unittest.TestCase):
                 nplants=1,
                 nmeters=1,
                 nshares=[1]).read(['id'])['id']
-        self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
+        self.setupLocalMeter('mymeter00',[
             ])
         self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
                 '2015-08-16', '2015-08-16')
@@ -136,7 +137,7 @@ class ProductionLoader_Test(unittest.TestCase):
                 nplants=1,
                 nmeters=1,
                 nshares=[1]).read(['id'])['id']
-        self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
+        self.setupLocalMeter('mymeter00',[
             ('2015-08-16', '2015-08-16', 'S', 10*[0]+[1000]+13*[0])
             ])
         self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
@@ -150,10 +151,10 @@ class ProductionLoader_Test(unittest.TestCase):
                 nplants=2,
                 nmeters=1,
                 nshares=[1,1]).read(['id'])['id']
-        self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
+        self.setupLocalMeter('mymeter00',[
             ('2015-08-16', '2015-08-16', 'S', 10*[0]+[1000]+13*[0])
             ])
-        self.setupLocalMeter(os.path.join(self.tempdir,'mymeter10'),[
+        self.setupLocalMeter('mymeter10',[
             ('2015-08-16', '2015-08-16', 'S', 10*[0]+[1000]+13*[0])
             ])
         self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
@@ -168,7 +169,7 @@ class ProductionLoader_Test(unittest.TestCase):
                 nplants=1,
                 nmeters=1,
                 nshares=[1]).read(['id'])['id']
-        self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
+        self.setupLocalMeter('mymeter00',[
             ('2015-08-16', '2015-08-16', 'S', 10*[0]+[1000]+13*[0])
             ])
         self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
@@ -188,7 +189,7 @@ class ProductionLoader_Test(unittest.TestCase):
                 nplants=1,
                 nmeters=1,
                 nshares=[4]).read(['id'])['id']
-        self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
+        self.setupLocalMeter('mymeter00',[
             ('2015-08-16', '2015-08-16', 'S', 10*[0]+[20000]+13*[0])
             ])
         self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
@@ -208,7 +209,7 @@ class ProductionLoader_Test(unittest.TestCase):
                 nplants=1,
                 nmeters=1,
                 nshares=[4]).read(['id'])['id']
-        self.setupLocalMeter(os.path.join(self.tempdir,'mymeter00'),[
+        self.setupLocalMeter('mymeter00',[
             ('2015-08-16', '2015-08-17', 'S', 2*(10*[0]+[20000]+13*[0]))
             ])
         self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
