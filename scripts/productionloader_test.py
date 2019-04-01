@@ -104,7 +104,7 @@ class ProductionLoader_Test(unittest.TestCase):
 
     def setupLocalMeter(self, name, points):
         import csv
-        filename = os.path.join(self.tempdir,name),[
+        filename = os.path.join(self.tempdir,name)
         def toStr(date):
             return date.strftime('%Y-%m-%d %H:%M')
 
