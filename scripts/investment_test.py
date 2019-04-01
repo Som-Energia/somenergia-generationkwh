@@ -2321,18 +2321,19 @@ class Investment_Test(unittest.TestCase):
             ))
 
     def test__divest__beforeEffectivePeriod(self):
+        lastyear = str(datetime.today().year-1)
+        currentyear = str(datetime.today().year)
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
-            '2017-01-01', # order_date
+            lastyear+'-01-01', # order_date
             1000,
             '10.10.23.123',
             'ES7712341234161234567890',
             )
         self.Investment.mark_as_invoiced(id)
-        self.Investment.mark_as_paid([id], '2017-09-02')
-        date_today = str(date.today())
+        self.Investment.mark_as_paid([id], lastyear+'-09-02')
 
-        invoice_ids, errors = self.Investment.divest([id], '2018-09-01')
+        invoice_ids, errors = self.Investment.divest([id], currentyear+'-09-01')
         self.assertEqual([], errors)
 
         investment = ns(self.Investment.read(id, []))
@@ -2344,9 +2345,9 @@ class Investment_Test(unittest.TestCase):
             member_id:
             - {member_id}
             - {surname}, {name}
-            order_date: '2017-01-01'
-            purchase_date: '2017-09-02'
-            first_effective_date: '2018-09-02'
+            order_date: '{lastyear}-01-01'
+            purchase_date: '{lastyear}-09-02'
+            first_effective_date: '{currentyear}-09-02'
             last_effective_date: '{divestment_date}'
             nshares: 10
             amortized_amount: 1000.0
@@ -2355,7 +2356,9 @@ class Investment_Test(unittest.TestCase):
             draft: false
             """.format(
                 id=id,
-                divestment_date = '2018-09-01',
+                divestment_date = currentyear+'-09-01',
+                lastyear=lastyear,
+                currentyear=currentyear,
                 **self.personalData
                 ))
 
