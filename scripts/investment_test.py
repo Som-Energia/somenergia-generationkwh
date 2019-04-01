@@ -76,7 +76,11 @@ class Investment_OLD_Test(unittest.TestCase):
                 #[1, '2016-05-19', False, 86],  #Fiscal year closing
                 [1, '2017-12-01', False, -2],
                 [1, '2017-12-01', False, -2],
-
+                [1, '2018-08-24', False, -1],
+                [1, '2018-08-24', False, -1],
+                [1, '2018-08-24', False, -1],
+                [1, '2019-01-25', False, -2],
+                [1, '2019-01-25', False, -2],
             ])
 
     def test__create_from_accounting__restrictingFirst(self):
