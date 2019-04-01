@@ -49,7 +49,7 @@ class ProductionLoader_Test(unittest.TestCase):
         self.Aggregator.unlink(self.Aggregator.search([]))
 
     def setUpMeasurements(self):
-        self.collection = 'generationkwh.production.measurement'
+        self.collection = 'tm_profile'
         self.clearMeasurements()
 
     def clearMeasurements(self):
