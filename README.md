@@ -37,6 +37,12 @@ $ sudo apt-get build-dep python-numpy
 
 ## CHANGES
 
+### 2.5.0
+
+- Multiple plants supported
+- LayeredShareCurve: Generalized additive constant curve from MemberShareCurve for PlantShareCurve
+
+
 ### 2.4.1
 
 - Fix: Error calling notification function on default assignments
