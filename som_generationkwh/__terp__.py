@@ -18,6 +18,7 @@
   "update_xml": [
     "som_generationkwh_data.xml",
     "giscedata_facturacio_view.xml",
+    "giscedata_polissa_view.xml",
     "som_generationkwh_view.xml",
     "wizard/wizard_investment_activation.xml",
     "wizard/wizard_investment_amortization.xml",

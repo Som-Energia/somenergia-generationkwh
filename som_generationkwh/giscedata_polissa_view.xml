@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_infoenergia_polissa_tree_energia_gkwh">
+            <field name="name">som.infoenergia.view.infoenergia.tree</field>
+            <field name="model">som.infoenergia</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="som_infoenergia.view_infoenergia_polissa_tree"/>
+            <field name="arch" type="xml">
+                <field name="data_inici" position="before">
+                    <field name="is_gkwh"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</openerp>
