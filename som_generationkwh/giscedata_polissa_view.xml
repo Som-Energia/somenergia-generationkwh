@@ -7,7 +7,7 @@
             <field name="type">form</field>
             <field name="inherit_id" ref="som_infoenergia.view_infoenergia_polissa_tree"/>
             <field name="arch" type="xml">
-                <field name="data_inici" position="before">
+                <field name="potencia" position="before">
                     <field name="is_gkwh"/>
                 </field>
             </field>
