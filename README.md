@@ -14,6 +14,8 @@ nosetests scripts # Run erp tests (require a working erp)
 
 ## CHANGES
 
+### 1.7.0 2019-04-02
+
 - Meters and plants have `first_active_date` attribute
 - Built plant shares is not a constant curve anymore, changes when adding new plants
 - Meter `first_active_date` filters out earlier meassures
