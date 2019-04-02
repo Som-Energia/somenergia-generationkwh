@@ -37,7 +37,7 @@ $ sudo apt-get build-dep python-numpy
 
 ## CHANGES
 
-### 2.5.0
+### 2.5.0 2017-04-02
 
 - Multiple plants supported
 - LayeredShareCurve: Generalized additive constant curve from MemberShareCurve for PlantShareCurve
