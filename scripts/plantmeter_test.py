@@ -162,7 +162,7 @@ class PlantMeterApiTestBase(unittest.TestCase):
 
         self.maxDiff = None
         self.database = 'dummytest'
-        self.collection = 'generationkwh.production.measurement'
+        self.collection = 'tm_profile'
 
         self.c = erppeek_wst.ClientWST(**dbconfig.erppeek)
         self.c.begin()
