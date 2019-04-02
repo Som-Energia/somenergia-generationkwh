@@ -70,7 +70,19 @@ class ProductionLoader_Test(unittest.TestCase):
             name='myplant%d' % plant,
             description='myplant%d' % plant,
             enabled=True,
-            nshares=nshares))
+            nshares=nshares,
+            first_active_date='2014-01-01'))
+
+    def updatePlant(self, plantName, **kwd):
+        id = self.Plant.search([('name','=',plantName)])
+        self.Plant.write(id, kwd)
+
+    def updateMeter(self, meterName, **kwd):
+        id = self.Meter.search([('name','=',meterName)])
+        self.Meter.write(id, kwd)
+        from yamlns import namespace as ns
+        print self.Meter.read(id,[])
+
 
     def setupMeter(self, plant_id, plant, meter):
         return self.Meter.create(dict(
@@ -219,6 +231,62 @@ class ProductionLoader_Test(unittest.TestCase):
 
         result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-17')
         self.assertEqual(result, 2*(10*[0]+[5000]+14*[0]))
+        self.assertEqual(remainder.lastRemainders(), [
+            [1, '2015-08-18', 0],
+            ])
+
+    def test_computeAvailableRights_withManyPlants_dividesByTotalShares(self):
+        aggr_id = self.setupAggregator(
+                nplants=2,
+                nmeters=1,
+                nshares=[2,2]).read(['id'])['id']
+        self.setupLocalMeter('mymeter00',[
+            ('2015-08-16', '2015-08-16', 'S', 10*[0]+[4000]+13*[0])
+            ])
+        self.setupLocalMeter('mymeter10',[
+            ('2015-08-16', '2015-08-16', 'S', 10*[0]+[16000]+13*[0])
+            ])
+        self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
+            '2015-08-16', '2015-08-16')
+        remainder = self.setupRemainders([(1,'2015-08-16',0)])
+
+        self.ProductionLoader.computeAvailableRights(aggr_id)
+
+        result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-16')
+        self.assertEqual(result, +10*[0]+[5000]+14*[0])
+        self.assertEqual(remainder.lastRemainders(), [
+            [1, '2015-08-17', 0],
+            ])
+
+    def test_computeAvailableRights_plantsEnteringLater(self):
+        aggr_id = self.setupAggregator(
+                nplants=2,
+                nmeters=1,
+                nshares=[1,3]).read(['id'])['id']
+        self.updatePlant('myplant0', first_active_date='2014-01-01')
+        #self.updateMeter('mymeter00', first_active_date='2014-01-01')
+        self.updatePlant('myplant1', first_active_date='2015-08-17')
+        self.updateMeter('mymeter10', first_active_date='2015-08-17')
+
+        self.setupLocalMeter('mymeter00',[
+            ('2015-08-16', '2015-08-16', 'S', 10*[0]+[4000]+13*[0]),
+            ('2015-08-17', '2015-08-17', 'S', 10*[0]+[4000]+13*[0]),
+            ])
+        self.setupLocalMeter('mymeter10',[
+            ('2015-08-16', '2015-08-16', 'S', 10*[0]+[16000]+13*[0]),
+            ('2015-08-17', '2015-08-17', 'S', 10*[0]+[16000]+13*[0]),
+            ])
+        self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
+            '2015-08-16', '2015-08-17')
+        remainder = self.setupRemainders([(1,'2015-08-16',0)])
+
+        self.ProductionLoader.computeAvailableRights(aggr_id)
+
+        result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-17')
+        self.assertEqual(result,
+            +10*[0]+[4000]+14*[0] # from 1sh*(4000kwh+0kwh)/(1sh+0sh) = 4000kwh
+            +10*[0]+[5000]+14*[0]  # from 1sh*(4000kwh+16000)/(1sh+4sh) = 5000kwh
+        )
         self.assertEqual(remainder.lastRemainders(), [
             [1, '2015-08-18', 0],
             ])
