@@ -2,6 +2,7 @@ import numpy as np
 
 from .providers import get_provider
 from .isodates import (
+    isodate,
     dateToLocal,
     localisodate,
     assertDateOrNone,
@@ -86,6 +87,7 @@ class ProductionMeter(Resource):
         self.uri = kwargs.pop('uri', None)
         self.lastcommit = kwargs.pop('lastcommit', None)
         self.first_active_date = kwargs.pop('first_active_date', None)
+        self.first_active_date = self.first_active_date and isodate(self.first_active_date)
         if self.lastcommit:
             self.lastcommit = localisodate(self.lastcommit).date() + datetime.timedelta(days=1)
         self.curveProvider = kwargs.pop('curveProvider', None)
