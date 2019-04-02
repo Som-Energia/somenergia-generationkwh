@@ -167,10 +167,6 @@ class PlantMeterApiTestBase(unittest.TestCase):
         self.c = erppeek_wst.ClientWST(**dbconfig.erppeek)
         self.c.begin()
         self.helper = self.c.GenerationkwhProductionAggregatorTesthelper
-        self.m = pymongo.MongoClient()
-        self.mdb = self.m[self.database]
-        self.mdc = self.mdb[self.collection]
-        self.curveProvider = MongoTimeCurve(self.mdb, self.collection)
         self.tempdir = tempfile.mkdtemp()
         self.clearAggregator()
         self.clearMeasurements()
