@@ -14,6 +14,18 @@ nosetests scripts # Run erp tests (require a working erp)
 
 ## CHANGES
 
+- Meters and plants have `first_active_date` attribute
+- Built plant shares is not a constant curve anymore, changes when adding new plants
+- Meter `first_active_date` filters out earlier meassures
+- Fix: lastMesurement in a mix/plant is the first one of lastMeasurement of the childs
+- `genkwh_migrate_1_6_3_newplant.sh`: Script to migrate old plant and incorporate the new one
+- In general, fixes to really enable multiple plants
+- `genkwh_production.py`: editmix, editplant, editmeter
+- `genkwh_production.py`: editmix, editplant, editmeter
+- `genkwh_production.py`: delmix, delplant, delmeter
+- `genkwh_production.py`: meterset -> editmeter
+
+
 ### 1.6.2 2019-01-21
 
 - Deprecated `genkwh_pull_status.py` and `genkwh_pull_status.sh`
