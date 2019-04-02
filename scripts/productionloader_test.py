@@ -73,7 +73,6 @@ class ProductionLoader_Test(unittest.TestCase):
             nshares=nshares))
 
     def setupMeter(self, plant_id, plant, meter):
-        self.Meter = self.erp.model('generationkwh.production.meter')
         return self.Meter.create(dict(
             plant_id=plant_id,
             name='mymeter%d%d' % (plant, meter),
