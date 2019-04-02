@@ -82,7 +82,7 @@ class ProductionLoader_Test(unittest.TestCase):
 
     def setupAggregator(self, nplants, nmeters, nshares):
         aggr = self.Aggregator.create(dict(
-            name='myaggr',
+            name='GenerationkWh',
             description='myaggr',
             enabled=True))
 
