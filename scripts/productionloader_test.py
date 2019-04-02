@@ -157,7 +157,7 @@ class ProductionLoader_Test(unittest.TestCase):
             ('2015-08-16', '2015-08-16', 'S', 10*[0]+[1000]+13*[0])
             ])
         self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
-                '2015-08-16', '2015-08-16')
+            '2015-08-16', '2015-08-16')
 
         production = self.getProduction(aggr_id, '2015-08-16', '2015-08-16')
         self.assertEqual(production, 10*[0]+[2000]+14*[0])
@@ -172,7 +172,7 @@ class ProductionLoader_Test(unittest.TestCase):
             ('2015-08-16', '2015-08-16', 'S', 10*[0]+[1000]+13*[0])
             ])
         self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
-                '2015-08-16', '2015-08-16')
+            '2015-08-16', '2015-08-16')
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
         self.ProductionLoader.computeAvailableRights(aggr_id)
