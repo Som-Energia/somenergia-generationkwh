@@ -8,7 +8,6 @@ Manages production plants initialization
 import erppeek
 import datetime
 from consolemsg import step, success, warn, error, fail
-from dateutil.relativedelta import relativedelta
 import dbconfig
 from yamlns import namespace as ns
 from generationkwh.isodates import naiveisodate
@@ -19,22 +18,11 @@ erp = erppeek.Client(**dbconfig.erppeek)
 Mix = erp.GenerationkwhProductionAggregator
 Plant = erp.GenerationkwhProductionPlant
 Meter = erp.GenerationkwhProductionMeter
-Meassures = erp.GenerationkwhProductionMeasurement
-Logger = erp.GenerationkwhProductionNotifier
-
-def csv2ts(filename, dtindex, valindex, valtype):
-    with open(filename, 'rb') as f:
-        return [
-                (naiveisodate(row[dtindex]), valtype(row[index]))
-                for row in csv.reader(f)
-                ]
 
 def clearAll():
     Meter.unlink(Meter.search([]))
     Plant.unlink(Plant.search([]))
     Mix.unlink(Mix.search([]))
-    Meassures.unlink(Meassures.search([]))
-    Logger.unlink(Logger.search([]))
 
 def setupAggregator(aggr):
     plants = aggr.generationkwh.pop('plants')
@@ -165,66 +153,6 @@ def init(filename):
     if filename:
        aggr = setupAggregator(ns.load(filename))
        Mix.update_kwh(aggr['id'])
-
-@production.command()
-@click.argument('filename')
-def update_kwh(filename):
-    fail("This subcommand is not meant to be executed anymore")
-
-    "Update aggregator kWh (deprecated)"
-    if filename:
-       aggr_name=ns.load(filename)['generationkwh']['name']
-       mix_id=getMix(aggr_name)
-       Mix.update_kwh(mix_id)
-
-@production.command(
-   help="Load measures from meters (unfinished rewrite of update_kwh command)")
-@click.argument('meter_path',
-    default='',
-    )
-def load_measures(meter_path):
-    fail("This subcommand is not meant to be executed anymore")
-
-    # TODO: Unfinished reimplementation of update_kwh
-    meterElements = meter_path.split('.')
-    mixes = meterElements[0:1]
-    plants = meterElements[1:2]
-    meters = meterElements[2:3]
-
-    mix_id=getMix(mixes[0])
-    Mix.update_kwh(mix_id)
-
-@production.command(
-    help="Checks for failed production imports in the last days",
-    )
-def pull_status():
-    twoDaysAgo = (datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
-    step("Checking ftp pulls since {}", twoDaysAgo)
-
-    fail("This subcommand is not meant to be executed anymore")
-
-    last_pulls_ids = Logger.search([('date_pull', '>', twoDaysAgo)])
-    if not last_pulls_ids and False:
-        fail("No data pull for the last 2 days")
-
-    last_pulls = Logger.read(last_pulls_ids)
-
-    last_pulls = [ns(p) for p in last_pulls]
-    #print(ns(imports=last_pulls).dump())
-
-    for pull in last_pulls[::-1]:
-        pull=ns(pull)
-        # avoid conflict among message is the first parameter for error and success
-        pull.msg = pull.pop('message') or '' 
-        if pull.msg: pull.msg=': '+pull.msg
-        if pull.status != 'done':
-            error('Pull at {date_pull} from meter {meter_id[0]} failed: {status}{msg}', **pull)
-        else:
-            success('Pull at {date_pull} from meter {meter_id[0]} successful{msg}', **pull)
-
-    if any(pull.status!='done' for pull in last_pulls):
-        fail("Failed pulls detected")
-    success("The last imports were successfull")
 
 @production.command()
 @click.argument('name')
