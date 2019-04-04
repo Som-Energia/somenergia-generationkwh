@@ -115,7 +115,4 @@ class ProductionLoader(object):
                 )
 	return 'n'.join(log)
 
-    def retrieveMeasuresFromPlants(self, start, end):
-        return self.productionAggregator.update_kwh(start, end)
-
 # vim: ts=4 sw=4 et

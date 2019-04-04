@@ -15,8 +15,6 @@ class ProductionAggregatorMockUp(object):
         self.data = data
         self.firstDate = first
         self.lastDate = last
-        self.updateStart = None
-        self.updateEnd = None
 
     def get_kwh(self, *args):
         return self.data
@@ -27,9 +25,6 @@ class ProductionAggregatorMockUp(object):
     def getLastMeasurementDate(self):
         return self.lastDate
 
-    def retrieveMeasuresFromPlants(self, start, end):
-        self.updateStart = start
-        self.updateEnd = end
 
 class RemainderProviderMockup(object):
     
@@ -459,13 +454,5 @@ class ProductionLoaderTest(unittest.TestCase):
             (1, isodate('2015-08-17'), 0),
             ])
 
-    def test_retrieveMeasuresFromPlants(self):
-        production = ProductionAggregatorMockUp()
-        now = datetime.datetime.now()
-        start = (now - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
-        end = (now - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
-        production.retrieveMeasuresFromPlants(start, end)
-        self.assertEqual(production.updateStart, start)
-        self.assertEqual(production.updateEnd, end)
 
 # vim: ts=4 sw=4 et

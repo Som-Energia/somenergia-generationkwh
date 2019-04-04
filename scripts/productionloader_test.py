@@ -121,51 +121,6 @@ class ProductionLoader_Test(unittest.TestCase):
     def getProduction(self, aggr_id, start, end):
         return self.AggregatorTestHelper.get_kwh(aggr_id, start, end)
 
-    def test_retrieveMeasuresFromPlants_withNoPoints(self):
-        aggr_id = self.setupAggregator(
-                nplants=1,
-                nmeters=1,
-                nshares=[1]).read(['id'])['id']
-        self.setupLocalMeter('mymeter00',[
-            ])
-        self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
-                '2015-08-16', '2015-08-16')
-
-        production = self.getProduction(aggr_id, '2015-08-16', '2015-08-16')
-        self.assertEqual(production, 25*[0])
-
-    def test_retrieveMeasuresFromPlants_onePlant(self):
-        aggr_id = self.setupAggregator(
-                nplants=1,
-                nmeters=1,
-                nshares=[1]).read(['id'])['id']
-        self.setupLocalMeter('mymeter00',[
-            ('2015-08-16', 10*[0]+[1000]+13*[0])
-            ])
-        self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
-                '2015-08-16', '2015-08-16')
-
-        production = self.getProduction(aggr_id, '2015-08-16', '2015-08-16')
-        self.assertEqual(production, 10*[0]+[1000]+14*[0])
-
-    def test_retrieveMeasuresFromPlants_twoPlant(self):
-        aggr_id = self.setupAggregator(
-                nplants=2,
-                nmeters=1,
-                nshares=[1,1]).read(['id'])['id']
-        self.setupLocalMeter('mymeter00',[
-            ('2015-08-16', 10*[0]+[1000]+13*[0])
-            ])
-        self.setupLocalMeter('mymeter10',[
-            ('2015-08-16', 10*[0]+[1000]+13*[0])
-            ])
-        self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
-            '2015-08-16', '2015-08-16')
-
-        production = self.getProduction(aggr_id, '2015-08-16', '2015-08-16')
-        self.assertEqual(production, 10*[0]+[2000]+14*[0])
-
- 
     def test_computeAvailableRights_singleDay(self):
         aggr_id = self.setupAggregator(
                 nplants=1,
@@ -174,8 +129,6 @@ class ProductionLoader_Test(unittest.TestCase):
         self.setupLocalMeter('mymeter00',[
             ('2015-08-16', 10*[0]+[1000]+13*[0])
             ])
-        self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
-            '2015-08-16', '2015-08-16')
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
         self.ProductionLoader.computeAvailableRights(aggr_id)
@@ -194,8 +147,6 @@ class ProductionLoader_Test(unittest.TestCase):
         self.setupLocalMeter('mymeter00',[
             ('2015-08-16', 10*[0]+[20000]+13*[0])
             ])
-        self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
-                '2015-08-16', '2015-08-16')
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
         self.ProductionLoader.computeAvailableRights(aggr_id)
@@ -215,8 +166,6 @@ class ProductionLoader_Test(unittest.TestCase):
             ('2015-08-16', 10*[0]+[20000]+13*[0]),
             ('2015-08-17', 10*[0]+[20000]+13*[0]),
             ])
-        self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
-                '2015-08-16', '2015-08-17')
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
         self.ProductionLoader.computeAvailableRights(aggr_id)
@@ -238,8 +187,6 @@ class ProductionLoader_Test(unittest.TestCase):
         self.setupLocalMeter('mymeter10',[
             ('2015-08-16', 10*[0]+[16000]+13*[0])
             ])
-        self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
-            '2015-08-16', '2015-08-16')
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
         self.ProductionLoader.computeAvailableRights(aggr_id)
@@ -268,8 +215,6 @@ class ProductionLoader_Test(unittest.TestCase):
             ('2015-08-16', 10*[0]+[16000]+13*[0]),
             ('2015-08-17', 10*[0]+[16000]+13*[0]),
             ])
-        self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
-            '2015-08-16', '2015-08-17')
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
         self.ProductionLoader.computeAvailableRights(aggr_id)
