@@ -15,6 +15,7 @@ setup(
 	license = 'GNU General Public License v3 or later (GPLv3+)',
 	packages=find_packages(exclude=['*[tT]est*']),
 	scripts=[
+		'scripts/genkwh_production.py',
 		],
 	install_requires=[
         'pymongo<3.0',
