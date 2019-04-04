@@ -15,8 +15,11 @@ def parseArgumments():
         title="Subcommands",
         dest='subcommand',
         )
-    listactive = subparsers.add_parser('listactive',
-        help="list remainders",
+    active = subparsers.add_parser('active',
+        help="list current remainders",
+        )
+    listall = subparsers.add_parser('listall',
+        help="list all remainders",
         )
     init = subparsers.add_parser('init',
         help="initialize remainders",
@@ -41,7 +44,12 @@ def parseArgumments():
             )
     return parser.parse_args(namespace=ns())
 
-def listactive():
+def active():
+    Remainder = c.GenerationkwhRemainderTesthelper
+    for nshares, day, remainderWh in sorted(Remainder.lastRemainders()):
+        print nshares, day, remainderWh
+
+def listall():
     remainder_obj = c.GenerationkwhRemainder
     remainders_id = remainder_obj.search([])
     remainders = remainder_obj.read(
