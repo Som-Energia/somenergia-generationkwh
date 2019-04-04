@@ -27,6 +27,7 @@ class ProductionLoader_Test(unittest.TestCase):
         self.AggregatorTestHelper = self.erp.GenerationkwhProductionAggregatorTesthelper
         self.ProductionLoader = self.erp.GenerationkwhProductionLoader
         self.TestHelper = self.erp.GenerationkwhTesthelper
+        self.ProductionHelper = self.erp.GenerationkwhProductionAggregatorTesthelper
         self.setUpAggregator()
         self.setUpMeasurements()
         self.setUpTemp()
@@ -114,18 +115,8 @@ class ProductionLoader_Test(unittest.TestCase):
         remainder.clean()
 
     def setupLocalMeter(self, name, points):
-        import csv
-        filename = os.path.join(self.tempdir,name)
-        def toStr(date):
-            return date.strftime('%Y-%m-%d %H:%M')
-
-        with open(filename, 'w') as tmpfile:
-            writer = csv.writer(tmpfile, delimiter=';')
-            writer.writerows([[toStr(date),summer,value,0,0]
-                for start, end, summer, values in points
-                for date,value in zip(datespan(localisodate(start),
-                    addDays(localisodate(end),1)),
-                    values)])
+        for start, values in points:
+            self.ProductionHelper.fillMeasurements(start, name, values)
 
     def getProduction(self, aggr_id, start, end):
         return self.AggregatorTestHelper.get_kwh(aggr_id, start, end)
@@ -149,7 +140,7 @@ class ProductionLoader_Test(unittest.TestCase):
                 nmeters=1,
                 nshares=[1]).read(['id'])['id']
         self.setupLocalMeter('mymeter00',[
-            ('2015-08-16', '2015-08-16', 'S', 10*[0]+[1000]+13*[0])
+            ('2015-08-16', 10*[0]+[1000]+13*[0])
             ])
         self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
                 '2015-08-16', '2015-08-16')
@@ -163,10 +154,10 @@ class ProductionLoader_Test(unittest.TestCase):
                 nmeters=1,
                 nshares=[1,1]).read(['id'])['id']
         self.setupLocalMeter('mymeter00',[
-            ('2015-08-16', '2015-08-16', 'S', 10*[0]+[1000]+13*[0])
+            ('2015-08-16', 10*[0]+[1000]+13*[0])
             ])
         self.setupLocalMeter('mymeter10',[
-            ('2015-08-16', '2015-08-16', 'S', 10*[0]+[1000]+13*[0])
+            ('2015-08-16', 10*[0]+[1000]+13*[0])
             ])
         self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
             '2015-08-16', '2015-08-16')
@@ -181,7 +172,7 @@ class ProductionLoader_Test(unittest.TestCase):
                 nmeters=1,
                 nshares=[1]).read(['id'])['id']
         self.setupLocalMeter('mymeter00',[
-            ('2015-08-16', '2015-08-16', 'S', 10*[0]+[1000]+13*[0])
+            ('2015-08-16', 10*[0]+[1000]+13*[0])
             ])
         self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
             '2015-08-16', '2015-08-16')
@@ -201,7 +192,7 @@ class ProductionLoader_Test(unittest.TestCase):
                 nmeters=1,
                 nshares=[4]).read(['id'])['id']
         self.setupLocalMeter('mymeter00',[
-            ('2015-08-16', '2015-08-16', 'S', 10*[0]+[20000]+13*[0])
+            ('2015-08-16', 10*[0]+[20000]+13*[0])
             ])
         self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
                 '2015-08-16', '2015-08-16')
@@ -221,7 +212,8 @@ class ProductionLoader_Test(unittest.TestCase):
                 nmeters=1,
                 nshares=[4]).read(['id'])['id']
         self.setupLocalMeter('mymeter00',[
-            ('2015-08-16', '2015-08-17', 'S', 2*(10*[0]+[20000]+13*[0]))
+            ('2015-08-16', 10*[0]+[20000]+13*[0]),
+            ('2015-08-17', 10*[0]+[20000]+13*[0]),
             ])
         self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
                 '2015-08-16', '2015-08-17')
@@ -241,10 +233,10 @@ class ProductionLoader_Test(unittest.TestCase):
                 nmeters=1,
                 nshares=[2,2]).read(['id'])['id']
         self.setupLocalMeter('mymeter00',[
-            ('2015-08-16', '2015-08-16', 'S', 10*[0]+[4000]+13*[0])
+            ('2015-08-16', 10*[0]+[4000]+13*[0])
             ])
         self.setupLocalMeter('mymeter10',[
-            ('2015-08-16', '2015-08-16', 'S', 10*[0]+[16000]+13*[0])
+            ('2015-08-16', 10*[0]+[16000]+13*[0])
             ])
         self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
             '2015-08-16', '2015-08-16')
@@ -269,12 +261,12 @@ class ProductionLoader_Test(unittest.TestCase):
         self.updateMeter('mymeter10', first_active_date='2015-08-17')
 
         self.setupLocalMeter('mymeter00',[
-            ('2015-08-16', '2015-08-16', 'S', 10*[0]+[4000]+13*[0]),
-            ('2015-08-17', '2015-08-17', 'S', 10*[0]+[4000]+13*[0]),
+            ('2015-08-16', 10*[0]+[4000]+13*[0]),
+            ('2015-08-17', 10*[0]+[4000]+13*[0]),
             ])
         self.setupLocalMeter('mymeter10',[
-            ('2015-08-16', '2015-08-16', 'S', 10*[0]+[16000]+13*[0]),
-            ('2015-08-17', '2015-08-17', 'S', 10*[0]+[16000]+13*[0]),
+            ('2015-08-16', 10*[0]+[16000]+13*[0]),
+            ('2015-08-17', 10*[0]+[16000]+13*[0]),
             ])
         self.ProductionLoader.retrieveMeasuresFromPlants(aggr_id,
             '2015-08-16', '2015-08-17')
