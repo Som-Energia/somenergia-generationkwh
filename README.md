@@ -14,6 +14,12 @@ nosetests scripts # Run erp tests (require a working erp)
 
 ## CHANGES
 
+### 1.7.1 2019-04-04
+
+- Removed deprecated scripts `genkwh_pull_status` and `genkwh_export`
+- Removed deprecated `genkwh_production` subcommands: pull-status, load-meassures and update-kwh
+- Script `genkwh_production.py` installed by setup.py
+
 ### 1.7.0 2019-04-02
 
 - Meters and plants have `first_active_date` attribute
