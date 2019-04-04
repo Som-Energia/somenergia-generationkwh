@@ -169,6 +169,8 @@ def init(filename):
 @production.command()
 @click.argument('filename')
 def update_kwh(filename):
+    fail("This subcommand is not meant to be executed anymore")
+
     "Update aggregator kWh (deprecated)"
     if filename:
        aggr_name=ns.load(filename)['generationkwh']['name']
@@ -181,6 +183,8 @@ def update_kwh(filename):
     default='',
     )
 def load_measures(meter_path):
+    fail("This subcommand is not meant to be executed anymore")
+
     # TODO: Unfinished reimplementation of update_kwh
     meterElements = meter_path.split('.')
     mixes = meterElements[0:1]
@@ -196,6 +200,8 @@ def load_measures(meter_path):
 def pull_status():
     twoDaysAgo = (datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
     step("Checking ftp pulls since {}", twoDaysAgo)
+
+    fail("This subcommand is not meant to be executed anymore")
 
     last_pulls_ids = Logger.search([('date_pull', '>', twoDaysAgo)])
     if not last_pulls_ids and False:

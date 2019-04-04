@@ -11,6 +11,8 @@ import dbconfig
 if __name__ == "__main__":
     step("Checking whether the production meassures have been imported properly")
 
+    fail("This script is not mean to be executed anymore")
+
     O = erppeek.Client(**dbconfig.erppeek)
 
     twoDaysAgo = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
