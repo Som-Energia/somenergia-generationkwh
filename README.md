@@ -37,11 +37,14 @@ $ sudo apt-get build-dep python-numpy
 
 ## CHANGES
 
+- `genkwh_reminders` has a new `active` subcommand to list just active
+- `genkwh_reminders` subcommand `listactive` renamed to `listall` which is what it does
+- Install scripts: `genkwh_reminders`, `genkwh_productionloader`, `genkwh_curve`, `genkwh_rights`, `genkwh_usage`
+
 ### 2.5.0 2017-04-02
 
 - Multiple plants supported
 - LayeredShareCurve: Generalized additive constant curve from MemberShareCurve for PlantShareCurve
-
 
 ### 2.4.1
 
