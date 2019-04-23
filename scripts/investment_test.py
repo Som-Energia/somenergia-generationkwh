@@ -2624,7 +2624,7 @@ class Investment_Test(unittest.TestCase):
             id = self.Investment.create_from_transfer(
                 1436, # magic number, existing investment
                 1, # magic number, not member
-                '2017-01-01', # order_date
+                date(year=2017, month=1, day=1), # order_date
                 'ES7712341234161234567890',
                 )
         self.assertEqual(ctx.exception.faultCode,
