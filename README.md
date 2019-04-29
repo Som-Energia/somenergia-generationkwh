@@ -37,11 +37,14 @@ $ sudo apt-get build-dep python-numpy
 
 ## CHANGES
 
+### 2.5.1 2019-04-29
+
+- FIX: Change date type in `Investment.create_from_transfer`
 - `genkwh_reminders` has a new `active` subcommand to list just active
 - `genkwh_reminders` subcommand `listactive` renamed to `listall` which is what it does
 - Install scripts: `genkwh_reminders`, `genkwh_productionloader`, `genkwh_curve`, `genkwh_rights`, `genkwh_usage`
 
-### 2.5.0 2017-04-02
+### 2.5.0 2019-04-02
 
 - Multiple plants supported
 - LayeredShareCurve: Generalized additive constant curve from MemberShareCurve for PlantShareCurve
