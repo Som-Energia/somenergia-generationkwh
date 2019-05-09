@@ -37,6 +37,10 @@ $ sudo apt-get build-dep python-numpy
 
 ## CHANGES
 
+### 2.5.2 2019-05-13
+
+- MOD: Add profit amount in Generationwkh invoice line
+
 ### 2.5.1 2019-04-29
 
 - FIX: Change date type in `Investment.create_from_transfer`
