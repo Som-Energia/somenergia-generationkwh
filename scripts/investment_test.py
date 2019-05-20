@@ -1242,16 +1242,16 @@ class Investment_Test(unittest.TestCase):
         self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2017-01-03')
         invoice_id, errors = self.Investment.create_amortization_invoice(
-            id, '2018-01-30', 80, 1, 24)
+            id, '2018-01-30', 80, 1, 24, 7)
         self.assertTrue(invoice_id)
 
         investment = self.Investment.browse(id)
 
         self.assertInvoiceInfoEqual(invoice_id, """\
             account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
-            amount_total: 80.0
-            amount_untaxed: 80.0
-            check_total: 80.0
+            amount_total: 73.0
+            amount_untaxed: 73.0
+            check_total: 73.0
             date_invoice: '{invoice_date}'
             id: {id}
             invoice_line:
@@ -1279,6 +1279,30 @@ class Investment_Test(unittest.TestCase):
               account_analytic_id: false
               quantity: 1.0
               product_id: '[GENKWH_AMOR] Amortització Generation kWh'
+            - account_analytic_id: false
+              account_id: 163500{p.nsoci:0>6s} {p.surname}, {p.name}
+              discount: 0.0
+              invoice_id:
+              - {id}
+              - 'SI: {investment_name}'
+              invoice_line_tax_id: []
+              name: 'Retenció IRPF sobre l''estalvi del Generationkwh de 2017 de {investment_name} '
+              note:
+                amortizationDate: '2018-01-30'
+                amortizationNumber: 1
+                amortizationTotalNumber: 24
+                investmentId: {investment_id}
+                investmentInitialAmount: 2000
+                investmentLastEffectiveDate: '2042-01-03'
+                investmentName: {investment_name}
+                investmentPurchaseDate: '2017-01-03'
+                pendingCapital: 1920.0
+              origin: false
+              price_subtotal: -7.0
+              price_unit: -7.0
+              product_id: '[GENKWH_IRPF] Retenció amortització Generation kWh'
+              quantity: 1.0
+              uos_id: PCE
             journal_id: Factures GenerationkWh
             mandate_id: {mandate_id}
             name: {investment_name}-AMOR{year}
@@ -1319,10 +1343,10 @@ class Investment_Test(unittest.TestCase):
         self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2017-01-03')
         self.Investment.create_amortization_invoice(
-            id, '2018-01-30', 80, 1, 24)
+            id, '2018-01-30', 80, 1, 24, 7)
 
         invoice_id, errors = self.Investment.create_amortization_invoice(
-            id, '2018-01-30', 80, 1, 24)
+            id, '2018-01-30', 80, 1, 24, 7)
 
         self.assertEqual(errors,
             u"Inversió {id}: L'amortització {name}-AMOR2018 ja existeix"
@@ -1340,7 +1364,7 @@ class Investment_Test(unittest.TestCase):
         self.Partner.write(self.personalData.partnerid,dict(bank_inversions = False))
 
         invocie_id, errors = self.Investment.create_amortization_invoice(
-            id, '2018-01-30' , 80, 1, 24)
+            id, '2018-01-30' , 80, 1, 24, 7)
 
         self.assertEqual(unicode(errors).encode('utf-8'),
             "Inversió {id}: El partner {surname}, {name} no té informat un compte corrent\n"
@@ -1362,7 +1386,7 @@ class Investment_Test(unittest.TestCase):
         self.Investment.mark_as_paid([id], '2016-01-03')
 
         invoice_id, errors = self.Investment.create_amortization_invoice(
-            id, '2018-01-03', 80, 1, 24)
+            id, '2018-01-03', 80, 1, 24, 7)
 
         invoice = self.Invoice.browse(invoice_id)
         self.assertEqual(invoice.name,
@@ -1381,7 +1405,7 @@ class Investment_Test(unittest.TestCase):
         self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2017-01-03')
         invoice_id, errors = self.Investment.create_amortization_invoice(
-            id, '2018-01-30', 80, 1, 24)
+            id, '2018-01-30', 80, 1, 24, 7)
 
         inv = ns(self.Investment.read(id, [
             'name',
@@ -1397,7 +1421,7 @@ class Investment_Test(unittest.TestCase):
             inversionPendingCapital: 1.920,00
             inversionPurchaseDate: '03/01/2017'
             inversionExpirationDate: '03/01/2042'
-            amortizationAmount: 80,00
+            amortizationAmount: 73,00
             amortizationName: {inv.name}-AMOR2018
             amortizationTotalPayments: 24
             inversionBankAccount: ES77 1234 1234 1612 3456 7890
@@ -1479,7 +1503,7 @@ class Investment_Test(unittest.TestCase):
         self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2017-01-03')
         invoice_id, errors = self.Investment.create_amortization_invoice(
-            id, '2018-01-30', 80, 1, 24)
+            id, '2018-01-30', 80, 1, 24, 7)
         self.assertTrue(invoice_id)
 
         self.Investment.open_invoices([invoice_id])
