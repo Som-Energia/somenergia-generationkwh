@@ -24,7 +24,6 @@ class Account_Invoice_Test(unittest.TestCase):
         self.erp.begin()
         self.Investment = self.erp.GenerationkwhInvestment
         self.Invoice = self.erp.AccountInvoice
-        self.AccountInvoice = self.erp.AccountInvoice
         self.MailMockup = self.erp.GenerationkwhMailmockup
         self.currentYear = str(date.today().year)
         self.Investment.dropAll()
@@ -49,7 +48,7 @@ class Account_Invoice_Test(unittest.TestCase):
         #create invoice
         invoice_ids, errs = self.Investment.create_initial_invoices([investment_id])
 
-        investment_from_invoice = self.AccountInvoice.get_investment(invoice_ids[0])
+        investment_from_invoice = self.Invoice.get_investment(invoice_ids[0])
 
         self.assertEqual(investment_id, investment_from_invoice)
 
@@ -63,16 +62,16 @@ class Account_Invoice_Test(unittest.TestCase):
         )
         #create invoice
         invoice_ids,errs = self.Investment.create_initial_invoices([investment_id])
-        invoice = self.AccountInvoice.write(invoice_ids[0], dict(
+        invoice = self.Invoice.write(invoice_ids[0], dict(
             journal_id = 2 # random
             ))
-        investment_from_invoice = self.AccountInvoice.get_investment(invoice_ids[0])
+        investment_from_invoice = self.Invoice.get_investment(invoice_ids[0])
 
         self.assertFalse(investment_from_invoice)
 
     def test__get_investment__notFound(self):
         invoice_id = 23132 # random
-        investment_id = self.AccountInvoice.get_investment(invoice_id)
+        investment_id = self.Invoice.get_investment(invoice_id)
         self.assertFalse(investment_id)
 
     def test__is_investment_payment_invoice(self):
@@ -86,15 +85,15 @@ class Account_Invoice_Test(unittest.TestCase):
         #create invoice
         invoice_ids,errs = self.Investment.create_initial_invoices([investment_id])
 
-        self.assertTrue(self.AccountInvoice.is_investment_payment(invoice_ids[0]))
+        self.assertTrue(self.Invoice.is_investment_payment(invoice_ids[0]))
 
     def test__is_investment_payment_null_invoice(self):
         invoice_id = 999999999 # does not exists
-        self.assertFalse(self.AccountInvoice.is_investment_payment(invoice_id))
+        self.assertFalse(self.Invoice.is_investment_payment(invoice_id))
 
     def test__is_investment_payment_unamed_invoice(self):
         invoice_id = 325569 # name null
-        self.assertFalse(self.AccountInvoice.is_investment_payment(invoice_id))
+        self.assertFalse(self.Invoice.is_investment_payment(invoice_id))
 
     def test__is_investment_payment_amortization_invoice(self):
         investment_id = self.Investment.create_from_form(
@@ -108,7 +107,7 @@ class Account_Invoice_Test(unittest.TestCase):
         self.Investment.mark_as_invoiced(investment_id)
         self.Investment.mark_as_paid([investment_id], '2014-01-01')
         amortinv_ids,errs = self.Investment.amortize('2017-01-02',[investment_id])
-        self.assertFalse(self.AccountInvoice.is_investment_payment(amortinv_ids[0]))
+        self.assertFalse(self.Invoice.is_investment_payment(amortinv_ids[0]))
 
     def test__paymentWizard(self):
 
@@ -125,7 +124,7 @@ class Account_Invoice_Test(unittest.TestCase):
         self.erp.GenerationkwhPaymentWizardTesthelper.pay(
             invoice_ids[0], 'movement description')
 
-        invoice = self.AccountInvoice.read(invoice_ids[0], ['residual'])
+        invoice = self.Invoice.read(invoice_ids[0], ['residual'])
         self.assertEqual(invoice['residual'], 0.0)
 
     def test__paymentWizard__unpay(self):
@@ -144,7 +143,7 @@ class Account_Invoice_Test(unittest.TestCase):
 
         self.erp.GenerationkwhPaymentWizardTesthelper.unpay(invoice_ids[0], 'an unpayment')
 
-        invoice = self.AccountInvoice.read(invoice_ids[0], ['residual'])
+        invoice = self.Invoice.read(invoice_ids[0], ['residual'])
         self.assertEqual(invoice['residual'], 1000.0)
 
     def test__accounting__openInvestmentInvoice(self):
@@ -458,6 +457,18 @@ class Account_Invoice_Test(unittest.TestCase):
           quantity: 1.0
           ref: {investment_name}-AMOR2019
           move_state: posted
+        - account_id: 1635000{nsoci:>05} {surname}, {name}
+          amount_to_pay: 0.0
+          credit: 0.0
+          debit: 0.0
+          invoice: 'SI: {investment_name}'
+          journal_id: Factures GenerationkWh
+          move_state: posted
+          name: Retenció IRPF sobre l'estalvi del Generationkwh de 2018 de GKWH0
+          payment_type: Transferencia
+          product_id: '[GENKWH_IRPF] Retenció amortització Generation kWh'
+          quantity: 1.0
+          ref: {investment_name}-AMOR2019
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 160.0
           credit: 160.0
@@ -508,6 +519,18 @@ class Account_Invoice_Test(unittest.TestCase):
           quantity: 1.0
           ref: {investment_name}-AMOR2019
           move_state: posted
+        - account_id: 1635000{nsoci:>05} {surname}, {name}
+          amount_to_pay: 0.0
+          credit: 0.0
+          debit: 0.0
+          invoice: 'SI: {investment_name}'
+          journal_id: Factures GenerationkWh
+          move_state: posted
+          name: Retenció IRPF sobre l'estalvi del Generationkwh de 2018 de GKWH0
+          payment_type: Transferencia
+          product_id: '[GENKWH_IRPF] Retenció amortització Generation kWh'
+          quantity: 1.0
+          ref: {investment_name}-AMOR2019
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 0.0 # CHANGED!!
           credit: 160.0
@@ -550,7 +573,7 @@ class Account_Invoice_Test(unittest.TestCase):
         ))
 
     def assertAccountingByInvoice(self, invoice_id, expected):
-        invoice = self.erp.AccountInvoice.read(invoice_id, [
+        invoice = self.Invoice.read(invoice_id, [
             'name',
             'journal_id',
         ])
