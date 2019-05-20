@@ -10,6 +10,7 @@ shareValue = 100 # price in € for a sigle GkWh share
 waitYears = 1 # number of years until a Gkwh investment comes effective
 waitingDays = 365 # number of days until a Gkwh investment comes effective
 waitDaysBeforeDivest = 30 #no allow divest before 30 deays from payment_date
+irpfTaxValue = 0.19
 
 expirationYears = 25 # number of active years for a Gkwh investment 
 mandateName = "PRESTEC GENERATION kWh"
@@ -18,6 +19,7 @@ journalCode = 'GENKWH'
 
 investmentProductCode = 'GENKWH_AE'
 amortizationProductCode = 'GENKWH_AMOR'
+irpfProductCode = 'GENKWH_IRPF'
 investmentPaymentMode = 'GENERATION kWh'
 amortizationPaymentMode = 'GENERATION kWh AMOR'
 bridgeAccountCode = '555000000004' # Bridge account to concile payments to the bank
