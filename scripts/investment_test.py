@@ -2913,6 +2913,95 @@ class Investment_Test(unittest.TestCase):
             move_id = move_id,
             ))
 
+    def test__get_dayshares_investmentyear__noDayShares(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2017-01-03')
+        inv_obj = self.Investment.read(id)
+
+        nDayShares = self.Investment.get_dayshares_investmentyear(inv_obj,'2017-01-01','2017-12-31')
+
+        self.assertEqual(nDayShares, 0)
+
+    def test__get_dayshares_investmentyear__ADaySharesOneCompleteInvestment(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2017-01-03')
+        inv_obj = self.Investment.read(id)
+
+        nDayShares = self.Investment.get_dayshares_investmentyear(inv_obj,'2019-01-01','2019-01-01')
+
+        self.assertEqual(nDayShares, 20)
+
+    def test__get_dayshares_investmentyear__someDaysSharesOneCompleteInvestment(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2017-01-03')
+        inv_obj = self.Investment.read(id)
+
+        nDayShares = self.Investment.get_dayshares_investmentyear(inv_obj,'2019-01-01','2019-12-31')
+
+        self.assertEqual(nDayShares, 7300)
+
+    def test__get_dayshares_investmentyear__someDaysSharesOneNoCompleteInvestment(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2017-03-01')
+        inv_obj = self.Investment.read(id)
+
+        nDayShares = self.Investment.get_dayshares_investmentyear(inv_obj,'2018-01-01','2018-12-31')
+
+        self.assertEqual(nDayShares, 6120)
+
+    def test__get_dayshares_investmentyear__someDaysSharesSomeCompletesInvestment(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            2000,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2017-03-01')
+        inv_obj = self.Investment.read(id)
+
+        id2 = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2018-01-01', # order_date
+            200,
+            '10.10.23.1',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id2)
+        self.Investment.mark_as_paid([id2], '2018-03-01')
+
+        nDayShares = self.Investment.get_dayshares_investmentyear(inv_obj,'2019-01-01','2019-12-31')
+
+        self.assertEqual(nDayShares, 7300)
 
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
