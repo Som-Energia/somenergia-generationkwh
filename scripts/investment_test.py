@@ -1280,7 +1280,7 @@ class Investment_Test(unittest.TestCase):
               quantity: 1.0
               product_id: '[GENKWH_AMOR] Amortització Generation kWh'
             - account_analytic_id: false
-              account_id: 163500{p.nsoci:0>6s} {p.surname}, {p.name}
+              account_id: 475119000001 IRPF 19% GENERATION KWh
               discount: 0.0
               invoice_id:
               - {id}
@@ -1300,7 +1300,7 @@ class Investment_Test(unittest.TestCase):
               origin: false
               price_subtotal: -7.0
               price_unit: -7.0
-              product_id: '[GENKWH_IRPF] Retenció amortització Generation kWh'
+              product_id: '[GENKWH_IRPF] Retenció IRPF estalvi Generation kWh'
               quantity: 1.0
               uos_id: PCE
             journal_id: Factures GenerationkWh
@@ -2988,7 +2988,6 @@ class Investment_Test(unittest.TestCase):
         self.Investment.mark_as_invoiced(id)
         self.Investment.mark_as_paid([id], '2017-03-01')
         inv_obj = self.Investment.read(id)
-
         id2 = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2018-01-01', # order_date
