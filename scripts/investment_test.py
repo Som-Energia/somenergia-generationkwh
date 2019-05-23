@@ -3003,6 +3003,43 @@ class Investment_Test(unittest.TestCase):
         self.assertEqual(nDayShares, 7300)
 
 
+    def test__is_last_year_amortized__True(self):
+        newMember = self.getAMember()
+        id = self.Investment.create_from_form(
+            newMember.partner_id[0],
+            '2017-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2017-01-02')
+        date_today = str(date.today())
+        self.Investment.amortize('2019-04-30', [id])
+
+        name = self.Investment.read(id, ['name'])['name']
+        amortized = self.Investment.is_last_year_amortized(name, '2020')
+
+        self.assertTrue(amortized)
+
+    def test__is_last_year_amortized__False(self):
+        newMember = self.getAMember()
+        id = self.Investment.create_from_form(
+            newMember.partner_id[0],
+            '2017-01-01', # order_date
+            1000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        self.Investment.mark_as_invoiced(id)
+        self.Investment.mark_as_paid([id], '2017-01-02')
+        date_today = str(date.today())
+
+        name = self.Investment.read(id, ['name'])['name']
+        amortized = self.Investment.is_last_year_amortized(name, '2020')
+
+        self.assertFalse(amortized)
+
 @unittest.skipIf(not dbconfig, "depends on ERP")
 class InvestmentList_Test(unittest.TestCase):
 
