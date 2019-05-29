@@ -427,7 +427,7 @@ class Account_Invoice_Test(unittest.TestCase):
             **self.personalData
         ))
 
-    def test__accounting__openAmortizationInvoice(self):
+    def test__accounting__openAmortizationInvoice__withoutIRPF(self):
         investment_id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
@@ -457,18 +457,6 @@ class Account_Invoice_Test(unittest.TestCase):
           quantity: 1.0
           ref: {investment_name}-AMOR2019
           move_state: posted
-        - account_id: 475119000001 IRPF 19% GENERATION KWh
-          amount_to_pay: 0.0
-          credit: 0.0
-          debit: 0.0
-          invoice: 'SI: {investment_name}'
-          journal_id: Factures GenerationkWh
-          move_state: posted
-          name: Retenció IRPF sobre l'estalvi del Generationkwh de 2018 de GKWH0
-          payment_type: Transferencia
-          product_id: '[GENKWH_IRPF] Retenció IRPF estalvi Generation kWh'
-          quantity: 1.0
-          ref: {investment_name}-AMOR2019
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 160.0
           credit: 160.0
@@ -519,18 +507,6 @@ class Account_Invoice_Test(unittest.TestCase):
           quantity: 1.0
           ref: {investment_name}-AMOR2019
           move_state: posted
-        - account_id: 475119000001 IRPF 19% GENERATION KWh
-          amount_to_pay: 0.0
-          credit: 0.0
-          debit: 0.0
-          invoice: 'SI: {investment_name}'
-          journal_id: Factures GenerationkWh
-          move_state: posted
-          name: Retenció IRPF sobre l'estalvi del Generationkwh de 2018 de GKWH0
-          payment_type: Transferencia
-          product_id: '[GENKWH_IRPF] Retenció IRPF estalvi Generation kWh'
-          quantity: 1.0
-          ref: {investment_name}-AMOR2019
         - account_id: 4100000{nsoci:>05} {surname}, {name}
           amount_to_pay: 0.0 # CHANGED!!
           credit: 160.0
