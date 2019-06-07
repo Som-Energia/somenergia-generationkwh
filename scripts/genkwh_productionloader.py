@@ -6,6 +6,7 @@ Calculate rights per share
 import erppeek
 import dbconfig
 from yamlns import namespace as ns
+from consolemsg import step, success
 
 def parseArgumments():
     import argparse
@@ -30,12 +31,13 @@ def parseArgumments():
 
 def computerights(id=None):
     Remainder = c.GenerationkwhRemainderTesthelper
+    ProductionLoader = c.GenerationkwhProductionLoader
     step("Next day to compute (nshares, date):")
     for nshares, day, remainderWh in sorted(Remainder.lastRemainders()):
         print nshares, day
     step("Computing production rights for each number of shares...")
-    productionloader_obj = c.GenerationkwhProductionLoader
-    productionloader_obj.computeAvailableRights(id)
+    log = ProductionLoader.computeAvailableRights(id)
+    success(log)
     step("Next day to compute after update...")
     for nshares, day, remainderWh in sorted(Remainder.lastRemainders()):
         print nshares, day

@@ -100,7 +100,11 @@ class ProductionLoader(object):
         recomputeStart, recomputeStop = self._recomputationInterval(remainders)
         aggregatedProduction = self.productionAggregator.get_kwh(recomputeStart, recomputeStop)
         plantShareCurve = self.plantShareCurver.hourly(recomputeStart, recomputeStop)
+        log = []
         for n, date, remainder in remainders:
+            log.append(
+		"Computing rights for members with {} shares from {} to {}"
+		.format(n, date, recomputeStop))
             self._appendRightsPerShare(
                 nshares=n,
                 firstDateToCompute = date,
@@ -109,6 +113,7 @@ class ProductionLoader(object):
                 production = numpy.asarray(aggregatedProduction),
                 plantshares = plantShareCurve,
                 )
+	return 'n'.join(log)
 
     def retrieveMeasuresFromPlants(self, start, end):
         return self.productionAggregator.update_kwh(start, end)
