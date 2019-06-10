@@ -46,20 +46,6 @@ class PlantShareCurverMockup(object):
     def hourly(self, start, end):
         return self.data
 
-class userRightsProviderMockup(object):
-    def __init__(self, userRights, newRemainder):
-        self.userRights=userRights
-        self.newRemainder=newRemainder
-
-    def computeRights(*args):
-        return userRights, newRemainder
-
-class rightsPerShareProviderMockup(object):
-    def updateRightsPerShare(self, n, start, stop):
-        self.data.append([n,start,stop])
-
-    def getRightsPerShare():
-        return self.data
 
 class ProductionLoaderTest(unittest.TestCase):
 
