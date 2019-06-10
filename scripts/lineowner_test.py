@@ -33,6 +33,21 @@ class GenerationkWhInvoiceLineOwner_test(unittest.TestCase):
         priceNoGen = float(self.LineOwner.getPriceWithoutGeneration(line)['price_unit'])
         self.assertEqual(priceNoGen , 0.13)
 
+    def test__getPriceWithoutGeneration__refundInvoice(self):
+        line = self.GisceFacturaLine.read(10486898)
+        self.assertEqual(line['price_unit_multi'], 0.115)
+        priceNoGen = float(self.LineOwner.getPriceWithoutGeneration(line)['price_unit'])
+        self.assertEqual(priceNoGen , 0.124)
+
+    def test__getProfit__allOk(self):
+        line = self.GisceFacturaLine.read(20972988)
+        profit = self.LineOwner.getProfit(line)
+        self.assertEqual(profit , 4.32)
+
+    def test__getProfit__refundInvoice(self):
+        line = self.GisceFacturaLine.read(10486898)
+        profit = self.LineOwner.getProfit(line)
+        self.assertEqual(profit , -0.61)
 
 if __name__ == '__main__':
     unittest.main()
