@@ -91,13 +91,15 @@ class ProductionLoader(object):
 
 
 
-    def computeAvailableRights(self):
+    def computeAvailableRights(self,lastDateToCompute=None):
         """
         Recompute pending available rights whenever we have new production
         readings.
         """
         remainders = self.remainders.lastRemainders()
         recomputeStart, recomputeStop = self._recomputationInterval(remainders)
+        if lastDateToCompute:
+            recomputeStop = lastDateToCompute
         aggregatedProduction = self.productionAggregator.get_kwh(recomputeStart, recomputeStop)
         plantShareCurve = self.plantShareCurver.hourly(recomputeStart, recomputeStop)
         log = []

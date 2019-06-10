@@ -16,8 +16,13 @@ class ProductionAggregatorMockUp(object):
         self.firstDate = first
         self.lastDate = last
 
-    def get_kwh(self, *args):
-        return self.data
+    def get_kwh(self, firstDate, lastDate):
+        # TODO: This just works for intervals within the data starting at self.firstDate
+        if firstDate > lastDate:
+            return numpy.array([])
+
+        nbins = 25*((lastDate-firstDate).days+1)
+        return self.data[:nbins]
 
     def getFirstMeasurementDate(self):
         return self.firstDate
@@ -439,6 +444,70 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(remainders.lastRemainders(), [
             (1, isodate('2015-08-17'), 0),
             ])
+
+    def test_computeAvailableRights_withSeveralDays(self):
+        rights = RightsPerShare(self.db)
+        remainders = RemainderProviderMockup([
+            (1, isodate('2015-08-16'), 0),
+            ])
+        production = ProductionAggregatorMockUp(
+                first=isodate('2015-08-16'),
+                last=isodate('2015-08-17'),
+                data=numpy.array(
+                    +10*[0]+[1000]+14*[0]
+                    +10*[0]+[2000]+14*[0]
+                ))
+        plantShare = PlantShareCurverMockup(
+                data=numpy.array(50*[1]))
+        l = ProductionLoader(productionAggregator=production,
+                plantShareCurver=plantShare,
+                rightsPerShare=rights,
+                remainders=remainders)
+        l.computeAvailableRights()
+        result = rights.rightsPerShare(1,
+            isodate('2015-08-16'),
+            isodate('2015-08-17'))
+        self.assertEqual(list(result),
+            +10*[0]+[1000]+14*[0]
+            +10*[0]+[2000]+14*[0]
+            )
+        self.assertEqual(remainders.lastRemainders(), [
+            (1, isodate('2015-08-18'), 0),
+            ])
+
+    def test_computeAvailableRights_withExplicitStop(self):
+        rights = RightsPerShare(self.db)
+        remainders = RemainderProviderMockup([
+            (1, isodate('2015-08-16'), 0),
+            ])
+        production = ProductionAggregatorMockUp(
+                first=isodate('2015-08-16'),
+                last=isodate('2015-08-17'),
+                data=numpy.array(
+                    +10*[0]+[1000]+14*[0]
+                    +10*[0]+[2000]+14*[0]
+                ))
+        plantShare = PlantShareCurverMockup(
+                data=numpy.array(50*[1]))
+        l = ProductionLoader(productionAggregator=production,
+                plantShareCurver=plantShare,
+                rightsPerShare=rights,
+                remainders=remainders)
+
+        l.computeAvailableRights(isodate('2015-08-16'))
+
+        result = rights.rightsPerShare(1,
+            isodate('2015-08-16'),
+            isodate('2015-08-17'))
+        self.assertEqual(list(result),
+            +10*[0]+[1000]+14*[0]
+            +25*[0]
+            )
+        self.assertEqual(remainders.lastRemainders(), [
+            (1, isodate('2015-08-17'), 0),
+            ])
+
+
 
 
 # vim: ts=4 sw=4 et
