@@ -27,13 +27,13 @@ class ProductionAggregatorMockUp(object):
 
 
 class RemainderProviderMockup(object):
-    
+
     def __init__(self,remainders=[]):
         self.remainders = dict((remainder[0], remainder) for remainder in remainders)
 
     def lastRemainders(self):
         return [self.remainders[nshares] for nshares in self.remainders]
-    
+
     def updateRemainders(self, remainders):
         for nshares, date, remainder in remainders:
             self.remainders[nshares] = (nshares, date, remainder)
@@ -66,11 +66,11 @@ class ProductionLoaderTest(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
         self.databasename = 'generationkwh_test'
-        
+
         c = pymongo.MongoClient()
         c.drop_database(self.databasename)
         self.db = c[self.databasename]
-        
+
     def tearDown(self):
         c = pymongo.MongoClient()
         c.drop_database(self.databasename)
@@ -83,7 +83,7 @@ class ProductionLoaderTest(unittest.TestCase):
             for shares, date, remainderwh in remainders
             ])
         self.assertEqual(str(date), expected)
-    
+
     def test_startPoint_withNoremainders(self):
         self.assertStartPointEqual('2000-01-01',[
             ], '2000-01-01')
@@ -128,7 +128,7 @@ class ProductionLoaderTest(unittest.TestCase):
         l = ProductionLoader(productionAggregator=p)
         interval = l._recomputationInterval([])
         self.assertDatePairEqual( ('2000-01-01','2006-01-01'), interval)
-    
+
     def test_getRecomputationInterval_withSingleRemainders_takesIt(self):
         p = ProductionAggregatorMockUp(
                 first=isodate('2000-01-01'),

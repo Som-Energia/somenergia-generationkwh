@@ -44,7 +44,7 @@ class ProductionLoader(object):
             date
             for shares, date, remainderwh in remainders
             )
-    
+
     def endPoint(self, intervalStart, curve):
         return intervalStart+datetime.timedelta(days=len(curve)//25)
 
@@ -56,7 +56,7 @@ class ProductionLoader(object):
         """
         firstMeasurement = self.productionAggregator.getFirstMeasurementDate()
         return (
-            self.startPoint(firstMeasurement, remainders), 
+            self.startPoint(firstMeasurement, remainders),
             self.productionAggregator.getLastMeasurementDate()
             )
 
