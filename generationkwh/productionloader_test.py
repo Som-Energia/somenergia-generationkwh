@@ -9,6 +9,9 @@ import numpy
 
 from .isodates import  isodate, localisodate
 
+def zeropad(array, left, right):
+    return numpy.pad(array, (left, right), 'constant', constant_values=[0])
+
 class ProductionAggregatorMockUp(object):
 
     def __init__(self,first=None,last=None,data=None):
@@ -17,12 +20,29 @@ class ProductionAggregatorMockUp(object):
         self.lastDate = last
 
     def get_kwh(self, firstDate, lastDate):
-        # TODO: This just works for intervals within the data starting at self.firstDate
         if firstDate > lastDate:
             return numpy.array([])
-
         nbins = 25*((lastDate-firstDate).days+1)
-        return self.data[:nbins]
+
+        if lastDate<self.firstDate:
+            return numpy.zeros(nbins)
+        if self.lastDate<firstDate:
+            return numpy.zeros(nbins)
+
+        frontpad = backpad = 0
+        offset = (firstDate - self.firstDate).days * 25
+        trailing = (self.lastDate - lastDate).days * 25
+
+        if offset<0:
+            frontpad = -offset
+            offset = 0
+        if trailing<0:
+            backpad = -trailing
+            trailing = 0
+
+        data = self.data[offset:nbins-trailing-frontpad]
+
+        return zeropad(data, frontpad, backpad)
 
     def getFirstMeasurementDate(self):
         return self.firstDate
@@ -30,6 +50,84 @@ class ProductionAggregatorMockUp(object):
     def getLastMeasurementDate(self):
         return self.lastDate
 
+class ProductionAggregatorMockUp_Test(unittest.TestCase):
+    def setUp(self):
+        self.maxDiff=None
+        self.p = ProductionAggregatorMockUp(
+            first=isodate('2015-08-16'),
+            last=isodate('2015-08-20'),
+            data=numpy.arange(100),
+            )
+
+    def test_getkwh_empyInterval(self):
+        result = self.p.get_kwh(
+            isodate('2015-08-17'),
+            isodate('2015-08-16'),
+            )
+        self.assertEqual(list(result), [])
+
+    def test_getkwh_beforeData(self):
+        result = self.p.get_kwh(
+            isodate('2015-08-14'),
+            isodate('2015-08-15'),
+            )
+        self.assertEqual(list(result), 50*[0])
+
+    def test_getkwh_afterData(self):
+        result = self.p.get_kwh(
+            isodate('2015-08-21'),
+            isodate('2015-08-22'),
+            )
+        self.assertEqual(list(result), 50*[0])
+
+    def test_getkwh_matchingData(self):
+        result = self.p.get_kwh(
+            isodate('2015-08-16'),
+            isodate('2015-08-20'),
+            )
+        self.assertEqual(list(result), range(100))
+
+    def test_getkwh_startInMiddle(self):
+        result = self.p.get_kwh(
+            isodate('2015-08-17'),
+            isodate('2015-08-20'),
+            )
+        self.assertEqual(list(result), range(25,100))
+
+    def test_getkwh_endInMiddle(self):
+        result = self.p.get_kwh(
+            isodate('2015-08-16'),
+            isodate('2015-08-19'),
+            )
+        self.assertEqual(list(result), range(75))
+
+    def test_getkwh_startingBeforeData(self):
+        result = self.p.get_kwh(
+            isodate('2015-08-15'),
+            isodate('2015-08-20'),
+            )
+        self.assertEqual(list(result), 25*[0]+range(100))
+
+    def test_getkwh_startingBeforeDataEndingMiddle(self):
+        result = self.p.get_kwh(
+            isodate('2015-08-15'),
+            isodate('2015-08-19'),
+            )
+        self.assertEqual(list(result), 25*[0]+range(75))
+
+    def test_getkwh_endingAfterData(self):
+        result = self.p.get_kwh(
+            isodate('2015-08-16'),
+            isodate('2015-08-21'),
+            )
+        self.assertEqual(list(result), range(100)+25*[0])
+
+    def test_getkwh_endingAfterDataStartingMiddle(self):
+        result = self.p.get_kwh(
+            isodate('2015-08-17'),
+            isodate('2015-08-21'),
+            )
+        self.assertEqual(list(result), range(25,100)+25*[0])
 
 class RemainderProviderMockup(object):
 
@@ -162,7 +260,7 @@ class ProductionLoaderTest(unittest.TestCase):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([])
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
-        l._appendRightsPerShare(
+        result = l._appendRightsPerShare(
             nshares=1,
             firstDateToCompute=isodate('2015-08-16'),
             lastDateToCompute=isodate('2015-08-16'),
@@ -170,6 +268,9 @@ class ProductionLoaderTest(unittest.TestCase):
             production=numpy.array(+10*[0]+[1000]+14*[0]),
             plantshares=numpy.array(25*[1]),
             )
+        self.assertNsEqual(result, """
+
+        """)
         result = rights.rightsPerShare(1,
             isodate('2015-08-16'),
             isodate('2015-08-16'))

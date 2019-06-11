@@ -345,8 +345,8 @@ class PartnerAssignments_Test(unittest.TestCase):
         self.Cups = self.erp.GiscedataCupsPs
         self.Assignment.dropAll()
 
-        self.contract_id = 300
-        self.contract_id2 = 301
+        self.contract_id = 400
+        self.contract_id2 = 401
 
     def tearDown(self):
         self.erp.rollback()
@@ -373,8 +373,8 @@ class PartnerAssignments_Test(unittest.TestCase):
             'name',
             'data_ultima_lectura',
             'state',
-            'cups_direccio',
             'cups',
+            'cups_direccio',
             ]))
         cups = self.Cups.read(contract.cups[0], ['conany_kwh'])
         contract.annualUseKwh = cups['conany_kwh']
