@@ -127,14 +127,14 @@ class ProductionLoader_Test(unittest.TestCase):
                 nmeters=1,
                 nshares=[1]).read(['id'])['id']
         self.setupLocalMeter('mymeter00',[
-            ('2015-08-16', 10*[0]+[1000]+13*[0])
+            ('2015-08-16', 18*[0]+[1000]+6*[0])
             ])
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
         self.ProductionLoader.computeAvailableRights(aggr_id)
 
         result = self.TestHelper.rights_per_share(1, '2015-08-16', '2015-08-16')
-        self.assertEqual(result, +10*[0]+[1000]+14*[0])
+        self.assertEqual(result, +18*[0]+[1000]+6*[0])
         self.assertEqual(remainder.lastRemainders(), [
             [1, '2015-08-17', 0],
             ])
@@ -145,14 +145,14 @@ class ProductionLoader_Test(unittest.TestCase):
                 nmeters=1,
                 nshares=[4]).read(['id'])['id']
         self.setupLocalMeter('mymeter00',[
-            ('2015-08-16', 10*[0]+[20000]+13*[0])
+            ('2015-08-16', 18*[0]+[20000]+6*[0])
             ])
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
         self.ProductionLoader.computeAvailableRights(aggr_id)
 
         result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-16')
-        self.assertEqual(result, +10*[0]+[5000]+14*[0])
+        self.assertEqual(result, +18*[0]+[5000]+6*[0])
         self.assertEqual(remainder.lastRemainders(), [
             [1, '2015-08-17', 0],
             ])
@@ -163,15 +163,15 @@ class ProductionLoader_Test(unittest.TestCase):
                 nmeters=1,
                 nshares=[4]).read(['id'])['id']
         self.setupLocalMeter('mymeter00',[
-            ('2015-08-16', 10*[0]+[20000]+13*[0]),
-            ('2015-08-17', 10*[0]+[20000]+13*[0]),
+            ('2015-08-16', 18*[0]+[20000]+6*[0]),
+            ('2015-08-17', 18*[0]+[20000]+6*[0]),
             ])
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
         self.ProductionLoader.computeAvailableRights(aggr_id)
 
         result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-17')
-        self.assertEqual(result, 2*(10*[0]+[5000]+14*[0]))
+        self.assertEqual(result, 2*(18*[0]+[5000]+6*[0]))
         self.assertEqual(remainder.lastRemainders(), [
             [1, '2015-08-18', 0],
             ])
@@ -182,17 +182,17 @@ class ProductionLoader_Test(unittest.TestCase):
                 nmeters=1,
                 nshares=[2,2]).read(['id'])['id']
         self.setupLocalMeter('mymeter00',[
-            ('2015-08-16', 10*[0]+[4000]+13*[0])
+            ('2015-08-16', 18*[0]+[4000]+6*[0])
             ])
         self.setupLocalMeter('mymeter10',[
-            ('2015-08-16', 10*[0]+[16000]+13*[0])
+            ('2015-08-16', 18*[0]+[16000]+6*[0])
             ])
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
         self.ProductionLoader.computeAvailableRights(aggr_id)
 
         result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-16')
-        self.assertEqual(result, +10*[0]+[5000]+14*[0])
+        self.assertEqual(result, +18*[0]+[5000]+6*[0])
         self.assertEqual(remainder.lastRemainders(), [
             [1, '2015-08-17', 0],
             ])
@@ -208,12 +208,12 @@ class ProductionLoader_Test(unittest.TestCase):
         self.updateMeter('mymeter10', first_active_date='2015-08-17')
 
         self.setupLocalMeter('mymeter00',[
-            ('2015-08-16', 10*[0]+[4000]+13*[0]),
-            ('2015-08-17', 10*[0]+[4000]+13*[0]),
+            ('2015-08-16', 18*[0]+[4000]+6*[0]),
+            ('2015-08-17', 18*[0]+[4000]+6*[0]),
             ])
         self.setupLocalMeter('mymeter10',[
-            ('2015-08-16', 10*[0]+[16000]+13*[0]),
-            ('2015-08-17', 10*[0]+[16000]+13*[0]),
+            ('2015-08-16', 18*[0]+[16000]+6*[0]),
+            ('2015-08-17', 18*[0]+[16000]+6*[0]),
             ])
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
