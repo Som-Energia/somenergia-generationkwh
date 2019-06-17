@@ -37,6 +37,11 @@ $ sudo apt-get build-dep python-numpy
 
 ## CHANGES
 
+### 2.5.3 2019-06-17
+
+- MOD: Add IRPF retention to amortization and divestment invoices
+- MOD: Change profint formula to avoid 3rd decimal
+
 ### 2.5.2 2019-05-13
 
 - MOD: Add profit amount in Generationwkh invoice line
