@@ -1,0 +1,44 @@
+generation:
+  description: Generació
+  scripts:
+    formatejaprevisions:
+      title: Formateja arxius de previsió
+      description: Formateja arxius de previsió
+      script:
+      - python
+      - -c
+      - celles='{celles}'; print ';'.join(x.replace(',', '.') for x in celles.split())
+      parameters:
+        celles:
+          description: Enganxa les celles de l'Excel
+    listplants:
+      title: Llistat de plantes
+      description: Mostra la definició de les plantes
+      script: python SOME_SRC/plantmeter/scripts/genkwh_production.py list
+    corvesProduccio:
+      title: Corbes de produccio
+      description: >
+        Genera corva de producció
+      script: python SOME_SRC/plantmeter/scripts/genkwh_production.py gisce {plant} {start_date} {end_date} | tee {output}
+      parameters:
+        start_date:
+          type: date
+          default: ''
+          description: data inici (ex. 2015-01-01)
+        end_date:
+          type: date
+          default: ''
+          description: data final (ex. 2015-03-31)
+        plant:
+          type: enum
+          values:
+            Fontivsolar: 501815908
+            Alcolea: 501600324
+        output:
+          type: FILEDOWN
+          extension: csv
+          name: production-{plant}-{start_date}-{end_date}.csv
+
+
+
+# vim: et ts=2 sw=2
