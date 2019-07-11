@@ -82,12 +82,17 @@ class ProductionLoader(object):
 
         userRights, newRemainder = ProductionToRightsPerShare().computeRights(
                 production[startIndex:], plantshares[startIndex:], nshares, lastRemainder)
+
+        self._updateRights(nshares, userRights, firstDateToCompute, lastDateToCompute, newRemainder)
+
+
+    def _updateRights(self, nshares, rights, firstDate, lastDate, remainder):
         if self.remainders:
             self.remainders.updateRemainders([
-                    [nshares, lastDateToCompute+datetime.timedelta(days=1), newRemainder]])
+                    [nshares, lastDate+datetime.timedelta(days=1), remainder]])
         if self.rightsPerShare:
             self.rightsPerShare.updateRightsPerShare(
-                    nshares, firstDateToCompute, userRights)
+                    nshares, firstDate, rights)
 
 
 
