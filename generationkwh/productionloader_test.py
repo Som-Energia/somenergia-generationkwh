@@ -260,7 +260,7 @@ class ProductionLoaderTest(unittest.TestCase):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([])
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
-        result = l._appendRightsPerShare(
+        l._appendRightsPerShare(
             nshares=1,
             firstDateToCompute=isodate('2015-08-16'),
             lastDateToCompute=isodate('2015-08-16'),
@@ -268,9 +268,6 @@ class ProductionLoaderTest(unittest.TestCase):
             production=numpy.array(+10*[0]+[1000]+14*[0]),
             plantshares=numpy.array(25*[1]),
             )
-        self.assertNsEqual(result, """
-
-        """)
         result = rights.rightsPerShare(1,
             isodate('2015-08-16'),
             isodate('2015-08-16'))
