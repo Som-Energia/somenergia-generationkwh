@@ -83,8 +83,6 @@ class ProductionLoader(object):
         userRights, newRemainder = ProductionToRightsPerShare().computeRights(
                 production[startIndex:], plantshares[startIndex:], nshares, lastRemainder)
 
-        self._updateRights(nshares, userRights, firstDateToCompute, lastDateToCompute, newRemainder)
-
         return userRights, newRemainder
 
 
@@ -114,7 +112,7 @@ class ProductionLoader(object):
             log.append(
                 "Computing rights for members with {} shares from {} to {}"
                 .format(n, date, recomputeStop))
-            self._appendRightsPerShare(
+            rights, remainder = self._appendRightsPerShare(
                 nshares=n,
                 firstDateToCompute = date,
                 lastDateToCompute = recomputeStop,
@@ -122,6 +120,14 @@ class ProductionLoader(object):
                 production = numpy.asarray(aggregatedProduction),
                 plantshares = plantShareCurve,
                 )
+            self._updateRights(n, rights, date, recomputeStop, remainder)
 	return 'n'.join(log)
+
+
+
+
+
+
+
 
 # vim: ts=4 sw=4 et

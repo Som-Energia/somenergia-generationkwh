@@ -257,9 +257,7 @@ class ProductionLoaderTest(unittest.TestCase):
             interval)
 
     def test_appendRightsPerShare_singleDay(self):
-        rights = RightsPerShare(self.db)
-        remainders = RemainderProviderMockup([])
-        l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
+        l = ProductionLoader()
         rights, remainder = l._appendRightsPerShare(
             nshares=1,
             firstDateToCompute=isodate('2015-08-16'),
@@ -274,9 +272,7 @@ class ProductionLoaderTest(unittest.TestCase):
     
 
     def test_appendRightsPerShare_manyDays(self):
-        rights = RightsPerShare(self.db)
-        remainders = RemainderProviderMockup([])
-        l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
+        l = ProductionLoader()
         rights, remainder = l._appendRightsPerShare(
             nshares=1,
             firstDateToCompute=isodate('2015-08-16'),
@@ -290,9 +286,7 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(remainder, 0)
 
     def test_appendRightsPerShare_withManyPlantShares_divides(self):
-        rights = RightsPerShare(self.db)
-        remainders = RemainderProviderMockup([])
-        l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
+        l = ProductionLoader()
         rights, remainder = l._appendRightsPerShare(
             nshares=1,
             firstDateToCompute=isodate('2015-08-16'),
@@ -306,9 +300,7 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(remainder, 0)
 
     def test_appendRightsPerShare_withNShares_multiplies(self):
-        rights = RightsPerShare(self.db)
-        remainders = RemainderProviderMockup([])
-        l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
+        l = ProductionLoader()
         rights, remainder = l._appendRightsPerShare(
             nshares=2, # here
             firstDateToCompute=isodate('2015-08-16'),
@@ -322,15 +314,13 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(remainder, 0)
 
     def test_appendRightsPerShare_withAdvancedRemainder(self):
-        rights = RightsPerShare(self.db)
-        remainders = RemainderProviderMockup([])
-        l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
+        l = ProductionLoader()
         rights, remainder = l._appendRightsPerShare(
             nshares=1,
             firstDateToCompute=isodate('2015-08-16'),
             lastDateToCompute=isodate('2015-08-16'),
             lastRemainder=0,
-            production=numpy.array(100*[0]+10*[0]+[1000]+14*[0]),
+            production=numpy.array(100*[0]+10*[0]+[1000]+14*[0]), # 100+1 days
             plantshares=numpy.array(100*[0]+25*[1]),
             )
         self.assertEqual(list(rights),
@@ -371,9 +361,7 @@ class ProductionLoaderTest(unittest.TestCase):
             "2015-08-16 00:00:00+02:00")
 
     def test_appendRightsPerShare_tooSmallProductionArray(self):
-        rights = RightsPerShare(self.db)
-        remainders = RemainderProviderMockup([])
-        l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
+        l = ProductionLoader()
         with self.assertRaises(AssertionError) as ctx:
             l._appendRightsPerShare(
                 nshares=1,
@@ -387,9 +375,7 @@ class ProductionLoaderTest(unittest.TestCase):
             "Not enough production data to compute such date interval")
 
     def test_appendRightsPerShare_tooSmallShareArray(self):
-        rights = RightsPerShare(self.db)
-        remainders = RemainderProviderMockup([])
-        l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
+        l = ProductionLoader()
         with self.assertRaises(AssertionError) as ctx:
             l._appendRightsPerShare(
                 nshares=1,
@@ -403,9 +389,7 @@ class ProductionLoaderTest(unittest.TestCase):
             "Not enough plant share data to compute such date interval")
 
     def test_appendRightsPerShare_crossedDates(self):
-        rights = RightsPerShare(self.db)
-        remainders = RemainderProviderMockup([])
-        l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
+        l = ProductionLoader()
         with self.assertRaises(AssertionError) as ctx:
             l._appendRightsPerShare(
                 nshares=1,
