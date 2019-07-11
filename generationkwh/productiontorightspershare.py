@@ -31,11 +31,21 @@ class ProductionToRightsPerShare(object):
         return result, remainder_wh
 
     def rectifyRights(self, original, wanted):
+        """
+        Whenever a rights profile has to be recomputed, we cannot
+        set the rights for an hour under its current value
+        because those rights may have been used already.
+        So we compensate the accomulated excess of rights at the
+        hours we had less rights than the wanted ones.
+        If the new rights are less in global, an error is produced.
+        """
+
         class Compensator:
             def __init__(self):
                 self.error=0
             def computeBin(self, d, o):
-                # wanted is under original, original must be kept, error accumulated
+                # wanted is under original
+                # original must be kept, error accumulated
                 if d<0:
                     self.error += d
                     return o
