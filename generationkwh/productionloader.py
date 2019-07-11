@@ -85,6 +85,8 @@ class ProductionLoader(object):
 
         self._updateRights(nshares, userRights, firstDateToCompute, lastDateToCompute, newRemainder)
 
+        return userRights, newRemainder
+
 
     def _updateRights(self, nshares, rights, firstDate, lastDate, remainder):
         if self.remainders:

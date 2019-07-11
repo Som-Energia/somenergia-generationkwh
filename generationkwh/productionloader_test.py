@@ -260,7 +260,7 @@ class ProductionLoaderTest(unittest.TestCase):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([])
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
-        l._appendRightsPerShare(
+        rights, remainder = l._appendRightsPerShare(
             nshares=1,
             firstDateToCompute=isodate('2015-08-16'),
             lastDateToCompute=isodate('2015-08-16'),
@@ -268,20 +268,16 @@ class ProductionLoaderTest(unittest.TestCase):
             production=numpy.array(+10*[0]+[1000]+14*[0]),
             plantshares=numpy.array(25*[1]),
             )
-        result = rights.rightsPerShare(1,
-            isodate('2015-08-16'),
-            isodate('2015-08-16'))
-        self.assertEqual(list(result),
+        self.assertEqual(list(rights),
             +10*[0]+[1000]+14*[0])
-        self.assertEqual(remainders.lastRemainders(), [
-            (1, isodate('2015-08-17'), 0),
-            ])
+        self.assertEqual(remainder, 0)
+    
 
     def test_appendRightsPerShare_manyDays(self):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([])
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
-        l._appendRightsPerShare(
+        rights, remainder = l._appendRightsPerShare(
             nshares=1,
             firstDateToCompute=isodate('2015-08-16'),
             lastDateToCompute=isodate('2015-08-17'),
@@ -289,20 +285,15 @@ class ProductionLoaderTest(unittest.TestCase):
             production=numpy.array((+10*[0]+[1000]+14*[0])*2),
             plantshares=numpy.array(25*[1]*2),
             )
-        result = rights.rightsPerShare(1,
-            isodate('2015-08-16'),
-            isodate('2015-08-17'))
-        self.assertEqual(list(result),
+        self.assertEqual(list(rights),
             (+10*[0]+[1000]+14*[0])*2)
-        self.assertEqual(remainders.lastRemainders(), [
-            (1, isodate('2015-08-18'), 0),
-            ])
+        self.assertEqual(remainder, 0)
 
     def test_appendRightsPerShare_withManyPlantShares_divides(self):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([])
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
-        l._appendRightsPerShare(
+        rights, remainder = l._appendRightsPerShare(
             nshares=1,
             firstDateToCompute=isodate('2015-08-16'),
             lastDateToCompute=isodate('2015-08-16'),
@@ -310,20 +301,15 @@ class ProductionLoaderTest(unittest.TestCase):
             production=numpy.array(+10*[0]+[2000]+14*[0]),
             plantshares=numpy.array(25*[4]), # here
             )
-        result = rights.rightsPerShare(1,
-            isodate('2015-08-16'),
-            isodate('2015-08-16'))
-        self.assertEqual(list(result),
+        self.assertEqual(list(rights),
             +10*[0]+[500]+14*[0])
-        self.assertEqual(remainders.lastRemainders(), [
-            (1, isodate('2015-08-17'), 0),
-            ])
+        self.assertEqual(remainder, 0)
 
     def test_appendRightsPerShare_withNShares_multiplies(self):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([])
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
-        l._appendRightsPerShare(
+        rights, remainder = l._appendRightsPerShare(
             nshares=2, # here
             firstDateToCompute=isodate('2015-08-16'),
             lastDateToCompute=isodate('2015-08-16'),
@@ -331,20 +317,15 @@ class ProductionLoaderTest(unittest.TestCase):
             production=numpy.array(+10*[0]+[1000]+14*[0]),
             plantshares=numpy.array(25*[1]),
             )
-        result = rights.rightsPerShare(2,
-            isodate('2015-08-16'),
-            isodate('2015-08-16'))
-        self.assertEqual(list(result),
+        self.assertEqual(list(rights),
             +10*[0]+[2000]+14*[0])
-        self.assertEqual(remainders.lastRemainders(), [
-            (2, isodate('2015-08-17'), 0),
-            ])
+        self.assertEqual(remainder, 0)
 
     def test_appendRightsPerShare_withAdvancedRemainder(self):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([])
         l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
-        l._appendRightsPerShare(
+        rights, remainder = l._appendRightsPerShare(
             nshares=1,
             firstDateToCompute=isodate('2015-08-16'),
             lastDateToCompute=isodate('2015-08-16'),
@@ -352,13 +333,33 @@ class ProductionLoaderTest(unittest.TestCase):
             production=numpy.array(100*[0]+10*[0]+[1000]+14*[0]),
             plantshares=numpy.array(100*[0]+25*[1]),
             )
-        result = rights.rightsPerShare(1,
-            isodate('2015-08-16'),
-            isodate('2015-08-16'))
-        self.assertEqual(list(result),
+        self.assertEqual(list(rights),
             +10*[0]+[1000]+14*[0])
+        self.assertEqual(remainder, 0)
+
+
+    def test_updateRights(self):
+        rights = RightsPerShare(self.db)
+        remainders = RemainderProviderMockup([])
+        l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
+
+        l._updateRights(
+            nshares=3,
+            rights = 50*[1],
+            firstDate=isodate('2015-08-16'),
+            lastDate=isodate('2015-08-17'),
+            remainder=69,
+            )
+
+        result = rights.rightsPerShare(3,
+            isodate('2015-08-16'),
+            isodate('2015-08-17'))
+        self.assertEqual(list(result),
+            +24*[1]+[0]
+            +24*[1]+[0]
+            )
         self.assertEqual(remainders.lastRemainders(), [
-            (1, isodate('2015-08-17'), 0),
+            (3, isodate('2015-08-18'), 69),
             ])
 
     def test_appendRightsPerShare_firstDateToCompute_isProtected(self):
