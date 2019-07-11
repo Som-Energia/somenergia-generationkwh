@@ -123,6 +123,55 @@ class ProductionToRightsPerShare_Test(unittest.TestCase):
         self.assertEqual(failure.exception.args[0],
             "ActiveShares base type is not integer")
 
+    def assertRectified(self, original, wanted, rectified, error):
+        curve = ProductionToRightsPerShare()
+        original = numpy.array(original)
+        wanted   = numpy.array(wanted)
+
+        result, resultError = curve.rectifyRights(original, wanted)
+
+        self.assertEqual(list(result), rectified)
+        self.assertEqual(resultError, error)
+
+
+    def test_rectifyRights_wantedAlwaysHigher(self):
+        self.assertRectified(
+            original  = [0,0,0,0],
+            wanted    = [1,2,3,4],
+            rectified = [1,2,3,4],
+            error     = 0,
+        )
+
+    def test_rectifyRights_wantedAlwaysZero(self):
+        self.assertRectified(
+            original  = [1,2,3,4],
+            wanted    = [0,0,0,0],
+            rectified = [1,2,3,4],
+            error     = -sum([1,2,3,4]),
+        )
+
+    def _test_rectifyRights_wantedAlwaysLower(self):
+        self.assertRectified(
+            original  = [1,2,3,4],
+            wanted    = [0,0,2,0],
+            rectified = [1,2,3,4],
+            error     = -sum([1,2,3-2,4]),
+        )
+
+    def _test_rectifyRights_wantedHigherAfterBeingLower(self):
+        self.assertRectified(
+            original  = [1,2,3,4],
+            wanted    = [0,0,0,10],
+            rectified = [1,2,3,4],
+            error     = 0,
+        )
+
+
+
+
+
+
+
 
 
 # vim: ts=4 sw=4 et

@@ -30,6 +30,14 @@ class ProductionToRightsPerShare(object):
 
         return result, remainder_wh
 
+    def rectifyRights(self, original, wanted):
+        diff = wanted - original
+        result = [
+            o+d if d>0 else o
+            for d,o in zip(diff, original)
+        ]
+        return result, -sum(original)
+
 
 
 # vim: ts=4 sw=4 et
