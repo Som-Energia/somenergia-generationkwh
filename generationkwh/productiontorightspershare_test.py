@@ -150,7 +150,7 @@ class ProductionToRightsPerShare_Test(unittest.TestCase):
             error     = -sum([1,2,3,4]),
         )
 
-    def _test_rectifyRights_wantedAlwaysLower(self):
+    def test_rectifyRights_wantedAlwaysLower_wantedSubstractedFromError(self):
         self.assertRectified(
             original  = [1,2,3,4],
             wanted    = [0,0,2,0],

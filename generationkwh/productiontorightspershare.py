@@ -32,11 +32,12 @@ class ProductionToRightsPerShare(object):
 
     def rectifyRights(self, original, wanted):
         diff = wanted - original
+        error = sum(d for d in diff if d<0)
         result = [
             o+d if d>0 else o
             for d,o in zip(diff, original)
         ]
-        return result, -sum(original)
+        return result, error
 
 
 
