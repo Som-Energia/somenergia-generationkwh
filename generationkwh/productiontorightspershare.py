@@ -31,15 +31,20 @@ class ProductionToRightsPerShare(object):
         return result, remainder_wh
 
     def rectifyRights(self, original, wanted):
-        def computeBin(d, o):
-            return o+d if d>0 else o
+        class Compensator:
+            def __init__(self):
+                self.error=0
+            def computeBin(self, d, o):
+                if d<0: self.error += d
+                return o+d if d>0 else o
+
+        compensator = Compensator()
         diff = wanted - original
-        error = sum(d for d in diff if d<0)
         result = [
-            computeBin(d,o)
+            compensator.computeBin(d,o)
             for d,o in zip(diff, original)
         ]
-        return result, error
+        return result, compensator.error
 
 
 
