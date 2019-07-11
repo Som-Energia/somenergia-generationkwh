@@ -35,8 +35,10 @@ class ProductionToRightsPerShare(object):
             def __init__(self):
                 self.error=0
             def computeBin(self, d, o):
-                if d<0: self.error += d
-                return o+d if d>0 else o
+                if d<0:
+                    self.error += d
+                    return o
+                return o+d
 
         compensator = Compensator()
         diff = wanted - original
