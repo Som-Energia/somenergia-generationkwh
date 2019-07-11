@@ -590,6 +590,48 @@ class ProductionLoaderTest(unittest.TestCase):
             (1, isodate('2015-08-17'), 0),
             ])
 
+    def test_recomputeRights(self):
+        rights = RightsPerShare(self.db)
+        remainders = RemainderProviderMockup([
+            (1, isodate('2015-08-15'), 10),
+            ])
+        rights.updateRightsPerShare(1, isodate('2015-08-11'),
+            4*25*[5])
+
+        production = ProductionAggregatorMockUp(
+                first=isodate('2015-08-11'),
+                last=isodate('2015-08-14'),
+                data=numpy.array(
+                    +24*[50]+[0] # Same
+                    +24*[60]+[0] # Higher
+                    +24*[40]+[0] # Lower
+                    +23*[70]+[35]+[0] # Higher after lower
+                )
+            )
+        plantShare = PlantShareCurverMockup(
+                data=numpy.array(25*4*[10]))
+
+        l = ProductionLoader(
+                productionAggregator=production,
+                plantShareCurver=plantShare,
+                rightsPerShare=rights,
+                remainders=remainders)
+
+        l.recomputeRights(isodate('2015-08-11'), isodate('2015-08-14'))
+
+        result = rights.rightsPerShare(1,
+            isodate('2015-08-11'),
+            isodate('2015-08-14'))
+        self.assertEqual(list(result),
+            +24*[5]+[0] # Same
+            +24*[6]+[0] # Higher
+            +24*[5]+[0] # Lower
+            +12*[5]+11*[7]+[5]+[0] # Higher after lower
+            )
+
+        self.assertEqual(remainders.lastRemainders(), [
+            (1, isodate('2015-08-15'), -1500),
+            ])
 
 
 

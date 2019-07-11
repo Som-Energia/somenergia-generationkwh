@@ -94,8 +94,6 @@ class ProductionLoader(object):
             self.rightsPerShare.updateRightsPerShare(
                     nshares, firstDate, rights)
 
-
-
     def computeAvailableRights(self,lastDateToCompute=None):
         """
         Recompute pending available rights whenever we have new production
@@ -121,7 +119,35 @@ class ProductionLoader(object):
                 plantshares = plantShareCurve,
                 )
             self._updateRights(n, rights, date, recomputeStop, remainder)
-	return 'n'.join(log)
+        return 'n'.join(log)
+
+    def recomputeRights(self, firstDate, lastDate):
+        """
+        Recompute pending available rights whenever we have new production
+        readings.
+        """
+        remainders = self.remainders.lastRemainders()
+        aggregatedProduction = self.productionAggregator.get_kwh(firstDate, lastDate)
+        plantShareCurve = self.plantShareCurver.hourly(firstDate, lastDate)
+        log = []
+        for n, date, remainder in remainders:
+            log.append(
+                "Computing rights for members with {} shares from {} to {}"
+                .format(n, date, lastDate))
+            rights, remainder = self._appendRightsPerShare(
+                nshares=n,
+                firstDateToCompute = firstDate,
+                lastDateToCompute = lastDate,
+                lastRemainder = 0, # TODO: Should we take the 
+                production = numpy.asarray(aggregatedProduction),
+                plantshares = plantShareCurve,
+                )
+            print "remainder {}".format(remainder)
+            original = self.rightsPerShare.rightsPerShare(n, firstDate, lastDate)
+            rights, error = ProductionToRightsPerShare().rectifyRights(original, rights)
+            self._updateRights(n, rights, firstDate, lastDate, remainder+error*1000)
+        return 'n'.join(log)
+
 
 
 
