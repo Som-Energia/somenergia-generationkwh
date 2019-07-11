@@ -31,10 +31,12 @@ class ProductionToRightsPerShare(object):
         return result, remainder_wh
 
     def rectifyRights(self, original, wanted):
+        def computeBin(d, o):
+            return o+d if d>0 else o
         diff = wanted - original
         error = sum(d for d in diff if d<0)
         result = [
-            o+d if d>0 else o
+            computeBin(d,o)
             for d,o in zip(diff, original)
         ]
         return result, error
