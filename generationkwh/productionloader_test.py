@@ -338,30 +338,6 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(remainder, 0)
 
 
-    def test_updateRights(self):
-        rights = RightsPerShare(self.db)
-        remainders = RemainderProviderMockup([])
-        l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
-
-        l._updateRights(
-            nshares=3,
-            rights = 50*[1],
-            firstDate=isodate('2015-08-16'),
-            lastDate=isodate('2015-08-17'),
-            remainder=69,
-            )
-
-        result = rights.rightsPerShare(3,
-            isodate('2015-08-16'),
-            isodate('2015-08-17'))
-        self.assertEqual(list(result),
-            +24*[1]+[0]
-            +24*[1]+[0]
-            )
-        self.assertEqual(remainders.lastRemainders(), [
-            (3, isodate('2015-08-18'), 69),
-            ])
-
     def test_appendRightsPerShare_firstDateToCompute_isProtected(self):
         l = ProductionLoader()
         with self.assertRaises(AssertionError) as ctx:
@@ -441,6 +417,30 @@ class ProductionLoaderTest(unittest.TestCase):
                 )
         self.assertEqual(ctx.exception.args[0],
             "Empty interval starting at 2015-08-16 and ending at 2015-08-15")
+
+    def test_updateRights(self):
+        rights = RightsPerShare(self.db)
+        remainders = RemainderProviderMockup([])
+        l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
+
+        l._updateRights(
+            nshares=3,
+            rights = 50*[1],
+            firstDate=isodate('2015-08-16'),
+            lastDate=isodate('2015-08-17'),
+            remainder=69,
+            )
+
+        result = rights.rightsPerShare(3,
+            isodate('2015-08-16'),
+            isodate('2015-08-17'))
+        self.assertEqual(list(result),
+            +24*[1]+[0]
+            +24*[1]+[0]
+            )
+        self.assertEqual(remainders.lastRemainders(), [
+            (3, isodate('2015-08-18'), 69),
+            ])
 
     def test_computeAvailableRights_singleDay(self):
         rights = RightsPerShare(self.db)

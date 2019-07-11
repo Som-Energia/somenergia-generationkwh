@@ -112,8 +112,8 @@ class ProductionLoader(object):
         log = []
         for n, date, remainder in remainders:
             log.append(
-		"Computing rights for members with {} shares from {} to {}"
-		.format(n, date, recomputeStop))
+                "Computing rights for members with {} shares from {} to {}"
+                .format(n, date, recomputeStop))
             self._appendRightsPerShare(
                 nshares=n,
                 firstDateToCompute = date,
