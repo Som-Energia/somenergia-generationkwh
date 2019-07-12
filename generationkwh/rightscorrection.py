@@ -17,7 +17,7 @@ class RightsCorrection(object):
     def __init__(self, db):
         self.db = db
         self.curve = MongoTimeCurve(
-            self.db,'rightscorrection')
+            self.db,'generationkwh_rightscorrection')
 
     def rightsCorrection(self, nshares, start, stop):
         """

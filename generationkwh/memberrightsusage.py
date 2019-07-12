@@ -23,6 +23,7 @@ class MemberRightsUsage(object):
             stop=dateToLocal(stop),
             field='usage_kwh',
             )
+
     def updateUsage(self, member, start, data):
         assert type(start) == datetime.date
 

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-
 from plantmeter.mongotimecurve import MongoTimeCurve
-import datetime
 from .isodates import dateToLocal
+import datetime
 
 class RightsPerShare(object):
     """
