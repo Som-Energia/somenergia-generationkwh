@@ -5,6 +5,7 @@ import unittest
 import datetime
 import pymongo
 from .rightspershare import RightsPerShare
+from .rightscorrection import RightsCorrection
 import numpy
 
 from .isodates import  isodate, localisodate
@@ -404,8 +405,13 @@ class ProductionLoaderTest(unittest.TestCase):
 
     def test_updateRights(self):
         rights = RightsPerShare(self.db)
+        rightsCorrection = RightsCorrection(self.db)
         remainders = RemainderProviderMockup([])
-        l = ProductionLoader(rightsPerShare=rights, remainders=remainders)
+        l = ProductionLoader(
+            rightsPerShare=rights,
+            remainders=remainders,
+            rightsCorrection=rightsCorrection,
+            )
 
         l._updateRights(
             nshares=3,
@@ -413,6 +419,7 @@ class ProductionLoaderTest(unittest.TestCase):
             firstDate=isodate('2015-08-16'),
             lastDate=isodate('2015-08-17'),
             remainder=69,
+            rightsCorrection = 50*[4]
             )
 
         result = rights.rightsPerShare(3,
@@ -421,6 +428,14 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(list(result),
             +24*[1]+[0]
             +24*[1]+[0]
+            )
+
+        result = rightsCorrection.rightsCorrection(3,
+            isodate('2015-08-16'),
+            isodate('2015-08-17'))
+        self.assertEqual(list(result),
+            +24*[4]+[0]
+            +24*[4]+[0]
             )
         self.assertEqual(remainders.lastRemainders(), [
             (3, isodate('2015-08-18'), 69),
@@ -592,6 +607,7 @@ class ProductionLoaderTest(unittest.TestCase):
 
     def test_recomputeRights(self):
         rights = RightsPerShare(self.db)
+        correction = RightsCorrection(self.db)
         remainders = RemainderProviderMockup([
             (1, isodate('2015-08-15'), 10),
             ])
@@ -615,7 +631,9 @@ class ProductionLoaderTest(unittest.TestCase):
                 productionAggregator=production,
                 plantShareCurver=plantShare,
                 rightsPerShare=rights,
-                remainders=remainders)
+                remainders=remainders,
+                rightsCorrection=correction,
+                )
 
         l.recomputeRights(isodate('2015-08-11'), isodate('2015-08-14'))
 
@@ -627,6 +645,16 @@ class ProductionLoaderTest(unittest.TestCase):
             +24*[6]+[0] # Higher
             +24*[5]+[0] # Lower
             +12*[5]+11*[7]+[5]+[0] # Higher after lower
+            )
+
+        result = correction.rightsCorrection(1,
+            isodate('2015-08-11'),
+            isodate('2015-08-14'))
+        self.assertEqual(list(result),
+            +24*[0]+[0] # Same
+            +24*[0]+[0] # Higher
+            +24*[1]+[0] # Lower
+            +12*[-2]+11*[0]+[2]+[0] # Higher after lower
             )
 
         self.assertEqual(remainders.lastRemainders(), [

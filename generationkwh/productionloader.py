@@ -31,11 +31,12 @@ import numpy
 class ProductionLoader(object):
     def __init__(self,
             productionAggregator=None, plantShareCurver=None,
-            rightsPerShare=None, remainders=None):
+            rightsPerShare=None, remainders=None, rightsCorrection=None):
         self.productionAggregator = productionAggregator
         self.plantShareCurver = plantShareCurver
         self.rightsPerShare = rightsPerShare
         self.remainders = remainders
+        self.rightsCorrection = rightsCorrection
 
     def startPoint(self, startDateOfProduction, remainders):
         if not remainders:
@@ -86,13 +87,16 @@ class ProductionLoader(object):
         return userRights, newRemainder
 
 
-    def _updateRights(self, nshares, rights, firstDate, lastDate, remainder):
+    def _updateRights(self, nshares, rights, firstDate, lastDate, remainder, rightsCorrection=None):
         if self.remainders:
             self.remainders.updateRemainders([
                     [nshares, lastDate+datetime.timedelta(days=1), remainder]])
         if self.rightsPerShare:
             self.rightsPerShare.updateRightsPerShare(
                     nshares, firstDate, rights)
+        if self.rightsCorrection:
+            self.rightsCorrection.updateRightsCorrection(
+                    nshares, firstDate, rightsCorrection)
 
     def computeAvailableRights(self,lastDateToCompute=None):
         """
@@ -134,7 +138,7 @@ class ProductionLoader(object):
             log.append(
                 "Computing rights for members with {} shares from {} to {}"
                 .format(n, date, lastDate))
-            rights, remainder = self._appendRightsPerShare(
+            wantedRights, remainder = self._appendRightsPerShare(
                 nshares=n,
                 firstDateToCompute = firstDate,
                 lastDateToCompute = lastDate,
@@ -144,8 +148,9 @@ class ProductionLoader(object):
                 )
             print "remainder {}".format(remainder)
             original = self.rightsPerShare.rightsPerShare(n, firstDate, lastDate)
-            rights, error = ProductionToRightsPerShare().rectifyRights(original, rights)
-            self._updateRights(n, rights, firstDate, lastDate, remainder-error*1000)
+            rights, error = ProductionToRightsPerShare().rectifyRights(original, wantedRights)
+            correction = rights - wantedRights
+            self._updateRights(n, rights, firstDate, lastDate, remainder-error*1000, correction)
         return 'n'.join(log)
 
 
