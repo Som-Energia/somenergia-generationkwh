@@ -91,11 +91,23 @@ class ProductionToRightsPerShare_Test(unittest.TestCase):
 
     def test_computeRights_takingRemainder(self):
         self.assertComputeEquals(
-            remainder_wh = 500.0,
+            remainder_wh = 500,
             production = 25*[500],
             activeShares = 25*[8],
             nShares=1,
             expected = 12*[63,62]+[63],
+            expectedRemainder = 0,
+            )
+
+    def test_computeRights_negativeRemainder(self):
+        nshares = 1
+        totalShares = 100
+        self.assertComputeEquals(
+            remainder_wh = -1200*1000*nshares/totalShares,
+            production = 25*[500],
+            activeShares = 25*[totalShares],
+            nShares=nshares,
+            expected = [0,0,3]+22*[5],
             expectedRemainder = 0,
             )
 

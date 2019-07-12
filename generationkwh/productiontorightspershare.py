@@ -24,6 +24,7 @@ class ProductionToRightsPerShare(object):
             fraction[~numpy.isfinite(fraction) ] = 0
         fraction = numpy.concatenate( ([remainder_wh],fraction) )
         integral = fraction.cumsum()
+        integral[integral<0]=0
 
         result = numpy.diff(integral//1000)
         remainder_wh = integral[-1]%1000
