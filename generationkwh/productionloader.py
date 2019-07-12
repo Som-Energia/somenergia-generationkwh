@@ -145,7 +145,7 @@ class ProductionLoader(object):
             print "remainder {}".format(remainder)
             original = self.rightsPerShare.rightsPerShare(n, firstDate, lastDate)
             rights, error = ProductionToRightsPerShare().rectifyRights(original, rights)
-            self._updateRights(n, rights, firstDate, lastDate, remainder+error*1000)
+            self._updateRights(n, rights, firstDate, lastDate, remainder-error*1000)
         return 'n'.join(log)
 
 

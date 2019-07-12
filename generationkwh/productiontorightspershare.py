@@ -48,15 +48,15 @@ class ProductionToRightsPerShare(object):
                 # wanted is under original
                 # original must be kept, error accumulated
                 if d<0:
-                    self.error += d
+                    self.error -= d
                     return o
                 # wanted over original, compensate the error
                 # difference bigger than accumulated error
-                if -self.error > d:
-                    self.error = self.error + d
+                if self.error > d:
+                    self.error = self.error - d
                     return o
                 # difference smaller than accumulated error
-                result = o+d+self.error
+                result = o+d-self.error
                 self.error = 0
                 return result
 

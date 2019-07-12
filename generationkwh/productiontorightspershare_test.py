@@ -159,7 +159,7 @@ class ProductionToRightsPerShare_Test(unittest.TestCase):
             original  = [1,2,3,4],
             wanted    = [0,0,0,0],
             rectified = [1,2,3,4],
-            error     = -sum([1,2,3,4]),
+            error     = sum([1,2,3,4]),
         )
 
     def test_rectifyRights_wantedAlwaysLower_wantedSubstractedFromError(self):
@@ -167,7 +167,7 @@ class ProductionToRightsPerShare_Test(unittest.TestCase):
             original  = [1,2,3,4],
             wanted    = [0,0,2,0],
             rectified = [1,2,3,4],
-            error     = -sum([1,2,3-2,4]),
+            error     = sum([1,2,3-2,4]),
         )
 
     def test_rectifyRights_compensatedErrorBigger(self):
@@ -175,7 +175,7 @@ class ProductionToRightsPerShare_Test(unittest.TestCase):
             original  = [1,2,3,4],
             wanted    = [0,0,0,8],
             rectified = [1,2,3,4],
-            error     = -2,
+            error     = 2,
         )
 
     def test_rectifyRights_compensatedBinBigger(self):
