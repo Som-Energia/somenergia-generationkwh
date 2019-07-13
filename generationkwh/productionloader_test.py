@@ -521,26 +521,47 @@ class ProductionLoaderTest(unittest.TestCase):
     def test_computeAvailableRights_withAdvancedRemainder(self):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([
-            (1, isodate('2015-08-16'), 0),
+            (1, isodate('2015-08-17'), 0),
+            (2, isodate('2015-08-16'), 0),
             ])
         production = ProductionAggregatorMockUp(
                 first=isodate('2015-08-16'),
-                last=isodate('2015-08-16'),
-                data=numpy.array(100*[0]+10*[0]+[1000]+14*[0]))
+                last=isodate('2015-08-18'),
+                data=numpy.array(
+                    +25*[1000] # 16
+                    +25*[2000] # 17
+                    +25*[3000] # 18
+                ))
         plantShare = PlantShareCurverMockup(
-                data=numpy.array(100*[0]+25*[1]))
+                data=numpy.array(125*[1]))
         l = ProductionLoader(productionAggregator=production,
                 plantShareCurver=plantShare,
                 rightsPerShare=rights,
                 remainders=remainders)
+
         l.computeAvailableRights()
+
         result = rights.rightsPerShare(1,
             isodate('2015-08-16'),
-            isodate('2015-08-16'))
+            isodate('2015-08-19'))
         self.assertEqual(list(result),
-            +10*[0]+[1000]+14*[0])
+            +25*[0] # already generated, untouched
+            +24*[2000]+[0]
+            +24*[3000]+[0]
+            +25*[0] # no production yet
+            )
+        result = rights.rightsPerShare(2,
+            isodate('2015-08-16'),
+            isodate('2015-08-19'))
+        self.assertEqual(list(result),
+            +24*[2*1000]+[0] # generaed for 2 shares
+            +24*[2*2000]+[0]
+            +24*[2*3000]+[0]
+            +25*[0] # no production yet
+            )
         self.assertEqual(remainders.lastRemainders(), [
-            (1, isodate('2015-08-17'), 0),
+            (1, isodate('2015-08-19'), 0),
+            (2, isodate('2015-08-19'), 0),
             ])
 
     def test_computeAvailableRights_withSeveralDays(self):
