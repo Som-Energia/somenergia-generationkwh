@@ -7,6 +7,8 @@ import erppeek
 import dbconfig
 from yamlns import namespace as ns
 from consolemsg import step, success
+from dateutil.relativedelta import relativedelta
+from generationkwh.isodates import isodate
 
 def parseArgumments():
     import argparse
@@ -17,9 +19,12 @@ def parseArgumments():
         dest='subcommand',
         )
     computerights = subparsers.add_parser('computerights',
-        help="compute rights",
+        help="Generates new rights available",
         )
-    for sub in computerights,:
+    recompute = subparsers.add_parser('recompute',
+        help="Recompute rights granting existing ones (and compensating)",
+        )
+    for sub in computerights, recompute:
         sub.add_argument(
             '--id',
             dest='id',
@@ -37,6 +42,24 @@ def computerights(id=None):
         print nshares, day
     step("Computing production rights for each number of shares...")
     log = ProductionLoader.computeAvailableRights(id)
+    success(log)
+    step("Next day to compute after update...")
+    for nshares, day, remainderWh in sorted(Remainder.lastRemainders()):
+        print nshares, day
+
+def recompute(id=None):
+    Mix = c.GenerationkwhProductionAggregatorTesthelper
+    Remainder = c.GenerationkwhRemainderTesthelper
+    ProductionLoader = c.GenerationkwhProductionLoader
+    firstDate=Mix.firstActiveDate(id)
+    lastRemainderDate = max(
+        day
+        for nshares, day, remainderWh
+        in Remainder.lastRemainders()
+    )
+    lastDate = str(isodate(lastRemainderDate)-relativedelta(days=1))
+    step("Recomputing rights from {} to {}:", firstDate, lastDate)
+    log = ProductionLoader.recomputeRights(id, firstDate, lastDate)
     success(log)
     step("Next day to compute after update...")
     for nshares, day, remainderWh in sorted(Remainder.lastRemainders()):
