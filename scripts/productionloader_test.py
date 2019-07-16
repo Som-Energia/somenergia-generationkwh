@@ -277,6 +277,43 @@ class ProductionLoader_Test(unittest.TestCase):
         self.assertEqual(remainder.lastRemainders(), [
             ])
 
+    def test_recomputeRights_singleDay(self):
+        self.maxDiff=None
+        remainder = self.setupRemainders([])
+        aggr_id = self.setupAggregator(
+                nplants=1,
+                nmeters=1,
+                nshares=[10]).read(['id'])['id']
+        self.setupLocalMeter('mymeter00',[
+            ('2016-08-16', +24*[50]+[0]), # Same
+            ('2016-08-17', +24*[60]+[0]), # Higher
+            ('2016-08-18', +24*[40]+[0]), # Lower
+            ('2016-08-19', +23*[70]+[35]+[0]), # Higher after lower
+            ])
+        self.TestHelper.setup_rights_per_share(
+            1, '2016-08-16', 4*(24*[5]+[0]))
+
+        self.ProductionLoader.recomputeRights(aggr_id, '2016-08-16', '2016-08-19')
+
+        result = self.TestHelper.rights_per_share(1, '2016-08-16', '2016-08-19')
+        self.assertEqual(result, 
+            +24*[5]+[0] # Same
+            +24*[6]+[0] # Higher
+            +24*[5]+[0] # Lower
+            +12*[5]+11*[7]+[5]+[0] # Higher after lower
+            )
+        result = self.TestHelper.rights_correction(1, '2016-08-16', '2016-08-19')
+        self.assertEqual(result,
+            +24*[0]+[0] # Same
+            +24*[0]+[0] # Higher
+            +24*[1]+[0] # Lower
+            +12*[-2]+11*[0]+[2]+[0] # Higher after lower
+            )
+        self.assertEqual(remainder.lastRemainders(), [
+            [1, '2016-08-20', -1500],
+            ])
+
+
 unittest.TestCase.__str__ = unittest.TestCase.id
 
 if __name__ == '__main__':

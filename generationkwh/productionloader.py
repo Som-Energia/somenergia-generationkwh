@@ -94,7 +94,7 @@ class ProductionLoader(object):
         if self.rightsPerShare:
             self.rightsPerShare.updateRightsPerShare(
                     nshares, firstDate, rights)
-        if self.rightsCorrection:
+        if self.rightsCorrection and rightsCorrection is not None:
             self.rightsCorrection.updateRightsCorrection(
                     nshares, firstDate, rightsCorrection)
 
