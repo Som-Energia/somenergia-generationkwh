@@ -136,8 +136,9 @@ class ProductionLoader(object):
         log = []
         for n, date, remainder in remainders:
             log.append(
-                "Computing rights for members with {} shares from {} to {}"
-                .format(n, date, lastDate))
+                "Recomputing rights for members with {} shares from {} to {}"
+                .format(n, firstDate, lastDate))
+            print log[-1]
             wantedRights, remainder = self._appendRightsPerShare(
                 nshares=n,
                 firstDateToCompute = firstDate,
@@ -146,12 +147,25 @@ class ProductionLoader(object):
                 production = numpy.asarray(aggregatedProduction),
                 plantshares = plantShareCurve,
                 )
-            print "remainder {}".format(remainder)
             original = self.rightsPerShare.rightsPerShare(n, firstDate, lastDate)
             rights, error = ProductionToRightsPerShare().rectifyRights(original, wantedRights)
             correction = rights - wantedRights
+            log.append(
+                "- {} kWh granted\n"
+                "- {} kWh added\n"
+                "- {} kWh kept above the real production\n"
+                "- {} kWh of those could be compensated\n"
+                "- {} kWh substracted as Wh to the next remainder.\n"
+                .format(
+                    sum(rights),
+                    sum(rights-original),
+                    sum(correction[correction>0]),
+                    sum(correction[correction<0]),
+                    error)
+                )
+            print log[-1]
             self._updateRights(n, rights, firstDate, lastDate, remainder-error*1000, correction)
-        return 'n'.join(log)
+        return '\n'.join(log)
 
 
 
