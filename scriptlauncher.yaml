@@ -1,5 +1,5 @@
-generation:
-  description: Generació
+projects:
+  description: Projectes de Generació
   scripts:
     formatejaprevisions:
       title: Formateja arxius de previsió
@@ -14,21 +14,23 @@ generation:
     listplants:
       title: Llistat de plantes
       description: Mostra la definició de les plantes
-      script: python SOME_SRC/plantmeter/scripts/genkwh_production.py list
-    corvesProduccio:
+      script: python SOME_SRC/plantmeter/scripts/genkwh_plants.py list
+    corbesProduccio:
       title: Corbes de produccio
       description: >
-        Genera corva de producció
-      script: python SOME_SRC/plantmeter/scripts/genkwh_production.py gisce {plant} {start_date} {end_date} | tee {output}
+        Genera corva de producció d'un comptador d'una planta
+        - Fontivsolar: 501815908
+        - Alcolea: 501600324
+      script: python SOME_SRC/plantmeter/scripts/genkwh_mtc.py curve production {plant} {first_date} {last_date} | tee {output}
       parameters:
-        start_date:
+        first_date:
           type: date
           default: ''
-          description: data inici (ex. 2015-01-01)
-        end_date:
+          description: Primera data (ex. 2015-01-01)
+        last_date:
           type: date
           default: ''
-          description: data final (ex. 2015-03-31)
+          description: Darrera data (ex. 2015-03-31)
         plant:
           type: enum
           values:
@@ -37,7 +39,48 @@ generation:
         output:
           type: FILEDOWN
           extension: csv
-          name: production-{plant}-{start_date}-{end_date}.csv
+          name: production-{plant}-{first_date}-{last_date}.csv
+    corbesDrets:
+      title: Corbes de drets
+      description: >
+        Genera corba de drets generats per a un perfil d'inversor amb un nombre d'accions determinat
+      script: python SOME_SRC/plantmeter/scripts/genkwh_mtc.py curve rightspershare {nshares} {first_date} {last_date} | tee {output}
+      parameters:
+        first_date:
+          type: date
+          default: ''
+          description: Primera data (ex. 2015-01-01)
+        last_date:
+          type: date
+          default: ''
+          description: Darrera data (ex. 2015-03-31)
+        nshares:
+          description: Número d'accions
+        output:
+          type: FILEDOWN
+          extension: csv
+          name: rights-{nshares}-{first_date}-{last_date}.csv
+
+    corbesUs:
+      title: Corbes d'Ús
+      description: >
+        Genera corba de drets gastats d'un inversor del GenerationkWh
+      script: python SOME_SRC/plantmeter/scripts/genkwh_mtc.py curve memberrightusage {member} {first_date} {last_date} | tee {output}
+      parameters:
+        first_date:
+          type: date
+          default: ''
+          description: Primera data (ex. 2015-01-01)
+        last_date:
+          type: date
+          default: ''
+          description: Darrera data (ex. 2015-03-31)
+        member:
+          description: Id de la fitxa de soci (no pas de
+        output:
+          type: FILEDOWN
+          extension: csv
+          name: use-{member}-{first_date}-{last_date}.csv
 
 
 
