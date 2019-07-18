@@ -114,6 +114,7 @@ class ProductionLoader(object):
             log.append(
                 "Computing rights for members with {} shares from {} to {}"
                 .format(n, date, recomputeStop))
+            print log[-1]
             rights, remainder = self._appendRightsPerShare(
                 nshares=n,
                 firstDateToCompute = date,
@@ -123,6 +124,11 @@ class ProductionLoader(object):
                 plantshares = plantShareCurve,
                 )
             self._updateRights(n, rights, date, recomputeStop, remainder)
+            log.append(
+                "- {} kWh granted\n"
+                "- {} Wh of remainder"
+                .format(sum(rights), remainder))
+            print log[-1]
         return 'n'.join(log)
 
     def recomputeRights(self, firstDate, lastDate):
