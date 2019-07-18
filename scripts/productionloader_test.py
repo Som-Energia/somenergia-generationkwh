@@ -233,49 +233,6 @@ class ProductionLoader_Test(unittest.TestCase):
             [1, '2015-08-18', 0],
             ])
 
-    def test_recomputeRightsOnPeriod_withManyPlantShares_twoDays(self):
-        aggr_id = self.setupAggregator(
-                nplants=1,
-                nmeters=1,
-                nshares=[4]).read(['id'])['id']
-
-        self.setupLocalMeter('mymeter00',[
-            ('2015-08-16', 18*[0]+[10000]+6*[0]),
-            ('2015-08-17', 18*[0]+[20000]+6*[0]),
-            ('2015-08-18', 18*[0]+[40000]+6*[0]),
-            ('2015-08-19', 18*[0]+[80000]+6*[0]),
-            ])
-
-        remainder = self.setupRemainders([])
-        result = self.ProductionLoader.recomputeRightsOnPeriod(aggr_id,
-            '2015-08-17',
-            '2015-08-18',
-            [
-                dict(nshares=1, remainder_wh=0),
-            ])
-
-        self.assertNsEqual(ns(data=result),'''
-            data:
-            -
-              nshares: 1
-              first_date: '2015-08-17'
-              last_date: '2015-08-18'
-              next_date: '2015-08-19'
-              previous_remainder_wh: 0
-              rights_kwh: 15000
-              remainder_wh: 0
-        ''')
-
-        result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-19')
-        self.assertEqual(result,
-            +18*[0]+[0]+6*[0]
-            +18*[0]+[5000]+6*[0]
-            +18*[0]+[10000]+6*[0]
-            +18*[0]+[0]+6*[0]
-            )
-        # Remainders untouch
-        self.assertEqual(remainder.lastRemainders(), [
-            ])
 
     def test_recomputeRights_singleDay(self):
         self.maxDiff=None
