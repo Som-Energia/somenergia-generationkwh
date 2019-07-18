@@ -15,7 +15,7 @@ from consolemsg import success, step, fail, warn
 
 def parseArgumments():
     import argparse
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=description)
 
     subparsers = parser.add_subparsers(
         title="Subcommands",
