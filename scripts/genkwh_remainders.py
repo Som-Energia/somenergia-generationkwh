@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 description = """
-Generates remainders 
+Manages remainders of transforming plant production into GkWh rights
+to be used as starting point for the next right recomputation.
+Remainders are those Wh that do not sum up to a kWh to be used.
+Each invesment profile (nshares) has its own remainders.
+Remainders are stored with a target date where they will be used.
+Ex. A computation up to 2010-01-01, will generate a remainder for
+2010-01-02.
 """
-
 import erppeek
 import dbconfig
 from yamlns import namespace as ns
