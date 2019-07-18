@@ -1099,7 +1099,7 @@ class Investment_Test(unittest.TestCase):
         result = self.Investment.create_initial_invoices([id])
         self.assertEqual(result, [[], [
             u"Partner '{surname}, {name}' has no investment bank account"
-                .format(**self.personalData).decode('utf-8')
+                .format(**self.personalData)
             ]])
 
     def test__create_initial_invoices__investmentWithPurchaseDate(self):
@@ -1367,7 +1367,7 @@ class Investment_Test(unittest.TestCase):
             id, '2018-01-30' , 80, 1, 24, 7)
 
         self.assertEqual(unicode(errors).encode('utf-8'),
-            "Inversió {id}: El partner {surname}, {name} no té informat un compte corrent\n"
+            u"Inversió {id}: El partner {surname}, {name} no té informat un compte corrent\n"
             .format(id=id, **dbconfig.personaldata))
 
     def test__create_amortization_invoice__withUnnamedInvestment(self):
