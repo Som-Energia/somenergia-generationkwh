@@ -1366,7 +1366,7 @@ class Investment_Test(unittest.TestCase):
         invocie_id, errors = self.Investment.create_amortization_invoice(
             id, '2018-01-30' , 80, 1, 24, 7)
 
-        self.assertEqual(unicode(errors).encode('utf-8'),
+        self.assertEqual(unicode(errors),
             u"Inversió {id}: El partner {surname}, {name} no té informat un compte corrent\n"
             .format(id=id, **dbconfig.personaldata))
 
@@ -1687,8 +1687,8 @@ class Investment_Test(unittest.TestCase):
                     partner_id=self.personalData.partnerid,
                     vat="ES"+self.personalData.nif,
                     debtor_name=nom_complet,
-                    address = partner.address[0].nv.encode('utf-8'),
-                    state = partner.address[0].state_id.name.encode('utf-8'),
+                    address = partner.address[0].nv,
+                    state = partner.address[0].state_id.name,
                     iban=iban,
                     format_iban=' '.join(
                         iban[n:n+4] for n in xrange(0,len(iban),4)),
