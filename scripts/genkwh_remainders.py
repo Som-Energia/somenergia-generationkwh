@@ -6,6 +6,7 @@ Generates remainders
 import erppeek
 import dbconfig
 from yamlns import namespace as ns
+from consolemsg import success, step, fail, warn
 
 def parseArgumments():
     import argparse
@@ -24,16 +25,28 @@ def parseArgumments():
     init = subparsers.add_parser('init',
         help="initialize remainders",
         )
+    pop = subparsers.add_parser('pop',
+        help="removes the remainders for the last date",
+        )
+    update = subparsers.add_parser('update',
+        help="writes the remainders from a file",
+        )
     clear = subparsers.add_parser('clear',
         help="clear remainders objects",
         )
+    for sub in update,:
+        sub.add_argument(
+            dest='infile',
+            metavar='FILE.csv',
+            help='space separated values file with rows: nshares isodate Wh',
+            )
     for sub in init,: 
         sub.add_argument(
             '--nshares',
             dest='nshares',
             type=int,
             metavar='NSHARES',
-            help="number of shares"
+            help="number of shares",
             ),
         sub.add_argument(
             '--start',
@@ -50,9 +63,9 @@ def active():
         print nshares, day, remainderWh
 
 def listall():
-    remainder_obj = c.GenerationkwhRemainder
-    remainders_id = remainder_obj.search([])
-    remainders = remainder_obj.read(
+    Remainder = c.GenerationkwhRemainder
+    remainders_id = Remainder.search([])
+    remainders = Remainder.read(
             remainders_id,
             ['n_shares', 'target_day', 'remainder_wh']
             )
@@ -63,13 +76,42 @@ def listall():
               remainder['remainder_wh']
 
 def init(start=None, nshares=None):
-    remainder_obj = c.GenerationkwhRemainder
-    remainder_obj.updateRemainders(
+    Remainder = c.GenerationkwhRemainder
+    Remainder.updateRemainders(
             [(n, start, 0)
                 for n in range(1,nshares)])
 def clear():
-    remainder_obj = c.GenerationkwhRemainder
-    remainder_obj.clean()
+    Remainder = c.GenerationkwhRemainder
+    Remainder.clean()
+
+def update(infile):
+    import io
+    with io.open(infile) as f:
+        remainders = [
+            (int(nshares), targetDay, int(wh))
+            for nshares, targetDay, wh
+            in (line.split() for line in f)
+        ]
+    Remainder = c.GenerationkwhRemainder
+    Remainder.updateRemainders(remainders)
+
+def pop():
+    Remainder = c.GenerationkwhRemainder
+    Helper = c.GenerationkwhRemainderTesthelper
+    lastRemainderTarget = max(
+        targetDay
+        for nshares, targetDay, remainderWh
+        in Helper.lastRemainders() or [(0, '2000-01-01', 0)]
+    )
+    remaindersToPop = Remainder.search([('target_day','=',lastRemainderTarget)])
+
+    remaindersToPop or fail("No remainders left to pop at date {}", lastRemainderTarget)
+    step("Removing {} remainders at date {}", len(remaindersToPop), lastRemainderTarget)
+    Remainder.unlink(remaindersToPop)
+    success("Done")
+
+    
+
 
 c = erppeek.Client(**dbconfig.erppeek)
 
@@ -77,7 +119,7 @@ def main():
     # Calls the function homonymous to the subcommand
     # with the options as paramteres
     args = parseArgumments()
-    print args.dump()
+    warn(args.dump())
     subcommand = args.subcommand
     del args.subcommand
     globals()[subcommand](**args)
