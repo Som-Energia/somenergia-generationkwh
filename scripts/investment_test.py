@@ -467,7 +467,7 @@ class Investment_Test(unittest.TestCase):
             )
 
         self.assertRegexpMatches(name,r'^GKWH[0-9]{5}$')
-        self.assertNsEqual(investment, """
+        self.assertNsEqual(investment, u"""
             id: {id}
             member_id:
             - {member_id}
@@ -585,7 +585,7 @@ class Investment_Test(unittest.TestCase):
             u' Quantitat: 4000 €, IBAN: ES7712341234161234567890\n'
             )
 
-        self.assertNsEqual(investment, """
+        self.assertNsEqual(investment, u"""
             id: {id}
             member_id:
             - {member_id}
@@ -631,7 +631,7 @@ class Investment_Test(unittest.TestCase):
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
-        self.assertNsEqual(investment, """
+        self.assertNsEqual(investment, u"""
             id: {id}
             member_id:
             - {member_id}
@@ -778,7 +778,7 @@ class Investment_Test(unittest.TestCase):
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
-        self.assertNsEqual(investment, """
+        self.assertNsEqual(investment, u"""
             id: {id}
             member_id:
             - {member_id}
@@ -981,7 +981,7 @@ class Investment_Test(unittest.TestCase):
         mandate_id = self.Investment.get_or_create_payment_mandate(
             self.personalData.partnerid, iban, gkwh.mandateName, gkwh.creditorCode)
 
-        self.assertInvoiceInfoEqual(invoice_ids[0], """\
+        self.assertInvoiceInfoEqual(invoice_ids[0], u"""\
             account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
             amount_total: 2000.0
             amount_untaxed: 2000.0
@@ -1098,7 +1098,7 @@ class Investment_Test(unittest.TestCase):
         self.Partner.write(self.personalData.partnerid,dict(bank_inversions = False))
         result = self.Investment.create_initial_invoices([id])
         self.assertEqual(result, [[], [
-            "Partner '{surname}, {name}' has no investment bank account"
+            u"Partner '{surname}, {name}' has no investment bank account"
                 .format(**self.personalData).decode('utf-8')
             ]])
 
@@ -1247,7 +1247,7 @@ class Investment_Test(unittest.TestCase):
 
         investment = self.Investment.browse(id)
 
-        self.assertInvoiceInfoEqual(invoice_id, """\
+        self.assertInvoiceInfoEqual(invoice_id, u"""\
             account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
             amount_total: 73.0
             amount_untaxed: 73.0
@@ -1412,7 +1412,7 @@ class Investment_Test(unittest.TestCase):
         ]))
 
         result = self.Invoice.investmentAmortization_notificationData_asDict([invoice_id])
-        self.assertNsEqual(ns(result), """\
+        self.assertNsEqual(ns(result), u"""\
             inversionName: {inv.name}
             ownerName: {surname}, {name}
             ownerNif: {nif}
@@ -1662,7 +1662,7 @@ class Investment_Test(unittest.TestCase):
             mandate.creditor_id = mandate.creditor_id[1]
             partner = self.ResPartner.browse(self.personalData.partnerid)
             nom_complet = self.personalData.surname + ", " + self.personalData.name
-            self.assertNsEqual(mandate, """\
+            self.assertNsEqual(mandate, u"""\
                 creditor_address: CL. PIC DE PEGUERA, 11 A 2 8  17003 GIRONA (ESPAÑA)
                 creditor_code: CREDITORCODE
                 creditor_id: SOM ENERGIA SCCL
@@ -2030,7 +2030,7 @@ class Investment_Test(unittest.TestCase):
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 4000 €, IBAN: ES7712341234161234567890\n'
             )
-        self.assertNsEqual(investment, """
+        self.assertNsEqual(investment, u"""
             id: {id}
             member_id:
             - {member_id}
@@ -2111,7 +2111,7 @@ class Investment_Test(unittest.TestCase):
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
-        self.assertNsEqual(investment, """
+        self.assertNsEqual(investment, u"""
             id: {id}
             member_id:
             - {member_id}
@@ -2157,7 +2157,7 @@ class Investment_Test(unittest.TestCase):
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
-        self.assertNsEqual(investment, """
+        self.assertNsEqual(investment, u"""
             id: {id}
             member_id:
             - {member_id}
@@ -2240,7 +2240,7 @@ class Investment_Test(unittest.TestCase):
 
         self.assertTrue(invoice_id)
         investment = self.Investment.browse(id)
-        self.assertInvoiceInfoEqual(invoice_id, """\
+        self.assertInvoiceInfoEqual(invoice_id, u"""\
             account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
             amount_total: 2000.0
             amount_untaxed: 2000.0
@@ -2300,7 +2300,7 @@ class Investment_Test(unittest.TestCase):
 
         self.assertTrue(invoice_id)
         investment = self.Investment.browse(id)
-        self.assertInvoiceInfoEqual(invoice_id, """\
+        self.assertInvoiceInfoEqual(invoice_id, u"""\
             account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
             amount_total: 2000.0
             amount_untaxed: 2000.0
@@ -2364,7 +2364,7 @@ class Investment_Test(unittest.TestCase):
         log = investment.pop('log')
         name = investment.pop('name')
         actions_log = investment.pop('actions_log') 
-        self.assertNsEqual(investment, """
+        self.assertNsEqual(investment, u"""
             id: {id}
             member_id:
             - {member_id}
@@ -2404,7 +2404,7 @@ class Investment_Test(unittest.TestCase):
         log = investment.pop('log')
         name = investment.pop('name')
         actions_log = investment.pop('actions_log')
-        self.assertNsEqual(investment, """
+        self.assertNsEqual(investment, u"""
             id: {id}
             member_id:
             - {member_id}
@@ -2494,7 +2494,7 @@ class Investment_Test(unittest.TestCase):
         log = investment.pop('log')
         investment_name = investment.pop('name')
         actions_log = investment.pop('actions_log')
-        self.assertNsEqual(investment, """
+        self.assertNsEqual(investment, u"""
             id: {id}
             member_id:
             - {member_id}
@@ -2513,7 +2513,7 @@ class Investment_Test(unittest.TestCase):
                 date_today = date_today,
                 **self.personalData
                 ))
-        self.assertInvoiceInfoEqual(invoice_id, """\
+        self.assertInvoiceInfoEqual(invoice_id, u"""\
             account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
             amount_total: 960.0
             amount_untaxed: 960.0
@@ -2586,7 +2586,7 @@ class Investment_Test(unittest.TestCase):
 
         self.assertTrue(invoice_id)
         investment = self.Investment.browse(id)
-        self.assertInvoiceInfoEqual(invoice_id, """\
+        self.assertInvoiceInfoEqual(invoice_id, u"""\
             account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
             amount_total: 2000.0
             amount_untaxed: 2000.0
@@ -2660,7 +2660,7 @@ class Investment_Test(unittest.TestCase):
 
         self.assertTrue(invoice_id)
         investment = self.Investment.browse(id)
-        self.assertInvoiceInfoEqual(invoice_id, """\
+        self.assertInvoiceInfoEqual(invoice_id, u"""\
             account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
             amount_total: 1993.0
             amount_untaxed: 1993.0
@@ -2755,7 +2755,7 @@ class Investment_Test(unittest.TestCase):
 
         self.assertTrue(invoice_id)
         investment = self.Investment.browse(id)
-        self.assertInvoiceInfoEqual(invoice_id, """\
+        self.assertInvoiceInfoEqual(invoice_id, u"""\
             account_id: 410000{p.nsoci:0>6s} {p.surname}, {p.name}
             amount_total: 1980.0
             amount_untaxed: 1980.0
@@ -2961,7 +2961,7 @@ class Investment_Test(unittest.TestCase):
         log = old_investment.pop('log')
         name = old_investment.pop('name')
         actions_log = old_investment.pop('actions_log')
-        self.assertNsEqual(old_investment, """
+        self.assertNsEqual(old_investment, u"""
             id: {id}
             member_id:
             - {newMember.id}
@@ -2985,7 +2985,7 @@ class Investment_Test(unittest.TestCase):
         log = investment.pop('log')
         name = investment.pop('name')
         actions_log = investment.pop('actions_log')
-        self.assertNsEqual(investment, """
+        self.assertNsEqual(investment, u"""
             id: {id}
             member_id:
             - {member_id}
@@ -3029,7 +3029,7 @@ class Investment_Test(unittest.TestCase):
         log = old_investment.pop('log')
         name = old_investment.pop('name')
         actions_log = old_investment.pop('actions_log')
-        self.assertNsEqual(old_investment, """
+        self.assertNsEqual(old_investment, u"""
             id: {id}
             member_id:
             - {newMember.id}
@@ -3053,7 +3053,7 @@ class Investment_Test(unittest.TestCase):
         log = investment.pop('log')
         name = investment.pop('name')
         actions_log = investment.pop('actions_log')
-        self.assertNsEqual(investment, """
+        self.assertNsEqual(investment, u"""
             id: {id}
             member_id:
             - {member_id}
@@ -3097,7 +3097,7 @@ class Investment_Test(unittest.TestCase):
             ('name', '=', period_name),
             ])[0]
         move = ns(self.AccountMove.read(move_id, []))
-        self.assertNsEqual(move,"""
+        self.assertNsEqual(move,u"""
             id: {move_id}
             amount: 1000.0
             journal_id:
@@ -3294,7 +3294,7 @@ class InvestmentList_Test(unittest.TestCase):
         name = self.Investment.read(id, ['name'])['name']
 
         result = self.list(member_id=self.personalData.member_id)
-        self.assertNsEqual(ns(data=result), """\
+        self.assertNsEqual(ns(data=result), u"""\
             data:
             - name: {investment_name}
               id: {id}
@@ -3335,7 +3335,7 @@ class InvestmentList_Test(unittest.TestCase):
         name2 = self.Investment.read(id2, ['name'])['name']
 
         result = self.list(member_id=self.personalData.member_id)
-        self.assertNsEqual(ns(data=result), """\
+        self.assertNsEqual(ns(data=result), u"""\
             data:
             - name: {investment_name}
               id: {id}
@@ -3397,7 +3397,7 @@ class InvestmentList_Test(unittest.TestCase):
         name = self.Investment.read(id, ['name'])['name']
 
         result = self.list(member_id=None)
-        self.assertNsEqual(ns(data=result), """\
+        self.assertNsEqual(ns(data=result), u"""\
             data:
             - name: {investment_name}
               id: {id}
