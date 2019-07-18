@@ -45,7 +45,7 @@ class ProductionLoader(object):
             for shares, date, remainderwh in remainders
             )
 
-    def _updateableInterval(self, remainders):
+    def _updatableInterval(self, remainders):
         """
             Returns the first and last day of production required to
             recompute rights given the remainders which have information
@@ -100,7 +100,7 @@ class ProductionLoader(object):
         readings.
         """
         remainders = self.remainders.lastRemainders()
-        recomputeStart, recomputeStop = self._updateableInterval(remainders)
+        recomputeStart, recomputeStop = self._updatableInterval(remainders)
         if lastDateToCompute:
             recomputeStop = lastDateToCompute
         aggregatedProduction = self.productionAggregator.get_kwh(recomputeStart, recomputeStop)

@@ -201,33 +201,33 @@ class ProductionLoaderTest(unittest.TestCase):
         e1,e2 = expected
         self.assertEqual((isodate(e1),isodate(e2)), result)
 
-    def test_updateableInterval_withNoremainders_takesFirstMeassure(self):
+    def test_updatableInterval_withNoremainders_takesFirstMeassure(self):
         p = ProductionAggregatorMockUp(
                 first=isodate('2000-01-01'),
                 last=isodate('2006-01-01'),
                 )
         l = ProductionLoader(productionAggregator=p)
-        interval = l._updateableInterval([])
+        interval = l._updatableInterval([])
         self.assertDatePairEqual( ('2000-01-01','2006-01-01'), interval)
 
-    def test_updateableInterval_withSingleRemainders_takesIt(self):
+    def test_updatableInterval_withSingleRemainders_takesIt(self):
         p = ProductionAggregatorMockUp(
                 first=isodate('2000-01-01'),
                 last=isodate('2006-01-01'),
                 )
         l = ProductionLoader(productionAggregator=p)
-        interval = l._updateableInterval([
+        interval = l._updatableInterval([
             (1,isodate('2001-01-01'), 45),
             ])
         self.assertDatePairEqual( ('2001-01-01','2006-01-01'), interval)
 
-    def test_updateableInterval_withManyRemainders_takesEarlier(self):
+    def test_updatableInterval_withManyRemainders_takesEarlier(self):
         p = ProductionAggregatorMockUp(
                 first=isodate('2000-01-01'),
                 last=isodate('2006-01-01'),
                 )
         l = ProductionLoader(productionAggregator=p)
-        interval = l._updateableInterval([
+        interval = l._updatableInterval([
             (1,isodate('2002-01-01'), 45),
             (2,isodate('2001-01-01'), 45),
             ])
