@@ -38,23 +38,22 @@ class ProductionLoader(object):
         self.remainders = remainders
         self.rightsCorrection = rightsCorrection
 
-    def startPoint(self, startDateOfProduction, remainders):
-        if not remainders:
-            return startDateOfProduction
+    def _olderRemainder(self, remainders):
+        if not remainders: return None
         return min(
             date
             for shares, date, remainderwh in remainders
             )
 
-    def _recomputationInterval(self, remainders):
+    def _updateableInterval(self, remainders):
         """
             Returns the first and last day of production required to
             recompute rights given the remainders which have information
             of the last computed rights date for each given number of shares.
         """
-        firstMeasurement = self.productionAggregator.getFirstMeasurementDate()
         return (
-            self.startPoint(firstMeasurement, remainders),
+            self._olderRemainder(remainders) or
+                self.productionAggregator.getFirstMeasurementDate(),
             self.productionAggregator.getLastMeasurementDate()
             )
 
@@ -101,7 +100,7 @@ class ProductionLoader(object):
         readings.
         """
         remainders = self.remainders.lastRemainders()
-        recomputeStart, recomputeStop = self._recomputationInterval(remainders)
+        recomputeStart, recomputeStop = self._updateableInterval(remainders)
         if lastDateToCompute:
             recomputeStop = lastDateToCompute
         aggregatedProduction = self.productionAggregator.get_kwh(recomputeStart, recomputeStop)

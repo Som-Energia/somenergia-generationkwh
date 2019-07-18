@@ -173,62 +173,61 @@ class ProductionLoaderTest(unittest.TestCase):
         c.drop_database(self.databasename)
 
 
-    def assertStartPointEqual(self, firstProductionDate, remainders, expected):
+    def assertOlderRemainderEqual(self, remainders, expected):
         l = ProductionLoader()
-        date = l.startPoint(isodate(firstProductionDate),[
+        date = l._olderRemainder([
             (shares, isodate(date), remainderwh)
             for shares, date, remainderwh in remainders
             ])
-        self.assertEqual(str(date), expected)
+        self.assertEqual(date and str(date), expected)
 
-    def test_startPoint_withNoremainders(self):
-        self.assertStartPointEqual('2000-01-01',[
-            ], '2000-01-01')
+    def test_olderRemainder_noremainders(self):
+        self.assertOlderRemainderEqual([
+            ], None)
 
-    def test_startPoint_withSingleRemainder(self):
-        self.assertStartPointEqual('2000-01-01',[
+    def test_olderRemainder_singleRemainder(self):
+        self.assertOlderRemainderEqual([
             (1, '2001-01-01', 45),
             ], '2001-01-01')
 
-    def test_startPoint_withManyRemainders(self):
-        self.assertStartPointEqual('2000-01-01',[
-            (1, '2002-01-01', 45),
-            (2, '2001-01-01', 45),
-            ], '2001-01-01')
-
+    def test_olderRemainder_manyRemainders_takesEarlier(self):
+        self.assertOlderRemainderEqual([
+            (1, '2001-01-01', 45),
+            (2, '2000-01-01', 45),
+            ], '2000-01-01')
 
 
     def assertDatePairEqual(self, expected, result):
         e1,e2 = expected
         self.assertEqual((isodate(e1),isodate(e2)), result)
 
-    def test_getRecomputationInterval_withNoremainders_takesFirstMeassure(self):
+    def test_updateableInterval_withNoremainders_takesFirstMeassure(self):
         p = ProductionAggregatorMockUp(
                 first=isodate('2000-01-01'),
                 last=isodate('2006-01-01'),
                 )
         l = ProductionLoader(productionAggregator=p)
-        interval = l._recomputationInterval([])
+        interval = l._updateableInterval([])
         self.assertDatePairEqual( ('2000-01-01','2006-01-01'), interval)
 
-    def test_getRecomputationInterval_withSingleRemainders_takesIt(self):
+    def test_updateableInterval_withSingleRemainders_takesIt(self):
         p = ProductionAggregatorMockUp(
                 first=isodate('2000-01-01'),
                 last=isodate('2006-01-01'),
                 )
         l = ProductionLoader(productionAggregator=p)
-        interval = l._recomputationInterval([
+        interval = l._updateableInterval([
             (1,isodate('2001-01-01'), 45),
             ])
         self.assertDatePairEqual( ('2001-01-01','2006-01-01'), interval)
 
-    def test_getRecomputationInterval_withManyRemainders_takesEarlier(self):
+    def test_updateableInterval_withManyRemainders_takesEarlier(self):
         p = ProductionAggregatorMockUp(
                 first=isodate('2000-01-01'),
                 last=isodate('2006-01-01'),
                 )
         l = ProductionLoader(productionAggregator=p)
-        interval = l._recomputationInterval([
+        interval = l._updateableInterval([
             (1,isodate('2002-01-01'), 45),
             (2,isodate('2001-01-01'), 45),
             ])
