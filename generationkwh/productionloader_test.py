@@ -197,21 +197,6 @@ class ProductionLoaderTest(unittest.TestCase):
             ], '2001-01-01')
 
 
-    def test_endPoint_withNoProduction(self):
-        l = ProductionLoader()
-        date = l.endPoint(isodate('2000-01-01'), [])
-        self.assertEqual('2000-01-01', str(date))
-
-    def test_endPoint_withOneDay(self):
-        l = ProductionLoader()
-        date = l.endPoint(isodate('2000-01-01'), 25*[0])
-        self.assertEqual('2000-01-02', str(date))
-
-    def test_endPoint_withHalfADay_justReturnsTheWholeOnes(self):
-        l = ProductionLoader()
-        date = l.endPoint(isodate('2000-01-01'), 27*[0])
-        self.assertEqual('2000-01-02', str(date))
-
 
     def assertDatePairEqual(self, expected, result):
         e1,e2 = expected

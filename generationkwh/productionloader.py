@@ -46,9 +46,6 @@ class ProductionLoader(object):
             for shares, date, remainderwh in remainders
             )
 
-    def endPoint(self, intervalStart, curve):
-        return intervalStart+datetime.timedelta(days=len(curve)//25)
-
     def _recomputationInterval(self, remainders):
         """
             Returns the first and last day of production required to
