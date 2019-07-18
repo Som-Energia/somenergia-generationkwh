@@ -37,6 +37,25 @@ $ sudo apt-get build-dep python-numpy
 
 ## CHANGES
 
+### 2.5.4 2019-07-xx
+
+_Production rewrite release_
+
+- Simplifications due to plantmeter functionality externalized to gisce
+    - Tests fill production directly instead using csv's plugins
+    - Removed `som_generation.ProductionLoader.retrieveMeasuresFromPlants`
+    - Removed `som_generation.ProductionAggregatorProvider.getNShares`
+- `genkwh_reminders` new subcommands pop and update
+- `genkwh_productionloader` recompute subcommand to be able to recompute
+  rights respecting existing ones if something weird happens
+  (ex. you have been reading from the wrong plant for a while)
+- A new mongo collection `rightscorrection` used to track the divergences
+  from the rights curve that should be expected given the production
+  when you apply recompute.
+- Added scriptlauncher file to remotely launch commands of interest
+- ProductionLoader.recomputeRightsOnPeriod
+- added parameter `lastDateToCompute` to `ProductionLoader.computeAvailableRights`
+
 ### 2.5.3 2019-06-17
 
 - MOD: Add IRPF retention to amortization and divestment invoices

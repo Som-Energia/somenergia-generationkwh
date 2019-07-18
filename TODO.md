@@ -2,29 +2,6 @@
 
 ## Inmediate TODO's
 
-+ Locate and fix the found problem in tested batch
-    + Fix: 32 limit on choose
-    + Fix: 3.0 P4-P5-P6 not used in P1-P2-P3
-+ Traduir Mail Premi
-+ Definir grups enviament segons data enviament vs data efectiva
-    + Grup 1: fins el dia que s'envii
-    + Grup 2: fins el 2016-04-26
-+ Muntar template
-+ Redactar versio sense maquina del temps
-+ Traduir sense maquina del temps
-+ Posar la data efectiva de tots
-+ Introduir els preus a produccio
-+ Escriure script d'enviament
-    + Seleccionar els socis que han invertit abans de 2016-04-26
-    + Funcio per enviar el correu
-- Enviar correu
-- Modificar el mail d'assignacio per que inclogui la data effectiva
-- Posar la data effectiva a totes les inversions comprovades
-- Cron: Create default assignment for investment a month about becoming effective and send an email
-
-
-## Unscheduled TODO's
-
 - Turn warning on investment creation with no member available into a logged warning
 - Investment: Add test on list for inactivated investment
 - Assignments: Add test for observations log
@@ -203,6 +180,24 @@
 	+ Add Remainder method (startTrackingRights?) to add a 0 kW remainder at production start for n-shares if there is no remainder yet
 	+ When invoicing, if nshares has no reminder, call startTrackingRights, so next time we load production will be computed, and use 1-share multiplied instead
 	+ Make generationkwh.rightspershare.RightsPerShare.rightspershare resilent to those cases
-
++ Locate and fix the found problem in tested batch
+    + Fix: 32 limit on choose
+    + Fix: 3.0 P4-P5-P6 not used in P1-P2-P3
++ Traduir Mail Premi
++ Definir grups enviament segons data enviament vs data efectiva
+    + Grup 1: fins el dia que s'envii
+    + Grup 2: fins el 2016-04-26
++ Muntar template
++ Redactar versio sense maquina del temps
++ Traduir sense maquina del temps
++ Posar la data efectiva de tots
++ Introduir els preus a produccio
++ Escriure script d'enviament
+    + Seleccionar els socis que han invertit abans de 2016-04-26
+    + Funcio per enviar el correu
++ Enviar correu
++ Modificar el mail d'assignacio per que inclogui la data effectiva
++ Posar la data effectiva a totes les inversions comprovades
++ Cron: Create default assignment for investment a month about becoming effective and send an email
 
 
