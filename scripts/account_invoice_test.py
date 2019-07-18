@@ -159,7 +159,7 @@ class Account_Invoice_Test(unittest.TestCase):
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
 
-        self.assertAccountingByInvoice(invoice_ids[0], """
+        self.assertAccountingByInvoice(invoice_ids[0], u"""
         movelines:
         - account_id: 1635000{nsoci:>05} {surname}, {name}
           amount_to_pay: 4000.0
@@ -205,7 +205,7 @@ class Account_Invoice_Test(unittest.TestCase):
             invoice_ids[0], 'payment movement')
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
-        self.assertAccountingByInvoice(invoice_ids[0], """
+        self.assertAccountingByInvoice(invoice_ids[0], u"""
         movelines:
         # Open
         - account_id: 1635000{nsoci:>05} {surname}, {name}
@@ -280,7 +280,7 @@ class Account_Invoice_Test(unittest.TestCase):
             invoice_ids[0], 'an unpayment')
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
-        self.assertAccountingByInvoice(invoice_ids[0], """
+        self.assertAccountingByInvoice(invoice_ids[0], u"""
         movelines:
         # Open
         - account_id: 1635000{nsoci:>05} {surname}, {name}
@@ -443,7 +443,7 @@ class Account_Invoice_Test(unittest.TestCase):
 
         investment_name = self.Investment.read(investment_id,['name'])['name']
 
-        self.assertAccountingByInvoice(amortization_ids[0], """
+        self.assertAccountingByInvoice(amortization_ids[0], u"""
         movelines:
         - account_id: 1635000{nsoci:>05} {surname}, {name}
           amount_to_pay: -160.0
@@ -493,7 +493,7 @@ class Account_Invoice_Test(unittest.TestCase):
         self.erp.GenerationkwhPaymentWizardTesthelper.pay(
             amortization_ids[0], 'movement description')
 
-        self.assertAccountingByInvoice(amortization_ids[0], """
+        self.assertAccountingByInvoice(amortization_ids[0], u"""
         movelines:
         - account_id: 1635000{nsoci:>05} {surname}, {name}
           amount_to_pay: -160.0
