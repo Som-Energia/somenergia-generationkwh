@@ -2697,7 +2697,7 @@ class Investment_Test(unittest.TestCase):
               - {id}
               - 'SI: {investment_name}'
               invoice_line_tax_id: []
-              name: 'Retenció IRPF sobre l''estalvi del Generationkwh de 2019 de GKWH04595 '
+              name: 'Retenció IRPF sobre l''estalvi del Generationkwh de 2019 de {investment_name} '
               note:
                 divestmentDate: '{invoice_date}'
                 investmentId: {investment_id}
