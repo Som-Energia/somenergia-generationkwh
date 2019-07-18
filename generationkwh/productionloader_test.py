@@ -594,6 +594,41 @@ class ProductionLoaderTest(unittest.TestCase):
             (1, isodate('2015-08-18'), 0),
             ])
 
+    def test_computeAvailableRights_remainder(self):
+        rights = RightsPerShare(self.db)
+        remainders = RemainderProviderMockup([
+            (1, isodate('2015-08-16'), 0),
+            ])
+        production = ProductionAggregatorMockUp(
+                first=isodate('2015-08-16'),
+                last=isodate('2015-08-17'),
+                data=numpy.array(
+                    +10*[0]+[3003]+14*[0]
+                    +10*[0]+[5006]+14*[0]
+                ))
+        plantShare = PlantShareCurverMockup(
+                data=numpy.array(2*25*[10]))
+        l = ProductionLoader(productionAggregator=production,
+                plantShareCurver=plantShare,
+                rightsPerShare=rights,
+                remainders=remainders)
+        log = l.computeAvailableRights()
+        result = rights.rightsPerShare(1,
+            isodate('2015-08-16'),
+            isodate('2015-08-17'))
+        self.assertEqual(list(result),
+            +10*[0]+[300]+14*[0]
+            +10*[0]+[500]+14*[0]
+            )
+        self.assertEqual(remainders.lastRemainders(), [
+            (1, isodate('2015-08-18'), 900),
+            ])
+        self.assertMultiLineEqual(log,
+            "Computing rights for members with 1 shares from 2015-08-16 to 2015-08-17\n"
+            "- 800 kWh granted\n"
+            "- 900 Wh of remainder"
+        )
+
     def test_computeAvailableRights_withExplicitStop(self):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([
@@ -656,7 +691,7 @@ class ProductionLoaderTest(unittest.TestCase):
                 rightsCorrection=correction,
                 )
 
-        l.recomputeRights(isodate('2015-08-11'), isodate('2015-08-14'))
+        log = l.recomputeRights(isodate('2015-08-11'), isodate('2015-08-14'))
 
         result = rights.rightsPerShare(1,
             isodate('2015-08-11'),
@@ -681,6 +716,14 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(remainders.lastRemainders(), [
             (1, isodate('2015-08-15'), -1500),
             ])
+        self.assertMultiLineEqual(log,
+            "Recomputing rights for members with 1 shares from 2015-08-11 to 2015-08-14\n"
+            "- 526 kWh granted\n"
+            "- 46 kWh added\n"
+            "- 26 kWh kept above the real production\n"
+            "- -24 kWh of those could be compensated\n"
+            "- 2 kWh substracted as Wh to the next remainder.\n"
+        )
 
 
 

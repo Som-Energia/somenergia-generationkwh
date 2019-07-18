@@ -129,7 +129,7 @@ class ProductionLoader(object):
                 "- {} Wh of remainder"
                 .format(sum(rights), remainder))
             print log[-1]
-        return 'n'.join(log)
+        return '\n'.join(log)
 
     def recomputeRights(self, firstDate, lastDate):
         """
