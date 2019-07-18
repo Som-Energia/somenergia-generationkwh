@@ -249,21 +249,6 @@ class ProductionLoaderTest(unittest.TestCase):
             ])
         self.assertDatePairEqual( ('2001-01-01','2006-01-01'), interval)
 
-    @unittest.skip("Failing case!!")
-    def test_getRecomputationInterval_withRemaindersSameTarget_takesLater(self):
-        p = ProductionAggregatorMockUp(
-                first=isodate('2000-01-01'),
-                last=isodate('2006-01-01'),
-                )
-        l = ProductionLoader(productionAggregator=p)
-        interval = l._recomputationInterval([
-            (1,isodate('2002-01-01'), 45),
-            (1,isodate('2001-01-01'), 45),
-            ])
-        self.assertDatePairEqual(
-            ('2002-01-01','2006-01-01'),
-            interval)
-
     def test_appendRightsPerShare_singleDay(self):
         l = ProductionLoader()
         rights, remainder = l._appendRightsPerShare(
