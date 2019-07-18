@@ -391,7 +391,7 @@ class PartnerAssignments_Test(unittest.TestCase):
         contract = self.contractInfo(self.contract_id)
 
         result = self.list(partner_id=self.personalData.partnerid)
-        self.assertNsEqual(ns(data=result), """\
+        self.assertNsEqual(ns(data=result), u"""\
             data:
             - id: {id}
               priority: 1
