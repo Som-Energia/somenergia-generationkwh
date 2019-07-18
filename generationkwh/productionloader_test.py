@@ -41,7 +41,7 @@ class ProductionAggregatorMockUp(object):
             backpad = -trailing
             trailing = 0
 
-        data = self.data[offset:nbins-trailing-frontpad]
+        data = self.data[offset:offset+nbins-frontpad-backpad]
 
         return zeropad(data, frontpad, backpad)
 
@@ -55,78 +55,85 @@ class ProductionAggregatorMockUp_Test(unittest.TestCase):
     def setUp(self):
         self.maxDiff=None
         self.p = ProductionAggregatorMockUp(
-            first=isodate('2015-08-16'),
-            last=isodate('2015-08-20'),
+            first=isodate('2015-08-11'),
+            last=isodate('2015-08-15'),
             data=numpy.arange(100),
             )
 
-    def test_getkwh_empyInterval(self):
+    def test_getkwh_empyinterval(self):
         result = self.p.get_kwh(
-            isodate('2015-08-17'),
-            isodate('2015-08-16'),
+            isodate('2015-08-12'),
+            isodate('2015-08-11'),
             )
         self.assertEqual(list(result), [])
 
+    def test_getkwh_singleDate(self):
+        result = self.p.get_kwh(
+            isodate('2015-08-12'),
+            isodate('2015-08-12'),
+            )
+        self.assertEqual(list(result), range(25,50))
+
     def test_getkwh_beforeData(self):
         result = self.p.get_kwh(
-            isodate('2015-08-14'),
-            isodate('2015-08-15'),
+            isodate('2015-08-09'),
+            isodate('2015-08-10'),
             )
         self.assertEqual(list(result), 50*[0])
 
     def test_getkwh_afterData(self):
         result = self.p.get_kwh(
-            isodate('2015-08-21'),
-            isodate('2015-08-22'),
+            isodate('2015-08-16'),
+            isodate('2015-08-17'),
             )
         self.assertEqual(list(result), 50*[0])
 
     def test_getkwh_matchingData(self):
         result = self.p.get_kwh(
-            isodate('2015-08-16'),
-            isodate('2015-08-20'),
+            isodate('2015-08-11'),
+            isodate('2015-08-15'),
             )
         self.assertEqual(list(result), range(100))
 
     def test_getkwh_startInMiddle(self):
         result = self.p.get_kwh(
-            isodate('2015-08-17'),
-            isodate('2015-08-20'),
+            isodate('2015-08-12'),
+            isodate('2015-08-15'),
             )
         self.assertEqual(list(result), range(25,100))
 
     def test_getkwh_endInMiddle(self):
         result = self.p.get_kwh(
-            isodate('2015-08-16'),
-            isodate('2015-08-19'),
+            isodate('2015-08-11'),
+            isodate('2015-08-13'),
             )
         self.assertEqual(list(result), range(75))
 
     def test_getkwh_startingBeforeData(self):
         result = self.p.get_kwh(
+            isodate('2015-08-10'),
             isodate('2015-08-15'),
-            isodate('2015-08-20'),
             )
         self.assertEqual(list(result), 25*[0]+range(100))
 
     def test_getkwh_startingBeforeDataEndingMiddle(self):
         result = self.p.get_kwh(
-            isodate('2015-08-15'),
-            isodate('2015-08-19'),
+            isodate('2015-08-10'),
+            isodate('2015-08-13'),
             )
         self.assertEqual(list(result), 25*[0]+range(75))
 
     def test_getkwh_endingAfterData(self):
         result = self.p.get_kwh(
+            isodate('2015-08-11'),
             isodate('2015-08-16'),
-            isodate('2015-08-21'),
             )
         self.assertEqual(list(result), range(100)+25*[0])
 
     def test_getkwh_endingAfterDataStartingMiddle(self):
         result = self.p.get_kwh(
-            isodate('2015-08-17'),
-            isodate('2015-08-21'),
+            isodate('2015-08-12'),
+            isodate('2015-08-16'),
             )
         self.assertEqual(list(result), range(25,100)+25*[0])
 
