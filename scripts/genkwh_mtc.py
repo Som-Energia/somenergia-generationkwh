@@ -92,15 +92,17 @@ def curve(database, type, name, **args):
         filter=None if name is None else long(name) if source.get('intname',False) else name,
         field=source.datafield,
         )
+    displayDayHourMatrix(args['from'], curve )
+
+def displayDayHourMatrix(firstDate, curve):
     import numpy
     for day, measures in enumerate(numpy.reshape(curve,(-1,25))):
-        print addDays(args['from'],day).date(),
+        print addDays(firstDate,day).date(),
         for x in measures:
             print format(x, ' 5d'),
         print format(sum(measures), ' 7d')
 
     print "Total", sum(curve)
-
 
 
 
