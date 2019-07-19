@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .productionloader import RightsGranter
+from .rightsgranter import RightsGranter
 import unittest
 import datetime
 import pymongo

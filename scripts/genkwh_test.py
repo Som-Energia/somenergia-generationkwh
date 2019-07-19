@@ -17,7 +17,7 @@ from usagetracker_test import *
 from assignment_test import *
 from curve_test import *
 from sequence import *
-from productionloader_test import *
+from rightsgranter_test import *
 
 def parseArgumments():
     import argparse
