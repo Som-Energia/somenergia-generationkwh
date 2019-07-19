@@ -294,7 +294,7 @@ class PartnerInvestments_Test(unittest.TestCase):
         name = self.Investment.read(id, ['name'])['name']
 
         result = self.list(partner_id=self.personalData.partnerid)
-        self.assertNsEqual(ns(data=result), """\
+        self.assertNsEqual(ns(data=result), u"""\
             data:
             - name: {investment_name}
               id: {id}
