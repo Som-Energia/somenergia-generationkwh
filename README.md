@@ -35,6 +35,14 @@ In Debian/Ubuntu
 $ sudo apt-get build-dep python-numpy
 ```
 
+## Testing
+
+```bash
+nosetests generationkwh # for unittests
+nosetests som_generationkwh/test # for functional/erp, requires running local erp
+```
+
+
 ## CHANGES
 
 ### 2.5.4 2019-07-xx
