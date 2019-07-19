@@ -22,7 +22,7 @@ run mkdir $OUTPUTDIR
 step "Running migration $0 at ${EXECUTION_DATE}"
 
 step "Current state"
-run scripts/genkwh_plants.py list
+run genkwh_plants.py list
 
 step "Dumping current mongo collections"
 run ${MONGOBINPATH}mongodump $MONGOOPTS -o "$OUTPUTDIR/dump" --db somenergia -c tm_profile
@@ -30,17 +30,17 @@ run ${MONGOBINPATH}mongodump $MONGOOPTS -o "$OUTPUTDIR/dump" --db somenergia -c 
 run ${MONGOBINPATH}mongodump $MONGOOPTS -o "$OUTPUTDIR/dump" --db somenergia -c generationkwh_rightscorrection
 
 step "Fixing Fontivsolar meter serial number"
-run scripts/genkwh_plants.py editmeter \
+run genkwh_plants.py editmeter \
     GenerationkWh Fontivsolar "$MATALLANA_COUNTER_SERIAL" name "$FONTIVSOLAR_COUNTER_SERIAL" ||
         fail "Unable to change Fontivsolar meter serial"
 
 step "Resulting state"
-run scripts/genkwh_plants.py list
+run genkwh_plants.py list
 
 step "Dumping previous granted rights"
-capture rightspershare-pre-120.csv scripts/genkwh_mtc.py curve rightspershare 120
-capture rightspershare-pre-20.csv  scripts/genkwh_mtc.py curve rightspershare 20
-capture rightspershare-pre-1.csv   scripts/genkwh_mtc.py curve rightspershare 1
+capture rightspershare-pre-120.csv genkwh_mtc.py curve rightspershare 120
+capture rightspershare-pre-20.csv  genkwh_mtc.py curve rightspershare 20
+capture rightspershare-pre-1.csv   genkwh_mtc.py curve rightspershare 1
 capture remainders-pre.cvs genkwh_remainders.py active
 
 step "Recomputing rights"
@@ -48,15 +48,15 @@ run genkwh_rightsgranter.py recompute --id "$GENERATIONKWH_MIX_ID" ||
     fail "Rights recomputation failed"
 
 step "Dumping resulting granted rights"
-capture rightspershare-120.csv scripts/genkwh_mtc.py curve rightspershare 120
-capture rightspershare-20.csv  scripts/genkwh_mtc.py curve rightspershare 20
-capture rightspershare-1.csv   scripts/genkwh_mtc.py curve rightspershare 1
+capture rightspershare-120.csv genkwh_mtc.py curve rightspershare 120
+capture rightspershare-20.csv  genkwh_mtc.py curve rightspershare 20
+capture rightspershare-1.csv   genkwh_mtc.py curve rightspershare 1
 capture remainders.cvs genkwh_remainders.py active
 
 step "Dumping corrections"
-capture rightscorrection-120.csv scripts/genkwh_mtc.py curve rightscorrection 120
-capture rightscorrection-20.csv  scripts/genkwh_mtc.py curve rightscorrection 20
-capture rightscorrection-1.csv   scripts/genkwh_mtc.py curve rightscorrection 1
+capture rightscorrection-120.csv genkwh_mtc.py curve rightscorrection 120
+capture rightscorrection-20.csv  genkwh_mtc.py curve rightscorrection 20
+capture rightscorrection-1.csv   genkwh_mtc.py curve rightscorrection 1
 
 step "Dumping current mongo collections"
 run ${MONGOBINPATH}mongodump $MONGOOPTS -o "$OUTPUTDIR/dump-result" --db somenergia -c tm_profile
@@ -67,7 +67,7 @@ run ${MONGOBINPATH}mongodump $MONGOOPTS -o "$OUTPUTDIR/dump-result" --db somener
 
 
 step "Undo commands:"
-echo scripts/genkwh_plants.py editmeter GenerationkWh Fontivsolar 501815908 name 68308479
+echo genkwh_plants.py editmeter GenerationkWh Fontivsolar 501815908 name 68308479
 
 
 
