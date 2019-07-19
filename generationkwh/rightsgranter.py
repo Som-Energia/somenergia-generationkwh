@@ -110,8 +110,7 @@ class RightsGranter(object):
             log.append(
                 "Computing rights for members with {} shares from {} to {}"
                 .format(n, date, recomputeStop))
-            print log[-1]
-            rights, remainder = self._appendRightsPerShare(
+            rights, newremainder = self._appendRightsPerShare(
                 nshares=n,
                 firstDateToCompute = date,
                 lastDateToCompute = recomputeStop,
@@ -119,12 +118,12 @@ class RightsGranter(object):
                 production = numpy.asarray(aggregatedProduction),
                 plantshares = plantShareCurve,
                 )
-            self._updateRights(n, rights, date, recomputeStop, remainder)
+            self._updateRights(n, rights, date, recomputeStop, newremainder)
             log.append(
+                "- {} Wh of remainder from previous days\n"
                 "- {} kWh granted\n"
-                "- {} Wh of remainder"
-                .format(sum(rights), remainder))
-            print log[-1]
+                "- {} Wh of remainder for the next days"
+                .format(remainder, sum(rights), newremainder))
         return '\n'.join(log)
 
     def recomputeRights(self, firstDate, lastDate):
