@@ -36,12 +36,12 @@ def parseArgumments():
 
 def computerights(id=None):
     Remainder = c.GenerationkwhRemainderTesthelper
-    ProductionLoader = c.GenerationkwhProductionLoader
+    RightsGranter = c.GenerationkwhRightsGranter
     step("Next day to compute (nshares, date):")
     for nshares, day, remainderWh in sorted(Remainder.lastRemainders()):
         print nshares, day
     step("Computing production rights for each number of shares...")
-    log = ProductionLoader.computeAvailableRights(id)
+    log = RightsGranter.computeAvailableRights(id)
     success(log)
     step("Next day to compute after update...")
     for nshares, day, remainderWh in sorted(Remainder.lastRemainders()):
@@ -50,7 +50,7 @@ def computerights(id=None):
 def recompute(id=None):
     Mix = c.GenerationkwhProductionAggregatorTesthelper
     Remainder = c.GenerationkwhRemainderTesthelper
-    ProductionLoader = c.GenerationkwhProductionLoader
+    RightsGranter = c.GenerationkwhRightsGranter
     firstDate=Mix.firstActiveDate(id)
     lastRemainderDate = max(
         day
@@ -59,7 +59,7 @@ def recompute(id=None):
     )
     lastDate = str(isodate(lastRemainderDate)-relativedelta(days=1))
     step("Recomputing rights from {} to {}:", firstDate, lastDate)
-    log = ProductionLoader.recomputeRights(id, firstDate, lastDate)
+    log = RightsGranter.recomputeRights(id, firstDate, lastDate)
     success(log)
     step("Next day to compute after update...")
     for nshares, day, remainderWh in sorted(Remainder.lastRemainders()):

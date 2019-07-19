@@ -21,7 +21,7 @@ def datespan(startDate, endDate, delta=datetime.timedelta(hours=1)):
         currentDate += delta
 
 @unittest.skipIf(not dbconfig, "depends on ERP")
-class ProductionLoader_Test(unittest.TestCase):
+class RightsGranter_Test(unittest.TestCase):
     from plantmeter.testutils import assertNsEqual
     def setUp(self):
         self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
@@ -30,7 +30,7 @@ class ProductionLoader_Test(unittest.TestCase):
         self.Meter = self.erp.GenerationkwhProductionMeter
         self.Aggregator = self.erp.GenerationkwhProductionAggregator
         self.AggregatorTestHelper = self.erp.GenerationkwhProductionAggregatorTesthelper
-        self.ProductionLoader = self.erp.GenerationkwhProductionLoader
+        self.RightsGranter = self.erp.GenerationkwhRightsGranter
         self.TestHelper = self.erp.GenerationkwhTesthelper
         self.ProductionHelper = self.erp.GenerationkwhProductionAggregatorTesthelper
         self.setUpAggregator()
@@ -135,7 +135,7 @@ class ProductionLoader_Test(unittest.TestCase):
             ])
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
-        self.ProductionLoader.computeAvailableRights(aggr_id)
+        self.RightsGranter.computeAvailableRights(aggr_id)
 
         result = self.TestHelper.rights_per_share(1, '2015-08-16', '2015-08-16')
         self.assertEqual(result, +18*[0]+[1000]+6*[0])
@@ -153,7 +153,7 @@ class ProductionLoader_Test(unittest.TestCase):
             ])
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
-        self.ProductionLoader.computeAvailableRights(aggr_id)
+        self.RightsGranter.computeAvailableRights(aggr_id)
 
         result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-16')
         self.assertEqual(result, +18*[0]+[5000]+6*[0])
@@ -172,7 +172,7 @@ class ProductionLoader_Test(unittest.TestCase):
             ])
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
-        self.ProductionLoader.computeAvailableRights(aggr_id)
+        self.RightsGranter.computeAvailableRights(aggr_id)
 
         result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-17')
         self.assertEqual(result, 2*(18*[0]+[5000]+6*[0]))
@@ -193,7 +193,7 @@ class ProductionLoader_Test(unittest.TestCase):
             ])
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
-        self.ProductionLoader.computeAvailableRights(aggr_id)
+        self.RightsGranter.computeAvailableRights(aggr_id)
 
         result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-16')
         self.assertEqual(result, +18*[0]+[5000]+6*[0])
@@ -221,7 +221,7 @@ class ProductionLoader_Test(unittest.TestCase):
             ])
         remainder = self.setupRemainders([(1,'2015-08-16',0)])
 
-        self.ProductionLoader.computeAvailableRights(aggr_id)
+        self.RightsGranter.computeAvailableRights(aggr_id)
 
         result = self.TestHelper.rights_per_share(1,'2015-08-16','2015-08-17')
         self.assertEqual(result,
@@ -249,7 +249,7 @@ class ProductionLoader_Test(unittest.TestCase):
         self.TestHelper.setup_rights_per_share(
             1, '2016-08-16', 4*(24*[5]+[0]))
 
-        self.ProductionLoader.recomputeRights(aggr_id, '2016-08-16', '2016-08-19')
+        self.RightsGranter.recomputeRights(aggr_id, '2016-08-16', '2016-08-19')
 
         result = self.TestHelper.rights_per_share(1, '2016-08-16', '2016-08-19')
         self.assertEqual(result, 

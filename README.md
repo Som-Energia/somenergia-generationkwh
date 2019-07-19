@@ -42,8 +42,10 @@ $ sudo apt-get build-dep python-numpy
 _Production rewrite release_
 
 - Simplifications due to plantmeter functionality externalized to gisce
+    - ProductionLoader renamed as RightsGranter
     - Tests fill production directly instead using csv's plugins
-    - Removed `som_generation.ProductionLoader.retrieveMeasuresFromPlants`
+    - Removed `som_generation.RightsGranter.retrieveMeasuresFromPlants`
+    - Removed `som_generation.RightsGranter.endPoint`
     - Removed `som_generation.ProductionAggregatorProvider.getNShares`
 - `genkwh_reminders` new subcommands pop and update
 - `genkwh_productionloader` recompute subcommand to be able to recompute
@@ -53,8 +55,7 @@ _Production rewrite release_
   from the rights curve that should be expected given the production
   when you apply recompute.
 - Added scriptlauncher file to remotely launch commands of interest
-- ProductionLoader.recomputeRightsOnPeriod
-- added parameter `lastDateToCompute` to `ProductionLoader.computeAvailableRights`
+- added parameter `lastDateToCompute` to `RightsGranter.computeAvailableRights`
 
 ### 2.5.3 2019-06-17
 

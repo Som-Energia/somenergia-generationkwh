@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .productionloader import ProductionLoader
+from .productionloader import RightsGranter
 import unittest
 import datetime
 import pymongo
@@ -158,7 +158,7 @@ class PlantShareCurverMockup(object):
         return self.data
 
 
-class ProductionLoaderTest(unittest.TestCase):
+class RightsGranterTest(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = None
@@ -174,7 +174,7 @@ class ProductionLoaderTest(unittest.TestCase):
 
 
     def assertOlderRemainderEqual(self, remainders, expected):
-        l = ProductionLoader()
+        l = RightsGranter()
         date = l._olderRemainder([
             (shares, isodate(date), remainderwh)
             for shares, date, remainderwh in remainders
@@ -206,7 +206,7 @@ class ProductionLoaderTest(unittest.TestCase):
                 first=isodate('2000-01-01'),
                 last=isodate('2006-01-01'),
                 )
-        l = ProductionLoader(productionAggregator=p)
+        l = RightsGranter(productionAggregator=p)
         interval = l._updatableInterval([])
         self.assertDatePairEqual( ('2000-01-01','2006-01-01'), interval)
 
@@ -215,7 +215,7 @@ class ProductionLoaderTest(unittest.TestCase):
                 first=isodate('2000-01-01'),
                 last=isodate('2006-01-01'),
                 )
-        l = ProductionLoader(productionAggregator=p)
+        l = RightsGranter(productionAggregator=p)
         interval = l._updatableInterval([
             (1,isodate('2001-01-01'), 45),
             ])
@@ -226,7 +226,7 @@ class ProductionLoaderTest(unittest.TestCase):
                 first=isodate('2000-01-01'),
                 last=isodate('2006-01-01'),
                 )
-        l = ProductionLoader(productionAggregator=p)
+        l = RightsGranter(productionAggregator=p)
         interval = l._updatableInterval([
             (1,isodate('2002-01-01'), 45),
             (2,isodate('2001-01-01'), 45),
@@ -234,7 +234,7 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertDatePairEqual( ('2001-01-01','2006-01-01'), interval)
 
     def test_appendRightsPerShare_singleDay(self):
-        l = ProductionLoader()
+        l = RightsGranter()
         rights, remainder = l._appendRightsPerShare(
             nshares=1,
             firstDateToCompute=isodate('2015-08-16'),
@@ -249,7 +249,7 @@ class ProductionLoaderTest(unittest.TestCase):
     
 
     def test_appendRightsPerShare_manyDays(self):
-        l = ProductionLoader()
+        l = RightsGranter()
         rights, remainder = l._appendRightsPerShare(
             nshares=1,
             firstDateToCompute=isodate('2015-08-16'),
@@ -263,7 +263,7 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(remainder, 0)
 
     def test_appendRightsPerShare_withManyPlantShares_divides(self):
-        l = ProductionLoader()
+        l = RightsGranter()
         rights, remainder = l._appendRightsPerShare(
             nshares=1,
             firstDateToCompute=isodate('2015-08-16'),
@@ -277,7 +277,7 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(remainder, 0)
 
     def test_appendRightsPerShare_withNShares_multiplies(self):
-        l = ProductionLoader()
+        l = RightsGranter()
         rights, remainder = l._appendRightsPerShare(
             nshares=2, # here
             firstDateToCompute=isodate('2015-08-16'),
@@ -291,7 +291,7 @@ class ProductionLoaderTest(unittest.TestCase):
         self.assertEqual(remainder, 0)
 
     def test_appendRightsPerShare_withAdvancedRemainder(self):
-        l = ProductionLoader()
+        l = RightsGranter()
         rights, remainder = l._appendRightsPerShare(
             nshares=1,
             firstDateToCompute=isodate('2015-08-16'),
@@ -306,7 +306,7 @@ class ProductionLoaderTest(unittest.TestCase):
 
 
     def test_appendRightsPerShare_firstDateToCompute_isProtected(self):
-        l = ProductionLoader()
+        l = RightsGranter()
         with self.assertRaises(AssertionError) as ctx:
             l._appendRightsPerShare(
                 nshares=1,
@@ -322,7 +322,7 @@ class ProductionLoaderTest(unittest.TestCase):
             "2015-08-16 00:00:00+02:00")
 
     def test_appendRightsPerShare_lastDateToCompute_isProtected(self):
-        l = ProductionLoader()
+        l = RightsGranter()
         with self.assertRaises(AssertionError) as ctx:
             l._appendRightsPerShare(
                 nshares=1,
@@ -338,7 +338,7 @@ class ProductionLoaderTest(unittest.TestCase):
             "2015-08-16 00:00:00+02:00")
 
     def test_appendRightsPerShare_tooSmallProductionArray(self):
-        l = ProductionLoader()
+        l = RightsGranter()
         with self.assertRaises(AssertionError) as ctx:
             l._appendRightsPerShare(
                 nshares=1,
@@ -352,7 +352,7 @@ class ProductionLoaderTest(unittest.TestCase):
             "Not enough production data to compute such date interval")
 
     def test_appendRightsPerShare_tooSmallShareArray(self):
-        l = ProductionLoader()
+        l = RightsGranter()
         with self.assertRaises(AssertionError) as ctx:
             l._appendRightsPerShare(
                 nshares=1,
@@ -366,7 +366,7 @@ class ProductionLoaderTest(unittest.TestCase):
             "Not enough plant share data to compute such date interval")
 
     def test_appendRightsPerShare_crossedDates(self):
-        l = ProductionLoader()
+        l = RightsGranter()
         with self.assertRaises(AssertionError) as ctx:
             l._appendRightsPerShare(
                 nshares=1,
@@ -383,7 +383,7 @@ class ProductionLoaderTest(unittest.TestCase):
         rights = RightsPerShare(self.db)
         rightsCorrection = RightsCorrection(self.db)
         remainders = RemainderProviderMockup([])
-        l = ProductionLoader(
+        l = RightsGranter(
             rightsPerShare=rights,
             remainders=remainders,
             rightsCorrection=rightsCorrection,
@@ -428,7 +428,7 @@ class ProductionLoaderTest(unittest.TestCase):
                 data=numpy.array(+10*[0]+[1000]+14*[0]))
         plantShare = PlantShareCurverMockup(
                 data=numpy.array(25*[1]))
-        l = ProductionLoader(productionAggregator=production,
+        l = RightsGranter(productionAggregator=production,
                 plantShareCurver=plantShare,
                 rightsPerShare=rights,
                 remainders=remainders)
@@ -453,7 +453,7 @@ class ProductionLoaderTest(unittest.TestCase):
                 data=numpy.array(+10*[0]+[20000]+14*[0]))
         plantShare = PlantShareCurverMockup(
                 data=numpy.array(25*[4]))
-        l = ProductionLoader(productionAggregator=production,
+        l = RightsGranter(productionAggregator=production,
                 plantShareCurver=plantShare,
                 rightsPerShare=rights,
                 remainders=remainders)
@@ -479,7 +479,7 @@ class ProductionLoaderTest(unittest.TestCase):
                 data=numpy.array(+10*[0]+[1]+14*[0]))
         plantShare = PlantShareCurverMockup(
                 data=numpy.array(25*[1]))
-        l = ProductionLoader(productionAggregator=production,
+        l = RightsGranter(productionAggregator=production,
                 plantShareCurver=plantShare,
                 rightsPerShare=rights,
                 remainders=remainders)
@@ -510,7 +510,7 @@ class ProductionLoaderTest(unittest.TestCase):
                 ))
         plantShare = PlantShareCurverMockup(
                 data=numpy.array(125*[1]))
-        l = ProductionLoader(productionAggregator=production,
+        l = RightsGranter(productionAggregator=production,
                 plantShareCurver=plantShare,
                 rightsPerShare=rights,
                 remainders=remainders)
@@ -554,7 +554,7 @@ class ProductionLoaderTest(unittest.TestCase):
                 ))
         plantShare = PlantShareCurverMockup(
                 data=numpy.array(50*[1]))
-        l = ProductionLoader(productionAggregator=production,
+        l = RightsGranter(productionAggregator=production,
                 plantShareCurver=plantShare,
                 rightsPerShare=rights,
                 remainders=remainders)
@@ -584,7 +584,7 @@ class ProductionLoaderTest(unittest.TestCase):
                 ))
         plantShare = PlantShareCurverMockup(
                 data=numpy.array(2*25*[10]))
-        l = ProductionLoader(productionAggregator=production,
+        l = RightsGranter(productionAggregator=production,
                 plantShareCurver=plantShare,
                 rightsPerShare=rights,
                 remainders=remainders)
@@ -619,7 +619,7 @@ class ProductionLoaderTest(unittest.TestCase):
                 ))
         plantShare = PlantShareCurverMockup(
                 data=numpy.array(50*[1]))
-        l = ProductionLoader(productionAggregator=production,
+        l = RightsGranter(productionAggregator=production,
                 plantShareCurver=plantShare,
                 rightsPerShare=rights,
                 remainders=remainders)
@@ -659,7 +659,7 @@ class ProductionLoaderTest(unittest.TestCase):
         plantShare = PlantShareCurverMockup(
                 data=numpy.array(25*4*[10]))
 
-        l = ProductionLoader(
+        l = RightsGranter(
                 productionAggregator=production,
                 plantShareCurver=plantShare,
                 rightsPerShare=rights,

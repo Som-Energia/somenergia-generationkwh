@@ -28,7 +28,7 @@ import datetime
 import numpy
 
 
-class ProductionLoader(object):
+class RightsGranter(object):
     def __init__(self,
             productionAggregator=None, plantShareCurver=None,
             rightsPerShare=None, remainders=None, rightsCorrection=None):
