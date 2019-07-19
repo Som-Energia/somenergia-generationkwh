@@ -67,7 +67,7 @@ def doPlot(columns, first, last):
     win.show()
     app.exec_()
 
-def compute(member, first, last, output=None, idmode='memberid', shares=None, show=False, **args):
+def compute(member, first, last, output=None, idmode='memberid', shares=None, **args):
     dbconfig = config(args.get('config', None))
     O = erp(dbconfig)
     member = preprocessMembers(O,[member], idmode=idmode)[0]
@@ -99,7 +99,7 @@ def plot(member, first, last,
 
     columns = compute(
         member, first, last,
-        output, idmode, shares, show,
+        output, idmode, shares,
         **args)
 
     doPlot(columns, first, last)
@@ -109,7 +109,7 @@ def dump(member, first, last,
 
     columns = compute(
         member, first, last,
-        output, idmode, shares, show,
+        output, idmode, shares,
         **args)
 
     if show: doPlot(columns, first, last)
@@ -128,6 +128,30 @@ def dump(member, first, last,
         with open(output,'w') as f:
             f.write(csv)
 
+from genkwh_mtc import displayDayHourMatrix
+
+def matrix(member, first, last,
+        output=None, idmode='memberid', shares=None, show=False, **args):
+    columns = compute(
+        member, first, last,
+        output, idmode, shares,
+        **args)
+
+    date = datetime.datetime(first.year, first.month, first.day)
+    csv = "\n\n".join(
+        "# {}\n".format(column[0])
+        + displayDayHourMatrix(date, column[1:])
+        for column in columns
+        )
+
+    if args.get('returnCsv', False):
+        return csv
+
+    if output is None:
+        print csv
+    else:
+        with open(output,'w') as f:
+            f.write(csv)
 
 
 
@@ -145,6 +169,9 @@ def parseArguments():
         help="shows curves in a plot window")
     init = subparsers.add_parser('init',
         help="clears and initializes curves and remainders")
+    matrix = subparsers.add_parser('matrix',
+        help="shows the curve in a compact hour/day matrix",
+        )
     for sub in init,:
         sub.add_argument(
             'first',
@@ -174,7 +201,7 @@ def parseArguments():
             help="explicitly use config file instead dbconfig.py at the binary location",
             )
 
-    for sub in dump,plot,:
+    for sub in dump,plot,matrix:
         sub.add_argument(
             'member',
             type=int,

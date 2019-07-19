@@ -6,6 +6,7 @@ Manages production plants initialization
 """
 
 import erppeek
+import io
 import datetime
 from consolemsg import step, success, warn, error, fail
 import dbconfig
@@ -65,6 +66,7 @@ sources = ns.loads("""
 @mtc.command()
 @click.argument('type', type=click.Choice(sources.keys()))
 @click.argument('name', required=False)
+@click.option('--output', '-o')
 @click.option('--database', '-d', default='somenergia')
 @click.option('--from','-f', type=localisodate, default="2016-05-01")
 @click.option('--to','-t', type=localisodate, default=str(datetime.date.today()))
@@ -92,17 +94,28 @@ def curve(database, type, name, **args):
         filter=None if name is None else long(name) if source.get('intname',False) else name,
         field=source.datafield,
         )
-    displayDayHourMatrix(args['from'], curve )
+    result = displayDayHourMatrix(args['from'], curve )
+    output = args.get('output',None)
+    if output:
+        with io.open(output) as output_file:
+            output_file.write(result)
+    else:
+        print result
 
 def displayDayHourMatrix(firstDate, curve):
     import numpy
-    for day, measures in enumerate(numpy.reshape(curve,(-1,25))):
-        print addDays(firstDate,day).date(),
-        for x in measures:
-            print format(x, ' 5d'),
-        print format(sum(measures), ' 7d')
-
-    print "Total", sum(curve)
+    return '\n'.join(
+        ''.join([
+            str(addDays(firstDate,day).date()),
+            ''.join(
+                format(x, ' 5d')
+                for x in measures
+            ),
+            format(sum(measures), ' 7d')
+        ])
+        for day, measures
+        in enumerate(numpy.reshape(curve,(-1,25)))
+    ) + "\nTotal {}".format(sum(curve))
 
 
 
