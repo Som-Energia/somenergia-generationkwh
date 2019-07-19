@@ -1,0 +1,1 @@
+genkwh_rightsgranter.py
