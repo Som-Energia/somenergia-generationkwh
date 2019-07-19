@@ -2569,7 +2569,7 @@ class Investment_Test(unittest.TestCase):
                 mandate_id = False,
             ))
 
-    def test__create_divestment_invoice__withoutProfitallOk(self):
+    def test__create_divestment_invoice__withoutProfitAllOk(self):
         id = self.Investment.create_from_form(
             self.personalData.partnerid,
             '2017-01-01', # order_date
