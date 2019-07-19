@@ -18,9 +18,12 @@ setup(
 		'scripts/genkwh_assignments.py',
 		'scripts/genkwh_investments.py',
 		'scripts/genkwh_productionloader.py',
+		'scripts/genkwh_rightsgranter.py',
 		'scripts/genkwh_rights.py',
 		'scripts/genkwh_usage.py',
 		'scripts/genkwh_curve.py',
+		'scripts/genkwh_mtc.py',
+		'scripts/genkwh_plants.py',
 		'scripts/genkwh_remainders.py',
 		],
 	install_requires=[
