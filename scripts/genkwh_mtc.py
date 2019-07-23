@@ -188,7 +188,7 @@ def curve(database, type, name, **args):
     curve = getMongoTimeCurve(database, type, name, firstDate, lastDate)
 
     display = dict(
-        dayhour = displayDayHourMatrix,
+        day = displayDayMatrix,
         dayhour = displayDayHourMatrix,
         monthhour = displayMonthHourMatrix,
         month = displayMonthMatrix,
