@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from generationkwh.isodates import isodate
 from yamlns import namespace as ns
+from consolemsg import error
 from sequence import sequence
 import datetime
 import erppeek
@@ -24,7 +25,12 @@ def erp(dbconfig=None):
 
 
 def doPlot(columns, first, last):
-    from pyqtgraph.Qt import QtGui, QtCore
+    try:
+        from pyqtgraph.Qt import QtGui, QtCore
+    except Exception:
+        error("Install python-pyside and run:")
+        error("ln -s /usr/lib/python3/dist-packages/PySide ${VIRTUAL_ENV}/lib/python2.7/site-packages/PySide'")
+        raise
     import numpy as np
     import pyqtgraph as pg
     import pyqtgraph.exporters
@@ -128,7 +134,12 @@ def dump(member, first, last,
         with open(output,'w') as f:
             f.write(csv)
 
-from genkwh_mtc import displayDayHourMatrix
+from genkwh_mtc import (
+    displayDayMatrix,
+    displayDayHourMatrix,
+    displayMonthHourMatrix,
+    displayMonthMatrix,
+)
 
 def matrix(member, first, last,
         output=None, idmode='memberid', shares=None, show=False, **args):
@@ -137,10 +148,17 @@ def matrix(member, first, last,
         output, idmode, shares,
         **args)
 
+    display = dict(
+        day = displayDayMatrix,
+        dayhour = displayDayHourMatrix,
+        monthhour = displayMonthHourMatrix,
+        month = displayMonthMatrix,
+    )[args.get('by', 'dayhour')]
+
     date = datetime.datetime(first.year, first.month, first.day)
     csv = "\n\n".join(
         "# {}\n".format(column[0])
-        + displayDayHourMatrix(date, column[1:])
+        + display(date, column[1:])
         for column in columns
         )
 
@@ -172,6 +190,18 @@ def parseArguments():
     matrix = subparsers.add_parser('matrix',
         help="shows the curve in a compact hour/day matrix",
         )
+    for sub in matrix,:
+        
+        sub.add_option(
+            '--by',
+            choices=[
+                'dayhour',
+                'monthhour',
+                'day',
+                'month',
+            ],
+            default='dayhour') 
+
     for sub in init,:
         sub.add_argument(
             'first',

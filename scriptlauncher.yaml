@@ -25,39 +25,73 @@ projects:
         - Fontivsolar: 501815908
         - Alcolea: 501600324
         - Matallana: 68308479
-      script: python SOME_SRC/somenergia-generationkwh/scripts/genkwh_mtc.py curve production {meter}
+      script: python SOME_SRC/somenergia-generationkwh/scripts/genkwh_mtc.py curve production {meter} --by {aggregation} -o {output}
       parameters:
         meter:
           description: Número de serie del comptador
           type: enum
-          values:
+          options:
+            Totes: ''
             Fontivsolar: 501815908
             Alcolea: 501600324
             Matallana: 68308479
+        aggregation:
+          description: Agregació
+          type: enum
+          options:
+            Diariament: day
+            Mensualment: month
+            Hora a hora diariament: dayhour
+            Hora a hora mensualment: monthhour
+          default: dayhour
+        output:
+          type: FILEDOWN
+          extension: csv
+          filename: production-{meter}.csv
 
     rightsCurve:
       title: Corbes de drets per a un perfil d'inversió
       description: >
         Genera corba de drets generats per a un perfil d'inversor amb un nombre d'accions determinat
-      script: python SOME_SRC/somenergia-generationkwh/scripts/genkwh_mtc.py curve rightspershare {nshares}
+      script: python SOME_SRC/somenergia-generationkwh/scripts/genkwh_mtc.py curve rightspershare {nshares} --by {aggregation} -o {output}
       parameters:
         nshares:
           description: Número d'accions
-
-    usageCurve:
-      title: Corbes d'Ús global
-      description: >
-        Genera corba de drets gastats per tots els inversor del GenerationkWh
-      script: python SOME_SRC/somenergia-generationkwh/scripts/genkwh_mtc.py curve memberrightusage
+        aggregation:
+          description: Agregació
+          type: enum
+          options:
+            Diariament: day
+            Mensualment: month
+            Hora a hora diariament: dayhour
+            Hora a hora mensualment: monthhour
+          default: dayhour
+        output:
+          type: FILEDOWN
+          extension: csv
+          filename: rightspershare-{nshares}.csv
 
     corbesUsPerSoci:
-      title: Corbes d'Ús
+      title: Corbes dels GkWh emprats
       description: >
         Genera corba de drets gastats d'un inversor del GenerationkWh
-      script: python SOME_SRC/somenergia-generationkwh/scripts/genkwh_mtc.py curve memberrightusage {member}
+      script: python SOME_SRC/somenergia-generationkwh/scripts/genkwh_mtc.py curve memberrightusage {member} --by {aggregation} -o {output}
       parameters:
         member:
-          description: Id de la fitxa de soci (no pas la de client)
+          description: Id de la fitxa de soci (no pas la de client). Deixa en blanc per veure la suma de tots els socis.
+        aggregation:
+          description: Agregació
+          type: enum
+          options:
+            Diariament: day
+            Mensualment: month
+            Hora a hora diariament: dayhour
+            Hora a hora mensualment: monthhour
+          default: dayhour
+        output:
+          type: FILEDOWN
+          extension: csv
+          filename: usage-{member}.csv
 
 
 # vim: et ts=2 sw=2
