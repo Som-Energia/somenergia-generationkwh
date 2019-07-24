@@ -602,7 +602,7 @@ class RightsGranterTest(unittest.TestCase):
         self.assertMultiLineEqual(log,
             "Computing rights for members with 1 shares from 2015-08-16 to 2015-08-17\n"
             "- 800 kWh granted\n"
-            "- 900 Wh of remainder"
+            "- 900 Wh of remainder for the next days"
         )
 
     def test_computeAvailableRights_withExplicitStop(self):
