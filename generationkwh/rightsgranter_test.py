@@ -573,7 +573,7 @@ class RightsGranterTest(unittest.TestCase):
     def test_computeAvailableRights_remainder(self):
         rights = RightsPerShare(self.db)
         remainders = RemainderProviderMockup([
-            (1, isodate('2015-08-16'), 0),
+            (1, isodate('2015-08-16'), 3),
             ])
         production = ProductionAggregatorMockUp(
                 first=isodate('2015-08-16'),
@@ -597,12 +597,13 @@ class RightsGranterTest(unittest.TestCase):
             +10*[0]+[500]+14*[0]
             )
         self.assertEqual(remainders.lastRemainders(), [
-            (1, isodate('2015-08-18'), 900),
+            (1, isodate('2015-08-18'), 903),
             ])
         self.assertMultiLineEqual(log,
             "Computing rights for members with 1 shares from 2015-08-16 to 2015-08-17\n"
+            "- 3 Wh of remainder from previous days\n"
             "- 800 kWh granted\n"
-            "- 900 Wh of remainder for the next days"
+            "- 903 Wh of remainder for the next days"
         )
 
     def test_computeAvailableRights_withExplicitStop(self):
