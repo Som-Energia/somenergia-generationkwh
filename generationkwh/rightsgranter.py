@@ -139,7 +139,6 @@ class RightsGranter(object):
             log.append(
                 "Recomputing rights for members with {} shares from {} to {}"
                 .format(n, firstDate, lastDate))
-            print log[-1]
             wantedRights, remainder = self._appendRightsPerShare(
                 nshares=n,
                 firstDateToCompute = firstDate,
@@ -164,7 +163,6 @@ class RightsGranter(object):
                     sum(correction[correction<0]),
                     error)
                 )
-            print log[-1]
             self._updateRights(n, rights, firstDate, lastDate, remainder-error*1000, correction)
         return '\n'.join(log)
 
