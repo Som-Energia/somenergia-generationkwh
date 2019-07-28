@@ -7,7 +7,7 @@ Manages production plants initialization
 
 import erppeek
 import datetime
-from consolemsg import step, success, warn, error, fail
+from consolemsg import step, success, warn, error, fail, out
 import dbconfig
 from yamlns import namespace as ns
 from generationkwh.isodates import naiveisodate
@@ -112,7 +112,7 @@ def list():
     aggrs = Mix.read(aggr_ids, [])
     for aggr in aggrs:
         aggr = ns(aggr)
-        print(u"{enabled_tick} {id} - {name}: \"{description}\" ".format(
+        out(u"{enabled_tick} {id} - {name}: \"{description}\" ".format(
             enabled_tick=coloredCheck(aggr.enabled),
             **aggr
             ))
@@ -120,21 +120,21 @@ def list():
         plants = Plant.read(aggr.plants, [])
         for plant in plants:
             plant = ns(plant)
-            print(u"\t{enabled_tick} {id} - {name}: \"{description}\" ({nshares} shares)".format(
+            out(u"\t{enabled_tick} {id} - {name}: \"{description}\" ({nshares} shares)".format(
                 enabled_tick=coloredCheck(plant.enabled),
                 **plant
                 ))
-            print(u"\t\tFirst active date: {first_active_date}".format(**plant))
-            print(u"\t\tLast active date: {last_active_date}".format(**plant))
+            out(u"\t\tFirst active date: {first_active_date}".format(**plant))
+            out(u"\t\tLast active date: {last_active_date}".format(**plant))
             if not plant.meters: continue
             meters = Meter.read(plant.meters, [])
             for meter in meters:
                 meter=ns(meter)
-                print(u"\t\t{enabled_tick} {id} - {name}: \"{description}\"".format(
+                out(u"\t\t{enabled_tick} {id} - {name}: \"{description}\"".format(
                     enabled_tick=coloredCheck(meter.enabled),
                     **meter
                     ))
-                print(u"\t\t\tFirst active date: {first_active_date}".format(**meter))
+                out(u"\t\t\tFirst active date: {first_active_date}".format(**meter))
 
 @production.command(
         help="Dumps current plant structure as commands to recreate it")
@@ -144,25 +144,25 @@ def dump():
     aggrs = Mix.read(aggr_ids, [])
     for aggr in aggrs:
         aggr = ns(aggr)
-        print(u"{} addmix {name!r} {description!r}".format(sys.argv[0],**aggr))
+        out(u"{} addmix {name!r} {description!r}".format(sys.argv[0],**aggr))
         if aggr.enabled:
-            print(u"{} setmix {name!r} enabled True".format(sys.argv[0], **aggr))
+            out(u"{} setmix {name!r} enabled True".format(sys.argv[0], **aggr))
 
         if not aggr.plants: continue
         plants = Plant.read(aggr.plants, [])
         for plant in plants:
             plant = ns(plant)
-            print("u{} addplant {mix!r} {name!r} {description!r} {nshares} {first_active_date} {last_active_date}".format(sys.argv[0], mix=aggr.name, **plant))
+            out(u"{} addplant {mix!r} {name!r} {description!r} {nshares} {first_active_date} {last_active_date}".format(sys.argv[0], mix=aggr.name, **plant))
             if plant.enabled:
-                print(u"{} setplant {mix!r} {name!r} enabled True".format(sys.argv[0], mix=aggr.name, **plant))
+                out(u"{} setplant {mix!r} {name!r} enabled True".format(sys.argv[0], mix=aggr.name, **plant))
             if not plant.meters: continue
             meters = Meter.read(plant.meters, [])
             for meter in meters:
                 meter=ns(meter)
-                print(u"{} addmeter {mix!r} {plant!r} {name!r} {description!r} {first_active_date}"
+                out(u"{} addmeter {mix!r} {plant!r} {name!r} {description!r} {first_active_date}"
                     .format(sys.argv[0], mix=aggr.name, plant=plant.name, **meter))
                 if meter.enabled:
-                    print(u"{} setmeter {mix!r} {plant!r} {name!r} enabled True"
+                    out(u"{} setmeter {mix!r} {plant!r} {name!r} enabled True"
                         .format(sys.argv[0], mix=aggr.name, plant=plant.name, **meter))
 
 @production.command()
@@ -191,7 +191,7 @@ def addmix(name, description):
         description=description,
         enabled=False,
         ))
-    success(u"Created mix with id {}".format(mix.id)
+    success(u"Created mix with id {}".format(mix.id))
 
 @production.command()
 @click.argument('mix')
