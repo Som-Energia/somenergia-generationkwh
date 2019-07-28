@@ -112,29 +112,29 @@ def list():
     aggrs = Mix.read(aggr_ids, [])
     for aggr in aggrs:
         aggr = ns(aggr)
-        print u"{enabled_tick} {id} - {name}: \"{description}\" ".format(
+        print(u"{enabled_tick} {id} - {name}: \"{description}\" ".format(
             enabled_tick=coloredCheck(aggr.enabled),
             **aggr
-            )
+            ))
         if not aggr.plants: continue
         plants = Plant.read(aggr.plants, [])
         for plant in plants:
             plant = ns(plant)
-            print u"\t{enabled_tick} {id} - {name}: \"{description}\" ({nshares} shares)".format(
+            print(u"\t{enabled_tick} {id} - {name}: \"{description}\" ({nshares} shares)".format(
                 enabled_tick=coloredCheck(plant.enabled),
                 **plant
-                )
-            print u"\t\tFirst active date: {first_active_date}".format(**plant)
-            print u"\t\tLast active date: {last_active_date}".format(**plant)
+                ))
+            print(u"\t\tFirst active date: {first_active_date}".format(**plant))
+            print(u"\t\tLast active date: {last_active_date}".format(**plant))
             if not plant.meters: continue
             meters = Meter.read(plant.meters, [])
             for meter in meters:
                 meter=ns(meter)
-                print u"\t\t{enabled_tick} {id} - {name}: \"{description}\"".format(
+                print(u"\t\t{enabled_tick} {id} - {name}: \"{description}\"".format(
                     enabled_tick=coloredCheck(meter.enabled),
                     **meter
-                    )
-                print u"\t\t\tFirst active date: {first_active_date}".format(**meter)
+                    ))
+                print(u"\t\t\tFirst active date: {first_active_date}".format(**meter))
 
 @production.command(
         help="Dumps current plant structure as commands to recreate it")
@@ -144,25 +144,25 @@ def dump():
     aggrs = Mix.read(aggr_ids, [])
     for aggr in aggrs:
         aggr = ns(aggr)
-        print("{} addmix {name!r} {description!r}".format(sys.argv[0],**aggr))
+        print(u"{} addmix {name!r} {description!r}".format(sys.argv[0],**aggr))
         if aggr.enabled:
-            print("{} setmix {name!r} enabled True".format(sys.argv[0], **aggr))
+            print(u"{} setmix {name!r} enabled True".format(sys.argv[0], **aggr))
 
         if not aggr.plants: continue
         plants = Plant.read(aggr.plants, [])
         for plant in plants:
             plant = ns(plant)
-            print("{} addplant {mix!r} {name!r} {description!r} {nshares} {first_active_date} {last_active_date}".format(sys.argv[0], mix=aggr.name, **plant))
+            print("u{} addplant {mix!r} {name!r} {description!r} {nshares} {first_active_date} {last_active_date}".format(sys.argv[0], mix=aggr.name, **plant))
             if plant.enabled:
-                print("{} setplant {mix!r} {name!r} enabled True".format(sys.argv[0], mix=aggr.name, **plant))
+                print(u"{} setplant {mix!r} {name!r} enabled True".format(sys.argv[0], mix=aggr.name, **plant))
             if not plant.meters: continue
             meters = Meter.read(plant.meters, [])
             for meter in meters:
                 meter=ns(meter)
-                print("{} addmeter {mix!r} {plant!r} {name!r} {description!r} {first_active_date}"
+                print(u"{} addmeter {mix!r} {plant!r} {name!r} {description!r} {first_active_date}"
                     .format(sys.argv[0], mix=aggr.name, plant=plant.name, **meter))
                 if meter.enabled:
-                    print("{} setmeter {mix!r} {plant!r} {name!r} enabled True"
+                    print(u"{} setmeter {mix!r} {plant!r} {name!r} enabled True"
                         .format(sys.argv[0], mix=aggr.name, plant=plant.name, **meter))
 
 @production.command()
@@ -191,7 +191,7 @@ def addmix(name, description):
         description=description,
         enabled=False,
         ))
-    print mix.id
+    success(u"Created mix with id {}".format(mix.id)
 
 @production.command()
 @click.argument('mix')
