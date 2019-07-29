@@ -62,10 +62,10 @@ class ProductionToRightsPerShare(object):
 
         compensator = Compensator()
         diff = wanted - original
-        result = [
+        result = numpy.fromiter((
             compensator.computeBin(d,o)
             for d,o in zip(diff, original)
-        ]
+        ), dtype=int)
         return result, compensator.error
 
 
