@@ -45,7 +45,19 @@ nosetests som_generationkwh/test # for functional/erp, requires running local er
 
 ## CHANGES
 
-### 2.5.4 2019-07-xx
+### 2.5.5 2019-xx-xx
+
+- `genkwh_mtc curve` new option `--by`, to aggregate the matrix in different ways.
+	- dayhour: values for every hour for each day (the old one)
+	- day: just the dayly accomulated
+	- monthhour: values summated each month for each hour
+	- month: just the monthly accomulated
+- Rights granter: logs now include input and output remainder
+- scriptlaucher: more scripts and options
+- `genkwh_plants`: safe unicode for pipes
+- Regression: Python 3 compatibility for the generationkwh module
+
+### 2.5.4 2019-07-19
 
 _Production rewrite release_
 
