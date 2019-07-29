@@ -13,6 +13,12 @@ from .isodates import  isodate, localisodate
 def zeropad(array, left, right):
     return numpy.pad(array, (left, right), 'constant', constant_values=[0])
 
+# Py3 compatibility. Alternative from future.utils import lrange
+def lrange(start, stop=None, step=1):
+    if stop is None:
+        return list(range(0,start,step))
+    return list(range(start, stop, step))
+
 class ProductionAggregatorMockUp(object):
 
     def __init__(self,first=None,last=None,data=None):
@@ -72,7 +78,7 @@ class ProductionAggregatorMockUp_Test(unittest.TestCase):
             isodate('2015-08-12'),
             isodate('2015-08-12'),
             )
-        self.assertEqual(list(result), range(25,50))
+        self.assertEqual(list(result), lrange(25,50))
 
     def test_getkwh_beforeData(self):
         result = self.p.get_kwh(
@@ -93,49 +99,49 @@ class ProductionAggregatorMockUp_Test(unittest.TestCase):
             isodate('2015-08-11'),
             isodate('2015-08-15'),
             )
-        self.assertEqual(list(result), range(100))
+        self.assertEqual(list(result), lrange(100))
 
     def test_getkwh_startInMiddle(self):
         result = self.p.get_kwh(
             isodate('2015-08-12'),
             isodate('2015-08-15'),
             )
-        self.assertEqual(list(result), range(25,100))
+        self.assertEqual(list(result), lrange(25,100))
 
     def test_getkwh_endInMiddle(self):
         result = self.p.get_kwh(
             isodate('2015-08-11'),
             isodate('2015-08-13'),
             )
-        self.assertEqual(list(result), range(75))
+        self.assertEqual(list(result), lrange(75))
 
     def test_getkwh_startingBeforeData(self):
         result = self.p.get_kwh(
             isodate('2015-08-10'),
             isodate('2015-08-15'),
             )
-        self.assertEqual(list(result), 25*[0]+range(100))
+        self.assertEqual(list(result), 25*[0]+lrange(100))
 
     def test_getkwh_startingBeforeDataEndingMiddle(self):
         result = self.p.get_kwh(
             isodate('2015-08-10'),
             isodate('2015-08-13'),
             )
-        self.assertEqual(list(result), 25*[0]+range(75))
+        self.assertEqual(list(result), 25*[0]+lrange(75))
 
     def test_getkwh_endingAfterData(self):
         result = self.p.get_kwh(
             isodate('2015-08-11'),
             isodate('2015-08-16'),
             )
-        self.assertEqual(list(result), range(100)+25*[0])
+        self.assertEqual(list(result), lrange(100)+25*[0])
 
     def test_getkwh_endingAfterDataStartingMiddle(self):
         result = self.p.get_kwh(
             isodate('2015-08-12'),
             isodate('2015-08-16'),
             )
-        self.assertEqual(list(result), range(25,100)+25*[0])
+        self.assertEqual(list(result), lrange(25,100)+25*[0])
 
 class RemainderProviderMockup(object):
 
