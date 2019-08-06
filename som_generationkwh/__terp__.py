@@ -12,6 +12,7 @@
     'som_polissa_soci',
     'som_inversions',
     'som_plantmeter',
+    'giscedata_polissa',
     ],
   "init_xml": [],
   "demo_xml": [],
