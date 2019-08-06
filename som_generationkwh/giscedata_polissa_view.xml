@@ -3,7 +3,7 @@
     <data>
         <record model="ir.ui.view" id="view_infoenergia_polissa_tree_energia_gkwh">
             <field name="name">som.infoenergia.view.infoenergia.tree</field>
-            <field name="model">som.infoenergia</field>
+            <field name="model">giscedata.polissa</field>
             <field name="type">form</field>
             <field name="inherit_id" ref="som_infoenergia.view_infoenergia_polissa_tree"/>
             <field name="arch" type="xml">
