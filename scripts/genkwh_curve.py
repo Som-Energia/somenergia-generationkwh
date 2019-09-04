@@ -192,7 +192,7 @@ def parseArguments():
         )
     for sub in matrix,:
         
-        sub.add_option(
+        sub.add_argument(
             '--by',
             choices=[
                 'dayhour',
