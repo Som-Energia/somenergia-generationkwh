@@ -1,6 +1,6 @@
 import dbconfig
 import psycopg2
-import dbutils
+from somutils import dbutils
 import contextlib
 from yamlns import namespace as ns
 from consolemsg import step, warn, success, error as consoleError, fail
