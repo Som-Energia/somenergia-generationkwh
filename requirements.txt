@@ -6,5 +6,5 @@ python-dateutil
 decorator
 
 # To execute tests
-ERPpeek==1.6.1
--e git+git@github.com:Som-Energia/erppeek_wst.git@808cd137e3fbdfb7efa3120f2cd559e42fce1efa#egg=ERPpeek_WST
+# ERPpeek==1.6.1
+# ERPpeek_WST
