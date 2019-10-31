@@ -831,7 +831,7 @@ ATR#</dia:string>
       <dia:attribute name="name">
         <dia:composite type="text">
           <dia:attribute name="string">
-            <dia:string>#Use Rights
+            <dia:string>#Rights
 Per Share#</dia:string>
           </dia:attribute>
           <dia:attribute name="font">
