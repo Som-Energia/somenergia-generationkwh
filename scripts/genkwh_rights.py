@@ -7,7 +7,7 @@ import datetime
 import erppeek
 import dbconfig
 from yamlns import namespace as ns
-from sequence import sequence
+from somutils.sequence import sequence
 
 from generationkwh.isodates import isodate
 import numpy as np

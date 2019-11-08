@@ -3,7 +3,7 @@
 from generationkwh.isodates import isodate
 from yamlns import namespace as ns
 from consolemsg import error
-from sequence import sequence
+from somutils.sequence import sequence
 import datetime
 import erppeek
 
