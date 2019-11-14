@@ -78,6 +78,18 @@ class GenerationkWhDealer(osv.osv):
             for r in res
             ]
 
+    def get_members_by_vats(self, cursor, uid, vats, context=None):
+        completedVats = [
+            "ES"+str(vat).zfill(6)
+            for vat in vats
+            ]
+        Soci = self.pool.get('somenergia.soci')
+        member_ids = Soci.search(cursor, uid, [('vat','in',completedCodes)], context=context)
+        res = Soci.read(cursor, uid, member_ids, ['vat'], context=context)
+        return [ (r['vat'], r['id'])
+            for r in res
+            ]
+
     def get_partners_by_members(self, cursor, uid, member_ids, context=None):
         Soci = self.pool.get('somenergia.soci')
         res = Soci.read(cursor, uid, member_ids, ['partner_id'], context=context)

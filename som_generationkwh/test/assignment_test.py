@@ -84,7 +84,7 @@ if dbconfig:
                 cases[key] = result[0]
                 cases[key].condition = condition
 
-#print cases.dump()
+print cases.dump()
 
 
 @unittest.skipIf(not dbconfig, "depends on ERP")

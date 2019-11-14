@@ -480,6 +480,47 @@ class PartnerAssignments_Test(unittest.TestCase):
             )))
 
 
+@unittest.skipIf(not dbconfig, "depends on ERP")
+class PartnerRights_Test(unittest.TestCase):
+
+    from generationkwh.testutils import assertNsEqual
+
+    def setUp(self):
+        self.maxDiff=None
+        self.b2bdatapath="b2bdata"
+        self.personalData = ns(dbconfig.personaldata)
+        self.erp = erppeek_wst.ClientWST(**dbconfig.erppeek)
+        self.erp.begin()
+        self.Soci = self.erp.SomenergiaSoci
+        self.ResPartner = self.erp.ResPartner
+        self.Investment = self.erp.GenerationkwhInvestment
+
+        self.contract_id = 400
+        self.contract_id2 = 401
+
+    def list(self, partner_id, first_date, last_date):
+        return self.ResPartner.www_generationkwh_rights_by_month(
+            partner_id, first_date, last_date)
+
+
+    def test(self):
+        id = self.Investment.create_from_form(
+            self.personalData.partnerid,
+            '2017-01-01', # order_date
+            4000,
+            '10.10.23.123',
+            'ES7712341234161234567890',
+            )
+        name = self.Investment.read(id, ['name'])['name']
+
+        result = self.list(
+            partner_id=self.personalData.partnerid,
+            first_date='2010-01-01',
+            last_date='2010-01-02',
+            )
+        self.assertEqual(result, "")
+
+
 
 if __name__=='__main__':
     unittest.main()

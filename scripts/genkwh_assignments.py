@@ -379,7 +379,6 @@ def unassigned(ctx, effectiveon=None, purchaseduntil=None, force=False, insist=F
 
 if __name__ == '__main__':
     cli(obj={})
-    #main()
 
 
 

@@ -43,6 +43,27 @@ class ResPartner(osv.osv):
             for x in Assignments.read(cursor, uid, assignment_ids, [])
         ], key=lambda x: (x['priority'],x['id']))
 
+    def www_generationkwh_rights_by_month(self, cursor, uid, id, firstDate, lastDate, context=None):
+        """
+        Returns the list of investments
+        """
+
+
+
+        Dealer =self.pool.get('generationkwh.dealer')
+        idmap = dict(Dealer.get_members_by_partners(cursor, uid, [id]))
+        if not idmap: # Not a member
+            return []
+        TestHelper = self.pool.get('generationkwh.testhelper')
+
+        return TestHelper.rights_kwh(
+            cursor, uid,
+            idmap[id],
+            str(firstDate),
+            str(lastDate),
+        )
+        
+
 
 
 

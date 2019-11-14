@@ -9,17 +9,38 @@ import erppeek
 import io
 import datetime
 from consolemsg import step, success, warn, error, fail
-import dbconfig
 from yamlns import namespace as ns
 
 import click
 
+def config(filename):
+    if filename:
+        import imp
+        dbconfig = imp.load_source('config',filename)
+    else:
+        import dbconfig
+    return dbconfig
+
+def erp(dbconfig=None):
+    if hasattr(erp,'value'):
+        return erp.value
+    erp.value = erppeek.Client(**dbconfig.erppeek)
+    return erp.value
+
+
 
 @click.group()
-def mtc():
+@click.option(
+    '-C','--config',
+    metavar="DBCONFIG.py",
+    help="explicitly use config file instead dbconfig.py at the binary location",
+    )
+def mtc(**args):
     """
     Retrieves time series from mongo.
     """
+    dbconfig = config(args['config'])
+    warn("Arguments:\n{}", ns(args).dump())
     privateconfig = ns(dbconfig.erppeek)
     del privateconfig.password
     warn("Using the following configuration {}:\n\n{}\n", dbconfig.__file__, privateconfig.dump())
@@ -50,7 +71,7 @@ sources = ns.loads("""
         datafield: usage_kwh
         timefield: datetime
         creationfield: create_at
-        intname: true
+        selecttype: partner
     rightscorrection:
         collection: generationkwh_rightscorrection
         datafield: rights_kwh
@@ -59,7 +80,8 @@ sources = ns.loads("""
 """)
 
 
-def getMongoTimeCurve(database, sourceName, filter, firstDate, lastDate):
+def getMongoTimeCurve(database, sourceName, filter, firstDate, lastDate, **args):
+    dbconfig = config(args.get('config', None))
     source = sources[sourceName]
     c = pymongo.MongoClient(**dbconfig.mongo)
     mongodb = c[database]
@@ -69,8 +91,12 @@ def getMongoTimeCurve(database, sourceName, filter, firstDate, lastDate):
         source.timefield,
         source.creationfield,
         )
-    if source.get('intname',False):
+    if source.get('selecttype',False) == 'int':
         filter = filter and long(filter)
+
+    if source.get('selecttype',False) == 'partner':
+        O = erp(dbconfig)
+        filter = preprocessMembers(O, [filter], args['idmode'])
 
     return mtc.get(
         start=firstDate,
@@ -160,10 +186,56 @@ def displayMonthHourMatrix(firstDate, curve):
         )+ u"\nTotal {}\n".format(monthly.sum())
 
 
+def preprocessMembers(O,members=None,idmode=None, all=None):
+    """Turns members in which ever format to the ones required by commands"""
+
+    if all:
+        return c.GenerationkwhAssignment.unassignedInvestors()
+
+    if idmode=="partner":
+        idmap = dict(O.GenerationkwhDealer.get_members_by_partners(members))
+        return idmap.values()
+
+    if idmode=="code":
+        idmap = dict(O.GenerationkwhDealer.get_members_by_codes(members))
+        return idmap.values()
+
+    return members
+
+partner_option = click.option(
+    '-p','--partner',
+    'idmode',
+    flag_value='partner',
+    help="select members by its partner database id",
+    )
+number_option = click.option(
+    '-n','--number',
+    'idmode',
+    flag_value='code',
+    help="select members by its member code number",
+    )
+member_option = click.option(
+    '-m','--member',
+    'idmode',
+    flag_value='memberid',
+    default=True,
+    show_default=True,
+    help="select members by its member database id",
+    )
+config_option = click.option(
+    '-C','--config',
+    metavar="DBCONFIG.py",
+    help="explicitly use config file instead dbconfig.py at the binary location",
+    )
+
+
 
 @mtc.command()
 @click.argument('type', type=click.Choice(sources.keys()))
-@click.argument('name', required=False)
+@click.argument('select', required=False)
+@partner_option
+@number_option
+@member_option
 @click.option('--output', '-o')
 @click.option('--database', '-d', default='somenergia')
 @click.option('--from','-f', type=localisodate, default="2016-05-01")
@@ -175,7 +247,7 @@ def displayMonthHourMatrix(firstDate, curve):
     'month',
     ]),
     default='dayhour') 
-def curve(database, type, name, **args):
+def curve(database, type, select, **args):
     """
     Outputs in a tabular format a mongo time curve
 
@@ -185,7 +257,7 @@ def curve(database, type, name, **args):
     """
     firstDate = args.get('from', None)
     lastDate = args.get('to',None)
-    curve = getMongoTimeCurve(database, type, name, firstDate, lastDate)
+    curve = getMongoTimeCurve(database, type, select, firstDate, lastDate, **args)
 
     display = dict(
         day = displayDayMatrix,
@@ -205,19 +277,23 @@ def curve(database, type, name, **args):
 
 @mtc.command()
 @click.argument('type', type=click.Choice(sources.keys()))
-@click.argument('name', required=False)
+@click.argument('select', required=False)
+@partner_option
+@number_option
+@member_option
 @click.option('--output', '-o')
 @click.option('--database', '-d', default='somenergia')
 @click.option('--from','-f', type=localisodate, default="2016-05-01")
 @click.option('--to','-t', type=localisodate, default=str(datetime.date.today()))
-def plot(database, type, name, **args):
+def plot(database, type, select, **args):
+    "Shows the curve in a plot"
     from genkwh_curve import doPlot
 
     firstDate = args.get('from', None)
     lastDate = args.get('to',None)
-    curve = getMongoTimeCurve(database, type, name, firstDate, lastDate)
+    curve = getMongoTimeCurve(database, type, select, firstDate, lastDate, **args)
 
-    title = '{}-{}'.format(type, name) if name else '{}-all'.format(type)
+    title = '{}-{}'.format(type, select) if select else '{}-all'.format(type)
 
     doPlot([[title]+list(curve)],firstDate, lastDate)
 

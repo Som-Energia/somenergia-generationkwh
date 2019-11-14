@@ -35,6 +35,7 @@ setup(
         'decorator',
         'python-dateutil',
         'consolemsg>=0.3',
+        'somenergia-utils>=1.6',
 #        'libfacturacioatr',
     ],
     include_package_data = True,

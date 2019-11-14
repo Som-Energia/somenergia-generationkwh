@@ -139,6 +139,7 @@ from genkwh_mtc import (
     displayDayHourMatrix,
     displayMonthHourMatrix,
     displayMonthMatrix,
+    preprocessMembers,
 )
 
 def matrix(member, first, last,
@@ -223,7 +224,7 @@ def parseArguments():
                 "You can use hyphen to indicate a range. "
                 "Example: 1-3,9 is 1,2,3,9.",
             )
-    for sub in dump,plot,init,:
+    for sub in dump,plot,init,matrix:
         sub.add_argument(
             '-C','--config',
             dest='config',
@@ -299,22 +300,6 @@ def parseArguments():
             
 
     return parser.parse_args(namespace=ns())
-
-def preprocessMembers(O,members=None,idmode=None, all=None):
-    """Turns members in which ever format to the ones required by commands"""
-
-    if all:
-        return c.GenerationkwhAssignment.unassignedInvestors()
-
-    if idmode=="partner":
-        idmap = dict(O.GenerationkwhDealer.get_members_by_partners(members))
-        return idmap.values()
-
-    if idmode=="code":
-        idmap = dict(O.GenerationkwhDealer.get_members_by_codes(members))
-        return idmap.values()
-
-    return members
 
 def main():
     args = parseArguments()
