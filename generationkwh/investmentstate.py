@@ -52,6 +52,7 @@ class InvestmentState(object):
         'amortized_amount',
         'draft',
         'active',
+        'signed_date',
         'first_effective_date',
         'last_effective_date',
         'order_date',
@@ -217,6 +218,23 @@ class InvestmentState(object):
             draft = True,
         )
 
+    @action
+    def sign(self, signed_date):
+        """
+        Sign a new investment an specific date.
+        """
+        log = self._log(
+            u"SIGN: Inversió signada amb data {date}\n",
+            date=signed_date,
+        )
+        actions = self.addAction(
+            type = 'sign',
+            date = signed_date,
+        )
+        return ns(
+            signed_date = signed_date,
+            log = log,
+        )
 
     @action
     def invoice(self):

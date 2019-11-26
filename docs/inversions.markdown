@@ -32,6 +32,7 @@
 ### Operations
 
 - Apply: Filling and sending the form
+- Sign: Sign the contract
 - Bank charge: We send the payment order to the bank.
     - In current implementation this is the "purchase date"
 - Bank return:

@@ -52,6 +52,7 @@ en comptes donar-te dret a un interès,
 
 - Cada inversió tè certes dates significatives:
 	- **Data de comanda:** quan s'omple el formulari. **No la tenim en compte!**
+	- **Data de signatura:** quan es signa el contracte de la inversió
 	- **Data de compra:** quan es fa la remesa. Es considera que hi comencen els 25 anys.
 	- **Primera data efectiva:** a partir de quan comença a rebre la producció en forma de drets
 		- normalment 1 any després de la compra
