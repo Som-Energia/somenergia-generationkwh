@@ -40,7 +40,10 @@ $ sudo apt-get build-dep python-numpy
 ```bash
 nosetests generationkwh # for unittests
 nosetests som_generationkwh/test # for functional/erp, requires running local erp
+dodestral -m som_generationkwh # for destral tests, without production database either running local erp
 ```
+
+[Destral docs]:https://destral.readthedocs.io/en/latest/
 
 
 ## CHANGES
