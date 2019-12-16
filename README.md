@@ -48,7 +48,10 @@ dodestral -m som_generationkwh # for destral tests, without production database 
 
 ## CHANGES
 
-### 2.5.5 2019-xx-xx
+### 2.5.6 2019-xx-xx
+
+
+### 2.5.5 2019-12-16
 
 - `genkwh_mtc curve` new option `--by`, to aggregate the matrix in different ways.
 	- dayhour: values for every hour for each day (the old one)
@@ -59,6 +62,7 @@ dodestral -m som_generationkwh # for destral tests, without production database 
 - scriptlaucher: more scripts and options
 - `genkwh_plants`: safe unicode for pipes
 - Regression: Python 3 compatibility for the generationkwh module
+- New model generationkwh.emission to create new investment campaigns
 
 ### 2.5.4 2019-07-19
 
