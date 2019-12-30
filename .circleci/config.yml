@@ -111,7 +111,8 @@ jobs:
             . venv/bin/activate
             export PYTHONPATH=$ROOT_DIR_SRC/erp/server/bin:$ROOT_DIR_SRC/erp/server/bin/addons:$ROOT_DIR_SRC/erp/server/sitecustomize
             cd $ROOT_DIR_SRC/$TESTING_REPO
-            destral --report-coverage --enable-coverage --report-junitxml $ROOT_DIR_SRC/test-results/destral
+            #destral --report-coverage --enable-coverage --report-junitxml $ROOT_DIR_SRC/test-results/destral
+            destral -m som_generationkwh --report-coverage --enable-coverage --report-junitxml $ROOT_DIR_SRC/test-results/destral
 
       - run:
           name: coverage
