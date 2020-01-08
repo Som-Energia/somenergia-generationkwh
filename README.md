@@ -3,6 +3,7 @@
 OpenERP module and library to manage [Som Energia]'s Generation kWh
 
 [![Build Status](https://travis-ci.org/Som-Energia/somenergia-generationkwh.svg?branch=master)](https://travis-ci.org/Som-Energia/somenergia-generationkwh)
+[![CircleCI](https://circleci.com/gh/Som-Energia/somenergia-generationkwh.svg?style=svg)](https://circleci.com/gh/Som-Energia/somenergia-generationkwh)
 
 [Generation kWh] is a campaign to design a feasible alternative
 to electricity self-production in the Spanish market.
