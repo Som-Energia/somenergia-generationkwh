@@ -80,8 +80,11 @@ jobs:
       - run:
           name: Install somenenergia-generation depencencies
           command: |
-            cd ~/src/somenergia-generationkwh && pip install -e . || "Not installing somenergia-generation Python package"
-            cd ~/src/plantmeter && pip install -e . || "Not installing plantmeter Python package"
+            . ~/src/venv/bin/activate
+            cd ~/src/somenergia-generationkwh
+            pip install -e . || "Not installing somenergia-generation Python package"
+            cd ~/src/plantmeter
+            pip install -e . || "Not installing plantmeter Python package"
 
       - save_cache:
           paths:
