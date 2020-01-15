@@ -142,7 +142,7 @@ jobs:
           destination: destral
 
       - store_artifacts:
-          path: ~/src/$TESTING_REPO/htmlcov
+          path: ~/src/somenergia-generationkwh/htmlcov
           destination: coverage
 
 
