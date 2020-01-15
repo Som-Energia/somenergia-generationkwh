@@ -75,10 +75,19 @@ projects:
       title: Corbes dels GkWh emprats
       description: >
         Genera corba de drets gastats d'un inversor del GenerationkWh
-      script: python SOME_SRC/somenergia-generationkwh/scripts/genkwh_mtc.py curve memberrightusage {member} --by {aggregation} -o {output}
+      script: python SOME_SRC/somenergia-generationkwh/scripts/genkwh_mtc.py curve memberrightusage {member} --idmethod {idmethod} --by {aggregation} -o {output}
       parameters:
         member:
           description: Id de la fitxa de soci (no pas la de client). Deixa en blanc per veure la suma de tots els socis.
+        idmethod:
+          description: Com identifiquem l'usuari
+          type: enum
+          options:
+            Pel codi de soci (SXXXXXX): code
+            Pel NIF: vat
+            Per l'id fitxa de client: partner
+            Per l'id fitxa de soci: member
+          default: member
         aggregation:
           description: Agregació
           type: enum

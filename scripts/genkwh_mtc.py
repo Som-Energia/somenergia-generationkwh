@@ -14,6 +14,11 @@ from yamlns import namespace as ns
 
 import click
 
+def erp():
+    if not hasattr(erp, 'inner'):
+        erp.inner = erppeek.Client(**dbconfig.erppeek)
+    return erp.inner
+
 
 @click.group()
 def mtc():
@@ -159,11 +164,43 @@ def displayMonthHourMatrix(firstDate, curve):
         for idate, value in zip(monthfirst, monthly)
         )+ u"\nTotal {}\n".format(monthly.sum())
 
+def get_members_by_vats(vats, context=None):
+    # TODO: Prepend ES just when detected as NIF
+    vats = ['ES'+vat for vat in vats]
+    Soci = erp().SomenergiaSoci
+    member_ids = Soci.search([('vat','in',vats)], context=context)
+    res = Soci.read(member_ids, ['vat'], context=context)
+    return [ (r['vat'][0], r['id'])
+        for r in res
+        ] if res else []
+
+
+
+def preprocessMembers(members=None,idmode=None):
+
+    """Turns members in which ever format to the ones required by commands"""
+
+    if idmode=="partner":
+        idmap = dict(erp().GenerationkwhDealer.get_members_by_partners(members))
+        return idmap.values()
+
+    if idmode=="code":
+        idmap = dict(erp().GenerationkwhDealer.get_members_by_codes(members))
+        return idmap.values()
+
+    if idmode=="vat":
+        # TODO: Rely on the erp method once it is released
+        idmap = dict(get_members_by_vats(members))
+        #idmap = dict(erp().GenerationkwhDealer.get_members_by_vats(members))
+        return idmap.values()
+
+    return members
 
 
 @mtc.command()
 @click.argument('type', type=click.Choice(sources.keys()))
 @click.argument('name', required=False)
+@click.option('--idmethod', type=click.Choice(['vat', 'member', 'code', 'partner']), default='member')
 @click.option('--output', '-o')
 @click.option('--database', '-d', default='somenergia')
 @click.option('--from','-f', type=localisodate, default="2016-05-01")
@@ -185,6 +222,13 @@ def curve(database, type, name, **args):
     """
     firstDate = args.get('from', None)
     lastDate = args.get('to',None)
+    idmethod = args.get('idmethod', None)
+    if idmethod:
+        name = name and preprocessMembers([name], idmethod)[0]
+        member = erp().SomenergiaSoci.read(name, ['vat', 'name', 'ref'])
+        print member.keys()
+        print(u"Showing data for VAT: {vat} Code: {ref} Name: {name}".format(**member))
+
     curve = getMongoTimeCurve(database, type, name, firstDate, lastDate)
 
     display = dict(
