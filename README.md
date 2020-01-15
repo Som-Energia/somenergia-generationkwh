@@ -49,8 +49,10 @@ dodestral -m som_generationkwh # for destral tests, without production database 
 
 ## CHANGES
 
-### 2.5.6 2019-xx-xx
+### 2.5.7 XXXX
 
+### 2.5.6 2020-01-15
+- CreateFromForm: Can create Aportacions
 
 ### 2.5.5 2019-12-16
 
