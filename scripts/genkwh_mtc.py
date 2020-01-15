@@ -169,8 +169,10 @@ def get_members_by_vats(vats, context=None):
     vats = [(vat if vat.startswith('ES') else 'ES'+vat) for vat in vats]
     Soci = erp().SomenergiaSoci
     member_ids = Soci.search([('vat','in',vats)], context=context)
+    if not member_ids: return []
+
     res = Soci.read(member_ids, ['vat'], context=context)
-    return [ (r['vat'][0], r['id'])
+    return [ (r['vat'], r['id'])
         for r in res
         ] if res else []
 
