@@ -166,7 +166,7 @@ def displayMonthHourMatrix(firstDate, curve):
 
 def get_members_by_vats(vats, context=None):
     # TODO: Prepend ES just when detected as NIF
-    vats = ['ES'+vat for vat in vats]
+    vats = [(vat if vat.startswith('ES') else 'ES'+vat) for vat in vats]
     Soci = erp().SomenergiaSoci
     member_ids = Soci.search([('vat','in',vats)], context=context)
     res = Soci.read(member_ids, ['vat'], context=context)
@@ -181,6 +181,7 @@ def preprocessMembers(members=None,idmode=None):
     """Turns members in which ever format to the ones required by commands"""
 
     if idmode=="partner":
+        members = [int(member) for member in members]
         idmap = dict(erp().GenerationkwhDealer.get_members_by_partners(members))
         return idmap.values()
 
@@ -200,7 +201,7 @@ def preprocessMembers(members=None,idmode=None):
 @mtc.command()
 @click.argument('type', type=click.Choice(sources.keys()))
 @click.argument('name', required=False)
-@click.option('--idmethod', type=click.Choice(['vat', 'member', 'code', 'partner']), default='member')
+@click.option('--idmethod', type=click.Choice(['vat', 'member', 'code', 'partner']), default=None)
 @click.option('--output', '-o')
 @click.option('--database', '-d', default='somenergia')
 @click.option('--from','-f', type=localisodate, default="2016-05-01")
@@ -223,11 +224,13 @@ def curve(database, type, name, **args):
     firstDate = args.get('from', None)
     lastDate = args.get('to',None)
     idmethod = args.get('idmethod', None)
-    if idmethod:
-        name = name and preprocessMembers([name], idmethod)[0]
-        member = erp().SomenergiaSoci.read(name, ['vat', 'name', 'ref'])
-        print member.keys()
-        print(u"Showing data for VAT: {vat} Code: {ref} Name: {name}".format(**member))
+    if idmethod and name:
+        name = name and preprocessMembers([name], idmethod)
+        name = name[0] if name else None
+        name or fail("Member not found ({}: {}) !".format(idmethod, name))
+        member = erp().SomenergiaSoci.read(name, ['vat', 'name', 'ref', 'partner_id'])
+        member or fail("Member not found!")
+        step(u"Showing data for VAT: {vat} Code: {ref} Name: {name} Member ID: {id} Partner ID: {partner_id[0]}".format(**member))
 
     curve = getMongoTimeCurve(database, type, name, firstDate, lastDate)
 
