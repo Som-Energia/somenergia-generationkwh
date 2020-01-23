@@ -133,6 +133,7 @@ jobs:
             cd $ROOT_DIR_SRC/$TESTING_REPO
             coverage report
             coverage html
+            coveralls
 
       - store_test_results:
           path: ~/src/test-results
