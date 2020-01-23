@@ -85,6 +85,7 @@ jobs:
             pip install -e . || "Not installing somenergia-generation Python package"
             cd ~/src/plantmeter
             pip install -e . || "Not installing plantmeter Python package"
+            pip install coveralls
 
       - save_cache:
           paths:
