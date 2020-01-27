@@ -662,30 +662,33 @@ class InvestmentState(object):
 
     @action
     def emitSplit(self, date, name1, amount1, name2, amount2):
+
         if self.purchase_date is None:
             raise InvestmentStateError(
                 "While splitting investment, original investment must be paid")
+
         if any(amount<=0 for amount in (amount1, amount2)):
             raise InvestmentStateError(
                 "While splitting investment, negative amounts not allowed")
+
         if amount1+amount2 != self.nominal_amount:
             raise InvestmentStateError(
                 u"While splitting investment, amounts ({:.2f}€+{:.2f}€) "
                 u"should add {:.2f}€"
                 .format(amount1,amount2,self.nominal_amount))
+
+        log = self._log(
+            u"SPLITTED: "
+            u"Partida entre {name1} ({amount1:.2f}€) i "
+            u"{name2} ({amount2:.2f}€)\n"
+            .format(**locals()))
+
         return ns(
             active = True,
             amortized_amount = self.nominal_amount,
             last_effective_date = date,
             paid_amount = 0.0,
-            log = self._log(
-                u"SPLITTED: "
-                u"Partida entre {names[0]} ({amounts[0]:.2f}€) i {names[1]} ({amounts[1]:.2f}€)\n"
-                .format(
-                    names = [name1,name2],
-                    amounts = [amount1, amount2],
-                )
-            ),
+            log = log,
             actions_log = self.addAction(
                 type = 'splitout',
                 amounts = [amount1, amount2],
@@ -696,6 +699,7 @@ class InvestmentState(object):
 
     @action
     def receiveSplit(self, name, date, amount, origin):
+
         if origin.purchase_date is None:
             raise InvestmentStateError(
                 u"While splitting investment, "
