@@ -706,6 +706,15 @@ class InvestmentState(object):
         first_effective_date = date + timedelta(days=1)
         # Inherits the proportional amortized amount
         amortized_amount = amount*origin.amortized_amount/origin.nominal_amount
+        log = self._log(
+            u"CREATEDBYSPLIT: "
+            u"Creada per partició de {name} de {amount:.2f}€ "
+            u"efectiva a partir del dia {first_effective_date}\n"
+            .format(
+                name = origin.name,
+                amount = amount,
+                first_effective_date = first_effective_date,
+            )
         return ns(
             origin.values(),
             name = name,
@@ -713,16 +722,7 @@ class InvestmentState(object):
             nominal_amount = amount,
             paid_amount = amount,
             amortized_amount = amortized_amount,
-            log = self._log(
-                u"CREATEDBYSPLIT: "
-                u"Creada per partició de {name} de {amount:.2f}€ "
-                u"efectiva a partir del dia {first_effective_date}\n"
-                .format(
-                    name = origin.name,
-                    amount = amount,
-                    first_effective_date = first_effective_date,
-                )
-            ),
+            log = log,
             actions_log = self.addAction(
                 type='splitin',
                 amount=amount,
