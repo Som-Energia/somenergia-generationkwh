@@ -696,6 +696,10 @@ class InvestmentState(object):
 
     @action
     def receiveSplit(self, name, date, amount, origin):
+        if origin.purchase_date is None:
+            raise InvestmentStateError(
+                "While splitting investment, original investment must be paid")
+
         first_effective_date = date + timedelta(days=1)
         return ns(
             origin.values(),

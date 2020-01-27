@@ -1695,6 +1695,30 @@ class InvestmentState_Test(unittest.TestCase):
                 timestamp = self.timestamp,
             ))
 
+    def test_receiveSplit_unpaid(self):
+        inv = self.setupInvestment()
+        origin = self.setupInvestment(
+            name = "GKWH00001",
+            nominal_amount = 300.0,
+            order_date = isodate("2000-01-01"),
+            purchase_date = None,
+            first_effective_date = None,
+            last_effective_date = None,
+            amortized_amount = 0.0,
+            draft = False,
+            active = True,
+            )
+
+        with self.assertRaises(StateError) as ctx:
+            inv.receiveSplit(
+                name = 'GKWH00002',
+                date = isodate("2001-01-03"),
+                amount = 100.0,
+                origin=origin,
+            )
+        self.assertExceptionMessage(ctx.exception,
+            "While splitting investment, original investment must be paid")
+
 
 
 
