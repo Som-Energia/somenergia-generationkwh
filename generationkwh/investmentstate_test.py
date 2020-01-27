@@ -1644,7 +1644,8 @@ class InvestmentState_Test(unittest.TestCase):
                 amount2 = 200.0,
             )
         self.assertExceptionMessage(ctx.exception,
-            "While splitting investment, original investment must be paid")
+            "While splitting investment, "
+            "original investment must be paid")
 
     def test_emitSplit_withAmountMissmatch(self):
         inv = self.setupInvestment(
@@ -1665,7 +1666,8 @@ class InvestmentState_Test(unittest.TestCase):
                 amount2 = 100.0,
             )
         self.assertExceptionMessage(ctx.exception,
-            "While splitting investment, amounts (100.00€+100.00€) should add 300.00€")
+            u"While splitting investment, "
+            u"amounts (100.00€+100.00€) should add 300.00€")
 
     def test_emitSplit_negativeAmounts(self):
         inv = self.setupInvestment(
@@ -1816,7 +1818,8 @@ class InvestmentState_Test(unittest.TestCase):
             order_date = isodate("2000-01-01"),
             purchase_date = isodate("2000-01-02"),
             first_effective_date = isodate("2001-01-02"),
-            last_effective_date = isodate("2025-01-02"),        amortized_amount = 0.0,
+            last_effective_date = isodate("2025-01-02"),
+            amortized_amount = 0.0,
             draft = False,
             active = True,
             )
@@ -1825,15 +1828,60 @@ class InvestmentState_Test(unittest.TestCase):
             inv.receiveSplit(
                 name = 'GKWH00002',
                 date = isodate("2001-01-03"),
-                amount = -100.0,
+                amount = -100.0, # Negative!
                 origin=origin,
             )
         self.assertExceptionMessage(ctx.exception,
-            u"While splitting investment, split amount -100.00€ must be positive")
+            u"While splitting investment, "
+            u"split amount -100.00€ must be positive")
 
-    def test_receiveSplit_zeroAmount(self): pass
-    def test_receiveSplit_negativeAmount(self): pass 
-    def test_receiveSplit_hugePart(self): pass # Igual o major
+    def test_receiveSplit_zeroAmount(self):
+        origin = self.setupInvestment(
+            name = "GKWH00001",
+            nominal_amount = 300.0,
+            order_date = isodate("2000-01-01"),
+            purchase_date = isodate("2000-01-02"),
+            first_effective_date = isodate("2001-01-02"),
+            last_effective_date = isodate("2025-01-02"),
+            amortized_amount = 0.0,
+            draft = False,
+            active = True,
+            )
+        inv = self.setupInvestment()
+        with self.assertRaises(StateError) as ctx:
+            inv.receiveSplit(
+                name = 'GKWH00002',
+                date = isodate("2001-01-03"),
+                amount = 0.0, # Zero!
+                origin=origin,
+            )
+        self.assertExceptionMessage(ctx.exception,
+            u"While splitting investment, "
+            u"split amount 0.00€ must be positive")
+
+    def test_receiveSplit_hugeAmount(self):
+        origin = self.setupInvestment(
+            name = "GKWH00001",
+            nominal_amount = 300.0,
+            order_date = isodate("2000-01-01"),
+            purchase_date = isodate("2000-01-02"),
+            first_effective_date = isodate("2001-01-02"),
+            last_effective_date = isodate("2025-01-02"),
+            amortized_amount = 0.0,
+            draft = False,
+            active = True,
+            )
+        inv = self.setupInvestment()
+        with self.assertRaises(StateError) as ctx:
+            inv.receiveSplit(
+                name = 'GKWH00002',
+                date = isodate("2001-01-03"),
+                amount = 300.0, # All 300!
+                origin=origin,
+            )
+        self.assertExceptionMessage(ctx.exception,
+            u"While splitting investment, "
+            u"split amount 300.00€ must be less than 300.00€")
 
 
 # vim: ts=4 sw=4 et

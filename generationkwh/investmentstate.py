@@ -698,10 +698,20 @@ class InvestmentState(object):
     def receiveSplit(self, name, date, amount, origin):
         if origin.purchase_date is None:
             raise InvestmentStateError(
-                u"While splitting investment, original investment must be paid")
-        if amount < 0:
+                u"While splitting investment, "
+                u"original investment must be paid")
+
+        if amount <= 0:
             raise InvestmentStateError(
-                u"While splitting investment, split amount {:.2f}€ must be positive".format(amount))
+                u"While splitting investment, "
+                u"split amount {:.2f}€ must be positive"
+                .format(amount))
+
+        if amount >= origin.nominal_amount:
+            raise InvestmentStateError(
+                u"While splitting investment, "
+                u"split amount {:.2f}€ must be less than {:.2f}€"
+                .format(amount, origin.nominal_amount))
 
         first_effective_date = date + timedelta(days=1)
         # Inherits the proportional amortized amount
@@ -714,7 +724,7 @@ class InvestmentState(object):
                 name = origin.name,
                 amount = amount,
                 first_effective_date = first_effective_date,
-            )
+        ))
         return ns(
             origin.values(),
             name = name,
