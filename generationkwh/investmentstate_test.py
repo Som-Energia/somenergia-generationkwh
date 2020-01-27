@@ -1583,6 +1583,27 @@ class InvestmentState_Test(unittest.TestCase):
                 timestamp = self.timestamp,
             ))
 
+    def test_emitSplit_withAmountMissmatch(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            order_date = isodate("2000-01-01"),
+            purchase_date = isodate("2000-01-02"),
+            first_effective_date = isodate("2001-01-02"),
+            last_effective_date = isodate("2025-01-02"),
+            draft = False,
+        )
+
+        with self.assertRaises(StateError) as ctx:
+            inv.emitSplit(
+                date = isodate("2006-08-01"),
+                name1 = "GKWH00069",
+                amount1 = 100.0,
+                name2 = "GKWH00070",
+                amount2 = 100.0,
+            )
+        self.assertExceptionMessage(ctx.exception,
+            "While splitting investment, amounts (100.00€+100.00€) should add 300.00€")
+
 
 
 

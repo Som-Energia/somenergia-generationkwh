@@ -662,6 +662,11 @@ class InvestmentState(object):
 
     @action
     def emitSplit(self, date, name1, amount1, name2, amount2):
+        if amount1+amount2 != self.nominal_amount:
+            raise InvestmentStateError(
+                "While splitting investment, amounts ({:.2f}€+{:.2f}€) "
+                "should add {:.2f}€"
+                .format(amount1,amount2,self.nominal_amount))
         return ns(
             active = True,
             amortized_amount = self.nominal_amount,
