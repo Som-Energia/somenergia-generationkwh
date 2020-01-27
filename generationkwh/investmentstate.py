@@ -665,11 +665,15 @@ class InvestmentState(object):
         return ns(
             active = True,
             amortized_amount = 300.0,
-            last_effective_date = isodate('2006-08-01'),
+            last_effective_date = date,
             paid_amount = 0.0,
             log = self._log(
                 u"SPLITTED: "
-                u"Partida entre GKWH00069 (100.00€) i GKWH00070 (200.00€)\n"
+                u"Partida entre {names[0]} ({amounts[0]:.2f}€) i {names[1]} ({amounts[1]:.2f}€)\n"
+                .format(
+                    names = destinationNames,
+                    amounts = amounts,
+                )
             ),
             actions_log = self.addAction(
                 type = 'splitout',
