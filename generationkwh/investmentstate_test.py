@@ -1636,6 +1636,7 @@ class InvestmentState_Test(unittest.TestCase):
             last_effective_date = isodate("2025-01-02"),
             amortized_amount = 0.0,
             draft = False,
+            active = True,
             )
         inv.receiveSplit(
             name = 'GKWH00002',
