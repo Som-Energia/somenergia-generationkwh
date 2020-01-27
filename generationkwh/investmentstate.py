@@ -662,6 +662,9 @@ class InvestmentState(object):
 
     @action
     def emitSplit(self, date, name1, amount1, name2, amount2):
+        if any(amount<=0 for amount in (amount1, amount2)):
+            raise InvestmentStateError(
+                "While splitting investment, negative amounts not allowed")
         if amount1+amount2 != self.nominal_amount:
             raise InvestmentStateError(
                 "While splitting investment, amounts ({:.2f}€+{:.2f}€) "
