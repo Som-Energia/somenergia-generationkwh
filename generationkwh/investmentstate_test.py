@@ -1543,6 +1543,46 @@ class InvestmentState_Test(unittest.TestCase):
                 timestamp = self.timestamp,
             ))
 
+    def test_emitSplit(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            order_date = isodate("2000-01-01"),
+            purchase_date = isodate("2000-01-02"),
+            first_effective_date = isodate("2001-01-02"),
+            last_effective_date = isodate("2025-01-02"),
+            draft = False,
+        )
+
+        inv.emitSplit(
+            date = isodate("2006-08-01"),
+            destinationNames = ["GKWH00069", "GKWH00070"],
+            amounts = [100.0, 200.0],
+        )
+
+        self.assertChangesEqual(inv, """
+            last_effective_date: 2006-08-01
+            active: True
+            paid_amount: 0.0
+            amortized_amount: 300.0
+            """,
+            u'SPLITTED: Partida entre GKWH00069 (100.00€) i GKWH00070 (200.00€)\n'
+            )
+        self.assertActionsEqual(inv, u"""
+            type: splitout
+            user: {user}
+            timestamp: '{timestamp}'
+            amounts: [100.0, 200.0]
+            date: 2006-08-01
+            destinationNames:
+            - GKWH00069
+            - GKWH00070
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
+
+
+
 
 
 # vim: ts=4 sw=4 et

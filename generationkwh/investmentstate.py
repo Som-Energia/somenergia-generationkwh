@@ -660,4 +660,27 @@ class InvestmentState(object):
             )
         )
 
+    @action
+    def emitSplit(self, date, destinationNames, amounts):
+        return ns(
+            active = True,
+            amortized_amount = 300.0,
+            last_effective_date = isodate('2006-08-01'),
+            paid_amount = 0.0,
+            log = self._log(
+                u"SPLITTED: "
+                u"Partida entre GKWH00069 (100.00€) i GKWH00070 (200.00€)\n"
+            ),
+            actions_log = self.addAction(
+                type = 'splitout',
+                amounts = [100.0, 200.0],
+                date = isodate('2006-08-01'),
+                destinationNames = [
+                    "GKWH00069",
+                    "GKWH00070",
+                ],
+            ),
+        )
+
+
 # vim: et ts=4 sw=4
