@@ -1555,8 +1555,10 @@ class InvestmentState_Test(unittest.TestCase):
 
         inv.emitSplit(
             date = isodate("2006-08-01"),
-            destinationNames = ["GKWH00069", "GKWH00070"],
-            amounts = [100.0, 200.0],
+            name1 = "GKWH00069",
+            amount1 = 100.0,
+            name2 = "GKWH00070",
+            amount2 = 200.0,
         )
 
         self.assertChangesEqual(inv, """

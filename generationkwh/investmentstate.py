@@ -661,7 +661,7 @@ class InvestmentState(object):
         )
 
     @action
-    def emitSplit(self, date, destinationNames, amounts):
+    def emitSplit(self, date, name1, amount1, name2, amount2):
         return ns(
             active = True,
             amortized_amount = self.nominal_amount,
@@ -671,18 +671,15 @@ class InvestmentState(object):
                 u"SPLITTED: "
                 u"Partida entre {names[0]} ({amounts[0]:.2f}€) i {names[1]} ({amounts[1]:.2f}€)\n"
                 .format(
-                    names = destinationNames,
-                    amounts = amounts,
+                    names = [name1,name2],
+                    amounts = [amount1, amount2],
                 )
             ),
             actions_log = self.addAction(
                 type = 'splitout',
-                amounts = [100.0, 200.0],
-                date = isodate('2006-08-01'),
-                destinationNames = [
-                    "GKWH00069",
-                    "GKWH00070",
-                ],
+                amounts = [amount1, amount2],
+                date = date,
+                destinationNames = [name1,name2],
             ),
         )
 
