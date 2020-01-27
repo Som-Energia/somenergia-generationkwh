@@ -1589,7 +1589,7 @@ class InvestmentState_Test(unittest.TestCase):
             nominal_amount = 300.0,
             order_date = isodate("2000-01-01"),
             purchase_date = isodate("2000-01-02"),
-            amortized_amount = 12.0,
+            amortized_amount = 12.0, # single amortization: 4€ per 3 actions
             first_effective_date = isodate("2001-01-02"),
             last_effective_date = isodate("2025-01-02"),
             draft = False,
@@ -1745,7 +1745,7 @@ class InvestmentState_Test(unittest.TestCase):
             purchase_date = isodate("2000-01-02"),
             first_effective_date = isodate("2001-01-02"),
             last_effective_date = isodate("2025-01-02"),
-            amortized_amount = 12.0,
+            amortized_amount = 12.0, # single amortization: 4€ per 3 actions
             draft = False,
             active = True,
             )
