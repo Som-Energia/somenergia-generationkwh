@@ -1625,6 +1625,54 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertExceptionMessage(ctx.exception,
             "While splitting investment, negative amounts not allowed")
 
+    def test_receiveSplit(self):
+        inv = self.setupInvestment()
+        origin = self.setupInvestment(
+            name = "GKWH00001",
+            nominal_amount = 300.0,
+            order_date = isodate("2000-01-01"),
+            purchase_date = isodate("2000-01-02"),
+            first_effective_date = isodate("2001-01-02"),
+            last_effective_date = isodate("2025-01-02"),
+            amortized_amount = 0.0,
+            draft = False,
+            )
+        inv.receiveSplit(
+            name = 'GKWH00002',
+            date = isodate("2001-01-03"),
+            amount = 100.0,
+            origin=origin,
+        )
+
+        self.assertChangesEqual(inv, """
+            name: GKWH00002
+            order_date: 2000-01-01 # Same as origin
+            purchase_date: 2000-01-02 # Same as origin
+            first_effective_date: 2001-01-04 # Next day of the transaction date
+            last_effective_date: 2025-01-02 # Same as origin
+            active: True
+            paid_amount: 100.0
+            nominal_amount: 100.0
+            amortized_amount: 0.0
+            draft: false
+            """,
+            u"CREATEDBYSPLIT: "
+            u"Creada per partició de GKWH00001 de 100.00€ "
+            u"efectiva a partir del dia 2001-01-04\n",
+            noPreviousLog=True,
+            )
+        self.assertActionsEqual(inv, u"""
+            type: splitin
+            user: {user}
+            timestamp: '{timestamp}'
+            amount: 100.0
+            splitdate: 2001-01-03
+            frominvestment: GKWH00001
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
+
 
 
 

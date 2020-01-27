@@ -691,5 +691,31 @@ class InvestmentState(object):
             ),
         )
 
+    @action
+    def receiveSplit(self, name, date, amount, origin):
+        return ns(
+            name = 'GKWH00002',
+            order_date = isodate('2000-01-01'),
+            purchase_date = isodate('2000-01-02'),
+            first_effective_date = isodate('2001-01-04'),
+            last_effective_date = isodate('2025-01-02'),
+            nominal_amount = 100.0,
+            paid_amount = 100.0,
+            amortized_amount = 0.0,
+            active = True,
+            draft = False,
+            log = self._log(
+                u"CREATEDBYSPLIT: "
+                u"Creada per partició de GKWH00001 de 100.00€ "
+                u"efectiva a partir del dia 2001-01-04\n"
+            ),
+            actions_log = self.addAction(
+                type='splitin',
+                amount=100.0,
+                splitdate=isodate('2001-01-03'),
+                frominvestment = 'GKWH00001',
+            ),
+        )
+
 
 # vim: et ts=4 sw=4
