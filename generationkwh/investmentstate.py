@@ -701,13 +701,15 @@ class InvestmentState(object):
                 "While splitting investment, original investment must be paid")
 
         first_effective_date = date + timedelta(days=1)
+        # Inherits the proportional amortized amount
+        amortized_amount = amount*origin.amortized_amount/origin.nominal_amount
         return ns(
             origin.values(),
             name = name,
             first_effective_date = first_effective_date,
             nominal_amount = amount,
             paid_amount = amount,
-            amortized_amount = 0.0,
+            amortized_amount = amortized_amount,
             log = self._log(
                 u"CREATEDBYSPLIT: "
                 u"Creada per partició de {name} de {amount:.2f}€ "
