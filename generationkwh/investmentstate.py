@@ -664,7 +664,7 @@ class InvestmentState(object):
     def emitSplit(self, date, destinationNames, amounts):
         return ns(
             active = True,
-            amortized_amount = 300.0,
+            amortized_amount = self.nominal_amount,
             last_effective_date = date,
             paid_amount = 0.0,
             log = self._log(
