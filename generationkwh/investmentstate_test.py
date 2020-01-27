@@ -1689,7 +1689,6 @@ class InvestmentState_Test(unittest.TestCase):
             "While splitting investment, negative amounts not allowed")
 
     def test_receiveSplit(self):
-        inv = self.setupInvestment()
         origin = self.setupInvestment(
             name = "GKWH00001",
             nominal_amount = 300.0,
@@ -1701,6 +1700,7 @@ class InvestmentState_Test(unittest.TestCase):
             draft = False,
             active = True,
             )
+        inv = self.setupInvestment()
         inv.receiveSplit(
             name = 'GKWH00002',
             date = isodate("2001-01-03"),
