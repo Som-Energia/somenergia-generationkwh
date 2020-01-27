@@ -1583,6 +1583,48 @@ class InvestmentState_Test(unittest.TestCase):
                 timestamp = self.timestamp,
             ))
 
+    # TODO: Unfailed test, could be removed
+    def test_emitSplit_amortized(self):
+        inv = self.setupInvestment(
+            nominal_amount = 300.0,
+            order_date = isodate("2000-01-01"),
+            purchase_date = isodate("2000-01-02"),
+            amortized_amount = 12.0,
+            first_effective_date = isodate("2001-01-02"),
+            last_effective_date = isodate("2025-01-02"),
+            draft = False,
+        )
+
+        inv.emitSplit(
+            date = isodate("2002-01-03"),
+            name1 = "GKWH00069",
+            amount1 = 100.0,
+            name2 = "GKWH00070",
+            amount2 = 200.0,
+        )
+
+        self.assertChangesEqual(inv, """
+            last_effective_date: 2002-01-03
+            active: True
+            paid_amount: 0.0
+            amortized_amount: 300.0
+            """,
+            u'SPLITTED: Partida entre GKWH00069 (100.00€) i GKWH00070 (200.00€)\n'
+            )
+        self.assertActionsEqual(inv, u"""
+            type: splitout
+            user: {user}
+            timestamp: '{timestamp}'
+            amounts: [100.0, 200.0]
+            date: 2002-01-03
+            destinationNames:
+            - GKWH00069
+            - GKWH00070
+            """.format(
+                user = self.user,
+                timestamp = self.timestamp,
+            ))
+
     def test_emitSplit_unpaid(self):
         inv = self.setupInvestment(
             nominal_amount = 300.0,
