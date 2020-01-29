@@ -50,9 +50,12 @@ dodestral -m som_generationkwh # for destral tests, without production database 
 
 ## CHANGES
 
-### 2.5.7 XXXX
+### 2.5.7 2020-01-29
+
+- PR #8 Added logic to model 193 lines wizard
 
 ### 2.5.6 2020-01-15
+
 - CreateFromForm: Can create Aportacions
 
 ### 2.5.5 2019-12-16
