@@ -1,18 +1,23 @@
 digraph G {
 rankdir=LR
-"" -> Draft [label=Form]
-Draft -> Waiting [label=Charge]
+Discarded
+"" -> Ordered [label=Order]
+Ordered -> Signed [label=Sign]
+Signed -> Invoiced [label=Invoice]
+Invoiced -> Waiting [label=Pay]
 Waiting -> Effective [label="1 year"]
 Effective -> Effective [label="Amortization"]
 Effective -> Expired [label="Expires 24y"]
 Effective -> Expired [label="Penalty Divest"]
-Waiting -> Expired  [label="Early Divestment"]
+Waiting -> Expired  [label="Early Divest"]
 
-Waiting -> Returned [label=Return]
+Waiting -> Returned [label=Unpay]
 Returned -> Waiting [label=BankTranfer]
-Returned -> Draft [label=AskedToCharge]
+Returned -> Invoiced [label=AskedToCharge]
 Returned -> Discarded [label=Discard]
-Draft -> Discarded [label=Discard]
+Ordered -> Discarded [label=Discard]
+Signed -> Discarded [label=Discard]
+Invoiced -> Discarded [label=Discard]
 
-"" -> Effective [label="Receive Transfer"]
+"" -> Effective [label="Transfer Ownership/Split"]
 }
