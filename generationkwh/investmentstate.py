@@ -238,6 +238,7 @@ class InvestmentState(object):
 
     @action
     def invoice(self):
+        # TODO: Check that signed_date is not None
         if not self.draft:
             raise InvestmentStateError("Already invoiced")
 
