@@ -102,5 +102,25 @@ projects:
           extension: csv
           filename: usage-{member}.csv
 
+    computeIntegral:
+      title: Compute integral file
+      description: >
+         Genera los valores de la integral de un fichero 
+      script: python SOME_SRC/somenergia-generationkwh/scripts/integral_batch_file.py {variableEntrada} {ficheroMedicion} {output}
+      parameters:
+        variableEntrada:
+          description: variable de entrada para integrar
+          type: enum
+          options:
+            Totes: ''
+            Irradiacion: ' Irradiation'
+            Temperatura: ' Temperature'
+        ficheroMedicion:
+          description: fichero csv con los datos para integrar
+          type: FILE
+        output:
+          type: FILEDOWN
+          extension: csv
+          filename: outputFileIntegrated{variableEntrada}.csv
 
 # vim: et ts=2 sw=2
