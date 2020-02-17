@@ -7,3 +7,4 @@ import wizard_investment_cancel_or_resign
 import wizard_investment_divest
 import wizard_investment_transfer
 import wizard_aeat193_from_gkwh_invoices
+import wizard_contract_sign_signaturit

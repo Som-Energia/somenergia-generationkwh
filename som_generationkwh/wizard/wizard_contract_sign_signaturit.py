@@ -4,7 +4,6 @@ from datetime import date
 from osv import osv, fields
 from tools.translate import _
 
-
 class WizardContractSignSignaturit(osv.osv_memory):
 
     _name = 'wizard.generationkwh.sign.signaturit'
@@ -17,7 +16,7 @@ class WizardContractSignSignaturit(osv.osv_memory):
         #Buscar si totes estan pendents de notificar
 
 
-        if True:
+        if False:
             #No notificaré cap:
             print("No notifico cap!")
             self.write(cursor, uid, ids, {

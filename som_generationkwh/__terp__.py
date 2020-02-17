@@ -14,6 +14,7 @@
     'som_inversions',
     'som_plantmeter',
     'l10n_ES_aeat_mod193',
+    'giscedata_signatura_documents_signaturit',
     ],
   "init_xml": [],
   "demo_xml": [
@@ -31,6 +32,7 @@
     "wizard/wizard_investment_divest.xml",
     "wizard/wizard_investment_transfer.xml",
     "wizard/wizard_aeat193_from_gkwh_invoices_view.xml",
+    "wizard/wizard_contract_sign_signaturit.xml",
     "investment_view.xml",
     "assignment_view.xml",
     "somenergia_soci_view.xml",
