@@ -5,6 +5,10 @@ import sys
 from scipy import integrate
 import pandas as pd
 from datetime import datetime
+import chardet
+
+def show_usage():
+    print('usage: column2Integrate input_csv_file output_csv_file')
 
 def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat='%d/%m/%Y %H:%M:%S', timeSpacing=5./60., column2Integrate=' Irradiation'):
     ''' Trapezoidal aproximation of the 24 hours following first sensor entry'''
@@ -31,22 +35,37 @@ def asciigraph_print(tuple_array, scale_factor = 10):
     for t, v in tuple_array:
         print("{} {}".format(t, '=' * int(v/scale_factor)))
 
+def find_encoding(fname):
+    with open(fname, 'rb') as f:
+        r_file = f.read()
+        result = chardet.detect(r_file)
+    charenc = result['encoding']
+    return charenc
+
 def main():
 
     if len(sys.argv[1:]) != 3:
         print('Expecting 3 arguments, got {}'.format(len(sys.argv[1:])))
+        show_usage()
         sys.exit(-1)
 
     '''TODO: use config file'''
     outputDataFormat = '%d/%m/%Y %H:%M:%S'
+    decimal=',' # European decimal point
 
     '''TODO: sanitize'''
     column2Integrate = sys.argv[1]
     input_csv_file = sys.argv[2]
     output_csv_file = sys.argv[3]
 
+    guessed_encoding = find_encoding(input_csv_file)
 
-    sensors = pd.read_csv(input_csv_file, delimiter=';', encoding='utf-8')
+    columnNames = pd.read_csv(input_csv_file, nrows=0).columns
+    typesDict = {column2Integrate: float}
+    typesDict.update({col: str for col in columnNames if col not in typesDict})
+
+    sensors = pd.read_csv(input_csv_file, delimiter=';', encoding=guessed_encoding, dtype=typesDict, decimal=decimal)
+
     sensors['date_'] = sensors['DATE'] + sensors[' TIME']
     sensors['date_'] = pd.to_datetime(sensors['date_'], format='%d/%m/%Y %H:%M')
 
@@ -66,5 +85,6 @@ def main():
     print("Saved {} records from {} to {}".format(len(integralsDF), from_date, to_date))
     print("Job's done, have a good day")
     asciigraph_print(integrals)
+
 if __name__ == "__main__":
 	main()
