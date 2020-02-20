@@ -8,7 +8,8 @@ from datetime import datetime
 import chardet
 
 def show_usage():
-    print('usage: column2Integrate input_csv_file output_csv_file')
+    print("usage: column2Integrate input_csv_file output_csv_file decimal\n\
+    e.g. python ./integral_batch_file.py \' Irradiation\' dades_in.csv dades_out.csv ','")
 
 def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat='%d/%m/%Y %H:%M:%S', timeSpacing=5./60., column2Integrate=' Irradiation'):
     ''' Trapezoidal aproximation of the 24 hours following first sensor entry'''
@@ -33,7 +34,7 @@ def asciigraph_print(tuple_array, scale_factor = 10):
     '''for the lulz'''
 
     for t, v in tuple_array:
-        print("{} {}".format(t, '=' * int(v/scale_factor)))
+        print("{} {} {:.2f}".format(t, '=' * int(v/scale_factor), v))
 
 def find_encoding(fname):
     with open(fname, 'rb') as f:
@@ -44,27 +45,36 @@ def find_encoding(fname):
 
 def main():
 
-    if len(sys.argv[1:]) != 3:
-        print('Expecting 3 arguments, got {}'.format(len(sys.argv[1:])))
+    if len(sys.argv[1:]) != 4:
+        print('Expecting 4 arguments, got {}'.format(len(sys.argv[1:])))
         show_usage()
         sys.exit(-1)
 
     '''TODO: use config file'''
     outputDataFormat = '%d/%m/%Y %H:%M:%S'
-    decimal=',' # European decimal point
 
     '''TODO: sanitize'''
     column2Integrate = sys.argv[1]
     input_csv_file = sys.argv[2]
     output_csv_file = sys.argv[3]
+    decimal = sys.argv[4]
+    # decimal=',' # European decimal point
 
     guessed_encoding = find_encoding(input_csv_file)
 
-    columnNames = pd.read_csv(input_csv_file, nrows=0).columns
-    typesDict = {column2Integrate: float}
-    typesDict.update({col: str for col in columnNames if col not in typesDict})
+    columnNames = pd.read_csv(input_csv_file, nrows=0, delimiter=';', encoding=guessed_encoding).columns
+    forcedTypesDict = {column2Integrate: float}
 
-    sensors = pd.read_csv(input_csv_file, delimiter=';', encoding=guessed_encoding, dtype=typesDict, decimal=decimal)
+    if column2Integrate not in columnNames:
+        print('Column \'{}\' not in columnNames. Columns are {}.'.format(column2Integrate, columnNames))
+        sys.exit(-1)
+
+    columnsTypesDict = forcedTypesDict
+    columnsTypesDict.update({col: str for col in columnNames if col not in forcedTypesDict})
+
+    '''TODO: utf sandwich instead of keeping guessed_encoding'''
+
+    sensors = pd.read_csv(input_csv_file, delimiter=';', encoding=guessed_encoding, dtype=columnsTypesDict, decimal=decimal)
 
     sensors['date_'] = sensors['DATE'] + sensors[' TIME']
     sensors['date_'] = pd.to_datetime(sensors['date_'], format='%d/%m/%Y %H:%M')
