@@ -122,5 +122,12 @@ projects:
           type: FILEDOWN
           extension: csv
           filename: outputFileIntegrated{variableEntrada}.csv
+        variableEntrada2:
+          description: Tipo de coma para los números
+          type: enum
+          options:
+            Totes: ''
+            Coma: ','
+            Punto: '.'
 
 # vim: et ts=2 sw=2
