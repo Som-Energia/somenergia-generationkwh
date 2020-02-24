@@ -106,7 +106,7 @@ projects:
       title: Compute integral file
       description: >
          Genera los valores de la integral de un fichero 
-      script: python3 SOME_SRC/somenergia-generationkwh/scripts/integral_batch_file.py {variableEntrada} {ficheroMedicion} {output}
+      script: python3 SOME_SRC/somenergia-generationkwh/scripts/integral_batch_file.py {variableEntrada} {ficheroMedicion} {output} {variableEntrada2}
       parameters:
         variableEntrada:
           description: variable de entrada para integrar
