@@ -18,7 +18,8 @@ def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFor
     ts_start = pd.Series(pd.date_range(start=from_date, end=to_date, freq='H'))
 
     deltaT = pd.Timedelta(hours=1)
-    timeStrings = ts_start.dt.strftime(outputDataFormat)
+    ts_end = ts_start + deltaT
+    timeStrings = ts_end.dt.strftime(outputDataFormat)
     integrals = []
     for start, timeString in zip(ts_start, timeStrings):
         end = start + deltaT
@@ -135,7 +136,7 @@ def main():
 
     print("Saved {} records from {} to {}".format(len(integralsDF), from_date, to_date))
     asciigraph_print(integrals)
-    print("Job's done, have a good day")
+    print("\nJob's done, have a good day\n")
 
 if __name__ == "__main__":
 	main()
