@@ -8,8 +8,8 @@ from datetime import datetime
 import chardet
 
 def show_usage():
-    print("usage: column2Integrate input_data_file output_data_file decimal\n\
-    e.g. python ./integral_batch_file.py \' Irradiation\' dades_in.csv dades_out.csv ','")
+    print("usage: column2Integrate input_data_file output_data_file csv_delimiter decimal\n\
+    e.g. python ./integral_batch_file.py \' Irradiation\' dades_in.csv dades_out.csv ';' ','")
 
 def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat='%d/%m/%Y %H:%M:%S', timeSpacing=5./60., column2Integrate=' Irradiation'):
     ''' Trapezoidal aproximation of the 24 hours following first sensor entry'''
@@ -43,22 +43,19 @@ def find_encoding(fname):
     charenc = result['encoding']
     return charenc
 
-def parse_csv(input_data_file, column2Integrate, decimal):
+def parse_csv(input_data_file, column2Integrate, delimiter, decimal):
 
     guessed_encoding = find_encoding(input_data_file)
 
     forcedTypesDict = {column2Integrate: float}
-    columnsTypesDict = forcedTypesDict
 
-    columnNames = pd.read_csv(input_data_file, nrows=0, delimiter=';', encoding=guessed_encoding).columns
+    columnNames = pd.read_csv(input_data_file, nrows=0, delimiter=delimiter, encoding=guessed_encoding).columns
 
     if column2Integrate not in columnNames:
         print('Column \'{}\' not in columnNames. Columns are {}.'.format(column2Integrate, columnNames))
         sys.exit(-1)
 
-    columnsTypesDict.update({col: str for col in columnNames if col not in forcedTypesDict})
-
-    sensors = pd.read_csv(input_data_file, encoding=guessed_encoding, dtype=columnsTypesDict, decimal=decimal)
+    sensors = pd.read_csv(input_data_file, delimiter=delimiter, encoding=guessed_encoding, dtype=forcedTypesDict, decimal=decimal)
 
     sensors['date_'] = sensors['DATE'] + sensors[' TIME']
     sensors['date_'] = pd.to_datetime(sensors['date_'], format='%d/%m/%Y %H:%M')
@@ -70,7 +67,6 @@ def parse_csv(input_data_file, column2Integrate, decimal):
 def parse_xlsx(input_data_file, column2Integrate):
 
     forcedTypesDict = {column2Integrate: float}
-    columnsTypesDict = forcedTypesDict
 
     columnNames = pd.read_excel(io=input_data_file, header=0).columns
 
@@ -78,9 +74,7 @@ def parse_xlsx(input_data_file, column2Integrate):
         print('Column \'{}\' not in columnNames. Columns are {}.'.format(column2Integrate, columnNames))
         sys.exit(-1)
 
-    columnsTypesDict.update({col: str for col in columnNames if col not in forcedTypesDict})
-
-    ordered_sensors = pd.read_excel(input_data_file, index_col=0, parse_dates=True, convert_float=False, dtype=columnsTypesDict)
+    ordered_sensors = pd.read_excel(input_data_file, index_col=0, parse_dates=True, convert_float=False, dtype=forcedTypesDict)
 
     '''todo standarize both csv and excel'''
     ordered_sensors.rename(columns={'TIME':'DATE'})
@@ -89,8 +83,8 @@ def parse_xlsx(input_data_file, column2Integrate):
 
 def main():
 
-    if len(sys.argv[1:]) != 4:
-        print('Expecting 4 arguments, got {}'.format(len(sys.argv[1:])))
+    if len(sys.argv[1:]) != 5:
+        print('Expecting 5 arguments, got {}'.format(len(sys.argv[1:])))
         show_usage()
         sys.exit(-1)
 
@@ -101,14 +95,15 @@ def main():
     column2Integrate = sys.argv[1]
     input_data_file = sys.argv[2]
     output_data_file = sys.argv[3]
-    decimal = sys.argv[4]
+    delimiter = sys.argv[4]
+    decimal = sys.argv[5]
     # decimal=',' # European decimal point
 
     '''TODO: utf sandwich instead of keeping guessed_encoding'''
 
     if input_data_file.endswith('csv'):
 
-        ordered_sensors = parse_csv(input_data_file, column2Integrate=column2Integrate, decimal=decimal)
+        ordered_sensors = parse_csv(input_data_file, column2Integrate=column2Integrate, delimiter=delimiter, decimal=decimal)
 
     elif input_data_file.endswith('xls') or input_data_file.endswith('xlsx'):
 
