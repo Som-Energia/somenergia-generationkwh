@@ -8,10 +8,10 @@ from datetime import datetime
 import chardet
 
 def show_usage():
-    print("usage: column2Integrate input_data_file output_data_file csv_delimiter decimal\n\
+    print("usage: column2integrate input_data_file output_data_file csv_delimiter decimal\n\
     e.g. python ./integral_batch_file.py \' Irradiation\' dades_in.csv dades_out.csv ';' ','")
 
-def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat='%d/%m/%Y %H:%M:%S', timeSpacing=5./60., column2Integrate=' Irradiation'):
+def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat='%d/%m/%Y %H:%M:%S', timeSpacing=5./60., column2integrateTitle=0):
     ''' Trapezoidal aproximation of the 24 hours following first sensor entry'''
 
     '''Get the first date entry and create hourly time entries'''
@@ -25,7 +25,7 @@ def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFor
         interval4integral = ordered_sensors.loc[start:end]
 
         ''' Trapezoidal aproximation of the hour following first sensor entry '''
-        test_integral = integrate.trapz(y = interval4integral[column2Integrate], dx = timeSpacing)
+        test_integral = integrate.trapz(y = interval4integral[column2integrateTitle], dx = timeSpacing)
 
         integrals.append((timeString, test_integral))
     return integrals
@@ -43,19 +43,21 @@ def find_encoding(fname):
     charenc = result['encoding']
     return charenc
 
-def parse_csv(input_data_file, column2Integrate, delimiter, decimal):
+def parse_csv(input_data_file, column2integrate, delimiter, decimal):
 
     guessed_encoding = find_encoding(input_data_file)
 
-    forcedTypesDict = {column2Integrate: float}
-
     columnNames = pd.read_csv(input_data_file, nrows=0, delimiter=delimiter, encoding=guessed_encoding).columns
 
-    if column2Integrate not in columnNames:
-        print('Column \'{}\' not in columnNames. Columns are {}.'.format(column2Integrate, columnNames))
+    if len(columnNames) < column2integrate:
+        print('Requested column \'{}\', but only {} availabe.'.format(column2integrate, len(columnNames)))
         sys.exit(-1)
 
-    sensors = pd.read_csv(input_data_file, delimiter=delimiter, encoding=guessed_encoding, dtype=forcedTypesDict, decimal=decimal)
+    print('Processing column {}'.format(columnNames[column2integrate]))
+
+    forcedTypesDict = {columnNames[column2integrate]: float}
+
+    sensors = pd.read_csv(input_data_file, usecols=[0,1,column2integrate], delimiter=delimiter, encoding=guessed_encoding, dtype=forcedTypesDict, decimal=decimal)
 
     sensors['date_'] = sensors['DATE'] + sensors[' TIME']
     sensors['date_'] = pd.to_datetime(sensors['date_'], format='%d/%m/%Y %H:%M')
@@ -64,20 +66,19 @@ def parse_csv(input_data_file, column2Integrate, delimiter, decimal):
 
     return ordered_sensors
 
-def parse_xlsx(input_data_file, column2Integrate):
-
-    forcedTypesDict = {column2Integrate: float}
+def parse_xlsx(input_data_file, column2integrate):
 
     columnNames = pd.read_excel(io=input_data_file, header=0).columns
 
-    if column2Integrate not in columnNames:
-        print('Column \'{}\' not in columnNames. Columns are {}.'.format(column2Integrate, columnNames))
+    if len(columnNames) <= column2integrate:
+        print('Requested column \'{}\', but only {} available.'.format(column2integrate, len(columnNames)))
         sys.exit(-1)
 
-    ordered_sensors = pd.read_excel(input_data_file, index_col=0, parse_dates=True, convert_float=False, dtype=forcedTypesDict)
+    print('Processing column {}'.format(columnNames[column2integrate]))
 
-    '''todo standarize both csv and excel'''
-    ordered_sensors.rename(columns={'TIME':'DATE'})
+    forcedTypesDict = {columnNames[column2integrate]: float}
+
+    ordered_sensors = pd.read_excel(input_data_file, usecols=[0, column2integrate], index_col=0, parse_dates=True, convert_float=False, dtype=forcedTypesDict)
 
     return ordered_sensors
 
@@ -92,26 +93,32 @@ def main():
     outputDataFormat = '%d/%m/%Y %H:%M:%S'
 
     '''TODO: sanitize'''
-    column2Integrate = sys.argv[1]
+    column2integrate = sys.argv[1]
     input_data_file = sys.argv[2]
     output_data_file = sys.argv[3]
     delimiter = sys.argv[4]
     decimal = sys.argv[5]
     # decimal=',' # European decimal point
 
+    column2integrate = int(column2integrate)
+
     '''TODO: utf sandwich instead of keeping guessed_encoding'''
 
     if input_data_file.endswith('csv'):
 
-        ordered_sensors = parse_csv(input_data_file, column2Integrate=column2Integrate, delimiter=delimiter, decimal=decimal)
+        ordered_sensors = parse_csv(input_data_file, column2integrate=column2integrate, delimiter=delimiter, decimal=decimal)
 
     elif input_data_file.endswith('xls') or input_data_file.endswith('xlsx'):
 
-        ordered_sensors = parse_xlsx(input_data_file, column2Integrate=column2Integrate)
+        ordered_sensors = parse_xlsx(input_data_file, column2integrate=column2integrate)
 
     else:
         print("Only .csv, .xls and .xlsx are supported")
         sys.exit(-2)
+
+    columnTitle = ordered_sensors.columns[0]
+
+    print("title {} ".format(columnTitle))
 
     ''' Time in hours between readings '''
     timeSpacing = 5./60.
@@ -119,14 +126,14 @@ def main():
     from_date = ordered_sensors.index[0].floor('d')
     to_date   = ordered_sensors.index[-1].ceil('d')
 
-    integrals = trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat, timeSpacing, column2Integrate)
+    integrals = trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat, timeSpacing, columnTitle)
 
-    integralsDF = pd.DataFrame(data = integrals, columns = ['datetime', column2Integrate])
+    integralsDF = pd.DataFrame(data = integrals, columns = ['datetime', columnTitle])
     integralsDF.to_csv(output_data_file, sep=';', encoding='utf-8', index=False)
 
     print("Saved {} records from {} to {}".format(len(integralsDF), from_date, to_date))
-    print("Job's done, have a good day")
     asciigraph_print(integrals)
+    print("Job's done, have a good day")
 
 if __name__ == "__main__":
 	main()
