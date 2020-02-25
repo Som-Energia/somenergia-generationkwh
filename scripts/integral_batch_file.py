@@ -8,7 +8,7 @@ from datetime import datetime
 import chardet
 
 def show_usage():
-    print("usage: column2Integrate input_csv_file output_csv_file decimal\n\
+    print("usage: column2Integrate input_data_file output_data_file decimal\n\
     e.g. python ./integral_batch_file.py \' Irradiation\' dades_in.csv dades_out.csv ','")
 
 def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat='%d/%m/%Y %H:%M:%S', timeSpacing=5./60., column2Integrate=' Irradiation'):
@@ -43,6 +43,50 @@ def find_encoding(fname):
     charenc = result['encoding']
     return charenc
 
+def parse_csv(input_data_file, column2Integrate, decimal):
+
+    guessed_encoding = find_encoding(input_data_file)
+
+    forcedTypesDict = {column2Integrate: float}
+    columnsTypesDict = forcedTypesDict
+
+    columnNames = pd.read_csv(input_data_file, nrows=0, delimiter=';', encoding=guessed_encoding).columns
+
+    if column2Integrate not in columnNames:
+        print('Column \'{}\' not in columnNames. Columns are {}.'.format(column2Integrate, columnNames))
+        sys.exit(-1)
+
+    columnsTypesDict.update({col: str for col in columnNames if col not in forcedTypesDict})
+
+    sensors = pd.read_csv(input_data_file, encoding=guessed_encoding, dtype=columnsTypesDict, decimal=decimal)
+
+    sensors['date_'] = sensors['DATE'] + sensors[' TIME']
+    sensors['date_'] = pd.to_datetime(sensors['date_'], format='%d/%m/%Y %H:%M')
+
+    ordered_sensors = sensors.set_index('date_')
+
+    return ordered_sensors
+
+def parse_xlsx(input_data_file, column2Integrate):
+
+    forcedTypesDict = {column2Integrate: float}
+    columnsTypesDict = forcedTypesDict
+
+    columnNames = pd.read_excel(io=input_data_file, header=0).columns
+
+    if column2Integrate not in columnNames:
+        print('Column \'{}\' not in columnNames. Columns are {}.'.format(column2Integrate, columnNames))
+        sys.exit(-1)
+
+    columnsTypesDict.update({col: str for col in columnNames if col not in forcedTypesDict})
+
+    ordered_sensors = pd.read_excel(input_data_file, index_col=0, parse_dates=True, convert_float=False, dtype=columnsTypesDict)
+
+    '''todo standarize both csv and excel'''
+    ordered_sensors.rename(columns={'TIME':'DATE'})
+
+    return ordered_sensors
+
 def main():
 
     if len(sys.argv[1:]) != 4:
@@ -55,42 +99,35 @@ def main():
 
     '''TODO: sanitize'''
     column2Integrate = sys.argv[1]
-    input_csv_file = sys.argv[2]
-    output_csv_file = sys.argv[3]
+    input_data_file = sys.argv[2]
+    output_data_file = sys.argv[3]
     decimal = sys.argv[4]
     # decimal=',' # European decimal point
 
-    guessed_encoding = find_encoding(input_csv_file)
-
-    columnNames = pd.read_csv(input_csv_file, nrows=0, delimiter=';', encoding=guessed_encoding).columns
-    forcedTypesDict = {column2Integrate: float}
-
-    if column2Integrate not in columnNames:
-        print('Column \'{}\' not in columnNames. Columns are {}.'.format(column2Integrate, columnNames))
-        sys.exit(-1)
-
-    columnsTypesDict = forcedTypesDict
-    columnsTypesDict.update({col: str for col in columnNames if col not in forcedTypesDict})
-
     '''TODO: utf sandwich instead of keeping guessed_encoding'''
 
-    sensors = pd.read_csv(input_csv_file, delimiter=';', encoding=guessed_encoding, dtype=columnsTypesDict, decimal=decimal)
+    if input_data_file.endswith('csv'):
 
-    sensors['date_'] = sensors['DATE'] + sensors[' TIME']
-    sensors['date_'] = pd.to_datetime(sensors['date_'], format='%d/%m/%Y %H:%M')
+        ordered_sensors = parse_csv(input_data_file, column2Integrate=column2Integrate, decimal=decimal)
 
-    ordered_sensors = sensors.set_index('date_')
+    elif input_data_file.endswith('xls') or input_data_file.endswith('xlsx'):
+
+        ordered_sensors = parse_xlsx(input_data_file, column2Integrate=column2Integrate)
+
+    else:
+        print("Only .csv, .xls and .xlsx are supported")
+        sys.exit(-2)
 
     ''' Time in hours between readings '''
     timeSpacing = 5./60.
 
-    from_date = pd.to_datetime(ordered_sensors['DATE'][0], format='%d/%m/%Y')
-    to_date = pd.to_datetime(ordered_sensors['DATE'][-1], format='%d/%m/%Y')
+    from_date = ordered_sensors.index[0].floor('d')
+    to_date   = ordered_sensors.index[-1].ceil('d')
 
     integrals = trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat, timeSpacing, column2Integrate)
 
     integralsDF = pd.DataFrame(data = integrals, columns = ['datetime', column2Integrate])
-    integralsDF.to_csv(output_csv_file, sep=';', encoding='utf-8', index=False)
+    integralsDF.to_csv(output_data_file, sep=';', encoding='utf-8', index=False)
 
     print("Saved {} records from {} to {}".format(len(integralsDF), from_date, to_date))
     print("Job's done, have a good day")
