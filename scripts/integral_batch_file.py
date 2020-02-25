@@ -49,8 +49,8 @@ def parse_csv(input_data_file, column2integrate, delimiter, decimal):
 
     columnNames = pd.read_csv(input_data_file, nrows=0, delimiter=delimiter, encoding=guessed_encoding).columns
 
-    if len(columnNames) < column2integrate:
-        print('Requested column \'{}\', but only {} availabe.'.format(column2integrate, len(columnNames)))
+    if len(columnNames) <= column2integrate:
+        print('Requested column \'{}\', but only {} available.'.format(column2integrate, len(columnNames)))
         sys.exit(-1)
 
     print('Processing column {}'.format(columnNames[column2integrate]))
@@ -61,6 +61,8 @@ def parse_csv(input_data_file, column2integrate, delimiter, decimal):
 
     sensors['date_'] = sensors['DATE'] + sensors[' TIME']
     sensors['date_'] = pd.to_datetime(sensors['date_'], format='%d/%m/%Y %H:%M')
+
+    sensors = sensors.drop(['DATE', ' TIME'], axis='columns')
 
     ordered_sensors = sensors.set_index('date_')
 
@@ -96,8 +98,8 @@ def main():
     column2integrate = sys.argv[1]
     input_data_file = sys.argv[2]
     output_data_file = sys.argv[3]
-    delimiter = sys.argv[4]
-    decimal = sys.argv[5]
+    decimal = sys.argv[4]
+    delimiter = sys.argv[5]
     # decimal=',' # European decimal point
 
     column2integrate = int(column2integrate)

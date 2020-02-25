@@ -117,7 +117,7 @@ projects:
         fitxerSortida:
           type: FILEDOWN
           extension: csv
-          filename: outputFileIntegrated{ncolumna}.csv
+          filename: outputFileIntegrated_{ncolumna}_col.csv
         decimal:
           description: Tipus de coma decimal dels numeros
           type: enum
