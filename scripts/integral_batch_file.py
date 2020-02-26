@@ -94,6 +94,8 @@ def parse_xlsx(input_data_file, column2integrate):
 
     ordered_sensors = pd.read_excel(input_data_file, usecols=[0, column2integrate], index_col=0, parse_dates=True, convert_float=False, dtype=forcedTypesDict)
 
+    ordered_sensors = ordered_sensors.tz_localize('Europe/Zurich')
+
     return ordered_sensors
 
 def main():
@@ -143,7 +145,7 @@ def main():
     integrals = trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat, timeSpacing, columnTitle)
 
     integralsDF = pd.DataFrame(data = integrals, columns = ['datetime', columnTitle])
-    integralsDF.to_csv(output_data_file, sep=';', encoding='utf-8', index=False)
+    integralsDF.to_csv(output_data_file, sep=',', encoding='utf-8', index=False)
 
     print("Saved {} records from {} to {}".format(len(integralsDF), from_date, to_date))
     asciigraph_print(integrals)
