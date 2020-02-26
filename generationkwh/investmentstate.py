@@ -248,7 +248,6 @@ class InvestmentState(object):
                 type = 'invoice',
             ))
 
-    @action
     def pay(self, date, amount, move_line_id):
         """
         A payment invoice has been generated and
@@ -292,18 +291,7 @@ class InvestmentState(object):
             # TODO: Concrete Exception class
             raise InvestmentStateError("Already paid")
 
-        return ns(
-            log=log,
-            paid_amount = paid_amount,
-            purchase_date = date,
-            first_effective_date = self.firstEffectiveDate(date),
-            last_effective_date = self.lastEffectiveDate(date),
-            actions_log = self.addAction(
-                type = 'pay',
-                amount = paid_amount,
-                move_line_id = move_line_id,
-                ),
-            )
+        return log, paid_amount
 
     @action
     def unpay(self, amount, move_line_id):
@@ -659,5 +647,49 @@ class InvestmentState(object):
                 newversion = newVersion,
             )
         )
+
+class AportacionsState(InvestmentState):
+    """
+    AportacionsState child of InvestmentState
+    """
+
+    @action
+    def pay(self, date, amount, move_line_id):
+        log, paid_amount = super(AportacionsState, self).pay(date, amount, move_line_id)
+
+        return ns(
+            log=self._log(log),
+            paid_amount = paid_amount,
+            purchase_date = date,
+            actions_log = self.addAction(
+                type = 'pay',
+                amount = paid_amount,
+                move_line_id = move_line_id,
+                ),
+            )
+
+class GenerationkwhState(InvestmentState):
+    """
+    GenerationkwhState child of InvestmentState
+    """
+    def __init__(self, user=None, timestamp=None, **values):
+        super(GenerationkwhState, self).__init__(user, timestamp, **values)
+
+    @action
+    def pay(self, date, amount, move_line_id):
+        log, paid_amount = super(GenerationkwhState, self).pay(date, amount, move_line_id)
+
+        return ns(
+            log=log,
+            paid_amount = paid_amount,
+            purchase_date = date,
+            first_effective_date = self.firstEffectiveDate(date),
+            last_effective_date = self.lastEffectiveDate(date),
+            actions_log = self.addAction(
+                type = 'pay',
+                amount = paid_amount,
+                move_line_id = move_line_id,
+                ),
+            )
 
 # vim: et ts=4 sw=4
