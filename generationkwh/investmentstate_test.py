@@ -4,6 +4,8 @@ from .investmentstate import (
     InvestmentState,
     InvestmentStateError as StateError,
     forceUnicode,
+    GenerationkwhState,
+    AportacionsState
     )
 import unittest
 from yamlns import namespace as ns
@@ -29,7 +31,7 @@ class InvestmentState_Test(unittest.TestCase):
             kwds.update(log = "previous log\n")
         if kwds and 'actions_log' not in kwds:
             kwds.update(actions_log = "actions: []")
-        return InvestmentState(self.user, self.timestamp, **kwds)
+        return GenerationkwhState(self.user, self.timestamp, **kwds)
 
     def assertChangesEqual(self, inv, attr,
             expectedlog=None, noPreviousLog=False):
