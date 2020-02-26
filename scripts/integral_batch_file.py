@@ -11,7 +11,7 @@ def show_usage():
     print("usage: column2integrate input_data_file output_data_file csv_delimiter decimal\n\
     e.g. python ./integral_batch_file.py \' Irradiation\' dades_in.csv dades_out.csv ';' ','")
 
-def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat='%d/%m/%Y %H:%M:%S', timeSpacing=5./60., column2integrateTitle=0):
+def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat='%d/%m/%Y %H:%M:%S %Z', timeSpacing=5./60., column2integrateTitle=0):
     ''' Trapezoidal aproximation of the 24 hours following first sensor entry'''
 
     '''Get the first date entry and create hourly time entries'''
@@ -19,10 +19,14 @@ def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFor
 
     deltaT = pd.Timedelta(hours=1)
     ts_end = ts_start + deltaT
-    timeStrings = ts_end.dt.strftime(outputDataFormat)
+    #timeStrings = ts_end.dt.strftime(outputDataFormat)
+    timeStrings = ts_end.dt.tz_convert('Europe/Zurich').dt.strftime("%Y-%m-%d %H:%M:%S%z")
+
     integrals = []
+    print('Starting integration')
     for start, timeString in zip(ts_start, timeStrings):
         end = start + deltaT
+
         interval4integral = ordered_sensors.loc[start:end]
 
         ''' Trapezoidal aproximation of the hour following first sensor entry '''
@@ -31,11 +35,15 @@ def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFor
         integrals.append((timeString, test_integral))
     return integrals
 
+def to_ECT_csv(integrals):
+    '''TODO handle tz-aware output instead ot delivering tz-naive and UTC-sandwitch'''
+    return
+
 def asciigraph_print(tuple_array, scale_factor = 10):
     '''for the lulz'''
 
     for t, v in tuple_array:
-        print("{} {} {:.2f}".format(t, '=' * int(v/scale_factor), v))
+        print("{} {} {:.2f}".format(t, v if pd.isna(v) else '=' * int(v/scale_factor), v) )
 
 def find_encoding(fname):
     with open(fname, 'rb') as f:
@@ -58,16 +66,19 @@ def parse_csv(input_data_file, column2integrate, delimiter, decimal):
 
     forcedTypesDict = {columnNames[column2integrate]: float}
 
-    sensors = pd.read_csv(input_data_file, usecols=[0,1,column2integrate], delimiter=delimiter, encoding=guessed_encoding, dtype=forcedTypesDict, decimal=decimal)
+    sensors = pd.read_csv(input_data_file, usecols=[0,1,column2integrate], delimiter=delimiter,
+                          encoding=guessed_encoding, dtype=forcedTypesDict, decimal=decimal,
+                          na_values=[' -nan'], engine='python', parse_dates=[[0,1]],
+                          infer_datetime_format=True, dayfirst=True)
 
-    sensors['date_'] = sensors['DATE'] + sensors[' TIME']
-    sensors['date_'] = pd.to_datetime(sensors['date_'], format='%d/%m/%Y %H:%M')
+    print(sensors.columns)
+    sensors.rename(columns={'DATE_ TIME':'datetimeECT'}, inplace=True)
 
-    sensors = sensors.drop(['DATE', ' TIME'], axis='columns')
+    sensors['datetimeUTC'] = pd.to_datetime(sensors['datetimeECT']).dt.tz_localize('Europe/Zurich', ambiguous='infer')
+    sensors.set_index('datetimeUTC', inplace=True)
+    sensors.drop(['datetimeECT'], axis=1, inplace=True)
 
-    ordered_sensors = sensors.set_index('date_')
-
-    return ordered_sensors
+    return sensors
 
 def parse_xlsx(input_data_file, column2integrate):
 
