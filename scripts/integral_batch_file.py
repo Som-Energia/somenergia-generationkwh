@@ -11,7 +11,7 @@ def show_usage():
     print("usage: column2integrate input_data_file output_data_file csv_delimiter decimal\n\
     e.g. python ./integral_batch_file.py \' Irradiation\' dades_in.csv dades_out.csv ';' ','")
 
-def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat='%d/%m/%Y %H:%M:%S %Z', timeSpacing=5./60., column2integrateTitle=0):
+def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat='%Y-%m-%d %H:%M:%S%z', timeSpacing=5./60., column2integrateTitle=0):
     ''' Trapezoidal aproximation of the 24 hours following first sensor entry'''
 
     '''Get the first date entry and create hourly time entries'''
@@ -19,11 +19,12 @@ def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFor
 
     deltaT = pd.Timedelta(hours=1)
     ts_end = ts_start + deltaT
-    #timeStrings = ts_end.dt.strftime(outputDataFormat)
-    timeStrings = ts_end.dt.tz_convert('Europe/Zurich').dt.strftime("%Y-%m-%d %H:%M:%S%z")
+    timeStrings = ts_end.dt.tz_convert('Europe/Zurich').dt.strftime(outputDataFormat)
 
     integrals = []
+
     print('Starting integration')
+
     for start, timeString in zip(ts_start, timeStrings):
         end = start + deltaT
 
@@ -36,7 +37,7 @@ def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFor
     return integrals
 
 def to_ECT_csv(integrals):
-    '''TODO handle tz-aware output instead ot delivering tz-naive and UTC-sandwitch'''
+    '''TODO handle tz-aware output instead ot delivering UTC and better UTC-sandwich'''
     return
 
 def asciigraph_print(tuple_array, scale_factor = 10):
@@ -71,7 +72,6 @@ def parse_csv(input_data_file, column2integrate, delimiter, decimal):
                           na_values=[' -nan'], engine='python', parse_dates=[[0,1]],
                           infer_datetime_format=True, dayfirst=True)
 
-    print(sensors.columns)
     sensors.rename(columns={'DATE_ TIME':'datetimeECT'}, inplace=True)
 
     sensors['datetimeUTC'] = pd.to_datetime(sensors['datetimeECT']).dt.tz_localize('Europe/Zurich', ambiguous='infer')
