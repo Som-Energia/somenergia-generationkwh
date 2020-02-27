@@ -63,7 +63,7 @@ def parse_csv(input_data_file, column2integrate, delimiter, decimal):
         print('Requested column \'{}\', but only {} available.'.format(column2integrate, len(columnNames)))
         sys.exit(-1)
 
-    print('Processing column {}'.format(columnNames[column2integrate]))
+    print('\033[94m\033[1mProcessing column {}\033[0m'.format(columnNames[column2integrate]))
 
     sensors = pd.read_csv(input_data_file, usecols=[0,1,column2integrate], delimiter=delimiter,
                           encoding=guessed_encoding, decimal=decimal,
@@ -86,11 +86,9 @@ def parse_xlsx(input_data_file, column2integrate):
         print('Requested column \'{}\', but only {} available.'.format(column2integrate, len(columnNames)))
         sys.exit(-1)
 
-    print('Processing column {}'.format(columnNames[column2integrate]))
+    print('\033[94m\033[1mProcessing column {}\033[0m'.format(columnNames[column2integrate]))
 
-    forcedTypesDict = {columnNames[column2integrate]: float}
-
-    ordered_sensors = pd.read_excel(input_data_file, usecols=[0, column2integrate], index_col=0, parse_dates=True, convert_float=False, dtype=forcedTypesDict)
+    ordered_sensors = pd.read_excel(input_data_file, usecols=[0, column2integrate], index_col=0, parse_dates=True, convert_float=False)
 
     ordered_sensors = ordered_sensors.tz_localize('Europe/Zurich')
 
@@ -104,7 +102,7 @@ def main():
         sys.exit(-1)
 
     '''TODO: use config file'''
-    outputDataFormat = '%d/%m/%Y %H:%M:%S'
+    outputDataFormat = '%Y-%m-%d %H:%M:%S%z'
 
     '''TODO: sanitize'''
     column2integrate = sys.argv[1]
