@@ -65,10 +65,8 @@ def parse_csv(input_data_file, column2integrate, delimiter, decimal):
 
     print('Processing column {}'.format(columnNames[column2integrate]))
 
-    forcedTypesDict = {columnNames[column2integrate]: float}
-
     sensors = pd.read_csv(input_data_file, usecols=[0,1,column2integrate], delimiter=delimiter,
-                          encoding=guessed_encoding, dtype=forcedTypesDict, decimal=decimal,
+                          encoding=guessed_encoding, decimal=decimal,
                           na_values=[' -nan'], engine='python', parse_dates=[[0,1]],
                           infer_datetime_format=True, dayfirst=True)
 
@@ -133,8 +131,6 @@ def main():
         sys.exit(-2)
 
     columnTitle = ordered_sensors.columns[0]
-
-    print("title {} ".format(columnTitle))
 
     ''' Time in hours between readings '''
     timeSpacing = 5./60.
