@@ -113,6 +113,10 @@ projects:
           default: 1
         fitxerMesures:
           description: fichero csv, xls o xlsx con los datos para integrar
+          extension:
+            - csv
+            - xlsx
+            - xls
           type: FILE
         fitxerSortida:
           type: FILEDOWN
