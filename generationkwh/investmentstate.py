@@ -157,10 +157,12 @@ class InvestmentState(object):
         return ns(self._vals, **self._changed)
 
     @staticmethod
-    def firstEffectiveDate(purchase_date):
+    def firstEffectiveDate(purchase_date, waitDays=None):
         # TODO: consider bissextile years for waitDays
+        if waitDays is None:
+            waitDays = gkwh.waitingDays
+
         pionersDay = '2016-04-28'
-        waitDays = gkwh.waitingDays
         if str(purchase_date) < pionersDay:
             waitDays -= 30
         waitDelta = relativedelta(days=waitDays)
@@ -173,10 +175,13 @@ class InvestmentState(object):
         waitDelta = relativedelta(years=gkwh.waitYears, days=-pionersPrize)
         return purchase_date + waitDelta
 
-
     @staticmethod
-    def lastEffectiveDate(purchase_date):
-        return purchase_date + relativedelta(years=gkwh.expirationYears)
+    def lastEffectiveDate(purchase_date, expirationYears=None):
+        if expirationYears is None:
+            expirationYears = gkwh.expirationYears
+        elif expirationYears == 0:
+            return None
+        return purchase_date + relativedelta(years=expirationYears)
 
     @staticmethod
     def hasEffectivePeriod(first_date, last_date):
@@ -649,18 +654,20 @@ class InvestmentState(object):
         )
 
 class AportacionsState(InvestmentState):
+    #TODO: Refactor unduo concrete class, not necessary anymore
     """
     AportacionsState child of InvestmentState
     """
-
     @action
-    def pay(self, date, amount, move_line_id):
+    def pay(self, date, amount, move_line_id, waitDays=None, expirationYears=None):
         log, paid_amount = super(AportacionsState, self).pay(date, amount, move_line_id)
 
         return ns(
-            log=self._log(log),
+            log=log,
             paid_amount = paid_amount,
             purchase_date = date,
+            first_effective_date = self.firstEffectiveDate(date, waitDays),
+            last_effective_date = self.lastEffectiveDate(date, expirationYears),
             actions_log = self.addAction(
                 type = 'pay',
                 amount = paid_amount,
@@ -669,6 +676,7 @@ class AportacionsState(InvestmentState):
             )
 
 class GenerationkwhState(InvestmentState):
+    #TODO: Refactor unduo concrete class, not necessary anymore
     """
     GenerationkwhState child of InvestmentState
     """
@@ -676,15 +684,15 @@ class GenerationkwhState(InvestmentState):
         super(GenerationkwhState, self).__init__(user, timestamp, **values)
 
     @action
-    def pay(self, date, amount, move_line_id):
+    def pay(self, date, amount, move_line_id, waitDays=None, expirationYears=None):
         log, paid_amount = super(GenerationkwhState, self).pay(date, amount, move_line_id)
 
         return ns(
             log=log,
             paid_amount = paid_amount,
             purchase_date = date,
-            first_effective_date = self.firstEffectiveDate(date),
-            last_effective_date = self.lastEffectiveDate(date),
+            first_effective_date = self.firstEffectiveDate(date, waitDays),
+            last_effective_date = self.lastEffectiveDate(date, expirationYears),
             actions_log = self.addAction(
                 type = 'pay',
                 amount = paid_amount,
