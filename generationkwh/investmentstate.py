@@ -157,10 +157,12 @@ class InvestmentState(object):
         return ns(self._vals, **self._changed)
 
     @staticmethod
-    def firstEffectiveDate(purchase_date):
+    def firstEffectiveDate(purchase_date, waitDays=None):
         # TODO: consider bissextile years for waitDays
+        if waitDays is None:
+            waitDays = gkwh.waitingDays
+
         pionersDay = '2016-04-28'
-        waitDays = gkwh.waitingDays
         if str(purchase_date) < pionersDay:
             waitDays -= 30
         waitDelta = relativedelta(days=waitDays)
@@ -173,10 +175,13 @@ class InvestmentState(object):
         waitDelta = relativedelta(years=gkwh.waitYears, days=-pionersPrize)
         return purchase_date + waitDelta
 
-
     @staticmethod
-    def lastEffectiveDate(purchase_date):
-        return purchase_date + relativedelta(years=gkwh.expirationYears)
+    def lastEffectiveDate(purchase_date, expirationYears=None):
+        if expirationYears is None:
+            expirationYears = gkwh.expirationYears
+        elif expirationYears == 0:
+            return None
+        return purchase_date + relativedelta(years=expirationYears)
 
     @staticmethod
     def hasEffectivePeriod(first_date, last_date):
@@ -238,6 +243,7 @@ class InvestmentState(object):
 
     @action
     def invoice(self):
+        # TODO: Check that signed_date is not None
         if not self.draft:
             raise InvestmentStateError("Already invoiced")
 
@@ -248,7 +254,6 @@ class InvestmentState(object):
                 type = 'invoice',
             ))
 
-    @action
     def pay(self, date, amount, move_line_id):
         """
         A payment invoice has been generated and
@@ -292,18 +297,7 @@ class InvestmentState(object):
             # TODO: Concrete Exception class
             raise InvestmentStateError("Already paid")
 
-        return ns(
-            log=log,
-            paid_amount = paid_amount,
-            purchase_date = date,
-            first_effective_date = self.firstEffectiveDate(date),
-            last_effective_date = self.lastEffectiveDate(date),
-            actions_log = self.addAction(
-                type = 'pay',
-                amount = paid_amount,
-                move_line_id = move_line_id,
-                ),
-            )
+        return log, paid_amount
 
     @action
     def unpay(self, amount, move_line_id):
@@ -659,5 +653,52 @@ class InvestmentState(object):
                 newversion = newVersion,
             )
         )
+
+class AportacionsState(InvestmentState):
+    #TODO: Refactor unduo concrete class, not necessary anymore
+    """
+    AportacionsState child of InvestmentState
+    """
+    @action
+    def pay(self, date, amount, move_line_id, waitDays=None, expirationYears=None):
+        log, paid_amount = super(AportacionsState, self).pay(date, amount, move_line_id)
+
+        return ns(
+            log=log,
+            paid_amount = paid_amount,
+            purchase_date = date,
+            first_effective_date = self.firstEffectiveDate(date, waitDays),
+            last_effective_date = self.lastEffectiveDate(date, expirationYears),
+            actions_log = self.addAction(
+                type = 'pay',
+                amount = paid_amount,
+                move_line_id = move_line_id,
+                ),
+            )
+
+class GenerationkwhState(InvestmentState):
+    #TODO: Refactor unduo concrete class, not necessary anymore
+    """
+    GenerationkwhState child of InvestmentState
+    """
+    def __init__(self, user=None, timestamp=None, **values):
+        super(GenerationkwhState, self).__init__(user, timestamp, **values)
+
+    @action
+    def pay(self, date, amount, move_line_id, waitDays=None, expirationYears=None):
+        log, paid_amount = super(GenerationkwhState, self).pay(date, amount, move_line_id)
+
+        return ns(
+            log=log,
+            paid_amount = paid_amount,
+            purchase_date = date,
+            first_effective_date = self.firstEffectiveDate(date, waitDays),
+            last_effective_date = self.lastEffectiveDate(date, expirationYears),
+            actions_log = self.addAction(
+                type = 'pay',
+                amount = paid_amount,
+                move_line_id = move_line_id,
+                ),
+            )
 
 # vim: et ts=4 sw=4

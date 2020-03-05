@@ -10,7 +10,7 @@ from consolemsg import step, warn, success, error as consoleError, fail
 import sys
 import generationkwh.investmentmodel as gkwh
 import datetime
-from generationkwh.investmentstate import InvestmentState
+from generationkwh.investmentstate import InvestmentState, AportacionsState, GenerationkwhState
 
 errorCases = ns()
 
@@ -1147,7 +1147,7 @@ def logCorrected(cr, attributes, investment, what):
 
 def logPaid(cr, attributes, move_line_id):
     ml = unusedMovements.pop(move_line_id)
-    inv = InvestmentState(ml.user, ml.create_date,
+    inv = GenerationkwhState(ml.user, ml.create_date,
         **attributes
         )
     inv.pay(

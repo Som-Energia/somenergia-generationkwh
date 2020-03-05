@@ -5,6 +5,7 @@ Parameters for the Generation kWh investment model
 """
 
 shareValue = 100 # price in € for a sigle GkWh share
+maxAmountInvested = 100000 # Max amount invested per parnter
 
 # Must decide which constant survives in the next refactor
 waitYears = 1 # number of years until a Gkwh investment comes effective

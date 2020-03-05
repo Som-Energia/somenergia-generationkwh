@@ -75,10 +75,19 @@ projects:
       title: Corbes dels GkWh emprats
       description: >
         Genera corba de drets gastats d'un inversor del GenerationkWh
-      script: python SOME_SRC/somenergia-generationkwh/scripts/genkwh_mtc.py curve memberrightusage {member} --by {aggregation} -o {output}
+      script: python SOME_SRC/somenergia-generationkwh/scripts/genkwh_mtc.py curve memberrightusage {member} --idmethod {idmethod} --by {aggregation} -o {output}
       parameters:
+        idmethod:
+          description: Com identifiquem l'usuari
+          type: enum
+          options:
+            Pel codi de soci (SXXXXXX): code
+            Pel NIF: vat
+            Per l'id fitxa de client: partner
+            Per l'id fitxa de soci: member
+          default: member
         member:
-          description: Id de la fitxa de soci (no pas la de client). Deixa en blanc per veure la suma de tots els socis.
+          description: Identificació. Deixa en blanc per veure la suma de tots els socis.
         aggregation:
           description: Agregació
           type: enum
@@ -92,6 +101,38 @@ projects:
           type: FILEDOWN
           extension: csv
           filename: usage-{member}.csv
+
+    computeIntegral:
+      title: Compute integral file
+      description: >
+         Genera los valores de la integral de un fichero
+      script: python3 SOME_SRC/somenergia-generationkwh/scripts/integral_batch_file.py {ncolumna} {fitxerMesures} {fitxerSortida} {decimal} {separador}
+      parameters:
+        ncolumna:
+          description: Número de columna a integrar (començant en 0)
+          default: 1
+        fitxerMesures:
+          description: fichero csv, xls o xlsx con los datos para integrar
+          type: FILE
+        fitxerSortida:
+          type: FILEDOWN
+          extension: csv
+          filename: outputFileIntegrated_{ncolumna}_col.csv
+        decimal:
+          description: Tipus de coma decimal dels numeros
+          type: enum
+          options:
+            Punt: '.'
+            Coma: ','
+            Irrellevant: '.'
+        separador:
+          description: Tipus de separador de valors del csv d'entrada i/o sortida
+          type: enum
+          options:
+            PuntComa: ';'
+            Coma: ','
+            Espai: ' '
+            Irrellevant: ';'
 
 
 # vim: et ts=2 sw=2
