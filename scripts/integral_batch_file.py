@@ -139,7 +139,7 @@ def main():
     integrals = trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat, timeSpacing, columnTitle)
 
     integralsDF = pd.DataFrame(data = integrals, columns = ['datetime', columnTitle])
-    integralsDF.to_csv(output_data_file, sep=',', encoding='utf-8', index=False)
+    integralsDF.to_csv(output_data_file, sep=';', decimal=',', encoding='utf-8', index=False)
 
     print("Saved {} records from {} to {}".format(len(integralsDF), from_date, to_date))
     asciigraph_print(integrals)
