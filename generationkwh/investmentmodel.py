@@ -19,11 +19,9 @@ creditorCode = 'ES24000F55091367'
 journalCode = 'GENKWH'
 
 investmentProductCode = 'GENKWH_AE'
-amortizationProductCode = 'GENKWH_AMOR'
 irpfProductCode = 'GENKWH_IRPF'
 investmentPaymentMode = 'GENERATION kWh'
 amortizationPaymentMode = 'GENERATION kWh AMOR'
 bridgeAccountCode = '555000000004' # Bridge account to concile payments to the bank
-
 
 # vim: et sw=4 ts=4
