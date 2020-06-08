@@ -956,7 +956,7 @@ def main(cr):
             warn("Got different number of lines {} than reported {} in Move"
                 .format(len(moveLines), data.move_nlines))
 
-        step("  Quadrant pagaments amb assentaments per persona i quantitat")
+        step("  Quadrant pagaments amb apunts per persona i quantitat")
         orderLinesDict = ns()
         repesca = []
 
@@ -989,7 +989,7 @@ def main(cr):
                 moveline = getAndRemoveFirst(movelinesByPartnerId, orderline.partner_id)
                 if not moveline:
                     error(
-                        "Linia de Remesa sense parella: "
+                        "Linia de Remesa sense apunt: "
                         "{name} id {id} {order_sent_date} {amount}€ {partner_name}",
                         **orderline)
                     continue
