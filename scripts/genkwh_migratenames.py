@@ -1625,15 +1625,16 @@ def deleteNullNamedInvestments(cr):
         """
     cr.execute(query)
 
-cases = ns.load('migration.yaml')
+if __name__=='__main__':
+    cases = ns.load('migration.yaml')
 
-with psycopg2.connect(**dbconfig.psycopg) as db:
-    with db.cursor() as cr:
-        with transaction(cr, discarded='--doit' not in sys.argv):
-            cleanUp(cr)
-            main(cr)
-            deleteNullNamedInvestments(cr)
-            showUnusedMovements(cr)
-            displayAllInvestments(cr)
+    with psycopg2.connect(**dbconfig.psycopg) as db:
+        with db.cursor() as cr:
+            with transaction(cr, discarded='--doit' not in sys.argv):
+                cleanUp(cr)
+                main(cr)
+                deleteNullNamedInvestments(cr)
+                showUnusedMovements(cr)
+                displayAllInvestments(cr)
 
 # vim: et ts=4 sw=4
