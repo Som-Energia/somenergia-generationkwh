@@ -954,8 +954,7 @@ def main(cr):
 
         if len(moveLines) != data.move_nlines:
             warn("Got different number of lines {} than reported {} in Move"
-                .format(len(orderLines), data.order_nlines))
-
+                .format(len(moveLines), data.move_nlines))
 
         step("  Quadrant pagaments amb assentaments per persona i quantitat")
         orderLinesDict = ns()
