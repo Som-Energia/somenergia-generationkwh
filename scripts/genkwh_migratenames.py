@@ -72,12 +72,14 @@ def ungeneratedInvestments(cr):
         on
             p.id = ml.period_id
         where
-            pacc.code = '1635' and
+            pacc.code = %(parentAccount)s and
             not p.special and
             inv.id is NULL
         order by
             create_date
-        """)
+        """, dict(
+            parentAccount = cases.get('parentAccount', '1635'),
+        ))
     return dbutils.nsList(cr)
 
 def activeNegativeInvestments(cr):
@@ -177,8 +179,9 @@ def investmentPointingSomeoneElsesAccount(cr):
         on
             acc.id = ml.account_id
         where
-            acc.code <> ('1635' || right('000'||right(p.ref,-1),8))
+            acc.code <> (%(accountPrefix)s || right('000'||right(p.ref,-1),8))
         """,dict(
+            accountPrefix = (cases.get('parentAccount', '1635')+'00')[:4],
             shareValue=gkwh.shareValue,
         ))
     return dbutils.nsList(cr)
@@ -211,14 +214,14 @@ def movementsVsInvesmentAmounts(cr):
             on
                 pac.id = ac.parent_id
             where
-                pac.code = '1635' and
+                pac.code = %(parentAccount)s and
                 true
             group by
                 ac.code
             ) as accounting	
         left outer join (
             select
-                '1635' || right('000'||right(partner.ref,-1),8) as account_code,
+                %(accountPrefix)s || right('000'||right(partner.ref,-1),8) as account_code,
                 partner.name as partner_name,
                 partner.id as partner_id,
                 sum(inv.nshares)*%(shareValue)s as amount,
@@ -248,7 +251,11 @@ def movementsVsInvesmentAmounts(cr):
             investment.amount - accounting.amount <> 0
         order by
             accounting.account_code
-    """, dict(shareValue=gkwh.shareValue))
+    """, dict(
+        shareValue=gkwh.shareValue),
+        parentAccount = cases.get('parentAccount', '1635'),
+        accountPrefix = (cases.get('parentAccount', '1635')+'00')[:4],
+    )
     return dbutils.nsList(cr)
 
 
@@ -343,7 +350,9 @@ def getGenerationMovelinesByPartner(cr, partner_id):
         partner_id=partner_id,
     ))
     partner = dbutils.nsList(cr)[0]
-    partner.account = '1635{:08}'.format(int(partner.ref[1:]))
+    parentAccount = cases.get('parentAccount', '1635')
+    accountPrefix = (parentAccount+'000')[:4]
+    partner.account = accountPrefix+'{:08}'.format(int(partner.ref[1:]))
     cr.execute("""\
         select
             %(partner_name)s as partner_name,
@@ -475,11 +484,12 @@ def getMoveLines(cr, move_id):
         on
            p.id = ml.partner_id
         where
-            pac.code = '1635' and
+            pac.code = %(parentAccount)s and
             ml.move_id = %(move_id)s
         order by ml.id
     """, dict(
         move_id=move_id,
+        parentAccount = cases.parentAccount,
     ))
     return dbutils.nsList(cr)
 
@@ -576,8 +586,12 @@ def getInvestmentByMoveline(cr, moveline_id):
     return dbutils.nsList(cr)[0]
 
 
-
-def investmentOrderAndMovements(cr, modeName='GENERATION kWh'):
+def investmentOrderAndMovements(cr,
+        paymentModes=['GENERATION kWh'],
+        parentAccount='1635',
+        excludedOrders=[],
+        extraPaymentOrders=[],
+        ):
     cr.execute("""\
         select
             o.id as order_id,
@@ -600,9 +614,13 @@ def investmentOrderAndMovements(cr, modeName='GENERATION kWh'):
             on
                 pm.id = po.mode
             where
-                pm.name = 'GENERATION kWh' or
-                po.id = 1389 or -- has mode 'ENGINYERS'
-                false
+                (
+                    pm.name = ANY(%(paymentModes)s) or
+                    po.id = ANY(%(extraPaymentOrders)s) or
+                    false
+                ) and
+                po.id != ALL(%(excludedOrders)s) and
+                true
         ) as o
         full outer join (
             select
@@ -620,7 +638,7 @@ def investmentOrderAndMovements(cr, modeName='GENERATION kWh'):
             on
                 pa.id = a.parent_id
             where
-                pa.code = '1635' and
+                pa.code = %(parentAccount)s and
                 l.name = '/' and
                 true
             group by
@@ -633,7 +651,12 @@ def investmentOrderAndMovements(cr, modeName='GENERATION kWh'):
         order by
             m.date_created
         ;
-        """)
+        """, dict(
+            paymentModes=paymentModes,
+            parentAccount=parentAccount,
+            excludedOrders=excludedOrders,
+            extraPaymentOrders=extraPaymentOrders,
+        ))
     return dbutils.nsList(cr)
 
 
@@ -870,12 +893,14 @@ def allMovements(cr):
         ON
             partner.ref = 'S' || right(acc.code, 6)
         where
-            pacc.code = '1635' and
+            pacc.code = %(parentAccount)s and
             not p.special and
             true
         order by
             create_date
-        """)
+        """, dict(
+            parentAccount = cases.get('parentAccount', '1635'),
+        ))
     return {x.id: x for x in dbutils.nsList(cr)}
 
 
@@ -886,12 +911,19 @@ def main(cr):
 
     global paymentMoveLines
     paymentMoveLines = ns()
-    for data in investmentOrderAndMovements(cr):
+    order2MovementMatches = investmentOrderAndMovements(cr,
+        paymentModes = cases.get('formPaymentModes',
+            ['GENERATION kWh']),
+        parentAccount = cases.get('parentAccount', '1635'),
+        extraPaymentOrders=cases.get('extraPaymentOrders', []),
+        )
+    for data in order2MovementMatches:
         step(" Quadrant remesa feta el {move_create_date}".format(**data))
-
-
-        step("  Comprovant que la remesa i el moviment coincideixen")
-
+        step("  Comprovant que la remesa i el moviment coincideixen. "
+            "Ordres a la remesa: {}, Assentaments al moviment: {}",
+            data.order_nlines,
+            data.move_nlines,
+        )
         if not data.move_id:
             warn("Remesa sense moviment. {}: Id {}, amb {} linies" .format(
                 data.order_sent_date or "not yet",
