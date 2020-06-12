@@ -515,11 +515,17 @@ def getActiveInvestments(cr):
             res_partner as p
         on
             p.id = soci.partner_id
+        left join
+            generationkwh_emission as e
+        on
+            e.id = inv.emission_id
         where
             inv.active and
+            e.type = %(emissionType)s and
             true
         order by inv.id
     """, dict(
+        emissionType=cases.get('emissionType','genkwh'),
     ))
     return dbutils.nsList(cr)
 
@@ -530,10 +536,16 @@ def lastInvestment(cr):
             max(move_line_id)
         from
             generationkwh_investment as inv
+        left join
+            generationkwh_emission as e
+        on
+            e.id = inv.emission_id
         where
             inv.active and
+            e.type = %(emissionType)s and
             true
     """, dict(
+        emissionType=cases.get('emissionType','genkwh'),
     ))
     return dbutils.nsList(cr)[0].max
 
