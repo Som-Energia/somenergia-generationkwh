@@ -6,7 +6,7 @@ import psycopg2
 import dbutils
 import contextlib
 from yamlns import namespace as ns
-from consolemsg import step, warn, success, error as consoleError, fail
+from consolemsg import step, warn, success, error as consoleError, fail, u
 import sys
 import generationkwh.investmentmodel as gkwh
 import datetime
@@ -598,12 +598,13 @@ def getInvestmentByMoveline(cr, moveline_id):
     return dbutils.nsList(cr)[0]
 
 
-def investmentOrderAndMovements(cr,
-        paymentModes=['GENERATION kWh'],
-        parentAccount='1635',
-        excludedOrders=[],
-        extraPaymentOrders=[],
-        ):
+def investmentOrderAndMovements(cr):
+    excludedOrders=[] # TODO
+    paymentModes = cases.get('formPaymentModes',
+        ['GENERATION kWh'])
+    parentAccount = cases.get('parentAccount', '1635')
+    extraPaymentOrders=cases.get('extraPaymentOrders', [])
+    excludedOrders=cases.get('excludedOrders', [])
     cr.execute("""\
         select
             o.id as order_id,
@@ -686,14 +687,15 @@ def getAndRemoveFirst(d, key):
 def bindMoveLineAndPaymentLine(moveline, orderline):
     communication = orderline.communication2
     ip = communication.split(" IP ")[1] if communication and ' IP ' in communication else '0.0.0.0'
-    False and success(
-        "Match ml-po ml-{moveline.id} {orderline.name} {orderline.create_date} {amount:=8}€ {moveline.partner_name} {ip}"
+    moveline.partner_name = moveline.partner_name and u(moveline.partner_name)
+    success(
+        u"Match ml-po ml-{moveline.id} {orderline.name} {orderline.create_date} {amount:=8}€ {moveline.partner_name} {ip}"
         .format(
             moveline=moveline,
             orderline=orderline,
             amount = moveline.credit-moveline.debit,
             ip = ip,
-            ))
+        ))
     paymentMoveLines[moveline.id] = ns(
         movelineid = moveline.id,
         ref=orderline.name,
@@ -703,6 +705,7 @@ def bindMoveLineAndPaymentLine(moveline, orderline):
         amount = moveline.credit-moveline.debit,
         ip = ip,
         )
+    matchedOrderLines.append(orderline.id)
 
 def displayPartnersMovements(cr, partner_id):
     movelines = getGenerationMovelinesByPartner(cr,partner_id)
@@ -923,12 +926,10 @@ def main(cr):
 
     global paymentMoveLines
     paymentMoveLines = ns()
-    order2MovementMatches = investmentOrderAndMovements(cr,
-        paymentModes = cases.get('formPaymentModes',
-            ['GENERATION kWh']),
-        parentAccount = cases.get('parentAccount', '1635'),
-        extraPaymentOrders=cases.get('extraPaymentOrders', []),
-        )
+    global matchedOrderLines
+    matchedOrderLines = []
+
+    order2MovementMatches = investmentOrderAndMovements(cr)
     for data in order2MovementMatches:
         step(" Quadrant remesa feta el {move_create_date}".format(**data))
         step("  Comprovant que la remesa i el moviment coincideixen. "
@@ -993,11 +994,16 @@ def main(cr):
         #step("  Create a partner -> unpaired movelines map")
         movelinesByPartnerId = {}
         for moveline in repesca:
+            if moveline.id in paymentMoveLines: continue
             appendToKey(movelinesByPartnerId, moveline.partner_id, moveline)
 
         #step("  Lookup for each unpaired order")
         for key, options in orderLinesDict.items():
             for orderline in options:
+                if orderline.id in matchedOrderLines:
+                    options.remove(orderline)
+                    continue
+
                 moveline = getAndRemoveFirst(movelinesByPartnerId, orderline.partner_id)
                 if not moveline:
                     error(
@@ -1040,7 +1046,7 @@ def main(cr):
         for partner_id, movelines in movelinesByPartnerId.items():
             for moveline in movelines:
                 error(
-                    "Linia de Moviment sense parella "
+                    "Apunt sense linea de remesa "
                     "id {id} {create_date} {credit}€ {partner_name}",
                     **moveline)
 
@@ -1642,6 +1648,7 @@ if __name__=='__main__':
 
     with psycopg2.connect(**dbconfig.psycopg) as db:
         with db.cursor() as cr:
+            psycopg2.extensions.register_type(psycopg2.extensions.UNICODE, cr)
             with transaction(cr, discarded='--doit' not in sys.argv):
                 cleanUp(cr)
                 main(cr)
