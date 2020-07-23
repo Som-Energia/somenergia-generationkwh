@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
-
+from __future__ import unicode_literals
 import dbconfig
 import psycopg2
 import dbutils
