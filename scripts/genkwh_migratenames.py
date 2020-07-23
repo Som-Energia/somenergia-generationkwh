@@ -599,7 +599,6 @@ def getInvestmentByMoveline(cr, moveline_id):
 
 
 def investmentOrderAndMovements(cr):
-    excludedOrders=[] # TODO
     paymentModes = cases.get('formPaymentModes',
         ['GENERATION kWh'])
     parentAccount = cases.get('parentAccount', '1635')

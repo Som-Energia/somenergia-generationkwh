@@ -104,29 +104,36 @@ class Migrator:
         for movement in movements:
             self.movementsByPartner.setdefault(movement.partner_id, []).append(movement)
 
-        partner = None
+    def dumpMovementsByPartner(self):
         with Path('apos_movementlines.csv').open('w', encoding='utf8') as output:
-            for movement in movements:
-                if movement.partner_id != partner:
-                    output.write("({partner_id}) {partner_ref} {partner_name}\n".format(**movement))
-                    partner = movement.partner_id
-                output.write("\t{account_code}\t{date_created}\t{credit: 10f}\t{debit: 10f}\t{id: 10d}\t{name}\n".format(**movement)) 
+            for partner_id in sorted(self.movementsByPartner):
+                movements = self.movementsByPartner[partner_id]
+                output.write("({partner_id}) {partner_ref} {partner_name}\n".format(**movements[0]))
+                for movement in movements:
+                    output.write("\t{account_code}\t{date_created}\t{credit: 10f}\t{debit: 10f}\t{id: 10d}\t{name}\n".format(**movement))
         return movements
+
+    def matchPaymentOrders(self):
+        ''
+
+    def doSteps(self):
+        self.cleanUp()
+        self.listMovementsByPartner()
+        self.matchPaymentOrders()
+        self.dumpMovementsByPartner()
+        #main(cr)
+        #deleteNullNamedInvestments(cr)
+        #showUnusedMovements(cr)
+        #displayAllInvestments(cr)
 
     @staticmethod
     def run():
         with psycopg2.connect(**dbconfig.psycopg) as db:
             with db.cursor() as cr:
                 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE, cr)
-                m = Migrator(cr)
-
                 with transaction(cr, discarded='--doit' not in sys.argv):
-                    m.cleanUp()
-                    m.listMovementsByPartner()
-                    #main(cr)
-                    #deleteNullNamedInvestments(cr)
-                    #showUnusedMovements(cr)
-                    #displayAllInvestments(cr)
+                    m = Migrator(cr)
+                    m.doSteps()
 
 Migrator.run()
 
