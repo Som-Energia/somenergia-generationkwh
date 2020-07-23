@@ -1,5 +1,18 @@
 # TODO's
 
+## APO's migration
+
++ Afegir el partner id
+- Obtenir objectes movelines, indexats per usuari
+- Anar marcant movelines com fetes, a mida que anem lligant movelines amb una operacio d'una inversio numerada
+	- Recuperar mapping de noms (i document) de les remeses
+	- Remeses sense moveline?
+	- Associar les inversions desinvertides
+		- Desinversions parcials
+		- Desinversions globals
+	- Que passa amb el macro moviment d'abril?
+
+
 ## Inmediate TODO's
 
 - Turn warning on investment creation with no member available into a logged warning
