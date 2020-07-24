@@ -381,11 +381,12 @@ class Migrator:
                 )
 
     def solveExistingInvestments(self):
+        step("Solving movements referring existing Invesments")
         unsolvedInvestments = set(self.investments.keys())
-        for moveline_id, moveline in self.movements:
+        for moveline_id, moveline in self.movements.items():
             if not (
-                moveline.name.startswith("Aportació APO00") or
-                moveline.name.startswith("Aportación APO00")
+                moveline.name.startswith("Inversió APO00") or
+                moveline.name.startswith("Inversión APO00")
             ): continue
             investment_name = moveline.name.split()[1]
             if investment_name not in unsolvedInvestments:
