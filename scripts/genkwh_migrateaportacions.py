@@ -190,6 +190,7 @@ class Migrator:
                 for movement in movements:
                     if 'solution' in movement: continue
                     output.write("#    {id}: unknown # {date_created} ({partner_name}) {amount} {name}\n".format(**movement))
+                output.write("\n")
 
     def matchPaymentOrders(self):
 
@@ -406,7 +407,7 @@ class Migrator:
                 type='existing',
                 name=investment_name,
                 )
-            unsolvedInvestments.pop(investment_name)
+            unsolvedInvestments.remove(investment_name)
 
     def resolve(self):
         for investment_name, actions in self.cases.legacyCases.items():
