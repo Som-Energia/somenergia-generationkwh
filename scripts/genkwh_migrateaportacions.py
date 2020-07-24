@@ -11,7 +11,7 @@ from consolemsg import out
 
 class Migrator:
     def __init__(self, cr):
-        self.cases = genkwh_migratenames.cases = ns.load('scripts/migration_aportacions.yaml')
+        self.cases = genkwh_migratenames.cases = ns.load('migration-aportacions.yaml')
         self.cr = cr
 
     def cleanUp(self):
