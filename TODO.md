@@ -2,27 +2,29 @@
 
 ## APO's migration
 
-- Generant b2b sense uknow
-- comencar a fer solucions
-	- en comptes de solucionar-ho directament amb la inversió agafar-ho del cases
-
-
 + Afegir el partner id
 + Obtenir objectes movelines, indexats per usuari
 + Anar marcant movelines com fetes, a mida que anem lligant movelines amb una operacio d'una inversio numerada
-	- Recuperar mapping de noms (i document) de les remeses
-	- Remeses sense moveline?
-	- Associar les inversions desinvertides
-		- Desinversions parcials
-		- Desinversions globals
+	+ Recuperar mapping de noms (i document) de les remeses
+	+ Associar les inversions desinvertides
+		+ Desinversions parcials
+		+ Desinversions globals
 	- Que passa amb el macro moviment d'abril?
-- Matxar les inversions
++ Matxar les inversions
 	+ Matxar amb els movelines del actions -> no tenim totes els actions (bug del action log)
 	+ Obtenir els movelines del log -> hi ha el moveline que no toca
-	- Obtenir el peer moveline
-	- Parser de log
+	+ Obtenir el peer moveline
++ Generant b2b
++ Solucionar els simples
+- Solucionar els complexes
+	- Pagaments directe per transferencia
+
 - Recuperar l'adjunt de les remeses
 - Recuperar l'iban de les remeses
+- Comprovar els logs:
+	- Text log line to YAML log line
+	- YAML log line to Text log line
+
 
 
 ## Inmediate TODO's
