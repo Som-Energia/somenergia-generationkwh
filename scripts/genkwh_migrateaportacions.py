@@ -418,7 +418,7 @@ class Migrator:
                     action = ns(
                         type = action,
                     )
-
+                if not moveline_id: continue # special op
                 self.movements[moveline_id].solution = ns(
                     action,
                     name = investment_name,
