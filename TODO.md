@@ -2,6 +2,37 @@
 
 ## APO's migration
 
+- Recuperar l'adjunt de les remeses
+- Recuperar l'iban de les remeses
+- Data effectiva la que apareix al client erp assentaments "Data" i no pas "Data creacio"
+- Query de totes les linies de remesa name start with INV
+	- Descartar associades amb move lines:
+- Dupped moveline revisar perque surten INV02458 INV02308 INV01176
+- Pendent d'en Carles
+	- No ho vam parlar: Cas Remberto
+		- Inversio INV00111 INV00112
+	- Titols que passen a aportacions consulta a legal
+		- Per error nostre (es va passar al compte de Apos una remesa de titols)
+		- Per error d'ells (ens van demanar de canviar-la)
+		- Cap te document ni codi
+	- Caja Laboral arreglar el partner id
+	- ml 223838 segona inversio de Fowler
+	- ml 20211635 florian
+- Accio per passar titols a aportacions
+	- AA
+	- Gabarró
+- Implementar relacio explicita orderline a remesa movelineToOrderline
+- Renombrar linia remesa 6620 INV357 -> INV00357
+- Ignore APO divest
+- Considerar partial overall S003186
+- Implementar overall
+- Ignorar compte 000000
+- Comprovar els logs:
+	- Text log line to YAML log line
+	- YAML log line to Text log line
+
+
+
 + Afegir el partner id
 + Obtenir objectes movelines, indexats per usuari
 + Anar marcant movelines com fetes, a mida que anem lligant movelines amb una operacio d'una inversio numerada
@@ -9,21 +40,12 @@
 	+ Associar les inversions desinvertides
 		+ Desinversions parcials
 		+ Desinversions globals
-	- Que passa amb el macro moviment d'abril?
 + Matxar les inversions
 	+ Matxar amb els movelines del actions -> no tenim totes els actions (bug del action log)
 	+ Obtenir els movelines del log -> hi ha el moveline que no toca
 	+ Obtenir el peer moveline
 + Generant b2b
 + Solucionar els simples
-- Solucionar els complexes
-	- Pagaments directe per transferencia
-
-- Recuperar l'adjunt de les remeses
-- Recuperar l'iban de les remeses
-- Comprovar els logs:
-	- Text log line to YAML log line
-	- YAML log line to Text log line
 
 
 
