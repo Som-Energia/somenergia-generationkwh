@@ -394,14 +394,14 @@ class Migrator:
             ): continue
             investment_name = moveline.name.split()[1]
             if investment_name not in unsolvedInvestments:
-                error("Movement {} refers not pending {}",
+                warn("Movement {} refers not pending {}",
                     moveline_id,
                     investment_name,
                 )
                 continue
 
             if 'solution' in moveline:
-                error("Movement {} refers already solved",
+                warn("Movement {} refers already solved",
                     moveline_id,
                 )
                 continue
@@ -421,11 +421,31 @@ class Migrator:
                     action = ns(
                         type = action,
                     )
-                if not moveline_id: continue # special op
-                self.movements[moveline_id].solution = ns(
-                    action,
-                    name = investment_name,
-                )
+                if not moveline_id: continue # special action
+                moveline = self.movements[moveline_id]
+                if action.type == 'paid':
+                    if 'solution' not in moveline:
+                        if moveline_id not in self.cases.movelineToOrderline:
+                            warn("Unexpected unsolved paid moveline {}", moveline_id)
+                            continue
+
+                        moveline.solution = ns(
+                            action,
+                            order_id = self.cases.movelineToOrderline[moveline_id],
+                            name = investment_name,
+                        )
+                    elif moveline.solution.name != investment_name:
+                        warn("Investment name missmatch overwritting {} with yaml {} for ml {}",
+                            moveline.solution.name, investment_name, moveline_id)
+                else:
+                    if 'solution' in moveline:
+                        warn("Moveline {} already has solution {} and receive {} from investment {}",
+                            moveline_id, moveline.solution, action, investment_name)
+
+                    moveline.solution = ns(
+                        action,
+                        name = investment_name,
+                    )
 
     def doSteps(self):
         self.cleanUp()
