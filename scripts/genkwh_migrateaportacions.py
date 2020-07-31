@@ -57,15 +57,18 @@ class Migrator:
                 ml.date_created as date_created,
                 ml.credit,
                 ml.debit,
-                CASE WHEN COALESCE(moveline_partner.id,1) = 1
+                --NULL no partner
+                -- 1 SomEnergia
+                -- 39060 Caja Laboral
+                CASE WHEN COALESCE(moveline_partner.id,1) IN (1,39060)
                     THEN account_partner.ref
                     ELSE moveline_partner.ref
                     END AS partner_ref,
-                CASE WHEN COALESCE(moveline_partner.id,1) = 1
+                CASE WHEN COALESCE(moveline_partner.id,1) IN (1,39060)
                     THEN account_partner.id
                     ELSE moveline_partner.id
                     END AS partner_id,
-                CASE WHEN COALESCE(moveline_partner.id,1) = 1
+                CASE WHEN COALESCE(moveline_partner.id,1) IN (1,39060)
                     THEN account_partner.name
                     ELSE moveline_partner.name
                     END AS partner_name,

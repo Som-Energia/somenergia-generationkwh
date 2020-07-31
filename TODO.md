@@ -2,15 +2,26 @@
 
 ## APO's migration
 
-- Recuperar l'adjunt de les remeses
++ Recuperar l'adjunt de les remeses -> No es un adjunt mongo, es un report, n'hi ha dos
++ Query de totes les linies de remesa name start with INV
++ Descartar associades amb move lines:
++ Si es caixa laboral, agafar el soci del numero de compte en comptes del partner id
+- Resoldre els casos directes de caixa laboral
+- En el cas dels pagaments per transferencia que ja trobem el paymentline id caldria extreure tota la info
+- Crear emisions de tipus aportacions per cada interval d'emisió.
 - Recuperar l'iban de les remeses
+- Recuperar l'emissio
+	- Determinar les dates límit de cada emision
 - Data effectiva la que apareix al client erp assentaments "Data" i no pas "Data creacio"
-- Query de totes les linies de remesa name start with INV
-	- Descartar associades amb move lines:
+	- Order date: data de creacio del paymentline
+	- Payment date: data de `date_done` de la remesa
 - Dupped moveline revisar perque surten INV02458 INV02308 INV01176
+- Revisar cas Pancorbo
 - Pendent d'en Carles
+	- Determinar les emisions que fan servir el contracte 2012
 	- No ho vam parlar: Cas Remberto
 		- Inversio INV00111 INV00112
+		- Quina es la bona?
 	- Titols que passen a aportacions consulta a legal
 		- Per error nostre (es va passar al compte de Apos una remesa de titols)
 		- Per error d'ells (ens van demanar de canviar-la)
@@ -21,7 +32,7 @@
 - Accio per passar titols a aportacions
 	- AA
 	- Gabarró
-- Implementar relacio explicita orderline a remesa movelineToOrderline
++ Implementar relacio explicita orderline a remesa movelineToOrderline
 - Renombrar linia remesa 6620 INV357 -> INV00357
 - Ignore APO divest
 - Considerar partial overall S003186
@@ -31,6 +42,7 @@
 	- Text log line to YAML log line
 	- YAML log line to Text log line
 
+- Identificar la informació que fan servir els dos reports de contracte i asegurar que ho tenim a inverfsio
 
 
 + Afegir el partner id
