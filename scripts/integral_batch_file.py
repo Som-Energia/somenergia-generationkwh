@@ -11,7 +11,7 @@ def show_usage():
     print("usage: column2integrate input_data_file output_data_file csv_delimiter decimal\n\
     e.g. python ./integral_batch_file.py \' Irradiation\' dades_in.csv dades_out.csv ';' ','")
 
-def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat='%Y-%m-%d %H:%M:%S%z', timeSpacing=5./60., column2integrateTitle=0):
+def trapezoidal_approximation(sensor_df, from_date, to_date, outputDataFormat='%Y-%m-%d %H:%M:%S%z', timeSpacing=5./60., column2integrateTitle=0):
     ''' Trapezoidal aproximation of the 24 hours following first sensor entry'''
 
     '''Get the first date entry and create hourly time entries'''
@@ -28,7 +28,7 @@ def trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFor
     for start, timeString in zip(ts_start, timeStrings):
         end = start + deltaT
 
-        interval4integral = ordered_sensors.loc[start:end]
+        interval4integral = sensor_df.loc[start:end]
 
         ''' Trapezoidal aproximation of the hour following first sensor entry '''
         test_integral = integrate.trapz(y = interval4integral[column2integrateTitle], dx = timeSpacing)
@@ -55,6 +55,9 @@ def find_encoding(fname):
 
 def parse_csv(input_data_file, column2integrate, delimiter, decimal):
 
+    date_col = 0
+    time_col = 1
+
     guessed_encoding = find_encoding(input_data_file)
 
     columnNames = pd.read_csv(input_data_file, nrows=0, delimiter=delimiter, encoding=guessed_encoding).columns
@@ -65,20 +68,22 @@ def parse_csv(input_data_file, column2integrate, delimiter, decimal):
 
     print('\033[94m\033[1mProcessing column {}\033[0m'.format(columnNames[column2integrate]))
 
-    sensors = pd.read_csv(input_data_file, usecols=[0,1,column2integrate], delimiter=delimiter,
+    sensor = pd.read_csv(input_data_file, usecols=[date_col,time_col,column2integrate], delimiter=delimiter,
                           encoding=guessed_encoding, decimal=decimal,
-                          na_values=[' -nan'], engine='python', parse_dates=[[0,1]],
+                          na_values=[' -nan'], engine='python', parse_dates=[[date_col,time_col]],
                           infer_datetime_format=True, dayfirst=True)
 
-    sensors.rename(columns={'DATE_ TIME':'datetimeECT'}, inplace=True)
+    sensor.rename(columns={'DATE_ TIME':'datetimeECT'}, inplace=True)
 
-    sensors['datetimeUTC'] = pd.to_datetime(sensors['datetimeECT']).dt.tz_localize('Europe/Zurich', ambiguous='infer')
-    sensors.set_index('datetimeUTC', inplace=True)
-    sensors.drop(['datetimeECT'], axis=1, inplace=True)
+    sensor['datetimeUTC'] = pd.to_datetime(sensor['datetimeECT']).dt.tz_localize('Europe/Zurich', ambiguous='infer')
+    sensor.set_index('datetimeUTC', inplace=True)
+    sensor.drop(['datetimeECT'], axis=1, inplace=True)
 
-    return sensors
+    return sensor
 
 def parse_xlsx(input_data_file, column2integrate):
+
+    datetime_col = 0
 
     columnNames = pd.read_excel(io=input_data_file, header=0).columns
 
@@ -88,11 +93,11 @@ def parse_xlsx(input_data_file, column2integrate):
 
     print('\033[94m\033[1mProcessing column {}\033[0m'.format(columnNames[column2integrate]))
 
-    ordered_sensors = pd.read_excel(input_data_file, usecols=[0, column2integrate], index_col=0, parse_dates=True, convert_float=False)
+    sensor = pd.read_excel(input_data_file, usecols=[datetime_col, column2integrate], index_col=datetime_col, parse_dates=True, convert_float=False)
 
-    ordered_sensors = ordered_sensors.tz_localize('Europe/Zurich')
+    sensor = sensor.tz_localize('Europe/Zurich')
 
-    return ordered_sensors
+    return sensor
 
 def main():
 
@@ -118,25 +123,27 @@ def main():
 
     if input_data_file.endswith('csv'):
 
-        ordered_sensors = parse_csv(input_data_file, column2integrate=column2integrate, delimiter=delimiter, decimal=decimal)
+        sensor_df = parse_csv(input_data_file, column2integrate=column2integrate, delimiter=delimiter, decimal=decimal)
 
     elif input_data_file.endswith('xls') or input_data_file.endswith('xlsx'):
 
-        ordered_sensors = parse_xlsx(input_data_file, column2integrate=column2integrate)
+        sensor_df = parse_xlsx(input_data_file, column2integrate=column2integrate)
 
     else:
         print("Only .csv, .xls and .xlsx are supported")
         sys.exit(-2)
 
-    columnTitle = ordered_sensors.columns[0]
+    ''' sensor_df is a one-column dataframe with datetime column as index '''
+
+    columnTitle = sensor_df.columns[0]
 
     ''' Time in hours between readings '''
     timeSpacing = 5./60.
 
-    from_date = ordered_sensors.index[0].floor('d')
-    to_date   = ordered_sensors.index[-1].ceil('d')
+    from_date = sensor_df.index[0].floor('d')
+    to_date   = sensor_df.index[-1].ceil('d')
 
-    integrals = trapezoidal_approximation(ordered_sensors, from_date, to_date, outputDataFormat, timeSpacing, columnTitle)
+    integrals = trapezoidal_approximation(sensor_df, from_date, to_date, outputDataFormat, timeSpacing, columnTitle)
 
     integralsDF = pd.DataFrame(data = integrals, columns = ['datetime', columnTitle])
     integralsDF.to_csv(output_data_file, sep=';', decimal=',', encoding='utf-8', index=False)
