@@ -19,7 +19,7 @@ class InvestmentActions(ErpWrapper):
     @property
     def journalCode(self):
         pass
-    
+
     @property
     def productCode(self):
         pass
@@ -63,14 +63,14 @@ class InvestmentActions(ErpWrapper):
 
     def divest(self, cursor, uid, id, invoice_ids, errors, date_invoice):
         pass
-    
+
     def get_or_create_investment_account(self, cursor, uid, partner_id):
         pass
 
     def create_divestment_invoice(self, cursor, uid,
             investment_id, date_invoice, to_be_divested,
             irpf_amount_current_year=0, irpf_amount=0, context=None):
-        
+
         Partner = self.erp.pool.get('res.partner')
         Product = self.erp.pool.get('product.product')
         Invoice = self.erp.pool.get('account.invoice')
@@ -99,7 +99,7 @@ class InvestmentActions(ErpWrapper):
         journal_id = Journal.search(cursor, uid, [
             ('code','=',self.journalCode),
             ])[0]
-        
+
         # The payment type
         payment_type_id = PaymentType.search(cursor, uid, [
             ('code', '=', 'TRANSFERENCIA_CSB'),
@@ -140,7 +140,7 @@ class InvestmentActions(ErpWrapper):
         vals.update(Invoice.onchange_partner_id(
             cursor, uid, [], 'in_invoice', partner_id,
         ).get('value', {}))
-        
+
 
         vals.update({
             'partner_id': partner_id,
@@ -214,29 +214,30 @@ class GenerationkwhActions(InvestmentActions):
         member_ids, emission_id = super(GenerationkwhActions, self).create_from_form(cursor, uid, partner_id, order_date, amount_in_euros, ip, iban,emission, context)
 
         GenerationkwhInvestment = self.erp.pool.get('generationkwh.investment')
-        ResUser = self.erp.pool.get('res.users')                            
-        user = ResUser.read(cursor, uid, uid, ['name'])                 
-        IrSequence = self.erp.pool.get('ir.sequence')                       
-        name = IrSequence.get_next(cursor,uid,'som.inversions.gkwh')    
-                                                                        
-        inv = InvestmentState(user['name'], datetime.now())             
-        inv.order(                                                      
-            name = name,                                                
-            date = order_date,                                          
-            amount = amount_in_euros,                                   
-            iban = iban,                                                
-            ip = ip,                                                    
-            )                                                           
-        investment_id = GenerationkwhInvestment.create(cursor, uid, dict(                  
-            inv.erpChanges(),                                           
-            member_id = member_ids[0],                                  
-            emission_id = emission_id,                                  
-        ), context)                                                     
-                                                                        
-        GenerationkwhInvestment.get_or_create_payment_mandate(cursor, uid,                 
-            partner_id, iban, gkwh.mandateName, gkwh.creditorCode)      
-                                                                        
-        GenerationkwhInvestment.send_mail(cursor, uid, investment_id,                      
+        ResUser = self.erp.pool.get('res.users')
+        user = ResUser.read(cursor, uid, uid, ['name'])
+        IrSequence = self.erp.pool.get('ir.sequence')
+        name = IrSequence.get_next(cursor,uid,'som.inversions.gkwh')
+
+        inv = InvestmentState(user['name'], datetime.now())
+        inv.order(
+            name = name,
+            date = order_date,
+            amount = amount_in_euros,
+            iban = iban,
+            ip = ip,
+            )
+
+        investment_id = GenerationkwhInvestment.create(cursor, uid, dict(
+            inv.erpChanges(),
+            member_id = member_ids[0],
+            emission_id = emission_id,
+        ), context)
+
+        GenerationkwhInvestment.get_or_create_payment_mandate(cursor, uid,
+            partner_id, iban, gkwh.mandateName, gkwh.creditorCode)
+
+        GenerationkwhInvestment.send_mail(cursor, uid, investment_id,
             'generationkwh.investment', '_mail_creacio')
 
         return investment_id
@@ -270,7 +271,7 @@ class GenerationkwhActions(InvestmentActions):
         Invoice = self.erp.pool.get('account.invoice')
         MoveLine = self.erp.pool.get('account.move.line')
         Investment = self.erp.pool.get('generationkwh.investment')
-        
+
         inversio = Investment.read(cursor, uid, id, [
             'log',
             'nshares',
@@ -395,7 +396,7 @@ class AportacionsActions(InvestmentActions):
     def get_or_create_investment_account(self, cursor, uid, partner_id):
         Partner = self.erp.pool.get('res.partner')
         partner = Partner.browse(cursor, uid, partner_id)
-        
+
         if not partner.property_account_liquidacio:
             partner.button_assign_acc_410()
             partner = partner.browse()[0]

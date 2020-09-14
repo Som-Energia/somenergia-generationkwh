@@ -54,9 +54,7 @@ class Generationkwh_MailMockup(osv.osv_memory):
     def log(self, cur, uid):
         ids = self.search(cur, uid, [])
         return self.browse(cur, uid, ids[0]).log
-        
-        
-        
+
 
 
 Generationkwh_MailMockup()
@@ -1424,7 +1422,6 @@ class GenerationkwhInvestment(osv.osv):
         InvoiceLine = self.pool.get('account.invoice.line')
         PaymentType = self.pool.get('payment.type')
         Journal = self.pool.get('account.journal')
-
         invoice_ids = []
 
         date_invoice = str(date.today())
@@ -1799,7 +1796,7 @@ class GenerationkwhInvestment(osv.osv):
             investment_actions.divest(cursor, uid, id, invoice_ids, errors, date_invoice)
 
         return invoice_ids, errors
-        
+
     def create_divestment_invoice(self, cursor, uid,
         investment_id, date_invoice, to_be_divested,
         irpf_amount_current_year=0, irpf_amount=0, context=None):
