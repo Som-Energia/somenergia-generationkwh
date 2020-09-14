@@ -94,7 +94,7 @@ class GenerationkwhInvestmentSign(osv.osv):
                 process_id = pro_obj.create(cursor, uid, values, context=context)
                 pro_obj.start(cursor, uid, [process_id], context=context)
 
-        return True
+        return process_id
 
     def generationkwh_signed(self, cursor, uid, gen_id, context=None):
         if not isinstance(gen_id, (list, tuple)):
