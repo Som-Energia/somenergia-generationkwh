@@ -11,6 +11,42 @@ class GenerationkwhInvestmentSign(osv.osv):
     _name = 'generationkwh.investment'
     _inherit = 'generationkwh.investment'
 
+    def invoice_sign_request(self, cursor, uid, ids, invoice_ids, context=None):
+        if not isinstance(invoice_ids, (list, tuple)):
+            invoice_ids = [invoice_ids]
+
+        signatura_doc_obj = self.pool.get('giscedata.signatura.documents')
+        signatura_proc_obj = self.pool.get('giscedata.signatura.proccess')
+        inv_obj = self.pool.get('account.invoice')
+
+        errors = []
+        signatura_procs = []
+        for inv_id in invoice_ids:
+            investment_name = inv_obj.read(cursor, uid, ['origin'])
+            doc_ids = signatura_doc_obj.search(cursor, uid, [('model', '=', 'account.invoice,{}'.format(inv_id))])
+            if doc_ids:
+                proc_ids = signatura_proc_obj.search(cursor, uid, [('id', 'in', doc_ids), ('status', 'in', ['wait', 'doing','completed'])])
+                if proc_ids:  #ja té un procés en iniciat o complert
+                    errors.append('La inversió {} té un procés de signatura actiu'.format(investment_name))
+                    continue
+            investment_id = self.search(cursor, uid, [('name', '=', investment_name)])[0]
+            try:
+                self.investment_sign_request(cursor, uid, investment_id)
+            except Exception as e:
+                pass
+
+            #TODO:
+            #- Testos:
+            #   - Intentar firmar una invoice ja firmada
+            #   - Intentar firmar una invoice amb procés cancelat o expirat
+            #   - Intentar firmar una ok.
+            #   - Intentar firmar una account.invoice que no sigui d'una inversió (origin no correspongui al nom de cap investment)
+            #- Return de llista errors i signat
+            #- Mostrar-ho al wizard
+            #- Cos del missatge "False"
+            #- Comprobar que no necessiti boto "Inicia"
+            #- Canviar nom variable config
+
     def investment_sign_request(self, cursor, uid, gen_ids, context=None):
         if not isinstance(gen_ids, (list, tuple)):
             gen_ids = [gen_ids]
@@ -25,6 +61,7 @@ class GenerationkwhInvestmentSign(osv.osv):
 
             address_id = invest.member_id.address[0].id
             email = invest.member_id.address[0].email
+            lang = invest.member_id.lang
             if not email:
                 raise osv.except_osv(
                     _('Error!'),
@@ -88,7 +125,8 @@ class GenerationkwhInvestmentSign(osv.osv):
                     'type': 'advanced',
                     'data': data,
                     'all_signed': False,  # Ver esquema
-                    'files': files  # Documentos
+                    'files': files,  # Documentos
+                    'lang': lang
                 }
 
                 process_id = pro_obj.create(cursor, uid, values, context=context)
