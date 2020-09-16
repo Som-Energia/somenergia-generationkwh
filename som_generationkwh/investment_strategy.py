@@ -241,15 +241,6 @@ class GenerationkwhActions(InvestmentActions):
         GenerationkwhInvestment.send_mail(cursor, uid, investment_id,
             'generationkwh.investment', '_mail_creacio')
 
-        try:
-            logger = logging.getLogger()
-            process_id = GenerationkwhInvestment.investment_sign_request(cursor, uid, investment_id, context=None)
-        except Exception as e:
-            error_message = "Error en iniciar el procés de Signaturit! {}".format(str(e))
-            logger.error(error_message)
-        else:
-            logger.info("Procés de Signaturit {} iniciat".format(process_id))
-
         return investment_id
 
     def get_prefix_semantic_id(self):

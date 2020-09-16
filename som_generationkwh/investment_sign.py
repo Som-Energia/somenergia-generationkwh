@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import json
+import json, logging
 from osv import osv, fields
 from datetime import datetime, date
 from tools.translate import _
@@ -15,36 +15,43 @@ class GenerationkwhInvestmentSign(osv.osv):
         if not isinstance(invoice_ids, (list, tuple)):
             invoice_ids = [invoice_ids]
 
+        logger = logging.getLogger()
         signatura_doc_obj = self.pool.get('giscedata.signatura.documents')
-        signatura_proc_obj = self.pool.get('giscedata.signatura.proccess')
+        signatura_proc_obj = self.pool.get('giscedata.signatura.process')
         inv_obj = self.pool.get('account.invoice')
 
         errors = []
         signatura_procs = []
         for inv_id in invoice_ids:
-            investment_name = inv_obj.read(cursor, uid, ['origin'])
+            investment_name = inv_obj.read(cursor, uid, inv_id, ['origin'])['origin']
             doc_ids = signatura_doc_obj.search(cursor, uid, [('model', '=', 'account.invoice,{}'.format(inv_id))])
             if doc_ids:
-                proc_ids = signatura_proc_obj.search(cursor, uid, [('id', 'in', doc_ids), ('status', 'in', ['wait', 'doing','completed'])])
-                if proc_ids:  #ja té un procés en iniciat o complert
-                    errors.append('La inversió {} té un procés de signatura actiu'.format(investment_name))
+                proc_ids = [
+                    doc['process_id'][0]
+                    for doc in signatura_doc_obj.read(cursor, uid, doc_ids,['process_id'])
+                ]
+                not_failed_procs = signatura_proc_obj.search(cursor, uid, [('id', 'in', proc_ids),
+                                                                   ('status', 'in', ['wait', 'doing', 'completed'])])
+                if not_failed_procs:  #ja té un procés en iniciat o complert
+                    error_message = 'La inversió {} té un procés de signatura actiu o finalitzat'.format(investment_name)
+                    errors.append(error_message)
+                    logger.error(error_message)
                     continue
-            investment_id = self.search(cursor, uid, [('name', '=', investment_name)])[0]
             try:
+                investment_id = self.search(cursor, uid, [('name', '=', investment_name)])[0]
                 self.investment_sign_request(cursor, uid, investment_id)
             except Exception as e:
-                pass
+                error_message = 'La inversió {} ha generat un error en iniciar la signatura, error: {}'.\
+                              format(investment_name, e)
+                errors.append(error_message)
+                logger.error(error_message)
+            else:
+                signatura_procs.append(investment_name)
+
+        return signatura_procs, errors
 
             #TODO:
-            #- Testos:
-            #   - Intentar firmar una invoice ja firmada
-            #   - Intentar firmar una invoice amb procés cancelat o expirat
-            #   - Intentar firmar una ok.
-            #   - Intentar firmar una account.invoice que no sigui d'una inversió (origin no correspongui al nom de cap investment)
-            #- Return de llista errors i signat
-            #- Mostrar-ho al wizard
             #- Cos del missatge "False"
-            #- Comprobar que no necessiti boto "Inicia"
             #- Canviar nom variable config
 
     def investment_sign_request(self, cursor, uid, gen_ids, context=None):
@@ -65,8 +72,12 @@ class GenerationkwhInvestmentSign(osv.osv):
             if not email:
                 raise osv.except_osv(
                     _('Error!'),
-                    _(u"""Es necessita una adreça de correu electrònic
-                            per enviar el document a signar.""")
+                    _(u"""Es necessita una adreça de correu electrònic per enviar el document a signar.""")
+                )
+            if not lang:
+                raise osv.except_osv(
+                    _('Error!'),
+                    _(u"""El soci no té cap idioma assignat.""")
                 )
             else:
                 acc_inv_obj = self.pool.get('account.invoice')

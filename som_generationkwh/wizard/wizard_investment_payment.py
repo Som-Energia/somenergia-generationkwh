@@ -26,6 +26,9 @@ class WizardInvestmentPayment(osv.osv):
                            '  - Les inversions no han de tenir data de compra \n'
                            '  - No han de tenir una factura ja creada \n'
                            '  - Han de tenir bank associat a la persona sòcia \n'
+                           '\n\n\n'
+                           'També s\'inciarà el procés de signatura del contracte '
+                           'per aquestes inversions'
     }
 
 
@@ -37,7 +40,7 @@ class WizardInvestmentPayment(osv.osv):
         investment_ids = context.get('active_ids', [])
 
         invoice_ids, errors = Investment.investment_payment(cursor, uid, investment_ids)
-
+        signature_investments, signature_errors = Investment.invoice_sign_request(cursor, uid, [], invoice_ids)
         info = "RESULTAT: \n"
         info += "================\n"
         if not invoice_ids:
@@ -52,6 +55,21 @@ class WizardInvestmentPayment(osv.osv):
             info +=  "\nERRORS DURANT EL PROCÉS: \n"
             for error in errors:
                 info+= " -  " + str(error) + "\n"
+
+        info += "\n\n================\n"
+        info += "PROCESSOS DE SIGNATURIT:\n"
+        if not signature_investments:
+            info+= "No s'han iniciat processos de signatura\n"
+        else:
+            info += "\nINVERSIONS PER LES QUALS S'HA INICIAT: \n"
+            for signature_inv in signature_investments:
+                info+= " - " + signature_inv + "\n"
+
+        if signature_errors:
+            info +=  "\nERRORS DURANT EL PROCÉS: \n"
+            for error in signature_errors:
+                info+= " -  " + str(error) + "\n"
+
 
         wiz.write(dict(
             info= info,
