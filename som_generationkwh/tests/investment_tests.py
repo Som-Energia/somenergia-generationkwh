@@ -40,6 +40,8 @@ class InvestmentTests(testing.OOTestCase):
         self.PaymentLine = self.openerp.pool.get('payment.line')
         self.PaymentOrder = self.openerp.pool.get('payment.order')
         self.Soci = self.openerp.pool.get('somenergia.soci')
+        self.SignatureProcess = self.openerp.pool.get('giscedata.signatura.process')
+        self.SignatureDocs = self.openerp.pool.get('giscedata.signatura.documents')
         self.maxDiff = None
 
     def tearDown(self):
@@ -2503,6 +2505,10 @@ class InvestmentTests(testing.OOTestCase):
             investment_id = self.IrModelData.get_object_reference(
                 cursor, uid, 'som_generationkwh', 'genkwh_0002'
             )[1]
+            partner_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh' ,'res_partner_inversor1'
+            )[1]
+            self.Partner.write(cursor, uid, [partner_id], {'lang': 'en_US'})
 
             self.Investment.investment_sign_request(cursor, uid, investment_id)
             mocked_sign.assert_called_with(cursor, uid, mock.ANY, context={})
@@ -2522,6 +2528,23 @@ class InvestmentTests(testing.OOTestCase):
 
             with self.assertRaises(except_osv) as ctx:
                 self.Investment.investment_sign_request(cursor, uid, investment_id)
+            self.assertEqual(ctx.exception.message, u"""warning -- Error!\n\nEs necessita una adreça de correu electrònic per enviar el document a signar.""")
+
+    def test__generationwkwh_investment_sign__withoutLang(self):
+        with Transaction().start(self.database) as txn:
+            cursor = txn.cursor
+            uid = txn.user
+            investment_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh', 'genkwh_0001'
+            )[1]
+            partner_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh' ,'res_partner_inversor1'
+            )[1]
+
+            self.Partner.write(cursor, uid, [partner_id], {'lang': False})
+            with self.assertRaises(except_osv) as ctx:
+                self.Investment.investment_sign_request(cursor, uid, investment_id)
+            self.assertEqual(ctx.exception.message, u'warning -- Error!\n\nEl soci no té cap idioma assignat.')
 
     def test__generationwkwh_investment_sign__withoutInvoice(self):
         with Transaction().start(self.database) as txn:
@@ -2530,10 +2553,14 @@ class InvestmentTests(testing.OOTestCase):
             investment_id = self.IrModelData.get_object_reference(
                 cursor, uid, 'som_generationkwh', 'genkwh_0001'
             )[1]
-
+            partner_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh' ,'res_partner_inversor1'
+            )[1]
+            self.Partner.write(cursor, uid, [partner_id], {'lang': 'en_US'})
             with self.assertRaises(except_osv) as ctx:
                 self.Investment.investment_sign_request(cursor, uid, investment_id)
-            
+            self.assertEqual(ctx.exception.message, u'warning -- Error!\n\nNo hi ha cap factura per a aquest préstec de generation!')
+
     def test__generationwkwh_investment_sign_callback__ok(self):
         with Transaction().start(self.database) as txn:
             cursor = txn.cursor
@@ -2541,6 +2568,10 @@ class InvestmentTests(testing.OOTestCase):
             investment_id = self.IrModelData.get_object_reference(
                 cursor, uid, 'som_generationkwh', 'genkwh_0002'
             )[1]
+            partner_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh' ,'res_partner_inversor1'
+            )[1]
+            self.Partner.write(cursor, uid, [partner_id], {'lang': 'en_US'})
             self.Investment.write(cursor, uid, investment_id, {'signed_date': False})
             self.Investment.investment_sign_request(cursor, uid, investment_id)
             context = {
@@ -2553,5 +2584,153 @@ class InvestmentTests(testing.OOTestCase):
             signed_date = self.Investment.read(cursor, uid, investment_id, ['signed_date'])['signed_date']
             self.assertTrue(signed_date)
 
+    @mock.patch("som_generationkwh.investment_sign.GenerationkwhInvestmentSign.investment_sign_request")
+    def test__generationwkwh_invoice_sign_request__allowed(self, mocked_sign):
+        with Transaction().start(self.database) as txn:
+            cursor = txn.cursor
+            uid = txn.user
+            investment_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh', 'genkwh_0002'
+            )[1]
+            invoice_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh', 'invoice_GKWH00002'
+            )[1]
+            origin = self.Invoice.read(cursor, uid, invoice_id, ['origin'])['origin']
+
+            signatura_procs, errors = self.Investment.invoice_sign_request(cursor, uid, [], invoice_id)
+            mocked_sign.assert_called_with(cursor, uid, investment_id)
+
+            self.assertFalse(errors)
+            self.assertEqual(signatura_procs, [origin])
+
+    def test__generationwkwh_invoice_sign_request_already_signed__notAllowed(self):
+        with Transaction().start(self.database) as txn:
+            cursor = txn.cursor
+            uid = txn.user
+            partner_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh' ,'res_partner_inversor1'
+            )[1]
+            self.Partner.write(cursor, uid, [partner_id], {'lang': 'en_US'})
+            investment_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh', 'genkwh_0002'
+            )[1]
+            invoice_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh', 'invoice_GKWH00002'
+            )[1]
+
+            origin = self.Invoice.read(cursor, uid, invoice_id, ['origin'])['origin']
+
+            proc_vals = {
+                'status': 'completed',
+                'lang': 'en_US',
+                'subject': origin,
+            }
+            process_id = self.SignatureProcess.create(cursor, uid, proc_vals)
+            doc_vals = {
+                'model': 'account.invoice,{}'.format(invoice_id),
+                'process_id': process_id,
+            }
+            doc_id = self.SignatureDocs.create(cursor, uid, doc_vals)
+
+            signatura_procs, errors = self.Investment.invoice_sign_request(cursor, uid, [], invoice_id)
+
+            self.assertEqual(len(self.SignatureProcess.search(cursor, uid, [('subject', 'ilike', origin)])), 1)
+            self.assertEqual([u'La inversió GKWH00002 té un procés de signatura actiu o finalitzat'], errors)
+            self.assertFalse(signatura_procs)
+
+    @mock.patch("som_generationkwh.investment_sign.GenerationkwhInvestmentSign.investment_sign_request")
+    def test__generationwkwh_invoice_sign_request_expired__allowed(self, mocked_sign):
+        with Transaction().start(self.database) as txn:
+            cursor = txn.cursor
+            uid = txn.user
+            partner_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh' ,'res_partner_inversor1'
+            )[1]
+            self.Partner.write(cursor, uid, [partner_id], {'lang': 'en_US'})
+            investment_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh', 'genkwh_0002'
+            )[1]
+            invoice_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh', 'invoice_GKWH00002'
+            )[1]
+
+            origin = self.Invoice.read(cursor, uid, invoice_id, ['origin'])['origin']
+
+            proc_vals = {
+                'status': 'expired',
+                'lang': 'en_US',
+                'subject': origin,
+            }
+            process_id = self.SignatureProcess.create(cursor, uid, proc_vals)
+            doc_vals = {
+                'model': 'account.invoice,{}'.format(invoice_id),
+                'process_id': process_id,
+            }
+            doc_id = self.SignatureDocs.create(cursor, uid, doc_vals)
+
+            signatura_procs, errors = self.Investment.invoice_sign_request(cursor, uid, [], invoice_id)
+            mocked_sign.assert_called_with(cursor, uid, investment_id)
+            self.assertEqual([origin], signatura_procs)
+            self.assertFalse(errors)
+
+    def test__generationwkwh_invoice_sign_request_two_processes__not_allowed(self):
+        with Transaction().start(self.database) as txn:
+            cursor = txn.cursor
+            uid = txn.user
+            partner_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh' ,'res_partner_inversor1'
+            )[1]
+            self.Partner.write(cursor, uid, [partner_id], {'lang': 'en_US'})
+            investment_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh', 'genkwh_0002'
+            )[1]
+            invoice_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh', 'invoice_GKWH00002'
+            )[1]
+
+            origin = self.Invoice.read(cursor, uid, invoice_id, ['origin'])['origin']
+
+            proc_vals = {
+                'status': 'expired',
+                'lang': 'en_US',
+                'subject': origin,
+            }
+            process_id = self.SignatureProcess.create(cursor, uid, proc_vals)
+            doc_vals = {
+                'model': 'account.invoice,{}'.format(invoice_id),
+                'process_id': process_id,
+            }
+            doc_1_id = self.SignatureDocs.create(cursor, uid, doc_vals)
+
+            proc_vals['status'] = 'completed'
+
+            process_2_id = self.SignatureProcess.create(cursor, uid, proc_vals)
+            doc_vals = {
+                'model': 'account.invoice,{}'.format(invoice_id),
+                'process_id': process_2_id,
+            }
+            doc_2_id = self.SignatureDocs.create(cursor, uid, doc_vals)
+
+            signatura_procs, errors = self.Investment.invoice_sign_request(cursor, uid, [], invoice_id)
+            self.assertEqual(len(self.SignatureProcess.search(cursor, uid, [('subject', 'ilike', origin)])), 2)
+            self.assertEqual([u'La inversió GKWH00002 té un procés de signatura actiu o finalitzat'], errors)
+            self.assertFalse(signatura_procs)
+
+    def test__generationwkwh_invoice_sign_request_notAnInvestment__notAllowed(self):
+        with Transaction().start(self.database) as txn:
+            cursor = txn.cursor
+            uid = txn.user
+            investment_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh', 'genkwh_0002'
+            )[1]
+            invoice_id = self.IrModelData.get_object_reference(
+                cursor, uid, 'som_generationkwh', 'invoice_GKWH00002'
+            )[1]
+            self.Invoice.write(cursor, uid, invoice_id, {'origin':'NO'})
+
+            signatura_procs, errors = self.Investment.invoice_sign_request(cursor, uid, [], invoice_id)
+
+            self.assertFalse(signatura_procs)
+            self.assertEqual(errors, ['La inversió NO ha generat un error en iniciar la signatura, error: list index out of range'])
 
 # vim: et ts=4 sw=4
