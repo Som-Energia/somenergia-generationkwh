@@ -417,7 +417,7 @@ class Migrator:
                 )
             unsolvedInvestments.remove(investment_name)
 
-    def resolve(self):
+    def resolveYamlExplicitCases(self):
         for investment_name, actions in self.cases.legacyCases.items():
             for moveline_id, action in sorted(actions.items()):
                 try:
@@ -463,7 +463,7 @@ class Migrator:
         self.matchPaymentOrders()
         #self.matchExistingInvestments()
         self.solveExistingInvestments()
-        self.resolve()
+        self.resolveYamlExplicitCases()
         self.dumpMovementsByPartner()
         self.dumpUnsolved()
         #main(cr)
