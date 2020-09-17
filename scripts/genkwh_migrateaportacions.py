@@ -195,14 +195,19 @@ class Migrator:
                     output.write("#    {id}: unknown # {date_created} ({partner_name}) {amount} {name}\n".format(**movement))
                 output.write("\n")
 
+    def orderLineIP(self, orderline):
+        communication = orderline.communication2
+        if communication and ' IP ' in communication:
+            return communication.split(" IP ")[1]
+        return '0.0.0.0'
+
     def matchPaymentOrders(self):
 
         paymentMoveLines = ns()
         matchedOrderLines = []
 
         def bindMoveLineAndPaymentLine(moveline, orderline):
-            communication = orderline.communication2
-            ip = communication.split(" IP ")[1] if communication and ' IP ' in communication else '0.0.0.0'
+            ip = self.orderLineIP(orderline)
             moveline.partner_name = moveline.partner_name and u(moveline.partner_name)
             False and success(
                 u"Match ml-po ml-{moveline.id} {orderline.name} {orderline.create_date} {amount:=8}€ {moveline.partner_name} {ip}"
@@ -432,6 +437,7 @@ class Migrator:
                         moveline.solution = ns(
                             action,
                             order_id = self.cases.movelineToOrderline[moveline_id],
+                            ip = ip,
                             name = investment_name,
                         )
                     elif moveline.solution.name != investment_name:
