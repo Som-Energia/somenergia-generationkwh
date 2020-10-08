@@ -2,17 +2,30 @@
 # -*- coding: utf8 -*-
 from __future__ import unicode_literals
 
-from genkwh_migratenames import *
+import sys
+import psycopg2
+from yamlns import namespace as ns
+import dbconfig
+import dbutils
 import genkwh_migratenames
+from genkwh_migratenames import (
+    transaction,
+    getOrderLines,
+    getMoveLines,
+)
+from tqdm import tqdm
+#def tqdm(x): return x
+
 from pathlib2 import Path
 import re
-from consolemsg import out
+from consolemsg import out, step, success, warn, error, u
 
 
 class Migrator:
     def __init__(self, cr):
         self.cases = genkwh_migratenames.cases = ns.load('migration-aportacions.yaml')
         self.cr = cr
+        self.unmatchedOrderLines = {}
 
     def cleanUp(self):
         """Clean up inconsistencies in cases so that the rest of
@@ -42,6 +55,80 @@ class Migrator:
         result = dbutils.nsList(self.cr)
         ns(data=result).dump(str(cachefile))
         return result
+
+    def getInvestmentPaymentOrders(self):
+        paymentModes = self.cases.get('formPaymentModes', ['GENERATION kWh'])
+        extraPaymentOrders=self.cases.get('extraPaymentOrders', [])
+        excludedOrders=self.cases.get('excludedOrders', [])
+        self.cr.execute("""\
+            select
+                po.id as order_id,
+                po.n_lines as order_nlines,
+                po.date_done as order_sent_date,
+                true as ignored
+            from
+                payment_order as po
+            left join
+                payment_mode as pm
+            on
+                pm.id = po.mode
+            where
+                (
+                    pm.name = ANY(%(paymentModes)s) or
+                    po.id = ANY(%(extraPaymentOrders)s) or
+                    false
+                ) and
+                po.id != ALL(%(excludedOrders)s) and
+                true
+            order by
+                po.date_done,
+                po.n_lines
+            ;
+            """, dict(
+                paymentModes=paymentModes,
+                excludedOrders=excludedOrders,
+                extraPaymentOrders=extraPaymentOrders,
+            ))
+        return dbutils.nsList(self.cr)
+
+    def getInvestmentPaymentMovement(self):
+        """
+            Returns movelines containing payments for investment payment orders.
+            They are identified by having lines against investment accounts
+            and having '/' as the name, because that's the name a payment order uses.
+        """
+        parentAccount = self.cases.get('parentAccount', '1635')
+        self.cr.execute("""\
+            select
+                l.move_id as move_id,
+                count(l.id) as move_nlines,
+                l.date_created as move_create_date
+            from
+                account_move_line as l
+            left join
+                account_account as a
+            on
+                l.account_id=a.id
+            left join
+                account_account as pa
+            on
+                pa.id = a.parent_id
+            where
+                pa.code = %(parentAccount)s and
+                l.name = '/' and
+                true
+            group by
+                move_id,
+                date_created
+            order by
+                move_create_date,
+                move_nlines
+            ;
+            """, dict(
+                parentAccount=parentAccount,
+            ))
+        return dbutils.nsList(self.cr)
+
 
     def getAllMovementsLines(self):
         parentAccount = self.cases.get('parentAccount', '1635')
@@ -146,23 +233,31 @@ class Migrator:
         if not result: return None
         return result[0].id
 
-    def listMovementsByPartner(self):
-        movements = self.getAllMovementsLines()
-
-        self.movements = {
-            movement.id: movement
-            for movement in movements
+    def loadInvestments(self):
+        step("Loading all investments")
+        self.investments = {
+            investment.name: investment
+            for investment in self.getAllInvestments()
         }
-        self.movementsByPartner = {}
-        for movement in movements:
-            self.movementsByPartner.setdefault(movement.partner_id, []).append(movement)
+
+    def loadMovements(self):
+        step("Loading all movelines")
+        movelines = self.getAllMovementsLines()
+
+        self.movelines = {
+            movement.id: movement
+            for movement in movelines
+        }
+        self.movelinesByPartner = {}
+        for movement in movelines:
+            self.movelinesByPartner.setdefault(movement.partner_id, []).append(movement)
 
     def dumpMovementsByPartner(self):
         with Path('apos_movementlines.csv').open('w', encoding='utf8') as output:
-            for partner_id in sorted(self.movementsByPartner):
-                movements = self.movementsByPartner[partner_id]
-                output.write("({partner_id}) {partner_ref} {partner_name}\n".format(**movements[0]))
-                for movement in movements:
+            for partner_id in sorted(self.movelinesByPartner):
+                movelines = self.movelinesByPartner[partner_id]
+                output.write("({partner_id}) {partner_ref} {partner_name}\n".format(**movelines[0]))
+                for movement in movelines:
                     output.write("\t{account_code}\t{date_created}\t{credit: 10f}\t{debit: 10f}\t{id: 10d}\t{name}\n".format(**movement))
                     if 'solution' in movement:
                         output.write("\t\t{name}\t{type}\t{solution}\n".format(solution=movement.solution, **movement.solution))
@@ -170,30 +265,42 @@ class Migrator:
     def dumpUnsolved(self):
         with Path('unsolved.yaml').open('w', encoding='utf8') as output:
             output.write("unsolved:\n")
-            for partner_id in sorted(self.movementsByPartner):
-                movements = self.movementsByPartner[partner_id]
-                if all('solution' in movement for movement in movements):
+            for partner_id in sorted(self.movelinesByPartner):
+                movelines = self.movelinesByPartner[partner_id]
+                if all('solution' in movement for movement in movelines):
                     continue # all solved
                 investments = list(sorted(set(
                     movement.solution.name
-                    for movement in movements
+                    for movement in movelines
                     if 'solution' in movement
                 )))
                 for investment in investments:
                     output.write(
                         "  {0}: # {1.partner_ref} {1.partner_name}\n"
-                            .format(investment, movements[0]))
-                    for movement in movements:
+                            .format(investment, movelines[0]))
+                    for movement in movelines:
                         if 'solution' not in movement: continue
                         if movement.solution.name != investment: continue
                         output.write("    {id}: {solution.type} # {date_created} ({partner_name}) {amount} {name}\n".format(**movement))
                 output.write(
                     "#  unsolved: # {partner_ref} {partner_name}\n"
-                        .format(**movements[0]))
-                for movement in movements:
+                        .format(**movelines[0]))
+                for movement in movelines:
                     if 'solution' in movement: continue
                     output.write("#    {id}: unknown # {date_created} ({partner_name}) {amount} {name}\n".format(**movement))
                 output.write("\n")
+
+    def organize(self, items, key):
+        result = ns()
+        for item in items:
+            result.setdefault(key(item), []).append(item)
+        return result
+
+    def takeFirst(self, pool, key):
+        values = pool.get(key, [])
+        if not values: return None
+        return values.pop(0)
+        
 
     def orderLineIP(self, orderline):
         communication = orderline.communication2
@@ -202,11 +309,20 @@ class Migrator:
         return '0.0.0.0'
 
     def matchPaymentOrders(self):
-
-        paymentMoveLines = ns()
-        matchedOrderLines = []
+        """
+        As old investment information is bound to the payment order
+        (name, order date, ip...), relate them to move lines.
+        This function identifies first payments move lines with their order.
+        Binds payment order lines (having order data such as name and dates)
+        with the movement line first matching lines from date-size matching
+        orders and movements and within, matching parther-amount lines.
+        Unmatched blocks fallback matching just by date, and unmatched
+        lines fallback matching just by partner.
+        """
 
         def bindMoveLineAndPaymentLine(moveline, orderline):
+            """Function to be called when a payment has been matched"""
+
             ip = self.orderLineIP(orderline)
             moveline.partner_name = moveline.partner_name and u(moveline.partner_name)
             False and success(
@@ -217,7 +333,7 @@ class Migrator:
                     amount = moveline.credit-moveline.debit,
                     ip = ip,
                 ))
-            paymentMoveLines[moveline.id] = ns(
+            self.paymentMoveLines[moveline.id] = ns(
                 movelineid = moveline.id,
                 ref=orderline.name,
                 order_date=orderline.create_date,
@@ -226,8 +342,7 @@ class Migrator:
                 amount = moveline.credit-moveline.debit,
                 ip = ip,
                 )
-            matchedOrderLines.append(orderline.id)
-            self.movements[moveline.id].update(
+            self.movelines[moveline.id].update(
                 solution = ns(
                     type = 'paid',
                     name = orderline.name,
@@ -235,130 +350,143 @@ class Migrator:
                     ip = ip,
                 )
             )
+        def update(d, **kwds):
+            d.update(**kwds)
+            return d
 
-        order2MovementMatches = investmentOrderAndMovements(self.cr)
-        for o2m in order2MovementMatches:
-            step(" Quadrant remesa feta el {move_create_date}".format(**o2m))
-            step("  Comprovant que la remesa i el moviment coincideixen. "
-                "Ordres a la remesa: {}, Assentaments al moviment: {}",
-                o2m.order_nlines,
-                o2m.move_nlines,
+        self.paymentMoveLines = ns()
+
+        step("Loading payment related movelines")
+        paymentMoves = self.getInvestmentPaymentMovement()
+
+        paymentMoves_byDateLines = self.organize(paymentMoves,
+            lambda m: (m.move_create_date, m.move_nlines))
+        paymentMoves_byDateLines.dump("moves_byDateLine.yaml")
+
+        step("Loading payment related movements lines")
+        pendingMovelines = [
+            update(line,
+                move_id = move.move_id,
+                create_date = move.move_create_date,
+                move_nlines = move.move_nlines,
             )
-            if not o2m.move_id:
-                warn("Remesa sense moviment. {}: Id {}, amb {} linies" .format(
-                    o2m.order_sent_date or "not yet",
-                    o2m.order_id,
-                    o2m.order_nlines,
-                    ))
-                continue
-            if not o2m.order_id:
-                warn("Moviment sense remesa. {}: Id {}, amb {} linies".format(
-                    o2m.move_create_date or "sense o2m",
-                    o2m.move_id,
-                    o2m.move_nlines,
-                    ))
-                continue
+            for move in tqdm(paymentMoves)
+            for line in getMoveLines(self.cr, move.move_id)
+        ]
+            
+        step("Loading payment related orders")
+        paymentOrders = self.getInvestmentPaymentOrders()
 
-            if o2m.move_nlines != o2m.order_nlines:
-                warn("{}: Different number of lines. Payment order {}, Movement {}".format(
-                    o2m.move_create_date,
-                    o2m.order_nlines,
-                    o2m.move_nlines,
-                    ))
+        paymentOrders_byDateLine = self.organize(paymentOrders,
+            lambda o: (o.order_sent_date, o.order_nlines))
+        paymentOrders_byDateLine.dump("orders_byDateLine.yaml")
 
-            orderLines = getOrderLines(self.cr, o2m.order_id)
-            moveLines = getMoveLines(self.cr, o2m.move_id)
+        step("Loading payment related order lines")
+        pendingOrderlines = [
+            update(line,
+                order_id = order.order_id,
+                order_sent_date = order.order_sent_date,
+                order_nlines = order.order_nlines,
+            )
+            for order in tqdm(paymentOrders)
+            for line in getOrderLines(self.cr, order.order_id)
+        ]
 
-            if len(orderLines) != o2m.order_nlines:
-                warn("Got different number of lines {} than reported {} in Order"
-                    .format(len(orderLines), o2m.order_nlines))
-
-            if len(moveLines) != o2m.move_nlines:
-                warn("Got different number of lines {} than reported {} in Move"
-                    .format(len(moveLines), o2m.move_nlines))
-
-            step("  Quadrant pagaments amb apunts per persona i quantitat")
-            orderLinesDict = ns()
-            repesca = []
-
-            #step("  Create a map partner,amount -> orderline")
-            for line in orderLines:
-                key = (line.partner_id, -line.amount)
-                appendToKey(orderLinesDict, key, line)
-
-            #step("  for each move line look up orderlines by partner,amount")
-            for moveline in moveLines:
-                key = (moveline.partner_id, moveline.credit)
-                orderline = getAndRemoveFirst(orderLinesDict, key)
+        def matchBy(orderlines, movelines, orderkey, movementkey):
+            orderlineDict = self.organize(orderlines, orderkey)
+            out(">> {}", len(movelines))
+            pendingMovelines = []
+            for moveline in tqdm(movelines):
+                key = movementkey(moveline)
+                orderline = self.takeFirst(orderlineDict,key)
                 if not orderline:
-                    repesca.append(moveline)
+                    pendingMovelines.append(moveline)
                     continue
-
-                # orderline-movementline match found
+                # Found
                 bindMoveLineAndPaymentLine(moveline, orderline)
 
-            if repesca: step("  Repescant els que no coincideix la quantitat")
+            pendingOrderlines = sum(orderlineDict.values(), [])
+            return pendingOrderlines, pendingMovelines
 
-            #step("  Create a partner -> unpaired movelines map")
-            movelinesByPartnerId = {}
-            for moveline in repesca:
-                if moveline.id in paymentMoveLines: continue
-                appendToKey(movelinesByPartnerId, moveline.partner_id, moveline)
-
-            #step("  Lookup for each unpaired order")
-            for key, options in orderLinesDict.items():
-                for orderline in options:
-                    if orderline.id in matchedOrderLines:
-                        options.remove(orderline)
-                        continue
-
-                    moveline = getAndRemoveFirst(movelinesByPartnerId, orderline.partner_id)
-                    if not moveline:
-                        error(
-                            "Linia de Remesa sense apunt: "
-                            "{name} id {id} {order_sent_date} {amount}€ {partner_name}",
-                            **orderline)
-                        continue
-                    bindMoveLineAndPaymentLine(moveline, orderline)
-                    if orderline.name not in self.cases.misscorrectedPayments:
-                        error(
-                            "Amount missmatch {orderline.name} "
-                            "order {orderline.amount}€ move {moveline.credit}",
-                                partner_id = moveline.partner_id,
-                                orderline=orderline,
-                                moveline=moveline,
-                            )
-                        displayPartnersMovements(self.cr, orderline.partner_id)
-                        continue
-                    corrected = self.cases.misscorrectedPayments[orderline.name]
-                    if corrected != moveline.credit:
-                        error(
-                            "Badly corrected amount missmatch {orderline.name}  "
-                            "order {orderline.amount}€ move {moveline.credit} "
-                            "corrected {corrected}€",
-                                partner_id = moveline.partner_id,
-                                orderline=orderline,
-                                moveline=moveline,
-                                corrected=corrected,
-                            )
-                        displayPartnersMovements(self.cr, orderline.partner_id)
-                        continue
+        def matchExplicit(orderlines, movelines):
+            explicitOrderlineToMoveLine = {
+                ol : ml
+                for ml, ol in self.cases.movelineToOrderline.items()
+                }
+            movelinesById = {
+                ml.id : ml
+                for ml in movelines
+            }
+            pendingOrderlines = []
+            for orderline in orderlines:
+                moveline_id = explicitOrderlineToMoveLine.pop(orderline.id,None)
+                if not moveline_id:
+                    pendingOrderlines.append(orderline)
+                    continue
+                moveline = movelinesById.pop(moveline_id, None)
+                if not moveline: # el moveline no tenia la "/"
+                    moveline = self.movelines[moveline_id]
                     warn(
-                        "Already corrected amount missmatch {orderline.name} "
-                        "order {orderline.amount}€ move {moveline.credit}"
-                        .format(
-                            orderline=orderline,
-                            moveline=moveline,
-                        ))
+                        "Explicit moveline to orderline: {ol.order_sent_date} {ol.amount} {ol.partner_name}",
+                        ml=moveline,
+                        ol=orderline,
+                    )
 
-            for partner_id, movelines in movelinesByPartnerId.items():
-                for moveline in movelines:
-                    error(
-                        "Apunt sense linea de remesa "
-                        "id {id} {create_date} {credit}€ {partner_name}",
-                        **moveline)
+                bindMoveLineAndPaymentLine(moveline, orderline)
+            for orderline_id in explicitOrderlineToMoveLine:
+                error("Not a pending order {}", orderline_id)
+            # TODO: Comprovar que les dades coincideixin
+
+            return pendingOrderlines, movelinesById.values()
+
+        out("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
+        pendingOrderlines, pendingMovelines = matchBy(pendingOrderlines, pendingMovelines,
+            lambda ol: (
+                ol.order_sent_date,
+                ol.order_nlines,
+                -ol.amount,
+                ol.partner_id,
+            ),
+            lambda ml: (
+                ml.create_date,
+                ml.move_nlines,
+                ml.credit,
+                ml.partner_id,
+            ),
+        )
+        out("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
+        pendingOrderlines, pendingMovelines = matchBy(pendingOrderlines, pendingMovelines,
+            lambda ol: (
+                ol.order_sent_date,
+                -ol.amount,
+                ol.partner_id,
+            ),
+            lambda ml: (
+                ml.create_date,
+                ml.credit,
+                ml.partner_id,
+            ),
+        )
+        out("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
+        pendingOrderlines, pendingMovelines = matchExplicit(pendingOrderlines, pendingMovelines)
+
+        out("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
+        for orderline in pendingOrderlines:
+            error(
+                "Linia de Remesa sense apunt: "
+                "{name} id {id} {order_sent_date} {amount}€ {partner_name}",
+                **orderline)
+        for moveline in pendingMovelines:
+            error(
+                "Apunt sense linea de remesa: "
+                "id {id} {create_date} {credit}€ {partner_name}",
+                **moveline)
+
+        # TODO: guardar els pending
+
 
     def matchExistingInvestments(self):
+        "Not used, keep for log parsing reference"
         for investment in self.investments.values():
             out(investment.name)
             log = investment.log
@@ -377,10 +505,10 @@ class Migrator:
                     continue
                 move_id=int(move.group(1))
                 move_id=self.peerMoveLine(move_id)
-                if move_id not in self.movements:
+                if move_id not in self.movelines:
                     #warn("Action {} refers movement {} not found".format(action, move_id))
                     continue
-                movement = self.movements[move_id]
+                movement = self.movelines[move_id]
                 if 'solution' in movement:
                     warn("Invesment {} referring an solved movement {}",
                         invesment.name, movement.id)
@@ -390,9 +518,9 @@ class Migrator:
                 )
 
     def solveExistingInvestments(self):
-        step("Solving movements referring existing Invesments")
+        step("Solving movelines referring existing Invesments")
         unsolvedInvestments = set(self.investments.keys())
-        for moveline_id, moveline in self.movements.items():
+        for moveline_id, moveline in self.movelines.items():
             if not (
                 moveline.name.startswith("Inversió APO00") or
                 moveline.name.startswith("Inversión APO00")
@@ -417,49 +545,53 @@ class Migrator:
                 )
             unsolvedInvestments.remove(investment_name)
 
+    def processExplicitAction(self, investment_name, moveline_id, action):
+        """Binds an action explicitly enumerated in the yaml file"""
+
+        if action.type in ['corrected',]:
+            # TODO: annotate the action
+            return
+            
+        moveline = self.movelines[moveline_id]
+
+        if action.type == 'paid':
+            if 'solution' not in moveline:
+                error("Payment movement without solution {ml.date_created} {ml.credit} {ml.partner_name}",
+                    ml=self.movelines[moveline_id])
+                return
+
+            if moveline.solution.name != investment_name:
+                warn("Investment name missmatch overwritting {} with yaml {} for ml {}",
+                    moveline.solution.name, investment_name, moveline_id)
+                return
+            # proper action
+            return
+
+        if 'solution' in moveline:
+            warn("Moveline {} already has solution {} and receive {} from investment {}",
+                moveline_id, moveline.solution, action, investment_name)
+
+        moveline.solution = ns(
+            action,
+            name = investment_name,
+        )
+
     def resolveYamlExplicitCases(self):
         for investment_name, actions in self.cases.legacyCases.items():
-            for moveline_id, action in sorted(actions.items()):
+            for moveline_id, action in actions.items():
                 try:
                     action.type
                 except AttributeError:
                     action = ns(
                         type = action,
                     )
-                if not moveline_id: continue # special action
-                moveline = self.movements[moveline_id]
-                if action.type == 'paid':
-                    if 'solution' not in moveline:
-                        if moveline_id not in self.cases.movelineToOrderline:
-                            warn("Unexpected unsolved paid moveline {}", moveline_id)
-                            continue
+                self.processExplicitAction(investment_name, moveline_id, action)
 
-                        moveline.solution = ns(
-                            action,
-                            order_id = self.cases.movelineToOrderline[moveline_id],
-                            ip = ip,
-                            name = investment_name,
-                        )
-                    elif moveline.solution.name != investment_name:
-                        warn("Investment name missmatch overwritting {} with yaml {} for ml {}",
-                            moveline.solution.name, investment_name, moveline_id)
-                else:
-                    if 'solution' in moveline:
-                        warn("Moveline {} already has solution {} and receive {} from investment {}",
-                            moveline_id, moveline.solution, action, investment_name)
-
-                    moveline.solution = ns(
-                        action,
-                        name = investment_name,
-                    )
 
     def doSteps(self):
         self.cleanUp()
-        self.investments = {
-            investment.name: investment
-            for investment in self.getAllInvestments()
-        }
-        self.listMovementsByPartner()
+        self.loadInvestments()
+        self.loadMovements()
         self.matchPaymentOrders()
         #self.matchExistingInvestments()
         self.solveExistingInvestments()

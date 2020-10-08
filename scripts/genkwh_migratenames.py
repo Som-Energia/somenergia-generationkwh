@@ -14,8 +14,8 @@ from generationkwh.investmentstate import InvestmentState, AportacionsState, Gen
 
 errorCases = ns()
 
-def error(message, **params):
-    msg = message.format(**params)
+def error(message, *args, **params):
+    msg = message.format(*args, **params)
     consoleError(msg)
     errorCases.setdefault(ns(params).partner_id, []).append(msg)
 

@@ -2,19 +2,46 @@
 
 ## APO's migration
 
+- Caldria apuntar-se els pendents al self
+- Noves aportacions
+	- Iterar per les aportacions existents (noves)
+	- Matxar amb les ordres sense moveline
+	- Donarles com a resoltes
+- Matxar moviments que no siguin de pagament
+	- Per cada inversio en legacyCase
+		- Per cada acció
+			- Si es un tipus paid comprovar:
+				- Que el moviment ja esta solved
+				- Que la solució és tambe 'paid'
+				- Que el nombre de la inversio coincideix
+				- Farcir la solucio amb els camps que falten
+			- Si es un tipus sense moveline:
+				- ???
+			- La resta de tipus:
+				- Comprovar que el moviment NO tingui solució
+				- Afegir la solució
+			- Anotar les accions en sequencia per a les inversions
+				- Les especials ara mateix les estem ignorant
+- Reconstruir les inversions
+	- 
+
+
+
 + Recuperar l'adjunt de les remeses -> No es un adjunt mongo, es un report, n'hi ha dos
 + Query de totes les linies de remesa name start with INV
 + Descartar associades amb move lines:
 + Si es caixa laboral, agafar el soci del numero de compte en comptes del partner id
-- Resoldre els casos directes de caixa laboral
-- En el cas dels pagaments per transferencia que ja trobem el paymentline id caldria extreure tota la info
++ Resoldre els casos directes de caixa laboral
++ En el cas dels pagaments per transferencia que ja trobem el paymentline id caldria extreure tota la info
+
 - Crear emisions de tipus aportacions per cada interval d'emisió.
-- Recuperar l'iban de les remeses
-- Recuperar l'emissio
+- Recuperar l'emisio
 	- Determinar les dates límit de cada emision
+- Recuperar l'iban de les remeses
 - Data effectiva la que apareix al client erp assentaments "Data" i no pas "Data creacio"
 	- Order date: data de creacio del paymentline
 	- Payment date: data de `date_done` de la remesa
+
 - Dupped moveline revisar perque surten INV02458 INV02308 INV01176
 - Revisar cas Pancorbo
 - Pendent d'en Carles
