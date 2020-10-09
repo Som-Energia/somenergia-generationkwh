@@ -320,6 +320,37 @@ class Migrator:
             return communication.split(" IP ")[1]
         return '0.0.0.0'
 
+    def bindMoveLineAndPaymentLine(self, moveline, orderline):
+        """Function to be called when a payment has been matched"""
+
+        ip = self.orderLineIP(orderline)
+        moveline.partner_name = moveline.partner_name and u(moveline.partner_name)
+        False and success(
+            u"Match ml-po ml-{moveline.id} {orderline.name} {orderline.create_date} {amount:=8}€ {moveline.partner_name} {ip}"
+            .format(
+                moveline=moveline,
+                orderline=orderline,
+                amount = moveline.credit-moveline.debit,
+                ip = ip,
+            ))
+        self.paymentMoveLines[moveline.id] = ns(
+            movelineid = moveline.id,
+            ref=orderline.name,
+            order_date=orderline.create_date,
+            partner_id = orderline.partner_id,
+            partner_name = orderline.partner_name,
+            amount = moveline.credit-moveline.debit,
+            ip = ip,
+            )
+        self.movelines[moveline.id].update(
+            solution = ns(
+                type = 'paid',
+                name = orderline.name,
+                orderline_id = orderline.id,
+                ip = ip,
+            )
+        )
+
     def matchPaymentOrders(self):
         """
         As old investment information is bound to the payment order
@@ -332,36 +363,6 @@ class Migrator:
         lines fallback matching just by partner.
         """
 
-        def bindMoveLineAndPaymentLine(moveline, orderline):
-            """Function to be called when a payment has been matched"""
-
-            ip = self.orderLineIP(orderline)
-            moveline.partner_name = moveline.partner_name and u(moveline.partner_name)
-            False and success(
-                u"Match ml-po ml-{moveline.id} {orderline.name} {orderline.create_date} {amount:=8}€ {moveline.partner_name} {ip}"
-                .format(
-                    moveline=moveline,
-                    orderline=orderline,
-                    amount = moveline.credit-moveline.debit,
-                    ip = ip,
-                ))
-            self.paymentMoveLines[moveline.id] = ns(
-                movelineid = moveline.id,
-                ref=orderline.name,
-                order_date=orderline.create_date,
-                partner_id = orderline.partner_id,
-                partner_name = orderline.partner_name,
-                amount = moveline.credit-moveline.debit,
-                ip = ip,
-                )
-            self.movelines[moveline.id].update(
-                solution = ns(
-                    type = 'paid',
-                    name = orderline.name,
-                    orderline_id = orderline.id,
-                    ip = ip,
-                )
-            )
         def update(d, **kwds):
             d.update(**kwds)
             return d
@@ -415,7 +416,7 @@ class Migrator:
                     pendingMovelines.append(moveline)
                     continue
                 # Found
-                bindMoveLineAndPaymentLine(moveline, orderline)
+                self.bindMoveLineAndPaymentLine(moveline, orderline)
 
             pendingOrderlines = sum(orderlineDict.values(), [])
             return pendingOrderlines, pendingMovelines
@@ -444,7 +445,7 @@ class Migrator:
                         ol=orderline,
                     )
 
-                bindMoveLineAndPaymentLine(moveline, orderline)
+                self.bindMoveLineAndPaymentLine(moveline, orderline)
             for orderline_id in explicitOrderlineToMoveLine:
                 error("Not a pending order {}", orderline_id)
             # TODO: Comprovar que les dades coincideixin
