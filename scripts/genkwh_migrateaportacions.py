@@ -131,9 +131,10 @@ class Migrator:
 
 
     def getAllMovementsLines(self):
+        cachingEnabled = False
         parentAccount = self.cases.get('parentAccount', '1635')
         cachefile = Path('apos_movementlines-{}.yaml'.format(parentAccount))
-        if False and cachefile.exists():
+        if cachingEnabled and cachefile.exists():
             out("loading from cache {}".format(cachefile))
             return ns.load(str(cachefile)).data
         self.cr.execute("""\
@@ -204,7 +205,8 @@ class Migrator:
             parentAccount = parentAccount,
         ))
         result = dbutils.nsList(self.cr)
-        ns(data=result).dump(str(cachefile))
+        if cachingEnabled:
+            ns(data=result).dump(str(cachefile))
         return result
 
     def peerMoveLine(self, moveline_id):
