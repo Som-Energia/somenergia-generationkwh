@@ -497,38 +497,6 @@ class Migrator:
         # TODO: guardar els pending
 
 
-    def matchExistingInvestments(self):
-        "Not used, keep for log parsing reference"
-        for investment in self.investments.values():
-            out(investment.name)
-            log = investment.log
-            loglines = log.split('\n')
-            for logline in loglines:
-                out(logline)
-                if not logline: continue
-                action = re.search(r'\] ([A-Z]+):', logline)
-                if not action:
-                    warn("Unrecognized action in: ".format(logline))
-                    continue
-                action = action.group(1)
-                move = re.search(r'\[([0-9]+)\]', logline)
-                if not move:
-                    #warn("Action {} without moveline".format(action))
-                    continue
-                move_id=int(move.group(1))
-                move_id=self.peerMoveLine(move_id)
-                if move_id not in self.movelines:
-                    #warn("Action {} refers movement {} not found".format(action, move_id))
-                    continue
-                movement = self.movelines[move_id]
-                if 'solution' in movement:
-                    warn("Invesment {} referring an solved movement {}",
-                        invesment.name, movement.id)
-                success(action)
-                movement.solution=ns(
-                    type=action.lower(),
-                )
-
     def solveExistingInvestments(self):
         step("Solving movelines referring existing Invesments")
         unsolvedInvestments = set(self.investments.keys())
@@ -615,7 +583,6 @@ class Migrator:
         self.loadInvestments()
         self.loadMovements()
         self.matchPaymentOrders()
-        #self.matchExistingInvestments()
         self.solveExistingInvestments()
         self.resolveYamlExplicitCases()
         self.dumpMovementsByPartner()
