@@ -483,35 +483,55 @@ class Migrator:
         pendingOrderlines, pendingMovelines = matchExplicit(pendingOrderlines, pendingMovelines)
 
         out("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
-        for orderline in pendingOrderlines:
+        self.pendingOrderlines = pendingOrderlines
+        self.pendingMovelines = pendingMovelines
+
+        self.solveExistingInvestments()
+        out("Pending: orderlines: {} movelines: {}", len(self.pendingOrderlines), len(self.pendingMovelines))
+
+        for orderline in self.pendingOrderlines:
             error(
                 "Linia de Remesa sense apunt: "
-                "{name} id {id} {order_sent_date} {amount}€ {partner_name}",
+                "{name} id {id} {order_sent_date} {amount}€ {partner_name} \"{communication}\"",
                 **orderline)
-        for moveline in pendingMovelines:
+        for moveline in self.pendingMovelines:
             error(
                 "Apunt sense linea de remesa: "
                 "id {id} {create_date} {credit}€ {partner_name}",
                 **moveline)
 
-        # TODO: guardar els pending
-
-
     def solveExistingInvestments(self):
         step("Solving movelines referring existing Invesments")
-        unsolvedInvestments = set(self.investments.keys())
+        pendingInvestments = set(self.investments.keys())
+
+        pendingOrderlines = {
+            orderline.communication[:9]: orderline
+            for orderline in self.pendingOrderlines
+        }
+
+        pendingMovelines = {
+            moveline.id: moveline
+            for moveline in self.pendingMovelines
+        }
+
         for moveline_id, moveline in self.movelines.items():
             if not (
                 moveline.name.startswith("Inversió APO00") or
                 moveline.name.startswith("Inversión APO00")
             ): continue
             investment_name = moveline.name.split()[1]
-            if investment_name not in unsolvedInvestments:
-                warn("Movement {} refers not pending {}",
+            orderline = pendingOrderlines.pop(investment_name, None)
+            if not orderline:
+                warn("Inversio sense línia de remesa: {}", investment_name)
+            pendingMovelines.pop(moveline_id,None)
+
+            if investment_name not in pendingInvestments:
+                warn("APO movement {} refers to missing investment {}",
                     moveline_id,
                     investment_name,
                 )
-                continue
+            else:
+                pendingInvestments.remove(investment_name)
 
             if 'solution' in moveline:
                 warn("Movement {} refers already solved",
@@ -523,11 +543,13 @@ class Migrator:
                 type='existing',
                 name=investment_name,
                 )
-            unsolvedInvestments.remove(investment_name)
 
-        for investment in unsolvedInvestments:
-            error("Unsolved investment {name} {partner_name}",
+        for investment in pendingInvestments:
+            error("Investment with no moveline: {name} {nshares}",
                 **self.investments[investment])
+
+        self.pendingOrderlines = pendingOrderlines.values()
+        self.pendingMovelines = pendingMovelines.values()
 
     def processExplicitAction(self, investment_name, moveline_id, action):
         """Binds an action explicitly enumerated in the yaml file"""
@@ -538,7 +560,7 @@ class Migrator:
             
         moveline = self.movelines[moveline_id]
 
-        if action.type == 'paid':
+        if action.type in ['paid', 'existing']:
             if 'solution' not in moveline:
                 error("Payment movement without solution {ml.date_created} {ml.credit} {ml.partner_name}",
                     ml=self.movelines[moveline_id])
@@ -587,7 +609,6 @@ class Migrator:
         self.loadInvestments()
         self.loadMovements()
         self.matchPaymentOrders()
-        self.solveExistingInvestments()
         self.resolveYamlExplicitCases()
         self.dumpMovementsByPartner()
         self.dumpUnsolved()
