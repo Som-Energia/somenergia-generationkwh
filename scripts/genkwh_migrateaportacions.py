@@ -260,7 +260,13 @@ class Migrator:
                 for movement in movelines:
                     output.write("\t{account_code}\t{date_created}\t{credit: 10f}\t{debit: 10f}\t{id: 10d}\t{name}\n".format(**movement))
                     if 'solution' in movement:
-                        output.write("\t\t{name}\t{type}\t{solution}\n".format(solution=movement.solution, **movement.solution))
+                        names = (
+                            movement.solution.names
+                            if 'names' in movement.solution
+                            else [movement.solution.name]
+                        )
+                        for name in names:
+                            output.write("\t\t{investment}\t{type}\t{solution}\n".format(solution=movement.solution, investment=name, **movement.solution))
 
     def dumpUnsolved(self):
         with Path('unsolved.yaml').open('w', encoding='utf8') as output:
@@ -273,6 +279,7 @@ class Migrator:
                     movement.solution.name
                     for movement in movelines
                     if 'solution' in movement
+                    and 'name' in movement.solution
                 )))
                 for investment in investments:
                     output.write(
@@ -280,7 +287,10 @@ class Migrator:
                             .format(investment, movelines[0]))
                     for movement in movelines:
                         if 'solution' not in movement: continue
-                        if movement.solution.name != investment: continue
+                        if 'name' in movement.solution:
+                            if movement.solution.name != investment: continue
+                        else: # names
+                            if investment not in movement.solution.names: continue
                         output.write("    {id}: {solution.type} # {date_created} ({partner_name}) {amount} {name}\n".format(**movement))
                 output.write(
                     "#  unsolved: # {partner_ref} {partner_name}\n"
@@ -565,6 +575,16 @@ class Migrator:
                     moveline.solution.name, investment_name, moveline_id)
                 return
             # proper action
+            return
+
+        if action.type == 'liquidated':
+            if 'solution' not in moveline:
+                moveline.solution = ns(
+                    action,
+                    names = [investment_name],
+                )
+            else:
+                moveline.solution.names.append(investment_name)
             return
 
         if 'solution' in moveline:
