@@ -13,8 +13,11 @@ from genkwh_migratenames import (
     getOrderLines,
     getMoveLines,
 )
-from tqdm import tqdm
+from io import open
+from tqdm import tqdm as old_tqdm
 #def tqdm(x): return x
+def tqdm(x):
+    return old_tqdm(x, file=open('/dev/tty', 'w', encoding='utf8'), ascii=False)
 
 from pathlib2 import Path
 import re
@@ -452,7 +455,8 @@ class Migrator:
 
             return pendingOrderlines, movelinesById.values()
 
-        out("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
+        warn("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
+        step("  Matching by date, nlines, amount, partner")
         pendingOrderlines, pendingMovelines = matchBy(pendingOrderlines, pendingMovelines,
             lambda ol: (
                 ol.order_sent_date,
@@ -467,7 +471,8 @@ class Migrator:
                 ml.partner_id,
             ),
         )
-        out("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
+        warn("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
+        step("  Matching by date, amount, partner")
         pendingOrderlines, pendingMovelines = matchBy(pendingOrderlines, pendingMovelines,
             lambda ol: (
                 ol.order_sent_date,
@@ -480,15 +485,17 @@ class Migrator:
                 ml.partner_id,
             ),
         )
-        out("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
+        warn("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
+        step("  Matching explicit pairs from yaml")
         pendingOrderlines, pendingMovelines = matchExplicit(pendingOrderlines, pendingMovelines)
 
-        out("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
+        warn("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
         self.pendingOrderlines = pendingOrderlines
         self.pendingMovelines = pendingMovelines
 
+        step("  Matching non-legacy investments")
         self.solveExistingInvestments()
-        out("Pending: orderlines: {} movelines: {}", len(self.pendingOrderlines), len(self.pendingMovelines))
+        warn("Pending: orderlines: {} movelines: {}", len(self.pendingOrderlines), len(self.pendingMovelines))
 
         for orderline in self.pendingOrderlines:
             error(
