@@ -525,6 +525,10 @@ class Migrator:
                 )
             unsolvedInvestments.remove(investment_name)
 
+        for investment in unsolvedInvestments:
+            error("Unsolved investment {name} {partner_name}",
+                **self.investments[investment])
+
     def processExplicitAction(self, investment_name, moveline_id, action):
         """Binds an action explicitly enumerated in the yaml file"""
 
