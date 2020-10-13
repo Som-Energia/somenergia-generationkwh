@@ -1,0 +1,13 @@
+datapath: "b2bdata/migrateapos" # Point it to the directory containing your reference data
+testcases:
+  migrateapos:
+    command: |
+      ./scripts/genkwh_migrateaportacions.py 2>&1 | tee output.log
+    outputs:
+    - apos_movementlines.csv
+    - output.log
+    - unsolved.yaml
+    - orders_byDateLine.yaml
+    - moves_byDateLine.yaml
+
+# vim: et ts=2 sw=2
