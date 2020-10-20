@@ -389,7 +389,7 @@ class Migrator:
             for move in tqdm(paymentMoves)
             for line in getMoveLines(self.cr, move.move_id)
         ]
-            
+
         step("Loading payment related orders")
         paymentOrders = self.getInvestmentPaymentOrders()
 
@@ -601,15 +601,22 @@ class Migrator:
             name = investment_name,
         )
 
+    def structurizeAction(self, action):
+        """Converts actions just being a string with the type name
+        into a full sctructured action.
+        """
+        try:
+            action.type
+            return action
+        except AttributeError:
+            return ns(
+                type = action,
+            )
+
     def resolveYamlExplicitCases(self):
         for investment_name, actions in self.cases.legacyCases.items():
             for moveline_id, action in actions.items():
-                try:
-                    action.type
-                except AttributeError:
-                    action = ns(
-                        type = action,
-                    )
+                action = self.structurizeAction(action)
                 self.processExplicitAction(investment_name, moveline_id, action)
 
 
