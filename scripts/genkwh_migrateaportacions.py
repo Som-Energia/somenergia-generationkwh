@@ -13,6 +13,7 @@ from genkwh_migratenames import (
     getOrderLines,
     getMoveLines,
 )
+from generationkwh.investmentstate import InvestmentState, AportacionsState
 from io import open
 from tqdm import tqdm as old_tqdm
 #def tqdm(x): return x
@@ -146,6 +147,7 @@ class Migrator:
                 ml.move_id,
                 ml.name as name,
                 ml.date_created as date_created,
+                ml.create_date as create_date,
                 ml.credit,
                 ml.debit,
                 --NULL no partner
@@ -350,6 +352,10 @@ class Migrator:
                 type = 'paid',
                 name = orderline.name,
                 orderline_id = orderline.id,
+                iban = orderline.iban,
+                order_date=orderline.create_date,
+                partner_name = orderline.partner_name,
+                amount = moveline.credit-moveline.debit,
                 ip = ip,
             )
         )
@@ -550,6 +556,12 @@ class Migrator:
             moveline.solution=ns(
                 type='existing',
                 name=investment_name,
+                amount = moveline.credit-moveline.debit,
+                orderline_id = orderline.id,
+                iban = orderline.iban,
+                order_date=orderline.create_date,
+                partner_name = orderline.partner_name,
+                ip='6.6.6.6',
                 )
 
         for investment in pendingInvestments:
@@ -559,14 +571,20 @@ class Migrator:
         self.pendingOrderlines = pendingOrderlines.values()
         self.pendingMovelines = pendingMovelines.values()
 
-    def processExplicitAction(self, investment_name, moveline_id, action):
+    def processExplicitAction(self, investment_name, moveline_id, action, attributes):
         """Binds an action explicitly enumerated in the yaml file"""
 
         if action.type in ['corrected',]:
-            # TODO: annotate the action
+            logCorrected(self.cr, attributes, investment_name, action)
             return
             
         moveline = self.movelines[moveline_id]
+
+        step("::: Processing {} {} {}", moveline.id, moveline.partner_name, action.type)
+        if investment_name == 'unsolved':
+            warn("::: Unsolved {} {} {}", moveline.id, moveline.partner_name, action.type)
+            return
+
 
         if action.type in ['paid', 'existing']:
             if 'solution' not in moveline:
@@ -579,7 +597,16 @@ class Migrator:
                     moveline.solution.name, investment_name, moveline_id)
                 return
 
-            # proper action
+            #if action.type == "existing": return # TODO
+
+            self.logOrdered(attributes,
+                investment_name,
+                moveline.solution.iban,
+                moveline.solution.amount,
+                moveline.solution.order_date,
+                moveline.solution.ip,
+                )
+            self.logMovement(attributes, investment_name, moveline_id, ns(action, type='paid'))
             return
 
         if action.type == 'liquidated':
@@ -600,6 +627,7 @@ class Migrator:
             action,
             name = investment_name,
         )
+        self.logMovement(attributes, investment_name, moveline_id, action)
 
     def structurizeAction(self, action):
         """Converts actions just being a string with the type name
@@ -614,11 +642,13 @@ class Migrator:
             )
 
     def resolveYamlExplicitCases(self):
+        investments = ns()
         for investment_name, actions in self.cases.legacyCases.items():
+            investments[investment_name] = attributes = ns()
             for moveline_id, action in actions.items():
                 action = self.structurizeAction(action)
-                self.processExplicitAction(investment_name, moveline_id, action)
-
+                self.processExplicitAction(investment_name, moveline_id, action, attributes)
+        investments.dump('result.yaml')
 
     def doSteps(self):
         self.cleanUp()
@@ -632,6 +662,171 @@ class Migrator:
         #deleteNullNamedInvestments(cr)
         #showUnusedMovements(cr)
         #displayAllInvestments(cr)
+
+    def logOrdered(self, attributes, investment_name, iban, amount, order_date, ip):
+        inv = InvestmentState("Webforms", order_date,
+            **attributes
+            )
+        inv.order(
+            name=investment_name,
+            date=order_date.date(),
+            ip=ip,
+            amount=amount,
+            iban=iban,
+            )
+        inv.invoice()
+        attributes.update(inv.changed())
+
+    def logCorrected(self, attributes, investment, what):
+        inv = InvestmentState(
+            "Nobody",
+            what.when,
+            **attributes
+            )
+        inv.correct(
+            from_amount = what['from'],
+            to_amount = what.to,
+            )
+        attributes.update(inv.changed())
+
+    def logPaid(self, attributes, move_line_id):
+        ml = self.movelines.get(move_line_id)
+        inv = AportacionsState(ml.username, ml.create_date,
+            **attributes
+            )
+        inv.pay(
+            date=ml.create_date.date(),
+            amount=ml.amount,
+            move_line_id=move_line_id,
+            )
+        attributes.update(inv.changed())
+
+    def logUnpay(self, attributes, move_line_id):
+        ml = self.movelines.get(move_line_id)
+        inv = InvestmentState(ml.username, ml.create_date,
+            **attributes
+            )
+        inv.unpay(
+            amount=-ml.amount,
+            move_line_id=move_line_id,
+            )
+        attributes.update(inv.changed())
+
+    def logResign(self, attributes):
+        # TODO: Never should be today but in order to b2b properly
+        nowOrNever = datetime.datetime.now() if '--doit' in sys.argv else 'Never'
+        inv = InvestmentState('Migration', nowOrNever,
+            **attributes
+            )
+        inv.cancel()
+        attributes.update(inv.changed())
+
+    def logPartial(self, attributes, investment, move_line_id):
+        ml = self.movelines.get(move_line_id)
+        inv = InvestmentState(ml.username, ml.create_date,
+            **attributes
+            )
+        inv.partial(
+            amount=-ml.amount,
+            move_line_id=move_line_id,
+            )
+        attributes.update(inv.changed())
+
+    sold = ns() # Temporary store for sold investments
+
+    def logSold(self, attributes, investment, move_line_id, what):
+        ml = self.movelines.get(move_line_id)
+        mlto = self.movelines.get(what.to)
+        transaction_date = what.get('date', ml.create_date.date())
+        newname = cases.unnamedCases[mlto.id]
+        oldinv = InvestmentState(ml.username, ml.create_date,
+            **attributes
+            )
+        newinv = InvestmentState(ml.username, ml.create_date)
+        # Important: keep before emitTransfer so that
+        # receiveTransfer can access original values
+        newinv.receiveTransfer(
+            name = newname,
+            date = transaction_date,
+            move_line_id = what.to,
+            amount = mlto.amount,
+            origin = oldinv,
+            origin_partner_name = ml.partner_name,
+            )
+        sold[what.to] = newinv.changed()
+        oldinv.emitTransfer(
+            date=transaction_date,
+            to_partner_name=mlto.partner_name.decode('utf-8'),
+            to_name=newname,
+            move_line_id=move_line_id,
+            amount=-ml.amount,
+            )
+        attributes.update(oldinv.changed())
+
+    def logBought(self, attributes, investment):
+        attributes.update(sold.pop(investment.move_line_id))
+
+    def logPact(self, attributes, investment, what):
+        inv = InvestmentState(
+            what.user.encode('utf-8'),
+            what.create_date,
+            **attributes
+            )
+        inv.pact(
+            date=what.create_date,
+            comment = what.note,
+            **what.changes
+            )
+        attributes.update(inv.changed())
+
+    def logDivestment(self, attributes, investment, move_line_id):
+        ml = self.movelines.get(move_line_id)
+        inv = InvestmentState(ml.username, ml.create_date,
+            **attributes
+            )
+        inv.divest(
+            date=ml.create_date.date(),
+            amount = -ml.amount,
+            move_line_id = move_line_id,
+            )
+        attributes.update(inv.changed())
+
+    def logMigrated(self, attributes):
+        nowOrNever = datetime.datetime.now() if '--doit' in sys.argv else 'Never'
+        inv = InvestmentState('Migration', nowOrNever,
+            **attributes
+            )
+        inv.migrate(
+            oldVersion = "1.6",
+            newVersion = "2.0",
+            )
+        attributes.update(inv.changed())
+
+    def logMovement(self, attributes, investment, movelineid, what):
+        try:
+            type = what.type
+        except:
+            type = what
+
+        if type == 'corrected':
+            return self.logCorrected(attributes, investment, what)
+        if type == 'sold':
+            return self.logSold(attributes, investment, movelineid, what)
+        if type == 'pact':
+            return self.logPact(attributes, investment, what)
+        if type == 'paid':
+            return self.logPaid(attributes, movelineid)
+        if type == 'unpaid':
+            return self.logUnpay(attributes, movelineid)
+        if type == 'repaid':
+            return self.logPaid(attributes, movelineid)
+        if type == 'partial':
+            return self.logPartial(attributes, investment, movelineid)
+        if type == 'divested':
+            return self.logDivestment(attributes, investment, movelineid)
+        raise Exception(
+            "T'has colat posant '{}'"
+            .format(type))
 
     @staticmethod
     def main(args):

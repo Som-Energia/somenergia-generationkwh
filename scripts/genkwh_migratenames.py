@@ -445,6 +445,7 @@ def getOrderLines(cr, order_id):
             pl.*,
             po.date_done as order_sent_date,
             p.name as partner_name,
+            bank.iban as iban,
             false
         from
             payment_line as pl
@@ -456,6 +457,10 @@ def getOrderLines(cr, order_id):
             res_partner as p
         on
            p.id = pl.partner_id
+        left join
+            res_partner_bank as bank
+        on
+            bank.id = p.bank_inversions
         where
             pl.order_id = %(order_id)s
         order by pl.id
@@ -468,6 +473,7 @@ def getMoveLines(cr, move_id):
     cr.execute("""\
         select
             ml.*,
+            u.name as user,
             p.name as partner_name
         from
             account_move_line as ml
@@ -483,6 +489,10 @@ def getMoveLines(cr, move_id):
             res_partner as p
         on
            p.id = ml.partner_id
+        left join
+            res_users as u
+        on
+            u.id = ml.create_uid
         where
             pac.code = %(parentAccount)s and
             ml.move_id = %(move_id)s

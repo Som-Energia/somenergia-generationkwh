@@ -9,5 +9,6 @@ testcases:
     - unsolved.yaml
     - orders_byDateLine.yaml
     - moves_byDateLine.yaml
+    - result.yaml
 
 # vim: et ts=2 sw=2
