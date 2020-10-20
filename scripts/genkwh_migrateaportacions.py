@@ -570,14 +570,15 @@ class Migrator:
 
         if action.type in ['paid', 'existing']:
             if 'solution' not in moveline:
-                error("Payment movement without solution {ml.date_created} {ml.credit} {ml.partner_name}",
+                error("Unexpected: Payment movement without solution {ml.id} {ml.date_created} {ml.credit} {ml.partner_name}",
                     ml=self.movelines[moveline_id])
                 return
 
             if moveline.solution.name != investment_name:
-                warn("Investment name missmatch overwritting {} with yaml {} for ml {}",
+                error("Investment name missmatch overwritting {} with yaml {} for ml {}",
                     moveline.solution.name, investment_name, moveline_id)
                 return
+
             # proper action
             return
 
@@ -592,7 +593,7 @@ class Migrator:
             return
 
         if 'solution' in moveline:
-            warn("Moveline {} already has solution {} and receive {} from investment {}",
+            error("Moveline {} already has solution {} and receive {} from investment {}",
                 moveline_id, moveline.solution, action, investment_name)
 
         moveline.solution = ns(
