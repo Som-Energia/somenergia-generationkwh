@@ -453,12 +453,29 @@ class Migrator:
                         ml=moveline,
                         ol=orderline,
                     )
+                if (
+                    orderline.order_sent_date,
+                    -orderline.amount,
+                    orderline.partner_id,
+                ) != (
+                    moveline.date_created,
+                    moveline.credit,
+                    moveline.partner_id,
+                ):
+                    warn("Explicit moveline to orderline with missmatching info:\n"
+                        "\torderline moveline\n"
+                        "\t{ol.order_sent_date} {ml.date_created}\n"
+                        "\t{orderamount} {ml.credit}\n"
+                        "\t{ol.partner_id} {ml.partner_id}",
+                        ol=orderline,
+                        ml=moveline,
+                        orderamount=-orderline.amount,
+                    )
 
                 self.bindMoveLineAndPaymentLine(moveline, orderline)
             for orderline_id in explicitOrderlineToMoveLine:
                 error("Not a pending order {}", orderline_id)
             # TODO: Comprovar que les dades coincideixin
-
             return pendingOrderlines, movelinesById.values()
 
         warn("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
