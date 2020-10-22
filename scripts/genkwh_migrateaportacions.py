@@ -644,7 +644,7 @@ class Migrator:
 
     def resolveYamlExplicitCases(self):
         investments = ns()
-        for investment_name, actions in sorted(self.cases.legacyCases.items()):
+        for investment_name, actions in tqdm(sorted(self.cases.legacyCases.items())):
             investments[investment_name] = attributes = ns()
             for moveline_id, action in actions.items():
                 action = self.structurizeAction(action)
