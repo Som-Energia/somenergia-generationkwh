@@ -614,8 +614,10 @@ class Migrator:
                     action,
                     names = [investment_name],
                 )
+                self.liquidations[moveline_id] = -moveline.amount
             else:
                 moveline.solution.names.append(investment_name)
+            self.logLiquidated(attributes, investment_name, moveline_id)
             return
 
         if 'solution' in moveline:
@@ -647,6 +649,10 @@ class Migrator:
             for moveline_id, action in actions.items():
                 action = self.structurizeAction(action)
                 self.processExplicitAction(investment_name, moveline_id, action, attributes)
+        for moveline_id, balance in self.liquidations.items():
+            if balance:
+                warn("Liquidacio incomplerta del moviment {} queden {}€ sense compensar",
+                    moveline_id, balance)
         investments.dump('result.yaml')
 
     def doSteps(self):
@@ -732,6 +738,7 @@ class Migrator:
         attributes.update(inv.changed())
 
     sold = ns() # Temporary store for sold investments
+    liquidations = ns()
 
     def logSold(self, attributes, investment, move_line_id, what):
         ml = self.movelines.get(move_line_id)
@@ -775,6 +782,20 @@ class Migrator:
             date=what.create_date,
             comment = what.note,
             **what.changes
+            )
+        attributes.update(inv.changed())
+
+    def logLiquidated(self, attributes, investment, move_line_id):
+        ml = self.movelines.get(move_line_id)
+        inv = InvestmentState(ml.username, ml.create_date,
+            **attributes
+            )
+        amount = attributes.paid_amount
+        self.liquidations[move_line_id] -= amount
+        inv.divest(
+            date=ml.create_date.date(),
+            amount = amount,
+            move_line_id = move_line_id,
             )
         attributes.update(inv.changed())
 
