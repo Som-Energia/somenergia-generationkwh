@@ -575,7 +575,7 @@ class Migrator:
         """Binds an action explicitly enumerated in the yaml file"""
 
         if action.type in ['corrected',]:
-            logCorrected(self.cr, attributes, investment_name, action)
+            self.logCorrected(attributes, investment_name, action)
             return
             
         moveline = self.movelines[moveline_id]
