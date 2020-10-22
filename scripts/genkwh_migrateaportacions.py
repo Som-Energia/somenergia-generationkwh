@@ -473,9 +473,10 @@ class Migrator:
                     )
 
                 self.bindMoveLineAndPaymentLine(moveline, orderline)
+
             for orderline_id in explicitOrderlineToMoveLine:
                 error("Not a pending order {}", orderline_id)
-            # TODO: Comprovar que les dades coincideixin
+
             return pendingOrderlines, movelinesById.values()
 
         warn("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
@@ -612,8 +613,6 @@ class Migrator:
             if moveline.solution.name != investment_name:
                 warn("Investment name missmatch overwritting {} with yaml {} for ml {}",
                     moveline.solution.name, investment_name, moveline_id)
-
-            #if action.type == "existing": return # TODO
 
             self.logOrdered(attributes,
                 investment_name,
