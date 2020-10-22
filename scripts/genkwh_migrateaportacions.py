@@ -580,7 +580,7 @@ class Migrator:
             
         moveline = self.movelines[moveline_id]
 
-        step("::: Processing {} {} {}", moveline.id, moveline.partner_name, action.type)
+        #step("::: Processing {} {} {} {}", investment_name, moveline.id, moveline.partner_name, action.type)
         if investment_name == 'unsolved':
             warn("::: Unsolved {} {} {}", moveline.id, moveline.partner_name, action.type)
             return
@@ -593,9 +593,8 @@ class Migrator:
                 return
 
             if moveline.solution.name != investment_name:
-                error("Investment name missmatch overwritting {} with yaml {} for ml {}",
+                warn("Investment name missmatch overwritting {} with yaml {} for ml {}",
                     moveline.solution.name, investment_name, moveline_id)
-                return
 
             #if action.type == "existing": return # TODO
 
