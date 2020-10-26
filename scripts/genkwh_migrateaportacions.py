@@ -651,6 +651,23 @@ class Migrator:
                 type = action,
             )
 
+    def resolveAllCases(self):
+        investments = ns()
+        pendingExplicitCases = ns(self.cases.legacyCases)
+        investment_names = sorted(m.ref for m in self.paymentMoveLines.values())
+        for investment_name in tqdm(investment_names):
+            actions = pendingExplicitCases.pop(investment_name, None)
+            if actions:
+                investments[investment_name] = attributes = ns()
+                for moveline_id, action in actions.items():
+                    action = self.structurizeAction(action)
+                    self.processExplicitAction(investment_name, moveline_id, action, attributes)
+        for moveline_id, balance in self.liquidations.items():
+            if balance:
+                warn("Liquidacio incomplerta del moviment {} queden {}€ sense compensar",
+                    moveline_id, balance)
+        investments.dump('result.yaml')
+
     def resolveYamlExplicitCases(self):
         investments = ns()
         for investment_name, actions in tqdm(sorted(self.cases.legacyCases.items())):
@@ -669,7 +686,8 @@ class Migrator:
         self.loadInvestments()
         self.loadMovements()
         self.matchPaymentOrders()
-        self.resolveYamlExplicitCases()
+        #self.resolveYamlExplicitCases()
+        self.resolveAllCases()
         self.dumpMovementsByPartner()
         self.dumpUnsolved()
         #main(cr)
