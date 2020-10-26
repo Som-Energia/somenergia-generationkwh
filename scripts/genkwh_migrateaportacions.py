@@ -571,16 +571,9 @@ class Migrator:
                 )
                 continue
 
-            moveline.solution=ns(
-                type='existing',
-                name=investment_name,
-                amount = moveline.credit-moveline.debit,
-                orderline_id = orderline.id,
-                iban = orderline.iban,
-                order_date=orderline.create_date,
-                partner_name = orderline.partner_name,
-                ip='6.6.6.6',
-                )
+            orderline.name = investment_name # New apos are not named as the investment
+            self.bindMoveLineAndPaymentLine(moveline, orderline)
+            moveline.solution.type='existing'
 
         for investment in pendingInvestments:
             error("Investment with no moveline: {name} {nshares}",
