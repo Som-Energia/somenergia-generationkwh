@@ -338,9 +338,18 @@ class Migrator:
                 amount = moveline.credit-moveline.debit,
                 ip = ip,
             ))
+        investment_name = orderline.name
+        if investment_name in self.cases.renamedInvestments:
+            investment_name = self.cases.renamedInvestments[investment_name]
+            warn("Renaming orderline {} as {}", orderline.name, investment_name)
+
+        if self.movelines[moveline.id].get('solution') is not None:
+            warn("Binding twice ml {}, was ol {}, now ol {}",
+                moveline.id, self.movelines[moveline.id].solution, orderline)
+            
         self.paymentMoveLines[moveline.id] = ns(
             movelineid = moveline.id,
-            ref=orderline.name,
+            ref = investment_name,
             order_date=orderline.create_date,
             partner_id = orderline.partner_id,
             partner_name = orderline.partner_name,
@@ -350,7 +359,7 @@ class Migrator:
         self.movelines[moveline.id].update(
             solution = ns(
                 type = 'paid',
-                name = orderline.name,
+                name = investment_name,
                 orderline_id = orderline.id,
                 iban = orderline.iban,
                 order_date=orderline.create_date,
@@ -654,18 +663,31 @@ class Migrator:
     def resolveAllCases(self):
         investments = ns()
         pendingExplicitCases = ns(self.cases.legacyCases)
-        investment_names = sorted(m.ref for m in self.paymentMoveLines.values())
-        for investment_name in tqdm(investment_names):
+        investment_names = sorted((m.ref, m.movelineid) for m in self.paymentMoveLines.values())
+        for investment_name, payment_moveline_id in tqdm(investment_names):
             actions = pendingExplicitCases.pop(investment_name, None)
-            if actions:
-                investments[investment_name] = attributes = ns()
-                for moveline_id, action in actions.items():
-                    action = self.structurizeAction(action)
-                    self.processExplicitAction(investment_name, moveline_id, action, attributes)
+            if investment_name in investments:
+                error("Overwritting {}, was {}\nWith moveline {}",
+                    investment_name, u(investments[investment_name].dump()), payment_moveline_id)
+            investments[investment_name] = attributes = ns()
+            if not actions:
+                action = self.structurizeAction(self.movelines[payment_moveline_id].solution.type)
+                self.processExplicitAction(investment_name, payment_moveline_id, action, attributes)
+                continue
+            for moveline_id, action in actions.items():
+                action = self.structurizeAction(action)
+                self.processExplicitAction(investment_name, moveline_id, action, attributes)
+
+        if not pendingExplicitCases:
+            success("All explicit cases resolved")
+        for investment_name in pendingExplicitCases:
+            warn("Unreferred pending case {}", investment_name)
+
         for moveline_id, balance in self.liquidations.items():
             if balance:
                 warn("Liquidacio incomplerta del moviment {} queden {}€ sense compensar",
                     moveline_id, balance)
+
         investments.dump('result.yaml')
 
     def resolveYamlExplicitCases(self):
