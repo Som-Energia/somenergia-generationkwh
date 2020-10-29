@@ -142,7 +142,7 @@ class Migrator:
             out("loading from cache {}".format(cachefile))
             return ns.load(str(cachefile)).data
         self.cr.execute("""\
-            select
+            select distinct
                 ml.id,
                 ml.move_id,
                 ml.name as name,
@@ -169,8 +169,8 @@ class Migrator:
                 account.name as account_name,
                 account.code as account_code,
                 COALESCE(usr.name, 'Nobody') as username,
-                account_partner.id as account_partner_id,
-                moveline_partner.id as moveline_partner_id,
+                -- account_partner.id as account_partner_id,
+                -- moveline_partner.id as moveline_partner_id,
                 true
             from
                 account_move_line as ml
@@ -475,7 +475,7 @@ class Migrator:
                         "\torderline moveline\n"
                         "\t{ol.order_sent_date} {ml.date_created}\n"
                         "\t{orderamount} {ml.credit}\n"
-                        "\t{ol.partner_id} {ml.partner_id}",
+                        "\t{ol.partner_name} {ml.partner_name}",
                         ol=orderline,
                         ml=moveline,
                         orderamount=-orderline.amount,
