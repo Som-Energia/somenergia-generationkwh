@@ -594,8 +594,12 @@ class Migrator:
     def processExplicitAction(self, investment_name, moveline_id, action, attributes):
         """Binds an action explicitly enumerated in the yaml file"""
 
-        if action.type in ['corrected',]:
+        if action.type == 'corrected':
             self.logCorrected(attributes, investment_name, action)
+            return
+
+        if action.type == 'pact':
+            self.logPact(attributes, investment_name, action)
             return
             
         moveline = self.movelines[moveline_id]
