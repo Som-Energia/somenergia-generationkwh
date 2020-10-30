@@ -353,6 +353,7 @@ class Migrator:
             order_date=orderline.create_date,
             partner_id = orderline.partner_id,
             partner_name = orderline.partner_name,
+            member_id = orderline.member_id,
             amount = moveline.credit-moveline.debit,
             ip = ip,
             )
@@ -363,6 +364,7 @@ class Migrator:
                 orderline_id = orderline.id,
                 iban = orderline.iban,
                 order_date=orderline.create_date,
+                member_id = orderline.member_id,
                 partner_name = orderline.partner_name,
                 amount = moveline.credit-moveline.debit,
                 ip = ip,
@@ -585,7 +587,8 @@ class Migrator:
             moveline.solution.type='existing'
 
         for investment in pendingInvestments:
-            error("Investment with no moveline: {name} {nshares}",
+            print(self.investments[investment].keys())
+            error("Investment with no moveline: {name} {nshares} shares member: {member_id} {purchase_date} {first_effective_date} {last_effective_date}",
                 **self.investments[investment])
 
         self.pendingOrderlines = pendingOrderlines.values()
@@ -664,6 +667,17 @@ class Migrator:
                 type = action,
             )
 
+
+    def emissionFromDate(self, investmentDate):
+        for firstEmissionDate, id in reversed(sorted(self.cases.emissions.items())):
+            if firstEmissionDate <= investmentDate:
+                return id
+        return None
+
+    def emissionDate(self, id):
+        return dict((v,k) for k,v in self.cases.emissions.items()).get(id, "NONE")
+        
+
     def resolveAllCases(self):
         investments = ns()
         pendingExplicitCases = ns(self.cases.legacyCases)
@@ -677,10 +691,17 @@ class Migrator:
             if not actions:
                 action = self.structurizeAction(self.movelines[payment_moveline_id].solution.type)
                 self.processExplicitAction(investment_name, payment_moveline_id, action, attributes)
-                continue
-            for moveline_id, action in actions.items():
-                action = self.structurizeAction(action)
-                self.processExplicitAction(investment_name, moveline_id, action, attributes)
+            else:
+                for moveline_id, action in actions.items():
+                    action = self.structurizeAction(action)
+                    self.processExplicitAction(investment_name, moveline_id, action, attributes)
+
+            attributes.member_id = self.movelines[payment_moveline_id].solution.member_id
+            attributes.emission_id = self.emissionFromDate(attributes.order_date)
+            False and success("{name} {order_date} {purchase_date} {emissionDate} {partner_name}",
+                partner_name = self.movelines[payment_moveline_id].solution.partner_name,
+                emissionDate = self.emissionDate(attributes.emission_id),
+                **attributes)
 
         if not pendingExplicitCases:
             success("All explicit cases resolved")
@@ -694,25 +715,11 @@ class Migrator:
 
         investments.dump('result.yaml')
 
-    def resolveYamlExplicitCases(self):
-        investments = ns()
-        for investment_name, actions in tqdm(sorted(self.cases.legacyCases.items())):
-            investments[investment_name] = attributes = ns()
-            for moveline_id, action in actions.items():
-                action = self.structurizeAction(action)
-                self.processExplicitAction(investment_name, moveline_id, action, attributes)
-        for moveline_id, balance in self.liquidations.items():
-            if balance:
-                warn("Liquidacio incomplerta del moviment {} queden {}€ sense compensar",
-                    moveline_id, balance)
-        investments.dump('result.yaml')
-
     def doSteps(self):
         self.cleanUp()
         self.loadInvestments()
         self.loadMovements()
         self.matchPaymentOrders()
-        #self.resolveYamlExplicitCases()
         self.resolveAllCases()
         self.dumpMovementsByPartner()
         self.dumpUnsolved()

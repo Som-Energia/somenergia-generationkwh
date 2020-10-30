@@ -48,7 +48,7 @@ class InvestmentState(object):
     allowedParams = [
         'name',
         'paid_amount',
-        'nominal_amount',
+        'nominal_amount', # nshares * 100
         'amortized_amount',
         'draft',
         'active',

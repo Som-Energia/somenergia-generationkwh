@@ -445,6 +445,7 @@ def getOrderLines(cr, order_id):
             pl.*,
             po.date_done as order_sent_date,
             p.name as partner_name,
+            soc.id as member_id,
             bank.iban as iban,
             false
         from
@@ -457,6 +458,10 @@ def getOrderLines(cr, order_id):
             res_partner as p
         on
            p.id = pl.partner_id
+        left join
+            somenergia_soci as soc
+        on
+           p.id = soc.partner_id
         left join
             res_partner_bank as bank
         on
