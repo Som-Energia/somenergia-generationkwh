@@ -756,6 +756,8 @@ class Migrator:
             date=ml.create_date.date(),
             amount=ml.amount,
             move_line_id=move_line_id,
+            waitDays=0, # Specific for Apos
+            expirationYears=0, # Specific for Apos
             )
         attributes.update(inv.changed())
 
