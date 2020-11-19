@@ -587,7 +587,6 @@ class Migrator:
             moveline.solution.type='existing'
 
         for investment in pendingInvestments:
-            print(self.investments[investment].keys())
             error("Investment with no moveline: {name} {nshares} shares member: {member_id} {purchase_date} {first_effective_date} {last_effective_date}",
                 **self.investments[investment])
 
@@ -732,37 +731,55 @@ class Migrator:
             ))
 
     fields = """\
-        name
-        member_id
-        emission_id
         move_line_id
+        first_effective_date
         nshares
-        amortized_amount
+        member_id
         active
+        last_effective_date
+        purchase_date
+        actions_log
+        log
+        name
         draft
         order_date
+        amortized_amount
         signed_date
-        purchase_date
-        first_effective_date
-        last_effective_date
-        log
-        actions_log
+        emission_id
         """.split()
 
 
     def applySolution(self, investments):
+        ns(data = [
+            ns([(k,unordered[k]) for k in self.fields])
+            for unordered in (
+                ns(investment,
+                    id=self.investments[investment.name],
+                    nshares = int(investment.nominal_amount)//100,
+                    signed_date = None,
+                    move_line_id = None,
+                )
+                for investment in investments.values()
+                if investment.name in self.investments
+            )
+            ]).dump("regenerated-existing-investments.yaml")
+
         sql = u"""\
             INSERT INTO
                 generationkwh_investment
                 (
-                    """ +',\n                    '.join(self.fields) +"""
+                    {fieldNames}
                 )
-            VALUES
-""" + u"\n".join(u(self.sqlInvestmentValues(investment))
-            for investment in investments.values()
-            if investment.name not in self.investments
-            )
+            VALUES\n{rows}""".format(
+                fieldNames = ',\n                    '.join(self.fields),
+                rows = u",\n".join(
+                    u(self.sqlInvestmentValues(investment))
+                    for investment in investments.values()
+                    if investment.name not in self.investments
+                    )
+                )
         Path('finalQuery.sql').write_text(sql, encoding='utf8')
+        #self.cr.execute(sql)
 
 
     def doSteps(self):
@@ -774,10 +791,6 @@ class Migrator:
         self.applySolution(investments)
         self.dumpMovementsByPartner()
         self.dumpUnsolved()
-        #main(cr)
-        #deleteNullNamedInvestments(cr)
-        #showUnusedMovements(cr)
-        #displayAllInvestments(cr)
 
     def logOrdered(self, attributes, investment_name, iban, amount, order_date, ip):
         inv = InvestmentState("Webforms", order_date,
