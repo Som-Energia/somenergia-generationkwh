@@ -10,5 +10,6 @@ testcases:
     - orders_byDateLine.yaml
     - moves_byDateLine.yaml
     - result.yaml
+    - finalQuery.sql
 
 # vim: et ts=2 sw=2

@@ -714,13 +714,64 @@ class Migrator:
                     moveline_id, balance)
 
         investments.dump('result.yaml')
+        return investments
+
+    def sqlInvestmentValues(self, investment):
+        nshares = investment.nominal_amount//100
+        if nshares*100 != int(investment.nominal_amount):
+             warn("Investment {} {!r} and {!r} differ",
+                investment.name, nshares*100, int(investment.nominal_amount))
+        return self.cr.mogrify(u"""\
+                (
+                    """ +',\n                    '.join("%("+f+")s" for f in self.fields) +"""
+                )""", dict(
+                nshares = nshares,
+                signed_date = None,
+                move_line_id = None,
+                **investment
+            ))
+
+    fields = """\
+        name
+        member_id
+        emission_id
+        move_line_id
+        nshares
+        amortized_amount
+        active
+        draft
+        order_date
+        signed_date
+        purchase_date
+        first_effective_date
+        last_effective_date
+        log
+        actions_log
+        """.split()
+
+
+    def applySolution(self, investments):
+        sql = u"""\
+            INSERT INTO
+                generationkwh_investment
+                (
+                    """ +',\n                    '.join(self.fields) +"""
+                )
+            VALUES
+""" + u"\n".join(u(self.sqlInvestmentValues(investment))
+            for investment in investments.values()
+            if investment.name not in self.investments
+            )
+        Path('finalQuery.sql').write_text(sql, encoding='utf8')
+
 
     def doSteps(self):
         self.cleanUp()
         self.loadInvestments()
         self.loadMovements()
         self.matchPaymentOrders()
-        self.resolveAllCases()
+        investments = self.resolveAllCases()
+        self.applySolution(investments)
         self.dumpMovementsByPartner()
         self.dumpUnsolved()
         #main(cr)
