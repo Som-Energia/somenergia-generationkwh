@@ -40,7 +40,7 @@ class Migrator:
 
     def getAllInvestments(self):
         emission = self.cases.get('emissionType', 'genkwh')
-        cachefile = Path('cached-apos-investments-{}.yaml'.format(emission))
+        cachefile = Path('cached-investments-{}.yaml'.format(emission))
         self.cr.execute("""
             select investment.*
             from
