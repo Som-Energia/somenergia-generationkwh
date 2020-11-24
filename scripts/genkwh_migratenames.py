@@ -465,7 +465,7 @@ def getOrderLines(cr, order_id):
         left join
             res_partner_bank as bank
         on
-            bank.id = p.bank_inversions
+            bank.id = pl.bank_id
         where
             pl.order_id = %(order_id)s
         order by pl.id
