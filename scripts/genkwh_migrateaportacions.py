@@ -56,7 +56,16 @@ class Migrator:
         """, dict(
             emission = emission,
         ))
-        result = dbutils.nsList(self.cr)
+        def processElement(x):
+            x.actions_log = ns.loads(x.actions_log)
+            del x.id
+            del x.create_uid
+            del x.create_date
+            del x.write_uid
+            del x.write_date
+            return x
+
+        result = [processElement(x) for x in dbutils.fetchNs(self.cr)]
         ns(data=result).dump(str(cachefile))
         return result
 
