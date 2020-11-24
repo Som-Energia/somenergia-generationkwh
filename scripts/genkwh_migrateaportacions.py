@@ -759,6 +759,7 @@ class Migrator:
 
 
     def applySolution(self, investments):
+        step("Dumping regenerated-existing-investments.yaml for comparision")
         ns(data = [
             ns([(k,unordered[k]) for k in self.fields])
             for unordered in (
@@ -767,12 +768,14 @@ class Migrator:
                     nshares = int(investment.nominal_amount)//100,
                     signed_date = None,
                     move_line_id = None,
+                    actions_log=ns.loads(investment.actions_log),
                 )
-                for investment in investments.values()
+                for investment in tqdm(investments.values())
                 if investment.name in self.investments
             )
             ]).dump("regenerated-existing-investments.yaml")
 
+        step("Dumping finalQuery.sql with not existing investments")
         sql = u"""\
             INSERT INTO
                 generationkwh_investment
@@ -783,7 +786,7 @@ class Migrator:
                 fieldNames = ',\n                    '.join(self.fields),
                 rows = u",\n".join(
                     u(self.sqlInvestmentValues(investment))
-                    for investment in investments.values()
+                    for investment in tqdm(investments.values())
                     if investment.name not in self.investments
                     )
                 )
