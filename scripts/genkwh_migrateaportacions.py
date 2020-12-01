@@ -202,7 +202,7 @@ class Migrator:
             left join
                 res_partner as account_partner
             on
-                account_partner.ref = ('S' || right(account.code, 6))
+                account_partner.ref = ('S' || right(account.code, 6)) and account_partner.id != 62517
             left join
                 res_partner as moveline_partner
             on
