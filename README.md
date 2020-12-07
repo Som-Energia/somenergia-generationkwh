@@ -10,7 +10,7 @@ OpenERP module and library to manage [Som Energia]'s Generation kWh
 to electricity self-production in the Spanish market.
 Spanish market legislation has been designed in a way quite
 hostile towards distributed renewable energies and user self-production
-and we propose _collective self-production_ as a formula that still
+and we propose *collective self-production* as a formula that still
 fits in the market.
 
 [Generation kWh]:https://generationkwh.org
@@ -73,7 +73,7 @@ dodestral -m som_generationkwh # for destral tests, without production database 
 
 ### 2.5.4 2019-07-19
 
-_Production rewrite release_
+*Production rewrite release*
 
 - Simplifications due to plantmeter functionality externalized to gisce
     - ProductionLoader renamed as RightsGranter
