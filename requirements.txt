@@ -4,6 +4,7 @@ yamlns
 plantmeter
 python-dateutil
 decorator
+babel
 
 # To execute tests
 # ERPpeek==1.6.1
