@@ -450,6 +450,23 @@ class Migrator:
             pendingOrderlines = sum(orderlineDict.values(), [])
             return pendingOrderlines, pendingMovelines
 
+        def bindVirtualOrderlines(orderlines, movelines):
+            step("Orderless payments")
+            remaining = []
+            for moveline in movelines:
+                virtualOrderLine = self.cases.virtualOrderLines.pop(moveline.id)
+                if not virtualOrderLine:
+                    remaining.append(moveline)
+                moveline = movelines.pop(movementline_id)
+                self.bindMoveLineAndPaymentLine(moveline, virtualOrderLine)
+            for moveline_id, virtualOrderLine in self.cases.virtualOrderLines.items():
+                warn("virtualOrderLines refer a payment moveline that is not pending", moveline_id)
+                moveline = self.movelines[moveline_id]
+                self.bindMoveLineAndPaymentLine(moveline, virtualOrderLine)
+
+            return orderlines, remaining
+
+
         def matchExplicit(orderlines, movelines):
             explicitOrderlineToMoveLine = {
                 ol : ml
@@ -532,6 +549,8 @@ class Migrator:
         warn("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
         step("  Matching explicit pairs from yaml")
         pendingOrderlines, pendingMovelines = matchExplicit(pendingOrderlines, pendingMovelines)
+
+        pendingOrderlines, pendingMovelines = bindVirtualOrderlines(pendingOrderlines, pendingMovelines)
 
         warn("Pending: orderlines: {} movelines: {}", len(pendingOrderlines), len(pendingMovelines))
         self.pendingOrderlines = pendingOrderlines

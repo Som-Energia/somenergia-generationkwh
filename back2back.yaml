@@ -11,5 +11,7 @@ testcases:
     - moves_byDateLine.yaml
     - result.yaml
     - finalQuery.sql
+    - cached-investments-apo.yaml
+    - regenerated-existing-investments.yaml
 
 # vim: et ts=2 sw=2
