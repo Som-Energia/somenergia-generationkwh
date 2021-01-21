@@ -4,10 +4,7 @@
 #
 version: 2
 jobs:
-  build:
-    branches:
-      ignore:
-        - /feature-.*/
+  test-template: &test-template
     docker:
       # specify the version you desire here
       # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
@@ -44,6 +41,7 @@ jobs:
             git clone --depth 1 https://github.com/gisce/mongodb_backend.git -b gisce $ROOT_DIR_SRC/mongodb_backend
             git clone --depth 1 https://github.com/gisce/poweremail_oorq.git $ROOT_DIR_SRC/poweremail_oorq
             git clone https://github.com/Som-Energia/plantmeter.git $ROOT_DIR_SRC/plantmeter
+
             curl -H "Authorization: token $GITHUB_TOKEN" -L https://api.github.com/repos/gisce/libFacturacioATR/tarball > /tmp/libFacturacioATR.tar.gz
             curl -H "Authorization: token $GITHUB_TOKEN" -L https://api.github.com/repos/gisce/pandapower_erp/tarball > /tmp/pandapower_erp.tar.gz
             curl -H "Authorization: token $GITHUB_TOKEN" -L https://api.github.com/repos/gisce/pandapower_validator/tarball > /tmp/pandapower_validator.tar.gz
@@ -124,7 +122,8 @@ jobs:
             cd $ROOT_DIR_SRC/$TESTING_REPO
             #destral --report-coverage --enable-coverage --report-junitxml $ROOT_DIR_SRC/test-results/destral
             destral -m som_generationkwh --report-coverage --enable-coverage --report-junitxml $ROOT_DIR_SRC/test-results/destral
-
+            python -m unittest -v tests.test_version_checker
+          no_output_timeout: 25m
       - run:
           name: coverage
           command: |
@@ -147,4 +146,31 @@ jobs:
           path: ~/src/somenergia-generationkwh/htmlcov
           destination: coverage
 
+  test-py27:
+    <<: *test-template
+    docker:
+      - image: circleci/python:2.7
+      - image: redis:2.8
+      - image: mongo:3.0
+      - image: timescale/timescaledb-postgis:latest-pg11
+        environment:
+          POSTGRES_USER: erp
+          POSTGRES_PASSWORD: erp
 
+  test-py37:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.7
+      - image: redis:2.8
+      - image: mongo:3.0
+      - image: timescale/timescaledb-postgis:latest-pg11
+        environment:
+          POSTGRES_USER: erp
+          POSTGRES_PASSWORD: erp
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test-py27
+      - test-py37
