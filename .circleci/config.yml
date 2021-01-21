@@ -71,9 +71,9 @@ jobs:
             pip install -r $ROOT_DIR_SRC/erp/requirements.txt
             test -x $ROOT_DIR_SRC/$TESTING_REPO/requirements.txt && pip install -r $ROOT_DIR_SRC/$TESTING_REPO/requirements.txt
             pip install --upgrade --force-reinstall https://github.com/gisce/destral/archive/master.zip
-            cd /tmp/egenix-mx-base-3.2.9
-            python setup.py install
-            cd -
+            #cd /tmp/egenix-mx-base-3.2.9
+            #python setup.py install
+            #cd -
 
       - save_cache:
           paths:
