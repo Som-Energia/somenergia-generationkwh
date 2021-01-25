@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
-
+from __future__ import unicode_literals
 import dbconfig
 import psycopg2
 import dbutils
 import contextlib
 from yamlns import namespace as ns
-from consolemsg import step, warn, success, error as consoleError, fail
+from consolemsg import step, warn, success, error as consoleError, fail, u
 import sys
 import generationkwh.investmentmodel as gkwh
 import datetime
@@ -14,8 +14,8 @@ from generationkwh.investmentstate import InvestmentState, AportacionsState, Gen
 
 errorCases = ns()
 
-def error(message, **params):
-    msg = message.format(**params)
+def error(message, *args, **params):
+    msg = message.format(*args, **params)
     consoleError(msg)
     errorCases.setdefault(ns(params).partner_id, []).append(msg)
 
@@ -72,12 +72,14 @@ def ungeneratedInvestments(cr):
         on
             p.id = ml.period_id
         where
-            pacc.code = '1635' and
+            pacc.code = %(parentAccount)s and
             not p.special and
             inv.id is NULL
         order by
             create_date
-        """)
+        """, dict(
+            parentAccount = cases.get('parentAccount', '1635'),
+        ))
     return dbutils.nsList(cr)
 
 def activeNegativeInvestments(cr):
@@ -177,8 +179,9 @@ def investmentPointingSomeoneElsesAccount(cr):
         on
             acc.id = ml.account_id
         where
-            acc.code <> ('1635' || right('000'||right(p.ref,-1),8))
+            acc.code <> (%(accountPrefix)s || right('000'||right(p.ref,-1),8))
         """,dict(
+            accountPrefix = (cases.get('parentAccount', '1635')+'00')[:4],
             shareValue=gkwh.shareValue,
         ))
     return dbutils.nsList(cr)
@@ -211,14 +214,14 @@ def movementsVsInvesmentAmounts(cr):
             on
                 pac.id = ac.parent_id
             where
-                pac.code = '1635' and
+                pac.code = %(parentAccount)s and
                 true
             group by
                 ac.code
             ) as accounting	
         left outer join (
             select
-                '1635' || right('000'||right(partner.ref,-1),8) as account_code,
+                %(accountPrefix)s || right('000'||right(partner.ref,-1),8) as account_code,
                 partner.name as partner_name,
                 partner.id as partner_id,
                 sum(inv.nshares)*%(shareValue)s as amount,
@@ -248,7 +251,11 @@ def movementsVsInvesmentAmounts(cr):
             investment.amount - accounting.amount <> 0
         order by
             accounting.account_code
-    """, dict(shareValue=gkwh.shareValue))
+    """, dict(
+        shareValue=gkwh.shareValue),
+        parentAccount = cases.get('parentAccount', '1635'),
+        accountPrefix = (cases.get('parentAccount', '1635')+'00')[:4],
+    )
     return dbutils.nsList(cr)
 
 
@@ -343,7 +350,9 @@ def getGenerationMovelinesByPartner(cr, partner_id):
         partner_id=partner_id,
     ))
     partner = dbutils.nsList(cr)[0]
-    partner.account = '1635{:08}'.format(int(partner.ref[1:]))
+    parentAccount = cases.get('parentAccount', '1635')
+    accountPrefix = (parentAccount+'000')[:4]
+    partner.account = accountPrefix+'{:08}'.format(int(partner.ref[1:]))
     cr.execute("""\
         select
             %(partner_name)s as partner_name,
@@ -436,6 +445,8 @@ def getOrderLines(cr, order_id):
             pl.*,
             po.date_done as order_sent_date,
             p.name as partner_name,
+            soc.id as member_id,
+            bank.iban as iban,
             false
         from
             payment_line as pl
@@ -447,6 +458,14 @@ def getOrderLines(cr, order_id):
             res_partner as p
         on
            p.id = pl.partner_id
+        left join
+            somenergia_soci as soc
+        on
+           p.id = soc.partner_id
+        left join
+            res_partner_bank as bank
+        on
+            bank.id = pl.bank_id
         where
             pl.order_id = %(order_id)s
         order by pl.id
@@ -459,6 +478,7 @@ def getMoveLines(cr, move_id):
     cr.execute("""\
         select
             ml.*,
+            u.name as user,
             p.name as partner_name
         from
             account_move_line as ml
@@ -474,12 +494,17 @@ def getMoveLines(cr, move_id):
             res_partner as p
         on
            p.id = ml.partner_id
+        left join
+            res_users as u
+        on
+            u.id = ml.create_uid
         where
-            pac.code = '1635' and
+            pac.code = %(parentAccount)s and
             ml.move_id = %(move_id)s
         order by ml.id
     """, dict(
         move_id=move_id,
+        parentAccount = cases.parentAccount,
     ))
     return dbutils.nsList(cr)
 
@@ -505,11 +530,17 @@ def getActiveInvestments(cr):
             res_partner as p
         on
             p.id = soci.partner_id
+        left join
+            generationkwh_emission as e
+        on
+            e.id = inv.emission_id
         where
             inv.active and
+            e.type = %(emissionType)s and
             true
         order by inv.id
     """, dict(
+        emissionType=cases.get('emissionType','genkwh'),
     ))
     return dbutils.nsList(cr)
 
@@ -520,10 +551,16 @@ def lastInvestment(cr):
             max(move_line_id)
         from
             generationkwh_investment as inv
+        left join
+            generationkwh_emission as e
+        on
+            e.id = inv.emission_id
         where
             inv.active and
+            e.type = %(emissionType)s and
             true
     """, dict(
+        emissionType=cases.get('emissionType','genkwh'),
     ))
     return dbutils.nsList(cr)[0].max
 
@@ -576,8 +613,12 @@ def getInvestmentByMoveline(cr, moveline_id):
     return dbutils.nsList(cr)[0]
 
 
-
-def investmentOrderAndMovements(cr, modeName='GENERATION kWh'):
+def investmentOrderAndMovements(cr):
+    paymentModes = cases.get('formPaymentModes',
+        ['GENERATION kWh'])
+    parentAccount = cases.get('parentAccount', '1635')
+    extraPaymentOrders=cases.get('extraPaymentOrders', [])
+    excludedOrders=cases.get('excludedOrders', [])
     cr.execute("""\
         select
             o.id as order_id,
@@ -600,9 +641,13 @@ def investmentOrderAndMovements(cr, modeName='GENERATION kWh'):
             on
                 pm.id = po.mode
             where
-                pm.name = 'GENERATION kWh' or
-                po.id = 1389 or -- has mode 'ENGINYERS'
-                false
+                (
+                    pm.name = ANY(%(paymentModes)s) or
+                    po.id = ANY(%(extraPaymentOrders)s) or
+                    false
+                ) and
+                po.id != ALL(%(excludedOrders)s) and
+                true
         ) as o
         full outer join (
             select
@@ -620,7 +665,7 @@ def investmentOrderAndMovements(cr, modeName='GENERATION kWh'):
             on
                 pa.id = a.parent_id
             where
-                pa.code = '1635' and
+                pa.code = %(parentAccount)s and
                 l.name = '/' and
                 true
             group by
@@ -633,7 +678,12 @@ def investmentOrderAndMovements(cr, modeName='GENERATION kWh'):
         order by
             m.date_created
         ;
-        """)
+        """, dict(
+            paymentModes=paymentModes,
+            parentAccount=parentAccount,
+            excludedOrders=excludedOrders,
+            extraPaymentOrders=extraPaymentOrders,
+        ))
     return dbutils.nsList(cr)
 
 
@@ -651,14 +701,15 @@ def getAndRemoveFirst(d, key):
 def bindMoveLineAndPaymentLine(moveline, orderline):
     communication = orderline.communication2
     ip = communication.split(" IP ")[1] if communication and ' IP ' in communication else '0.0.0.0'
-    False and success(
-        "Match ml-po ml-{moveline.id} {orderline.name} {orderline.create_date} {amount:=8}€ {moveline.partner_name} {ip}"
+    moveline.partner_name = moveline.partner_name and u(moveline.partner_name)
+    success(
+        u"Match ml-po ml-{moveline.id} {orderline.name} {orderline.create_date} {amount:=8}€ {moveline.partner_name} {ip}"
         .format(
             moveline=moveline,
             orderline=orderline,
             amount = moveline.credit-moveline.debit,
             ip = ip,
-            ))
+        ))
     paymentMoveLines[moveline.id] = ns(
         movelineid = moveline.id,
         ref=orderline.name,
@@ -668,6 +719,7 @@ def bindMoveLineAndPaymentLine(moveline, orderline):
         amount = moveline.credit-moveline.debit,
         ip = ip,
         )
+    matchedOrderLines.append(orderline.id)
 
 def displayPartnersMovements(cr, partner_id):
     movelines = getGenerationMovelinesByPartner(cr,partner_id)
@@ -870,12 +922,14 @@ def allMovements(cr):
         ON
             partner.ref = 'S' || right(acc.code, 6)
         where
-            pacc.code = '1635' and
+            pacc.code = %(parentAccount)s and
             not p.special and
             true
         order by
             create_date
-        """)
+        """, dict(
+            parentAccount = cases.get('parentAccount', '1635'),
+        ))
     return {x.id: x for x in dbutils.nsList(cr)}
 
 
@@ -886,12 +940,17 @@ def main(cr):
 
     global paymentMoveLines
     paymentMoveLines = ns()
-    for data in investmentOrderAndMovements(cr):
+    global matchedOrderLines
+    matchedOrderLines = []
+
+    order2MovementMatches = investmentOrderAndMovements(cr)
+    for data in order2MovementMatches:
         step(" Quadrant remesa feta el {move_create_date}".format(**data))
-
-
-        step("  Comprovant que la remesa i el moviment coincideixen")
-
+        step("  Comprovant que la remesa i el moviment coincideixen. "
+            "Ordres a la remesa: {}, Assentaments al moviment: {}",
+            data.order_nlines,
+            data.move_nlines,
+        )
         if not data.move_id:
             warn("Remesa sense moviment. {}: Id {}, amb {} linies" .format(
                 data.order_sent_date or "not yet",
@@ -922,10 +981,9 @@ def main(cr):
 
         if len(moveLines) != data.move_nlines:
             warn("Got different number of lines {} than reported {} in Move"
-                .format(len(orderLines), data.order_nlines))
+                .format(len(moveLines), data.move_nlines))
 
-
-        step("  Quadrant pagaments amb assentaments per persona i quantitat")
+        step("  Quadrant pagaments amb apunts per persona i quantitat")
         orderLinesDict = ns()
         repesca = []
 
@@ -950,15 +1008,20 @@ def main(cr):
         #step("  Create a partner -> unpaired movelines map")
         movelinesByPartnerId = {}
         for moveline in repesca:
+            if moveline.id in paymentMoveLines: continue
             appendToKey(movelinesByPartnerId, moveline.partner_id, moveline)
 
         #step("  Lookup for each unpaired order")
         for key, options in orderLinesDict.items():
             for orderline in options:
+                if orderline.id in matchedOrderLines:
+                    options.remove(orderline)
+                    continue
+
                 moveline = getAndRemoveFirst(movelinesByPartnerId, orderline.partner_id)
                 if not moveline:
                     error(
-                        "Linia de Remesa sense parella: "
+                        "Linia de Remesa sense apunt: "
                         "{name} id {id} {order_sent_date} {amount}€ {partner_name}",
                         **orderline)
                     continue
@@ -997,7 +1060,7 @@ def main(cr):
         for partner_id, movelines in movelinesByPartnerId.items():
             for moveline in movelines:
                 error(
-                    "Linia de Moviment sense parella "
+                    "Apunt sense linea de remesa "
                     "id {id} {create_date} {credit}€ {partner_name}",
                     **moveline)
 
@@ -1594,15 +1657,17 @@ def deleteNullNamedInvestments(cr):
         """
     cr.execute(query)
 
-cases = ns.load('migration.yaml')
+if __name__=='__main__':
+    cases = ns.load('migration.yaml')
 
-with psycopg2.connect(**dbconfig.psycopg) as db:
-    with db.cursor() as cr:
-        with transaction(cr, discarded='--doit' not in sys.argv):
-            cleanUp(cr)
-            main(cr)
-            deleteNullNamedInvestments(cr)
-            showUnusedMovements(cr)
-            displayAllInvestments(cr)
+    with psycopg2.connect(**dbconfig.psycopg) as db:
+        with db.cursor() as cr:
+            psycopg2.extensions.register_type(psycopg2.extensions.UNICODE, cr)
+            with transaction(cr, discarded='--doit' not in sys.argv):
+                cleanUp(cr)
+                main(cr)
+                deleteNullNamedInvestments(cr)
+                showUnusedMovements(cr)
+                displayAllInvestments(cr)
 
 # vim: et ts=4 sw=4

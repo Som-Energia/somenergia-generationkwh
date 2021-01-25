@@ -1,5 +1,93 @@
 # TODO's
 
+## APO's migration
+
+- Caldria apuntar-se els pendents al self
+- Noves aportacions
+	- Iterar per les aportacions existents (noves)
+	- Matxar amb les ordres sense moveline
+	- Donarles com a resoltes
+- Matxar moviments que no siguin de pagament
+	- Per cada inversio en legacyCase
+		- Per cada acció
+			- Si es un tipus paid comprovar:
+				- Que el moviment ja esta solved
+				- Que la solució és tambe 'paid'
+				- Que el nombre de la inversio coincideix
+				- Farcir la solucio amb els camps que falten
+			- Si es un tipus sense moveline:
+				- ???
+			- La resta de tipus:
+				- Comprovar que el moviment NO tingui solució
+				- Afegir la solució
+			- Anotar les accions en sequencia per a les inversions
+				- Les especials ara mateix les estem ignorant
+- Reconstruir les inversions
+	- 
+
+
+
++ Recuperar l'adjunt de les remeses -> No es un adjunt mongo, es un report, n'hi ha dos
++ Query de totes les linies de remesa name start with INV
++ Descartar associades amb move lines:
++ Si es caixa laboral, agafar el soci del numero de compte en comptes del partner id
++ Resoldre els casos directes de caixa laboral
++ En el cas dels pagaments per transferencia que ja trobem el paymentline id caldria extreure tota la info
+
+- Crear emisions de tipus aportacions per cada interval d'emisió.
+- Recuperar l'emisio
+	- Determinar les dates límit de cada emision
+- Recuperar l'iban de les remeses
+- Data effectiva la que apareix al client erp assentaments "Data" i no pas "Data creacio"
+	- Order date: data de creacio del paymentline
+	- Payment date: data de `date_done` de la remesa
+
+- Dupped moveline revisar perque surten INV02458 INV02308 INV01176
+- Revisar cas Pancorbo
+- Pendent d'en Carles
+	- Determinar les emisions que fan servir el contracte 2012
+	- No ho vam parlar: Cas Remberto
+		- Inversio INV00111 INV00112
+		- Quina es la bona?
+	- Titols que passen a aportacions consulta a legal
+		- Per error nostre (es va passar al compte de Apos una remesa de titols)
+		- Per error d'ells (ens van demanar de canviar-la)
+		- Cap te document ni codi
+	- Caja Laboral arreglar el partner id
+	- ml 223838 segona inversio de Fowler
+	- ml 20211635 florian
+- Accio per passar titols a aportacions
+	- AA
+	- Gabarró
++ Implementar relacio explicita orderline a remesa movelineToOrderline
+- Renombrar linia remesa 6620 INV357 -> INV00357
+- Ignore APO divest
+- Considerar partial overall S003186
+- Implementar overall
+- Ignorar compte 000000
+- Comprovar els logs:
+	- Text log line to YAML log line
+	- YAML log line to Text log line
+
+- Identificar la informació que fan servir els dos reports de contracte i asegurar que ho tenim a inverfsio
+
+
++ Afegir el partner id
++ Obtenir objectes movelines, indexats per usuari
++ Anar marcant movelines com fetes, a mida que anem lligant movelines amb una operacio d'una inversio numerada
+	+ Recuperar mapping de noms (i document) de les remeses
+	+ Associar les inversions desinvertides
+		+ Desinversions parcials
+		+ Desinversions globals
++ Matxar les inversions
+	+ Matxar amb els movelines del actions -> no tenim totes els actions (bug del action log)
+	+ Obtenir els movelines del log -> hi ha el moveline que no toca
+	+ Obtenir el peer moveline
++ Generant b2b
++ Solucionar els simples
+
+
+
 ## Inmediate TODO's
 
 - Turn warning on investment creation with no member available into a logged warning

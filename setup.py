@@ -29,12 +29,18 @@ setup(
     install_requires=[
         'yamlns>=0.6',
         'b2btest',
+        'lxml', # b2btest dependency, to remove
+        'wavefile', # b2btest dependency, to remove
         'numpy',
         'plantmeter',
         'python-dateutil',
         'decorator',
         'python-dateutil',
         'consolemsg>=0.3',
+        'somutils',
+        'tqdm',
+        'mock<4', # TODO: remove indirect dependency for Py2
+        'rsa<4.6', # TODO: remove indirect dependency for Py2
 #        'libfacturacioatr',
     ],
     include_package_data = True,
