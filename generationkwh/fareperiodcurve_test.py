@@ -66,43 +66,7 @@ class FarePeriodCurve_Test(unittest.TestCase):
         expected = [expected[i:i+25] for i in xrange(0,len(expected),25)]
         return self.assertEqual(result, expected)
 
-    def test_20A_singleMonth(self):
-        p = FarePeriodCurve(holidays=HolidaysProvidersMockup())
-
-        mask = self.setupCurve('2015-12-01', '2015-12-31', '2.0A', 'P1')
-
-        self.assertArrayEqual(mask,
-            + 31 * ( [1]*24+[0] )
-            )
-
-    def test_20DHA_singleMonth_summer(self):
-        p = FarePeriodCurve(holidays=HolidaysProvidersMockup())
-
-        mask = self.setupCurve('2015-08-01', '2015-08-31', '2.0DHA', 'P2')
-
-        self.assertArrayEqual(mask,
-            + 31 * ( [1]*13+[0]*10+[1,0] )
-            )
-
-    def test_20DHA_singleMonth_winter(self):
-        p = FarePeriodCurve(holidays=HolidaysProvidersMockup())
-
-        mask = self.setupCurve('2015-12-01', '2015-12-31', '2.0DHA', 'P2')
-
-        self.assertArrayEqual(mask,
-            + 31 * ( [1]*12+[0]*10+[1,1,0] )
-            )
-
-    def test_20DHA_singleMonth_summerToWinter(self):
-        p = FarePeriodCurve(holidays=HolidaysProvidersMockup())
-
-        mask = self.setupCurve('2016-10-01', '2016-10-31', '2.0DHA', 'P2')
-
-        self.assertArrayEqual(mask,
-            + 29 * ( [1]*13+[0]*10+[1,0] )
-            +  1 * ( [1]*13+[0]*10+[1,1] )
-            +  1 * ( [1]*12+[0]*10+[1,1,0] )
-            )
+#anem per aqui
 
     def test_20DHA_singleMonth_winterToSummer(self):
         p = FarePeriodCurve(holidays=HolidaysProvidersMockup())
