@@ -22,11 +22,12 @@
         </record>
         <record model="ir.actions.act_window" id="action_wizard_generationkwh_investment_transfer">
             <field name="name">Transferir</field>
+            <field name="type">ir.actions.act_window</field>
             <field name="res_model">wizard.generationkwh.investment.transfer</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
-            <field name="view_id" ref="wizard_generationkwh_investment_transfer_view"/>
+            <field name="view_mode">form</field>
             <field name="target">new</field>
+            <field name="view_id" ref="wizard_generationkwh_investment_transfer_view"/>
         </record>
         <record id="value_wizard_generationkwh_investment_transfer" model="ir.values">
             <field name="object" eval="1"/>

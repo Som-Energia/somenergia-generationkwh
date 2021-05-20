@@ -17,14 +17,14 @@ class WizardInvestmentTransfer(osv.osv):
         'partner_id_alt': fields.many2one(
             'res.partner',
             'Titular',
-            domain=[('category_id','=',8)],
+            domain=[('category_id.name','=','Soci')],
             required=True,
         ),
         'iban': fields.many2one(
             'res.partner.bank',
             'IBAN',
             required=True,
-        ),        
+        ),
     }
 
     _defaults = {
@@ -38,15 +38,20 @@ class WizardInvestmentTransfer(osv.osv):
         if context is None:
             context = {}
 
+        investment_id = context.get('active_ids', [])
+        if isinstance(investment_id, (tuple, list)):
+            investment_id = investment_id[0]
+
         Investment = self.pool.get('generationkwh.investment')
-        wiz = self.browse(cursor, uid, ids[0], context)
-        investment_ids = context.get('active_ids', [])
+        wiz = self.browse(cursor, uid, investment_id, context)
         new_partner_id = int(wiz.partner_id_alt.id)
         iban = wiz.iban.iban
         transfer_date = date.today().strftime('%Y-%m-%d')
 
-        new_investment_id = Investment.create_from_transfer(cursor, uid, investment_ids[0], new_partner_id, transfer_date, iban, context=None)
-        old = Investment.read(cursor, uid, investment_ids[0],['name'])
+        inv_obj = Investment.browse(cursor, uid, investment_id)
+        new_investment_id = Investment.create_from_transfer(cursor, uid, investment_id,
+            new_partner_id, transfer_date, iban, context=None, emission=inv_obj.emission_id.type)
+        old = Investment.read(cursor, uid, investment_id,['name'])
         new = Investment.read(cursor, uid, new_investment_id,['name'])
 
         info = "RESULTAT: \n"
