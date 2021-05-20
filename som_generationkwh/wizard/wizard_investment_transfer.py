@@ -43,7 +43,7 @@ class WizardInvestmentTransfer(osv.osv):
             investment_id = investment_id[0]
 
         Investment = self.pool.get('generationkwh.investment')
-        wiz = self.browse(cursor, uid, investment_id, context)
+        wiz = self.browse(cursor, uid, ids[0], context)
         new_partner_id = int(wiz.partner_id_alt.id)
         iban = wiz.iban.iban
         transfer_date = date.today().strftime('%Y-%m-%d')
