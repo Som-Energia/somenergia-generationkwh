@@ -12,8 +12,10 @@ setup(
     author_email = "info@somenergia.coop",
     url = 'https://github.com/Som-Energia/somenergia-generationkwh',
     long_description = readme,
+    long_description_content_type = 'text/markdown',
     license = 'GNU Affero General Public License v3 or later (AGPLv3+)',
     packages=find_packages(exclude=['*[tT]est*']),
+
     scripts=[
         'scripts/genkwh_assignments.py',
         'scripts/genkwh_investments.py',
@@ -27,6 +29,7 @@ setup(
         'scripts/genkwh_remainders.py',
         ],
     install_requires=[
+        'setuptools>=20.4', # markdown readme
         'yamlns>=0.6',
         'b2btest',
         'lxml', # b2btest dependency, to remove
