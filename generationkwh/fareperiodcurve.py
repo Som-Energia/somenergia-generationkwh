@@ -7,16 +7,38 @@ TODO:
 """
 
 import datetime
+from dateutil.relativedelta import relativedelta
 import numpy
 try:
     import libfacturacioatr
 except ImportError:
     libfacturacioatr = None
 
+DATE_START_NEW_FARES = datetime.date(2021,6,1)
 
 class FarePeriodCurve(object):
+
     def __init__(self, holidays):
         self.holidays = holidays
+
+    def get_pre_post_new_fares_periods(self, start, end):
+        if end < DATE_START_NEW_FARES or start >= DATE_START_NEW_FARES:
+            return [(start, end)]
+        translated_end = end - relativedelta(days=(end - DATE_START_NEW_FARES).days+1)
+        translated_end = translated_end + relativedelta(years=1)
+        translated_start = start + relativedelta(years=+1)
+        return [(translated_start, translated_end), (DATE_START_NEW_FARES, end)]
+
+    def get_period_mask_new_fares(self, start, end, fare, period):
+
+        if 'TD' in fare:
+            period_dates = self.get_pre_post_new_fares_periods(start, end)
+            mask = []
+            for range_start, range_end in period_dates:
+                mask += self._mask(range_start, range_end, fare, period)
+            return mask
+        else:
+            return self._mask(start, end, fare, period)
 
     def _mask(self, begin_date, end_date, fare, period):
         import libfacturacioatr
@@ -44,7 +66,7 @@ class FarePeriodCurve(object):
 
     def periodMask(self, fare, period, begin_date, end_date):
         return numpy.array(sum(
-            self._mask(begin_date, end_date, fare, period),[]))
+            self.get_period_mask_new_fares(begin_date, end_date, fare, period),[]))
 
 
 # vim: ts=4 sw=4 et
