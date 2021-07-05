@@ -7,16 +7,38 @@ TODO:
 """
 
 import datetime
+from dateutil.relativedelta import relativedelta
 import numpy
 try:
     import libfacturacioatr
 except ImportError:
     libfacturacioatr = None
 
+FIRST_DATE_TD_FARES = datetime.date(2021,6,1)
+LAST_DATE_TRANSLATED_INTERVAL = FIRST_DATE_TD_FARES + relativedelta(years=1) - relativedelta(days=1)
 
 class FarePeriodCurve(object):
+
     def __init__(self, holidays):
         self.holidays = holidays
+
+    def equivalentIntervalsForTDFares(self, start, end):
+        if end < FIRST_DATE_TD_FARES or start >= FIRST_DATE_TD_FARES:
+            return [(start, end)]
+
+        translated_start = start + relativedelta(years=+1)
+        return [(translated_start, LAST_DATE_TRANSLATED_INTERVAL), (FIRST_DATE_TD_FARES, end)]
+
+    def periodMaskConsideringOldAndTDFares(self, start, end, fare, period):
+
+        if 'TD' in fare:
+            period_dates = self.equivalentIntervalsForTDFares(start, end)
+            mask = []
+            for range_start, range_end in period_dates:
+                mask += self._mask(range_start, range_end, fare, period)
+            return mask
+        else:
+            return self._mask(start, end, fare, period)
 
     def _mask(self, begin_date, end_date, fare, period):
         import libfacturacioatr
@@ -44,7 +66,7 @@ class FarePeriodCurve(object):
 
     def periodMask(self, fare, period, begin_date, end_date):
         return numpy.array(sum(
-            self._mask(begin_date, end_date, fare, period),[]))
+            self.periodMaskConsideringOldAndTDFares(begin_date, end_date, fare, period),[]))
 
 
 # vim: ts=4 sw=4 et
