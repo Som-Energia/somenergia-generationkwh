@@ -23,8 +23,11 @@ class FarePeriodCurve(object):
         self.holidays = holidays
 
     def equivalentIntervalsForTDFares(self, start, end):
-        if end < FIRST_DATE_TD_FARES or start >= FIRST_DATE_TD_FARES:
+        if start >= FIRST_DATE_TD_FARES:
             return [(start, end)]
+
+        elif end < FIRST_DATE_TD_FARES:
+            return [(start + relativedelta(years=+1), end + relativedelta(years=+1))]
 
         translated_start = start + relativedelta(years=+1)
         return [(translated_start, LAST_DATE_TRANSLATED_INTERVAL), (FIRST_DATE_TD_FARES, end)]
