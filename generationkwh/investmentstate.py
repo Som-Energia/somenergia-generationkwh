@@ -59,6 +59,7 @@ class InvestmentState(object):
         'purchase_date',
         'log',
         'actions_log',
+        'last_interest_payed_date',
         ]
 
     def __init__(self, user=None, timestamp=None, **values):
@@ -611,7 +612,6 @@ class InvestmentState(object):
                 ),
             )
 
-
     def pendingAmortizations(self, current_date):
 
         if not self.purchase_date: return []
@@ -634,6 +634,28 @@ class InvestmentState(object):
             and amortization_number * yearlyAmount > self.amortized_amount
             ]
 
+
+    @action
+    def interest(self, date, to_be_interized):
+        """
+        Annotates interest for the given amount at the given date
+        """
+        if not self.purchase_date:
+            raise InvestmentStateError(u"Interest an unpaid investment")
+        return ns(
+            log = self._log(
+                u'INTEREST: Generada factura d\'interessos '
+                u'de {to_be_interized:.02f} € pel {last_interest_payed_date}\n',
+                    last_interest_payed_date = date,
+                    to_be_interized = to_be_interized,
+                ),
+            actions_log = self.addAction(
+                type = 'interest',
+                last_interest_payed_date=date,
+                amount=to_be_interized,
+                ),
+            last_interest_payed_date=date,
+            )
 
     @action
     def migrate(self, oldVersion, newVersion):
