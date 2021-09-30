@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
 from generationkwh import __version__
+import sys
 readme = open("README.md").read()
 
 setup(
@@ -40,7 +41,7 @@ setup(
         'decorator',
         'python-dateutil',
         'consolemsg>=0.3',
-        'somutils',
+        'somutils<1.7.1' if sys.version_info[0] < 3 else 'somutils', # gspread 4.0 not in Py2
         'tqdm',
         'mock<4', # TODO: remove indirect dependency for Py2
         'rsa<4.6', # TODO: remove indirect dependency for Py2
