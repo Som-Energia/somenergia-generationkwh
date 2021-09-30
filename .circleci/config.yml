@@ -92,6 +92,7 @@ jobs:
           name: link addons
           command: |
             export ROOT_DIR_SRC=~/src
+            . venv/bin/activate
             cd $ROOT_DIR_SRC/erp && ./tools/link_addons.sh
         
       # run tests!
