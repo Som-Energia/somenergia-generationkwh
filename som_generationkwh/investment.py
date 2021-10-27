@@ -1558,7 +1558,7 @@ class GenerationkwhInvestment(osv.osv):
                 if att_id:
                     mail_context.update({'attachment_ids': [(6, 0, [att_id])]})
                 self.send_mail(cursor, uid, invoice_id,
-                    'account.invoice', '_mail_pagament', investment_ids[0], mail_context)
+                    'account.invoice', '_mail_pagament', investment_ids[0], context=mail_context)
         return invoice_ids, errors
 
     def send_mail(self, cursor, uid, id, model, template, investment_id=None, context={}):

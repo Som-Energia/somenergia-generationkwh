@@ -397,7 +397,7 @@ class AportacionsActions(InvestmentActions):
                 mail_context.update({'attachment_ids': [(6, 0, [attachment_id])]})
 
         GenerationkwhInvestment.send_mail(cursor, uid, investment_id,
-            'generationkwh.investment', '_mail_creacio', mail_context)
+            'generationkwh.investment', '_mail_creacio', context=mail_context)
 
         return investment_id
 
