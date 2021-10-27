@@ -408,7 +408,7 @@ class AportacionsActions(InvestmentActions):
         # Attaching legal docs for higher than 5k APOS
         search_params = [('res_model', '=', 'generationkwh.emission'),
                          ('res_id', '=', emission_id),
-                         ('name', 'ilike', '%{}%'.format('CA' if partner_lang == 'ca_ES' else 'ES'))]
+                         ('name', 'ilike', '%_{}'.format('CA' if partner_lang == 'ca_ES' else 'ES'))]
         attachment_id = IrAttachment.search(cursor, uid, search_params)
         if attachment_id:
             return attachment_id[0]
