@@ -24,4 +24,5 @@ investmentPaymentMode = 'GENERATION kWh'
 amortizationPaymentMode = 'GENERATION kWh AMOR'
 bridgeAccountCode = '555000000004' # Bridge account to concile payments to the bank
 
+amountForlegalAtt = 5000
 # vim: et sw=4 ts=4

@@ -1551,12 +1551,13 @@ class GenerationkwhInvestment(osv.osv):
                     'account.invoice', '_mail_pagament', investment_ids[0])
         return invoice_ids, errors
 
-    def send_mail(self, cursor, uid, id, model, template, investment_id=None):
+    def send_mail(self, cursor, uid, id, model, template, investment_id=None, context={}):
 
         PEAccounts = self.pool.get('poweremail.core_accounts')
         WizardInvoiceOpenAndSend = self.pool.get('wizard.invoice.open.and.send')
         MailMockup = self.pool.get('generationkwh.mailmockup')
         IrModelData = self.pool.get('ir.model.data')
+
         if not investment_id:
             investment_id = id
         prefix = self.investment_actions(cursor, uid, investment_id).get_prefix_semantic_id()
@@ -1572,7 +1573,9 @@ class GenerationkwhInvestment(osv.osv):
                 ])
         else:
             from_id = from_id[:1]
-        ctx = {
+
+        ctx = context.copy()
+        ctx.update({
             'active_ids': [id],
             'active_id': id,
             'src_rec_ids': [id],
@@ -1580,7 +1583,8 @@ class GenerationkwhInvestment(osv.osv):
             'from': from_id,
             'state': 'single',
             'priority': '0',
-            }
+            })
+
         with AsyncMode('sync') as asmode:
             if MailMockup.isActive(cursor, uid):
                 MailMockup.send_mail(cursor, uid, ns(
