@@ -42,7 +42,6 @@ setup(
         'decorator<5' if py2 else 'decorator', # Py2
         'plantmeter',
         'python-dateutil',
-        'python-dateutil',
         'consolemsg>=0.3',
         'somutils',
         'mock<4' if py2 else '', # TODO: remove indirect dependency for Py2
