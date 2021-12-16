@@ -41,10 +41,9 @@ setup(
         'decorator',
         'python-dateutil',
         'consolemsg>=0.3',
-        'somutils<1.7.1' if sys.version_info[0] < 3 else 'somutils', # gspread 4.0 not in Py2
+        'somutils',
         'tqdm',
         'mock<4', # TODO: remove indirect dependency for Py2
-        'rsa<4.6', # TODO: remove indirect dependency for Py2
 #        'libfacturacioatr',
     ],
     include_package_data = True,
