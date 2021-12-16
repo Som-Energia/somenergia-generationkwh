@@ -37,14 +37,14 @@ setup(
         'b2btest',
         'lxml', # b2btest dependency, to remove
         'wavefile', # b2btest dependency, to remove
-        'numpy',
+        'numpy<1.19' if py2 else 'numpy', # Py2
+        'decorator<5' if py2 else 'decorator', # Py2
         'plantmeter',
         'python-dateutil',
         'python-dateutil',
         'consolemsg>=0.3',
         'somutils',
         'tqdm',
-        'decorator<5' if py2 else 'decorator', # Py2
         'mock<4' if py2 else 'mock', # TODO: remove indirect dependency for Py2
 #        'libfacturacioatr',
     ],
