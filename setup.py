@@ -43,7 +43,7 @@ setup(
         'consolemsg>=0.3',
         'somutils',
         'tqdm',
-        'mock<4', # TODO: remove indirect dependency for Py2
+        'mock<4' if sys.version_info < (3,) else 'mock', # TODO: remove indirect dependency for Py2
 #        'libfacturacioatr',
     ],
     include_package_data = True,
