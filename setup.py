@@ -34,6 +34,7 @@ setup(
     install_requires=[
         'setuptools>=20.4', # markdown readme
         'yamlns>=0.6',
+        'tqdm',
         'b2btest',
         'lxml', # b2btest dependency, to remove
         'wavefile', # b2btest dependency, to remove
@@ -44,7 +45,6 @@ setup(
         'python-dateutil',
         'consolemsg>=0.3',
         'somutils',
-        'tqdm',
         'mock<4' if py2 else '', # TODO: remove indirect dependency for Py2
 #        'libfacturacioatr',
     ],
