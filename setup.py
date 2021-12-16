@@ -4,6 +4,8 @@ from generationkwh import __version__
 import sys
 readme = open("README.md").read()
 
+py2 = sys.version_info<(3,)
+
 setup(
     name = "somenergia-generationkwh",
     version = __version__,
@@ -38,12 +40,12 @@ setup(
         'numpy',
         'plantmeter',
         'python-dateutil',
-        'decorator',
         'python-dateutil',
         'consolemsg>=0.3',
         'somutils',
         'tqdm',
-        'mock<4' if sys.version_info < (3,) else 'mock', # TODO: remove indirect dependency for Py2
+        'decorator<5' if py2 else 'decorator', # Py2
+        'mock<4' if py2 else 'mock', # TODO: remove indirect dependency for Py2
 #        'libfacturacioatr',
     ],
     include_package_data = True,
