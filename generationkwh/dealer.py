@@ -53,7 +53,7 @@ class Dealer(object):
         for asig in assignments:
             seek_end = min(last_date,asig.last_usable_date)
             if seek_end<seek_start: continue
-            memberUse = self._tracker.use_kwh(
+            memberUse, usage = self._tracker.use_kwh(
                     asig.member_id,
                     seek_start,
                     seek_end,
@@ -66,7 +66,7 @@ class Dealer(object):
                 "Genkwh Usage traker returned more ({}) than required (10) for member member1"
                 .format( memberUse, kwh-used, asig.member_id ))
 
-            result.append(dict(member_id=asig.member_id, kwh=int(memberUse)))
+            result.append(dict(member_id=asig.member_id, kwh=int(memberUse), usage=usage))
             used += memberUse
 
         return result
