@@ -37,7 +37,6 @@ setup(
         'tqdm',
         'b2btest',
         'lxml', # b2btest dependency, to remove
-        'wavefile', # b2btest dependency, to remove
         'numpy<1.17' if py2 else 'numpy', # Py2
         'decorator<5' if py2 else 'decorator', # Py2
         'plantmeter',
@@ -46,7 +45,7 @@ setup(
         'somutils',
         'mock<4' if py2 else '', # TODO: remove indirect dependency for Py2
         'pytest',
-        'pytest-cov',
+        'pytest-cov<3' if py2 else 'pytest-cov', # Py2
 #        'libfacturacioatr',
     ],
     include_package_data = True,
