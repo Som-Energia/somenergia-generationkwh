@@ -45,11 +45,12 @@ setup(
         'consolemsg>=0.3',
         'somutils',
         'mock<4' if py2 else '', # TODO: remove indirect dependency for Py2
+        'pytest',
+        'pytest-cov',
 #        'libfacturacioatr',
     ],
     include_package_data = True,
     test_suite = 'generationkwh',
-#    test_runner = 'colour_runner.runner.ColourTextTestRunner',
     classifiers = [
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
