@@ -25,7 +25,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: install system dependencies
         run:
-          sudo apt install mongod
+          wget -qO - https://www.mongodb.org/static/pgp/server-3.2.asc | sudo apt-key add -
+          echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+          sudo apt-get update -y
+          sudo apt install mongodb-org-server
       - name: Install dependencies
         run: |
           pip install https://files.pythonhosted.org/packages/3e/5c/2867e46f03d2fcc3d014a02eeb11ec55f3f8d9eddddcc5578ae8457f84f8/ERPpeek-1.7.1-py2.py3-none-any.whl
