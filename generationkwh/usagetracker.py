@@ -76,12 +76,14 @@ class UsageTracker(object):
                 to keep same solar time in the same position across summer
                 daylight saving shift.
             """
-            days = index//25
-            resultday = date.date() + datetime.timedelta(days=days)
+            hoursPerDay = 25
+            days = index//hoursPerDay
+            resultday = start_date + datetime.timedelta(days=days)
             naiveday = datetime.datetime.combine(resultday, datetime.time(0,0,0))
             if naiveday.tzinfo is None:
                 localday =  TZ.localize(naiveday)
-            localday =  naiveday.astimezone(TZ)
+            else:
+                localday =  naiveday.astimezone(TZ)
 
             nextDay = TZ.normalize(localday + datetime.timedelta(days=1))
             toWinterDls = localday.dst() and not nextDay.dst()
@@ -93,7 +95,7 @@ class UsageTracker(object):
             return TZ.normalize(localday+datetime.timedelta(hours=hours))
 
         result = {}
-        for i,q in filter(zip(enumerate(usage)), lambda x,y : y>0):
+        for i,q in filter(lambda x: x[1] > 0, enumerate(usage)):
             current_date = curveIndexToDate(start_date, i)
             result[current_date] = q
 
