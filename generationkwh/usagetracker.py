@@ -26,6 +26,10 @@ class UsageTracker(object):
             ))
 
     def use_kwh(self, member, start, end, fare, period, kwh):
+        allocated, usage_date_dict = self.use_kwh_with_dates_dict(member, start, end, fare, period, kwh)
+        return allocated
+
+    def use_kwh_with_dates_dict(self, member, start, end, fare, period, kwh):
         assert type(start) == datetime.date
         assert type(end) == datetime.date
         rights = self._rights.rights_kwh(member, start, end)
@@ -33,16 +37,19 @@ class UsageTracker(object):
         usage = self._usage.usage(member, start, end)
 
         allocated = 0
+        used_now =[]
         for i, (p, u, m) in enumerate(zip(rights, usage, periodMask)):
             if not m: continue # not in period
-            used = min(kwh-allocated, p-u)
+            used = int(min(kwh-allocated, p-u))
             usage[i] += used
-            allocated += used
-            if kwh - allocated < 1:
-                break
+            if used:
+                used_now.append((i,used))
+                allocated += used
+                if kwh - allocated < 1:
+                    break
 
         self._usage.updateUsage(member, start, usage)
-        usage_date_dict = self.convert_usage_date_quantity(usage, start, end)
+        usage_date_dict = self.convert_usage_date_quantity(used_now, start, end)
         return allocated, usage_date_dict
 
     def refund_kwh(self, member, start, end, fare, period, kwh):
@@ -95,9 +102,10 @@ class UsageTracker(object):
             return TZ.normalize(localday+datetime.timedelta(hours=hours))
 
         result = {}
-        for i,q in filter(lambda x: x[1] > 0, enumerate(usage)):
+        for i, q in usage:
             current_date = curveIndexToDate(start_date, i)
-            result[current_date] = q
+            current_date_str = datetime.strptime(current_date, '%Y-%m-%d %H:%M:%S')
+            result[current_date_str] = q
 
         return result
 
