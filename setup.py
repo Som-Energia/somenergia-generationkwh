@@ -4,6 +4,8 @@ from generationkwh import __version__
 import sys
 readme = open("README.md").read()
 
+py2 = sys.version_info<(3,)
+
 setup(
     name = "somenergia-generationkwh",
     version = __version__,
@@ -32,24 +34,22 @@ setup(
     install_requires=[
         'setuptools>=20.4', # markdown readme
         'yamlns>=0.6',
+        'tqdm',
         'b2btest',
         'lxml', # b2btest dependency, to remove
-        'wavefile', # b2btest dependency, to remove
-        'numpy',
+        'numpy<1.17' if py2 else 'numpy', # Py2
+        'decorator<5' if py2 else 'decorator', # Py2
         'plantmeter',
         'python-dateutil',
-        'decorator',
-        'python-dateutil',
         'consolemsg>=0.3',
-        'somutils<1.7.1' if sys.version_info[0] < 3 else 'somutils', # gspread 4.0 not in Py2
-        'tqdm',
-        'mock<4', # TODO: remove indirect dependency for Py2
-        'rsa<4.6', # TODO: remove indirect dependency for Py2
+        'somutils',
+        'mock<4' if py2 else '', # TODO: remove indirect dependency for Py2
+        'pytest',
+        'pytest-cov<3' if py2 else 'pytest-cov', # Py2
 #        'libfacturacioatr',
     ],
     include_package_data = True,
     test_suite = 'generationkwh',
-#    test_runner = 'colour_runner.runner.ColourTextTestRunner',
     classifiers = [
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',

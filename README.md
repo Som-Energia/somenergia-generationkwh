@@ -2,7 +2,8 @@
 
 OpenERP module and library to manage [Som Energia]'s Generation kWh
 
-[![Build Status](https://travis-ci.org/Som-Energia/somenergia-generationkwh.svg?branch=master)](https://travis-ci.org/Som-Energia/somenergia-generationkwh)
+
+[![CI](https://github.com/Som-Energia/somenergia-generationkwh/actions/workflows/main.yml/badge.svg)](https://github.com/Som-Energia/somenergia-generationkwh/actions/workflows/main.yml)
 [![CircleCI](https://circleci.com/gh/Som-Energia/somenergia-generationkwh.svg?style=svg)](https://circleci.com/gh/Som-Energia/somenergia-generationkwh)
 [![Coverage Status](https://coveralls.io/repos/github/Som-Energia/somenergia-generationkwh/badge.svg)](https://coveralls.io/github/Som-Energia/somenergia-generationkwh)
 
