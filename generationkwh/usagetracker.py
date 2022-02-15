@@ -41,8 +41,8 @@ class UsageTracker(object):
         for i, (p, u, m) in enumerate(zip(rights, usage, periodMask)):
             if not m: continue # not in period
             used = int(min(kwh-allocated, p-u))
-            usage[i] += used
             if used:
+                usage[i] += used
                 used_now.append((i,used))
                 allocated += used
                 if kwh - allocated < 1:
@@ -53,6 +53,10 @@ class UsageTracker(object):
         return allocated, usage_date_dict
 
     def refund_kwh(self, member, start, end, fare, period, kwh):
+        allocated, usage_date_dict = self.refund_kwh_with_dates_dict(member, start, end, fare, period, kwh)
+        return allocated
+
+    def refund_kwh_with_dates_dict(self, member, start, end, fare, period, kwh):
         assert type(start) == datetime.date
         assert type(end) == datetime.date
         rights = self._rights.rights_kwh(member, start, end)
@@ -60,14 +64,20 @@ class UsageTracker(object):
         usage = self._usage.usage(member, start, end)
 
         deallocated = 0
+        unused_now = []
         for i, (u, m) in reversed(list(enumerate(zip(usage, periodMask)))):
             if not m: continue # not in period
             unused = min(kwh-deallocated, u)
-            usage[i] -= unused
-            deallocated += unused
+            if unused:
+                usage[i] -= unused
+                unused_now.append((i, -unused))
+                deallocated += unused
+                if kwh - deallocated < 1:
+                    break
 
         self._usage.updateUsage(member, start, usage)
-        return deallocated
+        usage_date_dict = self.convert_usage_date_quantity(unused_now, start, end)
+        return deallocated, usage_date_dict
 
     def usage(self, member, start, end):
         assert type(start) == datetime.date
@@ -104,7 +114,7 @@ class UsageTracker(object):
         result = {}
         for i, q in usage:
             current_date = curveIndexToDate(start_date, i)
-            current_date_str = datetime.strptime(current_date, '%Y-%m-%d %H:%M:%S')
+            current_date_str = datetime.datetime.strftime(current_date, '%Y-%m-%d %H:%M:%S')
             result[current_date_str] = q
 
         return result

@@ -81,9 +81,13 @@ class Dealer(object):
         assert type(first_date) == datetime.date
         assert type(last_date) == datetime.date
         seek_start = first_date + relativedelta(years=-1)
-        return self._tracker.refund_kwh(member_id,
+        memberUse, unusage =  self._tracker.refund_kwh_with_dates_dict(member_id,
             seek_start, last_date,
             fare, period, kwh)
 
+        result = []
+        result.append(dict(member_id=member_id, kwh=int(memberUse), unusage=unusage))
+
+        return result
 
 # vim: ts=4 sw=4 et
