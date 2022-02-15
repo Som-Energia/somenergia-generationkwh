@@ -85,9 +85,6 @@ class Dealer(object):
             seek_start, last_date,
             fare, period, kwh)
 
-        result = []
-        result.append(dict(member_id=member_id, kwh=int(memberUse), unusage=unusage))
-
-        return result
+        return dict(member_id=member_id, kwh=int(memberUse), unusage=unusage)
 
 # vim: ts=4 sw=4 et

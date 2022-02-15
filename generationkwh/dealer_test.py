@@ -399,7 +399,7 @@ class Dealer_Test(unittest.TestCase):
                 '2.0A', 'P1', 100),
             ])
 
-        self.assertEqual(result, [{'kwh': 20, 'member_id': 'member1', 'unusage': {}}])
+        self.assertEqual(result, {'kwh': 20, 'member_id': 'member1', 'unusage': {}})
 
 
     def test_isactive_withAssignments_andInvesments(self):
