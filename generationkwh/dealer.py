@@ -53,7 +53,7 @@ class Dealer(object):
         for asig in assignments:
             seek_end = min(last_date,asig.last_usable_date)
             if seek_end<seek_start: continue
-            memberUse = self._tracker.use_kwh(
+            memberUse, usage = self._tracker.use_kwh_with_dates_dict(
                     asig.member_id,
                     seek_start,
                     seek_end,
@@ -66,7 +66,7 @@ class Dealer(object):
                 "Genkwh Usage traker returned more ({}) than required (10) for member member1"
                 .format( memberUse, kwh-used, asig.member_id ))
 
-            result.append(dict(member_id=asig.member_id, kwh=int(memberUse)))
+            result.append(dict(member_id=asig.member_id, kwh=int(memberUse), usage=usage))
             used += memberUse
 
         return result
@@ -81,9 +81,10 @@ class Dealer(object):
         assert type(first_date) == datetime.date
         assert type(last_date) == datetime.date
         seek_start = first_date + relativedelta(years=-1)
-        return self._tracker.refund_kwh(member_id,
+        memberUse, unusage =  self._tracker.refund_kwh_with_dates_dict(member_id,
             seek_start, last_date,
             fare, period, kwh)
 
+        return dict(member_id=member_id, kwh=int(memberUse), unusage=unusage)
 
 # vim: ts=4 sw=4 et
