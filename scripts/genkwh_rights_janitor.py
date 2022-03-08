@@ -70,10 +70,11 @@ def get_mongo_rights(member_id, consultation_date=None, start=START_DATE):
 
 def get_or_create_DAYD_member_rights(member_id):
     member_filepath = "{}/{}.json".format(PREV_RIGHTS_FOLDER, member_id)
+    data = ''
     if path.exists(member_filepath):
-        with open('data.json', 'r') as f:
+        with open(member_filepath, 'r') as f:
             data = json.load(f)
-    return data
+        return data
 
     data = get_mongo_rights(member_id, consultation_date=D_DAY)
     with open(member_filepath, 'w') as f:
@@ -87,7 +88,7 @@ def get_rights_invoices(partner_id):
     for rul in rul_o.read(rul_ids):
         if not rul['datetime'] in result:
             result[rul['datetime']] = 0
-        result[rul['datetime']] += run['quantity']
+        result[rul['datetime']] += rul['quantity']
 
     return result
 
@@ -96,13 +97,13 @@ def get_difference_DDay_now_mongo(member_id):
     today_mongo = get_mongo_rights(member_id)
     differences = today_mongo.copy()
 
-    for k,v in before_d_day_mongo:
+    for k,v in before_d_day_mongo.iteritems():
         if k in differences:
             differences[k] -= v
         else:
             differences[k] = -v
 
-    return diferencies
+    return differences
 
 def get_incoherent_rights(member_id):
     partner_id = soci_o.read(member_id, ['partner_id'])['partner_id'][0]
@@ -111,7 +112,7 @@ def get_incoherent_rights(member_id):
 
     accions = {}
     total = 0
-    for k,v in increment_mongo:
+    for k,v in increment_mongo.iteritems():
         if k in today_invoices:
             if v != today_invoices[k]:
                 diff = v - today_invoices[k]
@@ -126,7 +127,7 @@ def get_incoherent_rights(member_id):
             #(Volem anular-lo) Crear dret k amb valor 0
 
     if accions:
-        errror("El partner {} ha desquadrat per un total de {} drets (mongo - erp).".format(str(member_id), str(total)))
+        error("El partner {} ha desquadrat per un total de {} drets (mongo - erp).".format(str(member_id), str(total)))
     return accions
 
 def main():
@@ -146,11 +147,14 @@ def main():
             step("Member {}/{}".format(str(i), str(len(members))))
             member_actions[member_id] = get_incoherent_rights(member_id)
         except KeyboardInterrupt as e:
+            break
+        except Exception as e:
+            error("Member {}, error: {}".format(member_id, str(e)))
 
-    filename = "{}/{}-{}.json".format(PREV_RIGHTS_FOLDER, actions, datetime.today())
+    filename = "{}/{}-{}.json".format(PREV_RIGHTS_FOLDER, 'actions', datetime.datetime.today())
     success("Consulta acabada. Es guardaran les accions al fitxer {}".format(filename))
 
     with open(filename, 'w') as f:
-        f.write(json.load(member_actions))
+        f.write(json.dumps(member_actions))
 
     success("Sortint...")
