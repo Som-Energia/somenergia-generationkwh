@@ -84,6 +84,8 @@ def get_or_create_DAYD_member_rights(member_id):
 def get_rights_invoices(partner_id):
     rul_ids = rul_o.search([('owner_id', '=', partner_id)])
     result = {}
+    if not rul_ids:
+        return result
     for rul in rul_o.read(rul_ids):
         if not rul['datetime'] in result:
             result[rul['datetime']] = 0
@@ -121,8 +123,9 @@ def get_incoherent_rights(member_id):
                 #(Volem rectificar-lo) Crear dret k i valor erp
                 total += diff
         elif v != 0:
-            warn("Dret {} -> ERROR: només hi és al mongo: {}".format(k, v))
-            accions.update({k:0})
+            new_value = before_d_day_mongo[k]-0
+            warn("Dret {} -> ERROR: només hi és al mongo: {}. Escrivim {}:{}".format(k, v, k, new_value))
+            accions.update({k:new_value})
             total += v
             #cal tenir en compte que si no hi ha diferències entre el dia D i avui, vol dir que tot ok.
             #(Volem anular-lo) Crear dret k amb valor 0
