@@ -134,7 +134,6 @@ def get_incoherent_rights(member_id):
                 new_value = max(before_d_day_value+today_invoices[k], 0)
                 warn("Dret {} -> diferència (mongo-erp): {}. Escrivim {}:{}".format(k, diff, k, new_value))
                 accions.update({k:new_value})
-                #(Volem rectificar-lo) Crear dret k i valor erp
                 total += diff
         elif v != 0:
             before_d_day_value = before_d_day_mongo[k] if k in before_d_day_mongo else 0
@@ -143,7 +142,6 @@ def get_incoherent_rights(member_id):
             accions.update({k:new_value})
             total += v
             #cal tenir en compte que si no hi ha diferències entre el dia D i avui, vol dir que tot ok.
-            #(Volem anular-lo) Crear dret k amb valor 0
 
     if accions:
         error("El partner {} ha desquadrat per un total de {} drets (mongo - erp).".format(str(member_id), str(total)))
