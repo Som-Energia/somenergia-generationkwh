@@ -94,6 +94,13 @@ def get_rights_invoices(partner_id):
     return result
 
 def get_difference_DDay_now_mongo(member_id):
+    """
+    Aquesta funció retorna tres diccionaris:
+    - before_d_day_mongo: quins drets hi havia marcats a mongo justa abans de tenir dades a l'ERP
+    - today_mongo: quins drets hi ha marcats a mongo avui
+    - differences: canvis entre els dos diccionaris anteriors, que estaran reflexats a l'ERP.
+    """
+
     before_d_day_mongo = get_or_create_DAYD_member_rights(member_id)
     today_mongo = get_mongo_rights(member_id)
     differences = today_mongo.copy()
@@ -107,6 +114,12 @@ def get_difference_DDay_now_mongo(member_id):
     return before_d_day_mongo, today_mongo, differences
 
 def get_incoherent_rights(member_id):
+    """
+    Comprovem que els canvis del diccionari differences estiguin reflexats a l'ERP.
+    En cas contrari, creem una acció per:
+    marcar a mongo per a cada dret: (QUANTITAT USADA ANTERIOR A LA MILLORA) + (INCREMENT QUE FIGURA A L'ERP)
+    """
+
     partner_id = soci_o.read(member_id, ['partner_id'])['partner_id'][0]
     before_d_day_mongo, today_mongo, differences = get_difference_DDay_now_mongo(member_id)
     today_invoices = get_rights_invoices(partner_id)
@@ -118,7 +131,7 @@ def get_incoherent_rights(member_id):
             if v != today_invoices[k]:
                 diff = v - today_invoices[k]
                 before_d_day_value = before_d_day_mongo[k] if k in before_d_day_mongo else 0
-                new_value = max(before_d_day_value-today_invoices[k], 0)
+                new_value = max(before_d_day_value+today_invoices[k], 0)
                 warn("Dret {} -> diferència (mongo-erp): {}. Escrivim {}:{}".format(k, diff, k, new_value))
                 accions.update({k:new_value})
                 #(Volem rectificar-lo) Crear dret k i valor erp
