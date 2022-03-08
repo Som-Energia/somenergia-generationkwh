@@ -13,6 +13,7 @@ import dbconfig
 from yamlns import namespace as ns
 from plantmeter.isodates import localisodate, toLocal, asUtc, addDays
 import pymongo
+from bson.son import SON
 
 c = erppeek.Client(**dbconfig.erppeek)
 mongoClient = pymongo.MongoClient(**dbconfig.mongo)
@@ -37,8 +38,6 @@ def get_mongo_rights(member_id, consultation_date=None, start=START_DATE):
         filters.update({"create_at": {
             '$lt': localisodate(consultation_date)
         }})
-    from bson.son import SON
-
     pipeline = [
         {"$match":
             filters,
@@ -103,27 +102,29 @@ def get_difference_DDay_now_mongo(member_id):
         else:
             differences[k] = -v
 
-    return differences
+    return before_d_day_mongo, today_mongo, differences
 
 def get_incoherent_rights(member_id):
     partner_id = soci_o.read(member_id, ['partner_id'])['partner_id'][0]
-    increment_mongo = get_difference_DDay_now_mongo(member_id)
+    before_d_day_mongo, today_mongo, differences = get_difference_DDay_now_mongo(member_id)
     today_invoices = get_rights_invoices(partner_id)
 
     accions = {}
     total = 0
-    for k,v in increment_mongo.iteritems():
+    for k,v in differences.iteritems():
         if k in today_invoices:
             if v != today_invoices[k]:
                 diff = v - today_invoices[k]
-                warn("Dret {} -> diferència amb mongo (mongo-erp): {}".format(k, diff))
-                accions.update({k:today_invoices[k]})
+                new_value = max(before_d_day_mongo[k]-today_invoices[k], 0)
+                warn("Dret {} -> diferència (mongo-erp): {}. Escrivim {}:{}".format(k, diff, k, new_value))
+                accions.update({k:new_value})
                 #(Volem rectificar-lo) Crear dret k i valor erp
                 total += diff
-        else:
+        elif v != 0:
             warn("Dret {} -> ERROR: només hi és al mongo: {}".format(k, v))
             accions.update({k:0})
             total += v
+            #cal tenir en compte que si no hi ha diferències entre el dia D i avui, vol dir que tot ok.
             #(Volem anular-lo) Crear dret k amb valor 0
 
     if accions:
@@ -158,3 +159,6 @@ def main():
         f.write(json.dumps(member_actions))
 
     success("Sortint...")
+
+if __name__ == '__main__':
+    main()
