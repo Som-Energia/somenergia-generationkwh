@@ -117,13 +117,15 @@ def get_incoherent_rights(member_id):
         if k in today_invoices:
             if v != today_invoices[k]:
                 diff = v - today_invoices[k]
-                new_value = max(before_d_day_mongo[k]-today_invoices[k], 0)
+                before_d_day_value = before_d_day_mongo[k] if k in before_d_day_mongo else 0
+                new_value = max(before_d_day_value-today_invoices[k], 0)
                 warn("Dret {} -> diferència (mongo-erp): {}. Escrivim {}:{}".format(k, diff, k, new_value))
                 accions.update({k:new_value})
                 #(Volem rectificar-lo) Crear dret k i valor erp
                 total += diff
         elif v != 0:
-            new_value = before_d_day_mongo[k]-0
+            before_d_day_value = before_d_day_mongo[k] if k in before_d_day_mongo else 0
+            new_value = before_d_day_value
             warn("Dret {} -> ERROR: només hi és al mongo: {}. Escrivim {}:{}".format(k, v, k, new_value))
             accions.update({k:new_value})
             total += v
