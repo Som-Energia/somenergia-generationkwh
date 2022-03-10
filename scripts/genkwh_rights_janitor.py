@@ -152,48 +152,23 @@ def get_incoherent_rights(member_id):
 
 def insert_actions_mongo(actions_filename):
     actions = {}
-    with open(actions_filename, 'w') as f:
+    with open(actions_filename, 'r') as f:
         actions = json.load(f)
 
     for member_id, to_insert  in actions.items():
         for dt, usage in to_insert.items():
             try:
                 insert_values = {
-                    'name': member_id,
+                    'name': int(member_id),
                     'datetime': toLocal(datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")),
-                    'create_at': toLocal(datetime.strptime(datetime.now(), "%Y-%m-%d %H:%M:%S")),
-                    'usage_kwh': usage
+                    'create_at': toLocal(datetime.now()),
+                    'usage_kwh': int(usage)
                 }
                 mongodb.memberrightusage.insert(insert_values)
             except Exception as e:
                 error("Pel member {} no s'ha pogut inserir correctament {}->{} ".format(member_id, dt, usage))
             else:
                 step("Inserit {} al dret {} del member {}".format(usage, dt, member_id))
-        # name = member_id
-        # #asUtc(
-        # toLocal(datetime.strptime(
-        #     "2021-04-16 13:00:00", "%Y-%m-%d %H:%M:%S"))
-        # datatime.datetime.today().strftime('%Y-%m-%dT00:00:00')
-        # usage_kwh
-
-def get_mongo_data(mongo_db, mongo_collection, cups):
-    all_curves_search_query = {'name': {'$regex': '^{}'.format(cups[:20])}}
-    fields = {'_id': False}
-    curves =  mongo_db[mongo_collection].find(
-        all_curves_search_query,
-        fields)
-    return curves
-
-def set_mongo_data(mongo_db, mongo_collection, curve_type, cups, mongo_data):
-    try:
-        curves = mongo_db[mongo_collection].insert(
-            mongo_data, continue_on_error=True)
-    except pymongo.errors.DuplicateKeyError as e:
-        print "Alguns registres de la corba " + curve_type + " ja existeixen."
-    except Exception as e:
-        print "Error no controlat: " + str(e)
-        return False
-    return True
 
 def main(doit=False, actions_filename=False):
     if not os.path.exists(PREV_RIGHTS_FOLDER):
