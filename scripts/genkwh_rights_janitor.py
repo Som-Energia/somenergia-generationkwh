@@ -4,10 +4,12 @@
 Displays time series from Mongo
 """
 
+from xmlrpc.client import DateTime
 import erppeek
 import io, os, json
 from os import path
-import datetime
+import argparse
+from datetime import datetime
 from consolemsg import step, success, warn, error, fail
 import dbconfig
 from yamlns import namespace as ns
@@ -17,6 +19,8 @@ from bson.son import SON
 
 c = erppeek.Client(**dbconfig.erppeek)
 mongoClient = pymongo.MongoClient(**dbconfig.mongo)
+mongodb = mongoClient.somenergia
+
 soci_o = c.model('somenergia.soci')
 rul_o = c.model('generationkwh.right.usage.line')
 
@@ -25,7 +29,6 @@ PREV_RIGHTS_FOLDER = './2022022220_memberRights'
 START_DATE = '2021-01-01'
 
 def get_mongo_rights(member_id, consultation_date=None, start=START_DATE):
-    mongodb = mongoClient.somenergia
     start = localisodate(start)
 
     filters = {
@@ -61,7 +64,7 @@ def get_mongo_rights(member_id, consultation_date=None, start=START_DATE):
             'usage_kwh': {'$sum': '$usage_kwh'},
         }},
     ]
-    toLocalDateString = lambda x: datetime.datetime.strftime(toLocal(asUtc(x)), '%Y-%m-%d %H:%M:%S')
+    toLocalDateString = lambda x: datetime.strftime(toLocal(asUtc(x)), '%Y-%m-%d %H:%M:%S')
     return {
         toLocalDateString(x['datetime']): x['usage_kwh']
         for x in mongodb.memberrightusage.aggregate(pipeline,cursor={},allowDiskUse=True)
@@ -132,13 +135,13 @@ def get_incoherent_rights(member_id):
                 diff = v - today_invoices[k]
                 before_d_day_value = before_d_day_mongo[k] if k in before_d_day_mongo else 0
                 new_value = max(before_d_day_value+today_invoices[k], 0)
-                warn("Dret {} -> diferència (mongo-erp): {}. Escrivim {}:{}".format(k, diff, k, new_value))
+                warn("Dret {} -> diferència (mongo-erp): {}. Escrivim {}->{}".format(k, diff, k, new_value))
                 accions.update({k:new_value})
                 total += diff
         elif v != 0:
             before_d_day_value = before_d_day_mongo[k] if k in before_d_day_mongo else 0
             new_value = before_d_day_value
-            warn("Dret {} -> ERROR: només hi és al mongo: {}. Escrivim {}:{}".format(k, v, k, new_value))
+            warn("Dret {} -> ERROR: només hi és al mongo: {}. Escrivim {}->{}".format(k, v, k, new_value))
             accions.update({k:new_value})
             total += v
             #cal tenir en compte que si no hi ha diferències entre el dia D i avui, vol dir que tot ok.
@@ -147,9 +150,62 @@ def get_incoherent_rights(member_id):
         error("El partner {} ha desquadrat per un total de {} drets (mongo - erp).".format(str(member_id), str(total)))
     return accions
 
-def main():
+def insert_actions_mongo(actions_filename):
+    actions = {}
+    with open(actions_filename, 'w') as f:
+        actions = json.load(f)
+
+    for member_id, to_insert  in actions.items():
+        for dt, usage in to_insert.items():
+            try:
+                insert_values = {
+                    'name': member_id,
+                    'datetime': toLocal(datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")),
+                    'create_at': toLocal(datetime.strptime(datetime.now(), "%Y-%m-%d %H:%M:%S")),
+                    'usage_kwh': usage
+                }
+                mongodb.memberrightusage.insert(insert_values)
+            except Exception as e:
+                error("Pel member {} no s'ha pogut inserir correctament {}->{} ".format(member_id, dt, usage))
+            else:
+                step("Inserit {} al dret {} del member {}".format(usage, dt, member_id))
+        # name = member_id
+        # #asUtc(
+        # toLocal(datetime.strptime(
+        #     "2021-04-16 13:00:00", "%Y-%m-%d %H:%M:%S"))
+        # datatime.datetime.today().strftime('%Y-%m-%dT00:00:00')
+        # usage_kwh
+
+def get_mongo_data(mongo_db, mongo_collection, cups):
+    all_curves_search_query = {'name': {'$regex': '^{}'.format(cups[:20])}}
+    fields = {'_id': False}
+    curves =  mongo_db[mongo_collection].find(
+        all_curves_search_query,
+        fields)
+    return curves
+
+def set_mongo_data(mongo_db, mongo_collection, curve_type, cups, mongo_data):
+    try:
+        curves = mongo_db[mongo_collection].insert(
+            mongo_data, continue_on_error=True)
+    except pymongo.errors.DuplicateKeyError as e:
+        print "Alguns registres de la corba " + curve_type + " ja existeixen."
+    except Exception as e:
+        print "Error no controlat: " + str(e)
+        return False
+    return True
+
+def main(doit=False, actions_filename=False):
     if not os.path.exists(PREV_RIGHTS_FOLDER):
         os.makedirs(PREV_RIGHTS_FOLDER)
+
+    if doit and actions_filename:
+        insert_actions_mongo(actions_filename)
+        success("Sortint...")
+        return
+    elif actions_filename:
+        error("Per fer modificacions a mongo cal el flag --doit")
+        return
 
     step("Connectat a {}".format(c))
 
@@ -168,13 +224,44 @@ def main():
         except Exception as e:
             error("Member {}, error: {}".format(member_id, str(e)))
 
-    filename = "{}/{}-{}.json".format(PREV_RIGHTS_FOLDER, 'actions', datetime.datetime.today())
+    filename = "{}/{}-{}.json".format(PREV_RIGHTS_FOLDER, 'actions', datetime.today().strftime("%Y%m%d_%H%M"))
     success("Consulta acabada. Es guardaran les accions al fitxer {}".format(filename))
 
     with open(filename, 'w') as f:
         f.write(json.dumps(member_actions))
 
+    if doit:
+        insert_actions_mongo(filename)
+
     success("Sortint...")
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(
+        description="Corregeix la diferència de drets entre els usats i l'ERP"
+    )
+
+    parser.add_argument(
+        '--doit',
+        type=bool,
+        default=False,
+        const=True,
+        nargs='?',
+        help='realitza les accions'
+    )
+    parser.add_argument(
+        '--actions-file',
+        dest='actions_filename',
+        required=False,
+        default=False,
+        help="Fitxer json amb les accions a fer"
+    )
+
+    args = parser.parse_args()
+    if args.doit:
+        success("Es faran les accions proposades (--doit)")
+    else:
+        success("Només es consulten les accions que cal fer")
+
+    doit = args.doit
+    actions_filename = args.actions_filename
+    main(doit, actions_filename)
