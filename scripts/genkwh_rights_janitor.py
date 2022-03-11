@@ -134,7 +134,10 @@ def get_incoherent_rights(member_id):
             if v != today_invoices[k]:
                 diff = v - today_invoices[k]
                 before_d_day_value = before_d_day_mongo[k] if k in before_d_day_mongo else 0
-                new_value = max(before_d_day_value+today_invoices[k], 0)
+                new_value = before_d_day_value + today_invoices[k]
+                if new_value < 0 and today_mongo[k] == 0:
+                    continue
+                new_value = max(new_value, 0)
                 warn("Dret {} -> diferència (mongo-erp): {}. Escrivim {}->{}".format(k, diff, k, new_value))
                 accions.update({k:new_value})
                 total += diff
@@ -161,7 +164,7 @@ def insert_actions_mongo(actions_filename):
                 insert_values = {
                     'name': int(member_id),
                     'datetime': toLocal(datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")),
-                    'create_at': toLocal(datetime.now()),
+                    'create_at': datetime.now(),
                     'usage_kwh': int(usage)
                 }
                 mongodb.memberrightusage.insert(insert_values)
