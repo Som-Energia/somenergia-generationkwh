@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
 """
-Displays time series from Mongo
+Displays and repares generationkwh rights
 """
 
-from xmlrpc.client import DateTime
 import erppeek
-import io, os, json
-from os import path
+import os, json
 import argparse
 from datetime import datetime
 from consolemsg import step, success, warn, error, fail
@@ -24,8 +22,8 @@ mongodb = mongoClient.somenergia
 soci_o = c.model('somenergia.soci')
 rul_o = c.model('generationkwh.right.usage.line')
 
-D_DAY = '2022-02-23' #TODO: posar dia i hora (22/02 a les 20h aprox)
-PREV_RIGHTS_FOLDER = './2022022220_memberRights'
+D_DAY = '2022-02-22 19:50:00'
+PREV_RIGHTS_FOLDER = './202202221950_memberRights'
 START_DATE = '2021-01-01'
 
 def get_mongo_rights(member_id, consultation_date=None, start=START_DATE):
@@ -39,7 +37,7 @@ def get_mongo_rights(member_id, consultation_date=None, start=START_DATE):
     }
     if consultation_date:
         filters.update({"create_at": {
-            '$lt': localisodate(consultation_date)
+            '$lt': toLocal(datetime.strptime(consultation_date, '%Y-%m-%d %H:%M:%S'))
         }})
     pipeline = [
         {"$match":
@@ -73,7 +71,7 @@ def get_mongo_rights(member_id, consultation_date=None, start=START_DATE):
 def get_or_create_DAYD_member_rights(member_id):
     member_filepath = "{}/{}.json".format(PREV_RIGHTS_FOLDER, member_id)
     data = ''
-    if path.exists(member_filepath):
+    if os.path.exists(member_filepath):
         with open(member_filepath, 'r') as f:
             data = json.load(f)
         return data
