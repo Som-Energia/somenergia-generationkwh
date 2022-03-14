@@ -34,7 +34,7 @@ setup(
     install_requires=[
         'setuptools>=20.4', # markdown readme
         'yamlns>=0.6',
-        'tqdm',
+        'tqdm<4.63.0' if py2 else 'tqdm', # Py2, depends on import-resources, not supported by py2
         'b2btest',
         'lxml', # b2btest dependency, to remove
         'numpy<1.17' if py2 else 'numpy', # Py2
@@ -43,9 +43,14 @@ setup(
         'python-dateutil',
         'consolemsg>=0.3',
         'somutils',
-        'mock<4' if py2 else '', # TODO: remove indirect dependency for Py2
-        'pytest',
+        'pytest<5' if py2 else 'pytest', #  Py2
         'pytest-cov<3' if py2 else 'pytest-cov', # Py2
+        'mock<4' if py2 else '', # Py2, indirect from pytest
+        'importlib-metadata<3' if py2 else '', # Py2, indirect of pytest
+        'configparser<5' if py2 else '', # Py2, indirect of importlib-metadata, of pytest
+        'pyparsing<3' if py2 else '', # Py2, indirect of packaging, of pytest
+        'zipp<2' if py2 else '', # Py2, indirect of pytest
+        'coverage<6' if py2 else '', # Py2, indirect of pytest-cov
 #        'libfacturacioatr',
     ],
     include_package_data = True,
