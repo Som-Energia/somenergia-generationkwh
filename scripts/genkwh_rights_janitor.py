@@ -8,7 +8,6 @@ import erppeek
 import os, json
 import argparse
 from datetime import datetime
-from consolemsg import step, success, warn, error, fail
 import dbconfig
 from yamlns import namespace as ns
 from plantmeter.isodates import localisodate, toLocal, asUtc, addDays
@@ -136,19 +135,19 @@ def get_incoherent_rights(member_id):
                 if new_value < 0 and today_mongo[k] == 0:
                     continue
                 new_value = max(new_value, 0)
-                warn("Dret {} -> diferència (mongo-erp): {}. Escrivim {}->{}".format(k, diff, k, new_value))
+                print("Dret {} -> diferència (mongo-erp): {}. Escrivim {}->{}".format(k, diff, k, new_value))
                 accions.update({k:new_value})
                 total += diff
         elif v != 0:
             before_d_day_value = before_d_day_mongo[k] if k in before_d_day_mongo else 0
             new_value = before_d_day_value
-            warn("Dret {} -> ERROR: només hi és al mongo: {}. Escrivim {}->{}".format(k, v, k, new_value))
+            print("Dret {} -> ERROR: només hi és al mongo: {}. Escrivim {}->{}".format(k, v, k, new_value))
             accions.update({k:new_value})
             total += v
             #cal tenir en compte que si no hi ha diferències entre el dia D i avui, vol dir que tot ok.
 
     if accions:
-        error("El member {} ha desquadrat per un total de {} drets (mongo - erp).".format(str(member_id), str(total)))
+        print("El partner {} ha desquadrat per un total de {} drets (mongo - erp).".format(str(member_id), str(total)))
     return accions
 
 def insert_actions_mongo(actions_filename):
@@ -167,9 +166,9 @@ def insert_actions_mongo(actions_filename):
                 }
                 mongodb.memberrightusage.insert(insert_values)
             except Exception as e:
-                error("Pel member {} no s'ha pogut inserir correctament {}->{} ".format(member_id, dt, usage))
+                print("Pel member {} no s'ha pogut inserir correctament {}->{} ".format(member_id, dt, usage))
             else:
-                step("Inserit {} al dret {} del member {}".format(usage, dt, member_id))
+                print("Inserit {} al dret {} del member {}".format(usage, dt, member_id))
 
 def main(doit=False, actions_filename=False):
     if not os.path.exists(PREV_RIGHTS_FOLDER):
@@ -177,31 +176,33 @@ def main(doit=False, actions_filename=False):
 
     if doit and actions_filename:
         insert_actions_mongo(actions_filename)
-        success("Sortint...")
+        print("Sortint...")
         return
     elif actions_filename:
-        error("Per fer modificacions a mongo cal el flag --doit")
+        print("Per fer modificacions a mongo cal el flag --doit")
         return
 
-    step("Connectat a {}".format(c))
+    print("Connectat a {}".format(c))
 
     member_obj = c.model('somenergia.soci')
     members = member_obj.search([('has_gkwh','=',True), ('active','=',True)])
 
-    step("Consultant per cada una de les {} sòcies la diferència de drets a mongo (entre actualment i abans del dia D)...".format(len(members)))
+    print("Consultant per cada una de les {} sòcies la diferència de drets a mongo (entre actualment i abans del dia D)...".format(len(members)))
 
     member_actions = {}
     for i, member_id in enumerate(members):
         try:
-            step("Member {} ({}/{})".format(str(member_id), str(i), str(len(members))))
-            member_actions[member_id] = get_incoherent_rights(member_id)
+            #print("Member {} ({}/{})".format(str(member_id), str(i), str(len(members))))
+            actions_dict = get_incoherent_rights(member_id)
+            if actions_dict:
+                member_actions[member_id] = actions_dict
         except KeyboardInterrupt as e:
             break
         except Exception as e:
-            error("Member {}, error: {}".format(member_id, str(e)))
+            print("Member {}, error: {}".format(member_id, str(e)))
 
     filename = "{}/{}-{}.json".format(PREV_RIGHTS_FOLDER, 'actions', datetime.today().strftime("%Y%m%d_%H%M"))
-    success("Consulta acabada. Es guardaran les accions al fitxer {}".format(filename))
+    print("Consulta acabada. Es guardaran les accions al fitxer {}".format(filename))
 
     with open(filename, 'w') as f:
         f.write(json.dumps(member_actions))
@@ -209,7 +210,7 @@ def main(doit=False, actions_filename=False):
     if doit:
         insert_actions_mongo(filename)
 
-    success("Sortint...")
+    print("Sortint...")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -234,9 +235,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     if args.doit:
-        success("Es faran les accions proposades (--doit)")
+        print("Es faran les accions proposades (--doit)")
     else:
-        success("Només es consulten les accions que cal fer")
+        print("Només es consulten les accions que cal fer")
 
     doit = args.doit
     actions_filename = args.actions_filename
