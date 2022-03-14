@@ -148,7 +148,7 @@ def get_incoherent_rights(member_id):
             #cal tenir en compte que si no hi ha diferències entre el dia D i avui, vol dir que tot ok.
 
     if accions:
-        error("El partner {} ha desquadrat per un total de {} drets (mongo - erp).".format(str(member_id), str(total)))
+        error("El member {} ha desquadrat per un total de {} drets (mongo - erp).".format(str(member_id), str(total)))
     return accions
 
 def insert_actions_mongo(actions_filename):
@@ -193,7 +193,7 @@ def main(doit=False, actions_filename=False):
     member_actions = {}
     for i, member_id in enumerate(members):
         try:
-            step("Member {}/{}".format(str(i), str(len(members))))
+            step("Member {} ({}/{})".format(str(member_id), str(i), str(len(members))))
             member_actions[member_id] = get_incoherent_rights(member_id)
         except KeyboardInterrupt as e:
             break
