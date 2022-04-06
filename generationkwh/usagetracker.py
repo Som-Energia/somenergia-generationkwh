@@ -32,6 +32,9 @@ class UsageTracker(object):
     def use_kwh_with_dates_dict(self, member, start, end, fare, period, kwh):
         assert type(start) == datetime.date
         assert type(end) == datetime.date
+        if kwh == 0:
+            return 0, {}
+
         rights = self._rights.rights_kwh(member, start, end)
         periodMask = self._periodMask.periodMask(fare, period, start, end)
         usage = self._usage.usage(member, start, end)
@@ -59,6 +62,9 @@ class UsageTracker(object):
     def refund_kwh_with_dates_dict(self, member, start, end, fare, period, kwh):
         assert type(start) == datetime.date
         assert type(end) == datetime.date
+        if kwh == 0:
+            return 0, {}
+
         rights = self._rights.rights_kwh(member, start, end)
         periodMask = self._periodMask.periodMask(fare, period, start, end)
         usage = self._usage.usage(member, start, end)
