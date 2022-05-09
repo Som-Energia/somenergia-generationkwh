@@ -43,6 +43,7 @@ class UsageTracker(object):
         used_now =[]
         for i, (p, u, m) in enumerate(zip(rights, usage, periodMask)):
             if not m: continue # not in period
+            if u > p: continue # due to mongo not having transactions
             used = int(min(kwh-allocated, p-u))
             if used:
                 usage[i] += used
