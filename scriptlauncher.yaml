@@ -107,6 +107,13 @@ projects:
           extension: csv
           filename: usage-{member}.csv
 
+    diferenciaDretsFacturesGenerationkwh:
+      title: Drets perduts de Generationkwh
+      description: Compara els drets que s'han gastat a Mongo amb els que hem repartit a les factures i la diferencia són drets perduts per errors nostres
+      script: python SOME_SRC/somenergia-generationkwh/scripts/genkwh_rights_vs_usage.py --member-code {member_code}
+      parameters:
+        member_code:
+          description: Codi de persona sòcia (p.ex. S000001)
 
 
 # vim: et ts=2 sw=2

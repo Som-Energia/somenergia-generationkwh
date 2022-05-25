@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1366px"
+   height="768px"
+   viewBox="0 0 1366 768"
+   version="1.1"
+   id="SVGRoot"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="genkwh-correction-graph.svg"
+   inkscape:export-filename="/home/vokimon/somenergia/cursos/images/genkwh-correction-graph.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
+  <defs
+     id="defs815" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.49497475"
+     inkscape:cx="521.59069"
+     inkscape:cy="389.53404"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1296"
+     inkscape:window-height="688"
+     inkscape:window-x="26"
+     inkscape:window-y="17"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata818">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Capa 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       sodipodi:nodetypes="cscscccsccccc"
+       inkscape:connector-curvature="0"
+       id="path1375"
+       d="m 86,463.14286 c 0,0 69.18963,-250.32854 171.42857,-254.28571 80.85,-3.12931 111.22669,102.69083 157.93964,190.18712 71.52647,-18.45446 129.23952,-42.77216 207.77464,-34.47284 54.19271,5.7269 63.15938,21.64113 96.86126,39.70858 94.27732,77.06807 155.7371,107.06605 157.37241,102.34256 l 5.07738,-296.01968 c 0,0 16.94051,-10.61403 40.68895,-10.31717 182.34335,2.27929 188.21565,148.34224 277.55215,210.03933 49.7677,-38.60938 98.162,-75.75363 98.162,-75.75363 L 1288.8571,726 86,728.85714 V 463.14286"
+       style="fill:#b3ff80;stroke:#b3ff80;stroke-width:15.11811066;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <path
+       style="fill:none;stroke:#0000ff;stroke-width:15.11811066;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 94.57143,431.71429 c 0,0 60.6182,-218.89997 162.85714,-222.85714 140.3606,-5.43268 128.59913,317.49854 314.28571,302.85714 131.21362,-10.3462 245.68266,-315.57182 348.57143,-314.28571 228.57139,2.85714 193.57139,239.28571 379.28569,244.99999"
+       id="path1371"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="csssc" />
+    <path
+       style="fill:none;stroke:#ff2a2a;stroke-width:15.11811066;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 94.57143,431.71429 c 237.67827,34.11159 365.22964,-69.75708 517.14286,-72.85715 111.42857,0 217.71058,158.78398 331.42857,161.42858 C 1066,523.14286 1298.857,334.57142 1298.857,334.57142"
+       id="path1373"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccsc" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot1377"
+       style="font-style:normal;font-weight:normal;font-size:26.66666603px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       transform="translate(14.142138,-94.954339)"><flowRegion
+         id="flowRegion1379"><rect
+           id="rect1381"
+           width="242.43665"
+           height="115.15739"
+           x="107.07617"
+           y="121.50237" /></flowRegion><flowPara
+         id="flowPara1383">Having more production than we had is ok</flowPara></flowRoot>    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 197.9899,135.64451 38.3858,145.46196"
+       id="path1385"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <flowRoot
+       transform="translate(272.74119,-28.284271)"
+       style="font-style:normal;font-weight:normal;font-size:26.66666603px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       id="flowRoot1393"
+       xml:space="preserve"><flowRegion
+         id="flowRegion1389"><rect
+           y="121.50237"
+           x="107.07617"
+           height="151.52287"
+           width="288.90366"
+           id="rect1387" /></flowRegion><flowPara
+         id="flowPara1391">Having less rights is not ok, so we keep them and accomulate debt</flowPara></flowRoot>    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 551.54329,208.37549 6.06091,216.17264"
+       id="path1395"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot1403"
+       style="font-style:normal;font-weight:normal;font-size:26.66666603px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       transform="translate(571.74634,-78.791898)"><flowRegion
+         id="flowRegion1399"><rect
+           id="rect1397"
+           width="203.63139"
+           height="167.89241"
+           x="107.07617"
+           y="121.50237" /></flowRegion><flowPara
+         id="flowPara1401">Debt is compensated</flowPara><flowPara
+         id="flowPara1405">when we have excess again</flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot1403-3"
+       style="font-style:normal;font-weight:normal;font-size:26.66666603px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       transform="translate(824.39063,-88.459909)"><flowRegion
+         id="flowRegion1399-6"><rect
+           id="rect1397-7"
+           width="203.63139"
+           height="167.89241"
+           x="107.07617"
+           y="121.50237" /></flowRegion><flowPara
+         id="flowPara1405-3">Once compensated</flowPara><flowPara
+         id="flowPara1436">we are back</flowPara><flowPara
+         id="flowPara1438">to normal</flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot1403-5"
+       style="font-style:normal;font-weight:normal;font-size:26.66666603px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       transform="translate(1046.6242,2.4538164)"><flowRegion
+         id="flowRegion1399-62"><rect
+           id="rect1397-9"
+           width="203.63139"
+           height="167.89241"
+           x="107.07617"
+           y="121.50237" /></flowRegion><flowPara
+         id="flowPara1456">Last debt will end up as negative remainder</flowPara></flowRoot>    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 737.41136,206.35519 66.67007,145.46196"
+       id="path1460"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 1026.315,184.13183 977.82766,327.57349"
+       id="path1462"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 1224.3049,279.08617 52.5279,123.23861"
+       id="path1464"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+  </g>
+</svg>

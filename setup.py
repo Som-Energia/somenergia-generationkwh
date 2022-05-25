@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
 from generationkwh import __version__
+import sys
 readme = open("README.md").read()
+
+py2 = sys.version_info<(3,)
 
 setup(
     name = "somenergia-generationkwh",
@@ -31,24 +34,27 @@ setup(
     install_requires=[
         'setuptools>=20.4', # markdown readme
         'yamlns>=0.6',
+        'tqdm<4.63.0' if py2 else 'tqdm', # Py2, depends on import-resources, not supported by py2
         'b2btest',
         'lxml', # b2btest dependency, to remove
-        'wavefile', # b2btest dependency, to remove
-        'numpy',
+        'numpy<1.17' if py2 else 'numpy', # Py2
+        'decorator<5' if py2 else 'decorator', # Py2
         'plantmeter',
-        'python-dateutil',
-        'decorator',
         'python-dateutil',
         'consolemsg>=0.3',
         'somutils',
-        'tqdm',
-        'mock<4', # TODO: remove indirect dependency for Py2
-        'rsa<4.6', # TODO: remove indirect dependency for Py2
+        'pytest<5' if py2 else 'pytest', #  Py2
+        'pytest-cov<3' if py2 else 'pytest-cov', # Py2
+        'mock<4' if py2 else '', # Py2, indirect from pytest
+        'importlib-metadata<3' if py2 else '', # Py2, indirect of pytest
+        'configparser<5' if py2 else '', # Py2, indirect of importlib-metadata, of pytest
+        'pyparsing<3' if py2 else '', # Py2, indirect of packaging, of pytest
+        'zipp<2' if py2 else '', # Py2, indirect of pytest
+        'coverage<6' if py2 else '', # Py2, indirect of pytest-cov
 #        'libfacturacioatr',
     ],
     include_package_data = True,
     test_suite = 'generationkwh',
-#    test_runner = 'colour_runner.runner.ColourTextTestRunner',
     classifiers = [
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
