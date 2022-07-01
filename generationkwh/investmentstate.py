@@ -59,7 +59,7 @@ class InvestmentState(object):
         'purchase_date',
         'log',
         'actions_log',
-        'last_interest_payed_date',
+        'last_interest_paid_date',
         ]
 
     def __init__(self, user=None, timestamp=None, **values):
@@ -645,16 +645,16 @@ class InvestmentState(object):
         return ns(
             log = self._log(
                 u'INTEREST: Generada factura d\'interessos '
-                u'de {to_be_interized:.02f} € pel {last_interest_payed_date}\n',
-                    last_interest_payed_date = date,
+                u'de {to_be_interized:.02f} € pel {last_interest_paid_date}\n',
+                    last_interest_paid_date = date,
                     to_be_interized = to_be_interized,
                 ),
             actions_log = self.addAction(
                 type = 'interest',
-                last_interest_payed_date=date,
+                last_interest_paid_date=date,
                 amount=to_be_interized,
                 ),
-            last_interest_payed_date=date,
+            last_interest_paid_date=date,
             )
 
     @action
