@@ -77,7 +77,9 @@ class GenerationkwhEmission(osv.osv):
             ], 'Emission State', readonly=True, help="Gives the state of the emission. Only emission in open state accepts new investments.", select=True),
         'type': fields.selection([
             ('genkwh', 'GenerationkWh'), ('tit', 'Títols'),
-            ('apo', 'Aportacions'), ('other', 'Other'), #When not implementet yet
+            ('apo', 'Aportacions'),
+            ('apo_obl', 'Aportació obligatoria'),
+            ('other', 'Other'), #When not implementet yet
             ], 'Emission Type', help="Type of the emission.",
             select=True, required=False),
         'grace_period': fields.integer(
