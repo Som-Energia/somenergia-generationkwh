@@ -856,11 +856,11 @@ class AportacionsObligatoriesActions(InvestmentActions):
 
     @property
     def journalCode(self):
-        return 'APOO_FACT'
+        return 'APOOB_FACT'
 
     @property
     def productCode(self):
-        return 'APOO_AE'
+        return 'APOOB'
 
     def create_from_form(self, cursor, uid, partner_id, order_date, amount_in_euros, ip, iban, emission=None, context=None):
         """
@@ -935,10 +935,11 @@ class AportacionsObligatoriesActions(InvestmentActions):
         Partner = self.erp.pool.get('res.partner')
         partner = Partner.browse(cursor, uid, partner_id)
 
+        #TODO: verificar amb ET si cal usar/definir comptes comptables especifics per a les Ap.Obligatòries
+        #return 14 al destral per l'account 100000
         if not partner.property_account_liquidacio:
             partner.button_assign_acc_410()
             partner = partner.browse()[0]
-        #TODO: verificar amb ET si cal usar/definir comptes comptables especifics per a les Ap.Obligatòries
         if not partner.property_account_aportacions:
             partner.button_assign_acc_163()
             partner = partner.browse()[0]

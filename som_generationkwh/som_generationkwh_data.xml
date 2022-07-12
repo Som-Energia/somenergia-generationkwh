@@ -2104,7 +2104,7 @@ ${text_legal}
             <field name="bridge_account_payments_id" ref="pgc_555000000011" />
         </record>
         <record id="apo_ob_fact_journal" model="account.journal">
-            <field name="code">APOO_FACT</field>
+            <field name="code">APOOB_FACT</field>
             <field eval="[(6,0,[])]" name="account_control_ids"/>
             <field name="user_id" ref="base.user_root"/>
             <field eval="0" name="centralisation"/>
@@ -2147,7 +2147,7 @@ ${text_legal}
         </record>
         <record id="apo_ob_product_ae" model="product.product">
             <field name="name">Aportacions</field>
-            <field name="default_code">APOO_AE</field>
+            <field name="default_code">APOOB</field>
             <field name="categ_id" model='product.category' search="[('name','=','Inversions')]"/>
             <field name="property_account_expense" model="account.account" search="[('code','=','163000000000')]"/>
         </record>
@@ -2162,7 +2162,7 @@ ${text_legal}
             <field name="expiration_years">0</field>
             <field name="waiting_days">0</field>
             <field name="mandate_name">PRESTEC Aportacions</field>
-            <field name="journal_id" ref="apo_ob_journal"/>
+            <field name="journal_id" ref="apo_ob_fact_journal"/>
             <field name="investment_product_id" ref="apo_ob_product_ae" />
             <field name="investment_payment_mode_id" ref="apo_ob_investment_payment_mode" />
             <field name="bridge_account_payments_id" ref="pgc_555000000011" />

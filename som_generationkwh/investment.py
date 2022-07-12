@@ -170,14 +170,15 @@ class GenerationkwhInvestment(osv.osv):
 
     def investment_actions(self, cursor, uid, id):
         inv = self.browse(cursor, uid, id)
-        #TODO: afegir el apos obligatories
-        if str(inv.emission_id.type) == 'apo':
+        if str(inv.emission_id.type) == 'apo_obl':
+            return AportacionsObligatoriesActions(self, cursor, uid, 1)
+        elif str(inv.emission_id.type) == 'apo':
             return AportacionsActions(self, cursor, uid, 1)
         return GenerationkwhActions(self, cursor, uid, 1)
 
     def state_actions(self, cursor, uid, id, user, timestamp, **values):
         inv = self.browse(cursor, uid, id)
-        #TODO: afegir el apos obligatories?
+        #TODO: afegir el apos obligatories? on està aquest state?
         if str(inv.emission_id.type) == 'apo':
             return AportacionsState(user, timestamp, **values)
         return GenerationkwhState(user, timestamp, **values)
@@ -1500,9 +1501,10 @@ class GenerationkwhInvestment(osv.osv):
                     attachment_id = InvestmentActions.get_investment_legal_attachment(cursor, uid, partner_id, emission_id)
                     if attachment_id:
                         mail_context.update({'attachment_ids': [(6, 0, [attachment_id])]})
-
-                self.send_mail(cursor, uid, invoice_id,
-                    'account.invoice', '_mail_pagament', investment_ids[0], context=mail_context)
+                #el mail també hauria d'estar dins l'if?
+                if InvestmentActions.productCode != 'APOOB':
+                    self.send_mail(cursor, uid, invoice_id,
+                        'account.invoice', '_mail_pagament', investment_ids[0], context=mail_context)
         return invoice_ids, errors
 
     def send_mail(self, cursor, uid, id, model, template, investment_id=None, context={}):
@@ -1706,11 +1708,12 @@ class GenerationkwhInvestment(osv.osv):
         invoice_ids = []
         errors = []
         date_invoice = divestment_date or str(datetime.today().date())
-
         for id in ids:
             inv = self.browse(cursor, uid, id)
             investment_actions = GenerationkwhActions(self, cursor, uid, 1)
-            if str(inv.emission_id.type) == 'apo':
+            if str(inv.emission_id.type) == 'apo_obl':
+                investment_actions = AportacionsObligatoriesActions(self, cursor, uid, 1)
+            elif str(inv.emission_id.type) == 'apo':
                 investment_actions = AportacionsActions(self, cursor, uid, 1)
             investment_actions.divest(cursor, uid, id, invoice_ids, errors, date_invoice)
 
