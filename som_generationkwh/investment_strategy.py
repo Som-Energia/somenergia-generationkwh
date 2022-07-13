@@ -935,15 +935,20 @@ class AportacionsObligatoriesActions(InvestmentActions):
         Partner = self.erp.pool.get('res.partner')
         partner = Partner.browse(cursor, uid, partner_id)
 
-        #TODO: verificar amb ET si cal usar/definir comptes comptables especifics per a les Ap.Obligatòries
-        #return 14 al destral per l'account 100000
-        if not partner.property_account_liquidacio:
-            partner.button_assign_acc_410()
-            partner = partner.browse()[0]
-        if not partner.property_account_aportacions:
-            partner.button_assign_acc_163()
-            partner = partner.browse()[0]
-        return partner.property_account_aportacions.id
+        # a destral té menys 0's que a prod
+        # aa_model = self.erp.pool.get('account.account')
+        # res = aa_model.search(cursor, uid, [('code','=','100000')])
+        # return res[0]
+
+        # aa_model = self.erp.pool.get('account.account')
+        # res = aa_model.search(cursor, uid, [('code','=','100000000000')])
+        # return res[0]
+
+        #ilike per ser compatible amb destral i prod/testing
+        aa_model = self.erp.pool.get('account.account')
+        res = aa_model.search(cursor, uid, [('code','=ilike','100000%')])
+        return res[0]
+
 
     def get_payment_mode_name(self, cursor, uid):
         imd_model = self.erp.pool.get('ir.model.data')

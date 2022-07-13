@@ -1321,7 +1321,7 @@ class GenerationkwhInvestment(osv.osv):
         InvoiceLine = self.pool.get('account.invoice.line')
         PaymentType = self.pool.get('payment.type')
         Journal = self.pool.get('account.journal')
-
+        import pudb; pu.db
         invoice_ids = []
 
         date_invoice = str(date.today())
@@ -1350,6 +1350,7 @@ class GenerationkwhInvestment(osv.osv):
             product = investment.emission_id.investment_product_id
 
             # TODO: Remove the GENKWHID stuff when fully migrated, error instead
+            # TODO: Ficar aqui també per 'apo_obl'
             invoice_name = '%s-JUST' % '{}'.format(investment.id)
             if investment.name:
                  invoice_name = '%s-JUST' % investment.name
@@ -1402,6 +1403,8 @@ class GenerationkwhInvestment(osv.osv):
                 'name': invoice_name,
                 'number': invoice_name,
                 'journal_id': investment.emission_id.journal_id.id,
+                #el property aquest fa petar amb les ob perquè fem el browse
+                #en la funcio d'interessos potser té sentit però en aquesta és bug de copypaste?
                 'account_id': partner.property_account_liquidacio.id,
                 'partner_bank': partner.bank_inversions.id,
                 'payment_type': payment_type_id,

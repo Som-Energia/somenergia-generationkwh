@@ -2103,6 +2103,14 @@ ${text_legal}
             <field name="investment_payment_mode_id" ref="apo_investment_payment_mode" />
             <field name="bridge_account_payments_id" ref="pgc_555000000011" />
         </record>
+        <record id="pgc_555000000003" model="account.account">
+            <field name="code">555000000003</field>
+            <field name="reconcile" eval="True"/>
+            <field name="parent_id" model="account.account" search="[('code','=','555')]"/>
+            <field name="type">other</field>
+            <field name="name">CAIXA Aportacions Obligatories</field>
+            <field name="user_type" ref="l10n_chart_ES.financieras"/>
+        </record>
         <record id="apo_ob_fact_journal" model="account.journal">
             <field name="code">APOOB_FACT</field>
             <field eval="[(6,0,[])]" name="account_control_ids"/>
@@ -2110,8 +2118,8 @@ ${text_legal}
             <field eval="0" name="centralisation"/>
             <field eval="0" name="group_invoice_lines"/>
             <field name="type">cash</field>
-            <field name="default_credit_account_id" ref="pgc_555000000011" />
-            <field name="default_debit_account_id" ref="pgc_555000000011" />
+            <field name="default_credit_account_id" ref="pgc_555000000003" />
+            <field name="default_debit_account_id" ref="pgc_555000000003" />
             <field name="view_id" ref="account.account_journal_bank_view"/>
             <field eval="[(6,0,[])]" name="type_control_ids"/>
             <field name="sequence_id" ref="account.sequence_journal"/>
@@ -2165,7 +2173,7 @@ ${text_legal}
             <field name="journal_id" ref="apo_ob_fact_journal"/>
             <field name="investment_product_id" ref="apo_ob_product_ae" />
             <field name="investment_payment_mode_id" ref="apo_ob_investment_payment_mode" />
-            <field name="bridge_account_payments_id" ref="pgc_555000000011" />
+            <field name="bridge_account_payments_id" ref="pgc_555000000003" />
         </record>
 
         <record model="ir.sequence.type" id="seq_type_som_aportacions_ob">
