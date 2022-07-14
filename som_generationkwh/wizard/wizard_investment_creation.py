@@ -27,7 +27,6 @@ class WizardInvestmentCreation(osv.osv):
         creation_errors = ''
 
         start = datetime.now()
-        import pudb; pu.db
         try:
             emission_code = Emission.read(cursor, uid, emission_id, ['code'])['code']
             #Compatibility 'emissio_apo'

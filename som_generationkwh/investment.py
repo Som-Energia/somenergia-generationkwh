@@ -1321,7 +1321,6 @@ class GenerationkwhInvestment(osv.osv):
         InvoiceLine = self.pool.get('account.invoice.line')
         PaymentType = self.pool.get('payment.type')
         Journal = self.pool.get('account.journal')
-        import pudb; pu.db
         invoice_ids = []
 
         date_invoice = str(date.today())
