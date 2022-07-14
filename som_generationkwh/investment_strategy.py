@@ -935,6 +935,10 @@ class AportacionsObligatoriesActions(InvestmentActions):
         Partner = self.erp.pool.get('res.partner')
         partner = Partner.browse(cursor, uid, partner_id)
 
+        if not partner.property_account_liquidacio:
+            partner.button_assign_acc_410()
+            partner = partner.browse()[0]
+
         # a destral té menys 0's que a prod
         # aa_model = self.erp.pool.get('account.account')
         # res = aa_model.search(cursor, uid, [('code','=','100000')])
