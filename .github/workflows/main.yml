@@ -1,7 +1,6 @@
 name: CI
 
 on:
-  push: # git push
   pull_request: # PR
   workflow_dispatch: # manual
 
