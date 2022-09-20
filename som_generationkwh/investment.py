@@ -1313,8 +1313,9 @@ class GenerationkwhInvestment(osv.osv):
                 self.send_mail(cursor, uid, invoice_ids[0],
                     'account.invoice', '_mail_impagament',  id)
 
-    def create_initial_invoices(self,cursor,uid, investment_ids):
-
+    def create_initial_invoices(self,cursor,uid, investment_ids, context=None):
+        if not context:
+            context = {}
         Partner = self.pool.get('res.partner')
         Product = self.pool.get('product.product')
         Invoice = self.pool.get('account.invoice')
@@ -1324,8 +1325,9 @@ class GenerationkwhInvestment(osv.osv):
         invoice_ids = []
 
         date_invoice = str(date.today())
+        tpv_payment = context.get('tpv_payment', False)
 
-        # The payment type
+        # The payment type TODO: change when tpv_payment?
         payment_type_id = PaymentType.search(cursor, uid, [
             ('code', '=', 'RECIBO_CSB'),
             ])[0]
@@ -1379,16 +1381,16 @@ class GenerationkwhInvestment(osv.osv):
             partner = Partner.browse(cursor, uid, partner_id)
 
             # Check if exist bank account
-            if not partner.bank_inversions:
+            if not partner.bank_inversions and not tpv_payment:
                 error(u"Partner '{}' has no investment bank account"
                     .format(partner.name))
                 continue
 
             amount_total = gkwh.shareValue * investment.nshares
-
-            mandate_id = self.get_or_create_payment_mandate(cursor, uid,
-                partner_id, partner.bank_inversions.iban,
-                investment.emission_id.mandate_name, gkwh.creditorCode)
+            if not tpv_payment:
+                mandate_id = self.get_or_create_payment_mandate(cursor, uid,
+                    partner_id, partner.bank_inversions.iban,
+                    investment.emission_id.mandate_name, gkwh.creditorCode)
 
             # Default invoice fields for given partner
             vals = {}
@@ -1405,13 +1407,16 @@ class GenerationkwhInvestment(osv.osv):
                 #el property aquest fa petar amb les ob perquè fem el browse
                 #en la funcio d'interessos potser té sentit però en aquesta és bug de copypaste?
                 'account_id': partner.property_account_liquidacio.id,
-                'partner_bank': partner.bank_inversions.id,
                 'payment_type': payment_type_id,
                 'check_total': amount_total,
                 'origin': investment.name,
-                'mandate_id': mandate_id,
                 'date_invoice': date_invoice,
             })
+            if not tpv_payment:
+                vals.update({
+                    'partner_bank': partner.bank_inversions.id,
+                    'mandate_id': mandate_id,
+                })
 
             invoice_id = Invoice.create(cursor, uid, vals)
             Invoice.write(cursor,uid, invoice_id,{'sii_to_send':False})

@@ -2164,12 +2164,12 @@ ${text_legal}
             <field name="code">APO_OB</field>
             <field name="start_date">2021-10-21-</field>
             <field name="amount_emission">99999999</field>
-            <field name="state">draft</field>
+            <field name="state">open</field>
             <field name="type">apo_obl</field>
             <field name="grace_period">1</field>
             <field name="expiration_years">0</field>
             <field name="waiting_days">0</field>
-            <field name="mandate_name">PRESTEC Aportacions</field>
+            <field name="mandate_name">APORTACIO Obligatoria</field>
             <field name="journal_id" ref="apo_ob_fact_journal"/>
             <field name="investment_product_id" ref="apo_ob_product_ae" />
             <field name="investment_payment_mode_id" ref="apo_ob_investment_payment_mode" />
@@ -2194,7 +2194,7 @@ ${text_legal}
             <field name="code">APO_202003</field>
             <field name="start_date">2020-03-03</field>
             <field name="amount_emission">5000000</field>
-            <field name="state">draft</field>
+            <field name="state">open</field>
             <field name="type">apo</field>
             <field name="grace_period">1</field>
             <field name="expiration_years">0</field>

@@ -26,15 +26,19 @@ class InvestmentActions(ErpWrapper):
 
     def create_from_form(self, cursor, uid, partner_id, order_date, amount_in_euros, ip, iban,
             emission=None, context=None):
+        if not context:
+            context = {}
         GenerationkwhInvestment = self.erp.pool.get('generationkwh.investment')
         Emission = self.erp.pool.get('generationkwh.emission')
 
+        tpv_payment = context.get('tpv_payment', False)
         if amount_in_euros <= 0 or amount_in_euros % gkwh.shareValue > 0:
                 raise InvestmentException("Invalid amount")
-        iban = GenerationkwhInvestment.check_iban(cursor, uid, iban)
-
-        if not iban:
+        if not tpv_payment:
+            iban = GenerationkwhInvestment.check_iban(cursor, uid, iban)
+            if not iban:
                 raise PartnerException("Wrong iban")
+
         if not emission:
             emission = 'emissio_genkwh'
 
@@ -54,11 +58,12 @@ class InvestmentActions(ErpWrapper):
         if not member_ids:
             raise PartnerException("Not a member")
 
-        bank_id = GenerationkwhInvestment.get_or_create_partner_bank(cursor, uid,
-                    partner_id, iban)
-        ResPartner = self.erp.pool.get('res.partner')
-        ResPartner.write(cursor, uid, partner_id, dict(
-            bank_inversions = bank_id,),context)
+        if not tpv_payment:
+            bank_id = GenerationkwhInvestment.get_or_create_partner_bank(cursor, uid,
+                        partner_id, iban)
+            ResPartner = self.erp.pool.get('res.partner')
+            ResPartner.write(cursor, uid, partner_id, dict(
+                bank_inversions = bank_id,),context)
 
         return member_ids, emission_id
 
@@ -905,9 +910,9 @@ class AportacionsObligatoriesActions(InvestmentActions):
             emission_id = emission_id,
         ), context)
 
-
-        GenerationkwhInvestment.get_or_create_payment_mandate(cursor, uid,
-            partner_id, iban, emi_obj['mandate_name'], gkwh.creditorCode)
+        if not context.get('tpv_payment', False):
+            GenerationkwhInvestment.get_or_create_payment_mandate(cursor, uid,
+                partner_id, iban, emi_obj['mandate_name'], gkwh.creditorCode)
 
         """
             Ja es deu estar enviant ara un correu quan algú es fa soci?
