@@ -33,6 +33,9 @@ def get_mongo_rights(member_id, consultation_date=None, start=START_DATE):
             '$gte': start,
         },
         "name": member_id,
+        "regularization": {
+            "$exists": False
+        },
     }
     if consultation_date:
         filters.update({"create_at": {
