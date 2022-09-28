@@ -33,6 +33,9 @@ def get_mongo_rights(member_id, consultation_date=None, start=START_DATE):
             '$gte': start,
         },
         "name": member_id,
+        "regularization": {
+            "$exists": False
+        },
     }
     if consultation_date:
         filters.update({"create_at": {
@@ -147,7 +150,7 @@ def get_incoherent_rights(member_id):
             #cal tenir en compte que si no hi ha diferències entre el dia D i avui, vol dir que tot ok.
 
     if accions:
-        print("El partner {} ha desquadrat per un total de {} drets (mongo - erp).".format(str(member_id), str(total)))
+        print("El member {} ha desquadrat per un total de {} drets (mongo - erp).".format(str(member_id), str(total)))
     return accions
 
 def insert_actions_mongo(actions_filename):
