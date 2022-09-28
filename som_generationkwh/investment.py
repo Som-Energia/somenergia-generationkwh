@@ -1327,10 +1327,14 @@ class GenerationkwhInvestment(osv.osv):
         date_invoice = str(date.today())
         tpv_payment = context.get('tpv_payment', False)
 
-        # The payment type TODO: change when tpv_payment?
-        payment_type_id = PaymentType.search(cursor, uid, [
-            ('code', '=', 'RECIBO_CSB'),
-            ])[0]
+        if tpv_payment:
+            payment_type_id = PaymentType.search(cursor, uid, [
+                ('code', '=', 'TPV'),
+                ])[0]
+        else:
+            payment_type_id = PaymentType.search(cursor, uid, [
+                ('code', '=', 'RECIBO_CSB'),
+                ])[0]
 
         errors = []
         def error(message):
@@ -1477,6 +1481,7 @@ class GenerationkwhInvestment(osv.osv):
         order_id = self.get_or_create_open_payment_order(cursor, uid, payment_mode_name,
                     True)
         Invoice.afegeix_a_remesa(cursor,uid,invoice_ids, order_id)
+
 
     def investment_payment(self,cursor,uid,investment_ids):
         """
