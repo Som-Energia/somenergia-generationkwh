@@ -588,7 +588,7 @@ class InvestmentTests(testing.OOTestCase):
                 partner_id, iban, investment.emission_id.mandate_name, gkwh.creditorCode)
             partner_data = self.Partner.browse(cursor, uid, partner_id)
             self.assertInvoiceInfoEqual(cursor, uid, invoice_ids[0], u"""\
-                account_id: 410000{num_soci:0>6s} {p.name}
+                account_id: 410000 Acreedores por prestaciones de servicios (euros)
                 amount_total: 2000.0
                 amount_untaxed: 2000.0
                 check_total: 2000.0
@@ -669,7 +669,7 @@ class InvestmentTests(testing.OOTestCase):
                 partner_id, iban, emission_data.mandate_name, gkwh.creditorCode)
             partner_data = self.Partner.browse(cursor, uid, partner_id)
             self.assertInvoiceInfoEqual(cursor, uid, invoice_ids[0], u"""\
-                account_id: 410000{num_soci:0>6s} {p.name}
+                account_id: 410000 Acreedores por prestaciones de servicios (euros)
                 amount_total: 1000.0
                 amount_untaxed: 1000.0
                 check_total: 1000.0
@@ -1125,7 +1125,7 @@ class InvestmentTests(testing.OOTestCase):
 
             partner = self.Partner.browse(cursor, uid, partner_id)
             self.assertEquals(partner.property_account_aportacions.code, '163000000000')
-            self.assertEquals(partner.property_account_liquidacio.code, '410000202001')
+            self.assertEquals(partner.property_account_liquidacio.code, '410000')
 
     def test__get_or_create_investment_account_GKWH(self):
         with Transaction().start(self.database) as txn:
@@ -1146,7 +1146,7 @@ class InvestmentTests(testing.OOTestCase):
 
             partner = self.Partner.browse(cursor, uid, partner_id)
             self.assertEquals(partner.property_account_gkwh.code, '163500000000')
-            self.assertEquals(partner.property_account_liquidacio.code, '410000202001')
+            self.assertEquals(partner.property_account_liquidacio.code, '410000')
 
     def test__amortize__oneAmortizationGKWH(self):
         with Transaction().start(self.database) as txn:
@@ -1545,7 +1545,7 @@ class InvestmentTests(testing.OOTestCase):
             inv_0001 = self.Investment.read(cursor, uid, inv_id)
             self.assertLogEquals(inv_0001['log'],
                 u'PAID: Pagament de 1000 € efectuat [None]\n'
-                u'INVOICED: Facturada i remesada\n'
+                u'INVOICED: Facturada\n'
             )
             inv_0001.pop('actions_log')
             inv_0001.pop('log')
@@ -1592,7 +1592,7 @@ class InvestmentTests(testing.OOTestCase):
             inv_0001 = self.Investment.read(cursor, uid, inv_id)
             self.assertLogEquals(inv_0001['log'],
                 u'PAID: Pagament de 1000 € efectuat [None]\n'
-                u'INVOICED: Facturada i remesada\n'
+                u'INVOICED: Facturada\n'
             )
             inv_0001.pop('actions_log')
             inv_0001.pop('log')
@@ -1905,7 +1905,7 @@ class InvestmentTests(testing.OOTestCase):
             self.assertTrue(invoice_ids)
             partner_data = self.Partner.browse(cursor, uid, partner_id)
             self.assertInvoiceInfoEqual(cursor, uid, invoice_ids, u"""\
-                account_id: 410000{num_soci:0>6s} {p.name}
+                account_id: 410000 Acreedores por prestaciones de servicios (euros)
                 amount_total: 1000.0
                 amount_untaxed: 1000.0
                 check_total: 1000.0
@@ -1990,7 +1990,7 @@ class InvestmentTests(testing.OOTestCase):
             self.assertTrue(invoice_ids)
             partner_data = self.Partner.browse(cursor, uid, partner_id)
             self.assertInvoiceInfoEqual(cursor, uid, invoice_ids, u"""\
-                account_id: 410000{num_soci:0>6s} {p.name}
+                account_id: 410000 Acreedores por prestaciones de servicios (euros)
                 amount_total: 993.0
                 amount_untaxed: 993.0
                 check_total: 993.0
@@ -2099,7 +2099,7 @@ class InvestmentTests(testing.OOTestCase):
             self.assertTrue(invoice_ids)
             partner_data = self.Partner.browse(cursor, uid, partner_id)
             self.assertInvoiceInfoEqual(cursor, uid, invoice_ids, u"""\
-                account_id: 410000{num_soci:0>6s} {p.name}
+                account_id: 410000 Acreedores por prestaciones de servicios (euros)
                 amount_total: 999.9
                 amount_untaxed: 999.9
                 check_total: 999.9
@@ -2231,7 +2231,7 @@ class InvestmentTests(testing.OOTestCase):
             self.assertTrue(invoice_ids)
             partner_data = self.Partner.browse(cursor, uid, partner_id)
             self.assertInvoiceInfoEqual(cursor, uid, invoice_ids, u"""\
-                account_id: 410000{num_soci:0>6s} {p.name}
+                account_id: 410000 Acreedores por prestaciones de servicios (euros)
                 amount_total: 990.0
                 amount_untaxed: 990.0
                 check_total: 990.0
@@ -2362,7 +2362,7 @@ class InvestmentTests(testing.OOTestCase):
             self.assertTrue(invoice_ids)
             partner_data = self.Partner.browse(cursor, uid, partner_id)
             self.assertInvoiceInfoEqual(cursor, uid, invoice_ids, u"""\
-                account_id: 410000{num_soci:0>6s} {p.name}
+                account_id: 410000 Acreedores por prestaciones de servicios (euros)
                 amount_total: 1000.0
                 amount_untaxed: 1000.0
                 check_total: 1000.0

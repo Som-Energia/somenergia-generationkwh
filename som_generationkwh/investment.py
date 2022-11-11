@@ -23,6 +23,7 @@ from oorq.oorq import AsyncMode
 from investment_strategy import (
     AportacionsActions,
     GenerationkwhActions,
+    AportacionsObligatoriesActions,
     PartnerException,
     InvestmentException,
 )
@@ -169,12 +170,15 @@ class GenerationkwhInvestment(osv.osv):
 
     def investment_actions(self, cursor, uid, id):
         inv = self.browse(cursor, uid, id)
-        if str(inv.emission_id.type) == 'apo':
+        if str(inv.emission_id.type) == 'apo_obl':
+            return AportacionsObligatoriesActions(self, cursor, uid, 1)
+        elif str(inv.emission_id.type) == 'apo':
             return AportacionsActions(self, cursor, uid, 1)
         return GenerationkwhActions(self, cursor, uid, 1)
 
     def state_actions(self, cursor, uid, id, user, timestamp, **values):
         inv = self.browse(cursor, uid, id)
+        #TODO: afegir el apos obligatories? on està aquest state?
         if str(inv.emission_id.type) == 'apo':
             return AportacionsState(user, timestamp, **values)
         return GenerationkwhState(user, timestamp, **values)
@@ -973,7 +977,9 @@ class GenerationkwhInvestment(osv.osv):
                          context=None):
         investment_actions = GenerationkwhActions(self, cursor, uid, 1)
         # Compatibility 'emissio_apo'
-        if emission == 'emissio_apo' or (emission and 'APO_' in emission):
+        if emission == 'APO_OB':
+            investment_actions = AportacionsObligatoriesActions(self, cursor, uid, 1)
+        elif emission == 'emissio_apo' or (emission and 'APO_' in emission):
             investment_actions = AportacionsActions(self, cursor, uid, 1)
         investment_id = investment_actions.create_from_form(cursor, uid,
                                                             partner_id, order_date, amount_in_euros, ip, iban, emission,
@@ -1307,23 +1313,28 @@ class GenerationkwhInvestment(osv.osv):
                 self.send_mail(cursor, uid, invoice_ids[0],
                     'account.invoice', '_mail_impagament',  id)
 
-    def create_initial_invoices(self,cursor,uid, investment_ids):
-
+    def create_initial_invoices(self,cursor,uid, investment_ids, context=None):
+        if not context:
+            context = {}
         Partner = self.pool.get('res.partner')
         Product = self.pool.get('product.product')
         Invoice = self.pool.get('account.invoice')
         InvoiceLine = self.pool.get('account.invoice.line')
         PaymentType = self.pool.get('payment.type')
         Journal = self.pool.get('account.journal')
-
         invoice_ids = []
 
         date_invoice = str(date.today())
+        tpv_payment = context.get('tpv_payment', False)
 
-        # The payment type
-        payment_type_id = PaymentType.search(cursor, uid, [
-            ('code', '=', 'RECIBO_CSB'),
-            ])[0]
+        if tpv_payment:
+            payment_type_id = PaymentType.search(cursor, uid, [
+                ('code', '=', 'TPV'),
+                ])[0]
+        else:
+            payment_type_id = PaymentType.search(cursor, uid, [
+                ('code', '=', 'RECIBO_CSB'),
+                ])[0]
 
         errors = []
         def error(message):
@@ -1344,6 +1355,7 @@ class GenerationkwhInvestment(osv.osv):
             product = investment.emission_id.investment_product_id
 
             # TODO: Remove the GENKWHID stuff when fully migrated, error instead
+            # TODO: Ficar aqui també per 'apo_obl'
             invoice_name = '%s-JUST' % '{}'.format(investment.id)
             if investment.name:
                  invoice_name = '%s-JUST' % investment.name
@@ -1373,16 +1385,16 @@ class GenerationkwhInvestment(osv.osv):
             partner = Partner.browse(cursor, uid, partner_id)
 
             # Check if exist bank account
-            if not partner.bank_inversions:
+            if not partner.bank_inversions and not tpv_payment:
                 error(u"Partner '{}' has no investment bank account"
                     .format(partner.name))
                 continue
 
             amount_total = gkwh.shareValue * investment.nshares
-
-            mandate_id = self.get_or_create_payment_mandate(cursor, uid,
-                partner_id, partner.bank_inversions.iban,
-                investment.emission_id.mandate_name, gkwh.creditorCode)
+            if not tpv_payment:
+                mandate_id = self.get_or_create_payment_mandate(cursor, uid,
+                    partner_id, partner.bank_inversions.iban,
+                    investment.emission_id.mandate_name, gkwh.creditorCode)
 
             # Default invoice fields for given partner
             vals = {}
@@ -1396,14 +1408,19 @@ class GenerationkwhInvestment(osv.osv):
                 'name': invoice_name,
                 'number': invoice_name,
                 'journal_id': investment.emission_id.journal_id.id,
+                #el property aquest fa petar amb les ob perquè fem el browse
+                #en la funcio d'interessos potser té sentit però en aquesta és bug de copypaste?
                 'account_id': partner.property_account_liquidacio.id,
-                'partner_bank': partner.bank_inversions.id,
                 'payment_type': payment_type_id,
                 'check_total': amount_total,
                 'origin': investment.name,
-                'mandate_id': mandate_id,
                 'date_invoice': date_invoice,
             })
+            if not tpv_payment:
+                vals.update({
+                    'partner_bank': partner.bank_inversions.id,
+                    'mandate_id': mandate_id,
+                })
 
             invoice_id = Invoice.create(cursor, uid, vals)
             Invoice.write(cursor,uid, invoice_id,{'sii_to_send':False})
@@ -1465,6 +1482,7 @@ class GenerationkwhInvestment(osv.osv):
                     True)
         Invoice.afegeix_a_remesa(cursor,uid,invoice_ids, order_id)
 
+
     def investment_payment(self,cursor,uid,investment_ids):
         """
         Creates the invoices, open them and add the current payment order.
@@ -1474,28 +1492,39 @@ class GenerationkwhInvestment(osv.osv):
 
         invoice_ids, errors = self.create_initial_invoices(cursor,uid, investment_ids)
         if invoice_ids:
-            self.open_invoices(cursor, uid, invoice_ids)
-            InvestmentActions = self.investment_actions(cursor, uid, investment_ids[0])
-            payment_mode = InvestmentActions.get_payment_mode_name(cursor, uid)
-            self.invoices_to_payment_order(cursor, uid,
-                invoice_ids, payment_mode)
+            invoice_ids, errors = self.investment_payment_add_to_payment_order(cursor, uid, investment_ids, invoice_ids, errors)
+        return invoice_ids, errors
 
-            investment =  self.browse(cursor, uid, investment_ids[0])
-            emission_id = investment.emission_id.id
-            member_id = investment.member_id.id
-            for invoice_id in invoice_ids:
-                invoice_data = Invoice.read(cursor, uid, invoice_id, ['origin','partner_id'])
-                investment_ids = self.search(cursor, uid,[
-                    ('name','=',invoice_data['origin'])])
-                partner_id = invoice_data['partner_id'][0]
-                total_amount_in_emission = self.get_investments_amount(cursor, uid, member_id, emission_id=emission_id)
+    def investment_payment_add_to_payment_order(self, cursor, uid, investment_ids, invoice_ids, errors, context=None):
+        """
+        Opens the invoices and adds them to the current payment order.
+        Called from the investment_payment_wizard.
+        """
+        Invoice = self.pool.get('account.invoice')
 
-                mail_context = {}
-                if total_amount_in_emission > gkwh.amountForlegalAtt:
-                    attachment_id = InvestmentActions.get_investment_legal_attachment(cursor, uid, partner_id, emission_id)
-                    if attachment_id:
-                        mail_context.update({'attachment_ids': [(6, 0, [attachment_id])]})
+        self.open_invoices(cursor, uid, invoice_ids)
+        InvestmentActions = self.investment_actions(cursor, uid, investment_ids[0])
+        payment_mode = InvestmentActions.get_payment_mode_name(cursor, uid)
+        self.invoices_to_payment_order(cursor, uid,
+            invoice_ids, payment_mode)
 
+        investment =  self.browse(cursor, uid, investment_ids[0])
+        emission_id = investment.emission_id.id
+        member_id = investment.member_id.id
+        for invoice_id in invoice_ids:
+            invoice_data = Invoice.read(cursor, uid, invoice_id, ['origin','partner_id'])
+            investment_ids = self.search(cursor, uid,[
+                ('name','=',invoice_data['origin'])])
+            partner_id = invoice_data['partner_id'][0]
+            total_amount_in_emission = self.get_investments_amount(cursor, uid, member_id, emission_id=emission_id)
+
+            mail_context = {}
+            if total_amount_in_emission > gkwh.amountForlegalAtt:
+                attachment_id = InvestmentActions.get_investment_legal_attachment(cursor, uid, partner_id, emission_id)
+                if attachment_id:
+                    mail_context.update({'attachment_ids': [(6, 0, [attachment_id])]})
+            #el mail també hauria d'estar dins l'if?
+            if InvestmentActions.productCode != 'APOOB':
                 self.send_mail(cursor, uid, invoice_id,
                     'account.invoice', '_mail_pagament', investment_ids[0], context=mail_context)
         return invoice_ids, errors
@@ -1701,11 +1730,12 @@ class GenerationkwhInvestment(osv.osv):
         invoice_ids = []
         errors = []
         date_invoice = divestment_date or str(datetime.today().date())
-
         for id in ids:
             inv = self.browse(cursor, uid, id)
             investment_actions = GenerationkwhActions(self, cursor, uid, 1)
-            if str(inv.emission_id.type) == 'apo':
+            if str(inv.emission_id.type) == 'apo_obl':
+                investment_actions = AportacionsObligatoriesActions(self, cursor, uid, 1)
+            elif str(inv.emission_id.type) == 'apo':
                 investment_actions = AportacionsActions(self, cursor, uid, 1)
             investment_actions.divest(cursor, uid, id, invoice_ids, errors, date_invoice)
 

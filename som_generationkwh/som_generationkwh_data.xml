@@ -2103,12 +2103,98 @@ ${text_legal}
             <field name="investment_payment_mode_id" ref="apo_investment_payment_mode" />
             <field name="bridge_account_payments_id" ref="pgc_555000000011" />
         </record>
+        <record id="pgc_555000000003" model="account.account">
+            <field name="code">555000000003</field>
+            <field name="reconcile" eval="True"/>
+            <field name="parent_id" model="account.account" search="[('code','=','555')]"/>
+            <field name="type">other</field>
+            <field name="name">CAIXA Aportacions Obligatories</field>
+            <field name="user_type" ref="l10n_chart_ES.financieras"/>
+        </record>
+        <record id="apo_ob_fact_journal" model="account.journal">
+            <field name="code">APOOB_FACT</field>
+            <field eval="[(6,0,[])]" name="account_control_ids"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field eval="0" name="centralisation"/>
+            <field eval="0" name="group_invoice_lines"/>
+            <field name="type">cash</field>
+            <field name="default_credit_account_id" ref="pgc_555000000003" />
+            <field name="default_debit_account_id" ref="pgc_555000000003" />
+            <field name="view_id" ref="account.account_journal_bank_view"/>
+            <field eval="[(6,0,[])]" name="type_control_ids"/>
+            <field name="sequence_id" ref="account.sequence_journal"/>
+            <field eval="1" name="active"/>
+            <field eval="1" name="update_posted"/>
+            <field name="name">Factures Aportacions Obligatories</field>
+            <field eval="0" name="refund_journal"/>
+            <field eval="1" name="entry_posted"/>
+        </record>
+         <record id="apo_ob_investment_payment_mode" model="payment.mode">
+            <field name="name">APORTACIONS OBLIGATORIES (Enginyers)</field>
+            <field name="type" search="[('code', '=', 'RECIBO_CSB')]"/>
+            <field name="journal" ref="apo_ob_fact_journal"/>
+            <field name="bank_id" search="[('partner_id', '=', 1)]"/>
+            <field name="tipo">sepa19</field>
+            <field name="nombre">Som Energia SCCL</field>
+            <field name="sufijo">000</field>
+            <field name="require_bank_account" eval="True"/>
+            <field name="partner_id">1</field>
+            <field name="sepa_creditor_code">ES24000F55091367</field>
+        </record>
+        <record id="apo_ob_divestment_payment_mode" model="payment.mode">
+            <field name="name">RETORN APORTACIONS OBLIGATORIES (Enginyers)</field>
+            <field name="type" search="[('code', '=', 'RECIBO_CSB')]"/>
+            <field name="journal" ref="apo_ob_fact_journal"/>
+            <field name="bank_id" search="[('partner_id', '=', 1)]"/>
+            <field name="tipo">sepa34</field>
+            <field name="nombre">Som Energia SCCL</field>
+            <field name="sufijo">000</field>
+            <field name="require_bank_account" eval="True"/>
+            <field name="partner_id">1</field>
+            <field name="sepa_creditor_code">ES24000F55091367</field>
+        </record>
+        <record id="apo_ob_product_ae" model="product.product">
+            <field name="name">Aportacions</field>
+            <field name="default_code">APOOB</field>
+            <field name="categ_id" model='product.category' search="[('name','=','Inversions')]"/>
+            <field name="property_account_expense" model="account.account" search="[('code','=','163000000000')]"/>
+        </record>
+        <record id="emissio_apo_obligatoria" model="generationkwh.emission">
+            <field name="name">Aportacions obligatòries</field>
+            <field name="code">APO_OB</field>
+            <field name="start_date">2021-10-21-</field>
+            <field name="amount_emission">99999999</field>
+            <field name="state">open</field>
+            <field name="type">apo_obl</field>
+            <field name="grace_period">1</field>
+            <field name="expiration_years">0</field>
+            <field name="waiting_days">0</field>
+            <field name="mandate_name">APORTACIO Obligatoria</field>
+            <field name="journal_id" ref="apo_ob_fact_journal"/>
+            <field name="investment_product_id" ref="apo_ob_product_ae" />
+            <field name="investment_payment_mode_id" ref="apo_ob_investment_payment_mode" />
+            <field name="bridge_account_payments_id" ref="pgc_555000000003" />
+        </record>
+
+        <record model="ir.sequence.type" id="seq_type_som_aportacions_ob">
+            <field name="name">Seq. Aportacions al Capital Social Obligatòries</field>
+            <field name="code">seq.som.aportacions.ob</field>
+        </record>
+        <record model="ir.sequence" id="seq_som_aportacions_ob">
+            <field name="name">Seq. Aportacions al Capital Social Obligatòries</field>
+            <field name="code">seq.som.aportacions.ob</field>
+            <field name="padding">6</field>
+            <field name="number_increment">1</field>
+            <field name="type" ref="seq_type_som_aportacions_ob" />
+            <field name="prefix">APOOB</field>
+        </record>
+
         <record id="emissio_apo" model="generationkwh.emission">
             <field name="name">Aportacions</field>
             <field name="code">APO_202003</field>
             <field name="start_date">2020-03-03</field>
             <field name="amount_emission">5000000</field>
-            <field name="state">draft</field>
+            <field name="state">open</field>
             <field name="type">apo</field>
             <field name="grace_period">1</field>
             <field name="expiration_years">0</field>
@@ -2186,6 +2272,33 @@ ${text_legal}
                 Definim l'interes aplicat actualment en les aportacions fetes al capital social.
                 Decimal definit amb punt. Exemple: "1.5"
             </field>
+        </record>
+        <record id="payment_type_TPV" model="payment.type">
+            <field eval="&quot;&quot;&quot;TPV&quot;&quot;&quot;" name="code"/>
+            <field eval="&quot;&quot;&quot;Pago por TPV&quot;&quot;&quot;" name="name"/>
+            <field eval="[]" name="suitable_bank_types"/>
+            <field eval="&quot;&quot;&quot;Pagament per TPV&quot;&quot;&quot;" name="note"/>
+            <field eval="1" name="active"/>
+        </record>
+        <record id="socis_tpv_journal" model="account.journal">
+            <field name="code">TPVSOCI</field>
+            <field eval="[(6,0,[])]" name="account_control_ids"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field eval="0" name="centralisation"/>
+            <field eval="0" name="group_invoice_lines"/>
+            <field name="type">cash</field>
+            <field eval="0" name="sii_to_send"/>
+            <!-- TODO: el compte haver ha de ser el 100(..)00 i el deure el 5720(..)00
+            <field name="default_credit_account_id" model="account.account" search="[('code','=','5720')]" />
+            <field name="default_debit_account_id" model="account.account" search="[('code','=','10000')]" /> -->
+            <field name="view_id" ref="account.account_journal_bank_view"/>
+            <field eval="[(6,0,[])]" name="type_control_ids"/>
+            <field name="sequence_id" ref="account.sequence_journal"/>
+            <field eval="1" name="active"/>
+            <field eval="1" name="update_posted"/>
+            <field name="name">Factures TPV Quota Soci</field>
+            <field eval="0" name="refund_journal"/>
+            <field eval="1" name="entry_posted"/>
         </record>
     </data>
 </openerp>

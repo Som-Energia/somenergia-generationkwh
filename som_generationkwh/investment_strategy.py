@@ -26,15 +26,19 @@ class InvestmentActions(ErpWrapper):
 
     def create_from_form(self, cursor, uid, partner_id, order_date, amount_in_euros, ip, iban,
             emission=None, context=None):
+        if not context:
+            context = {}
         GenerationkwhInvestment = self.erp.pool.get('generationkwh.investment')
         Emission = self.erp.pool.get('generationkwh.emission')
 
+        tpv_payment = context.get('tpv_payment', False)
         if amount_in_euros <= 0 or amount_in_euros % gkwh.shareValue > 0:
                 raise InvestmentException("Invalid amount")
-        iban = GenerationkwhInvestment.check_iban(cursor, uid, iban)
-
-        if not iban:
+        if not tpv_payment:
+            iban = GenerationkwhInvestment.check_iban(cursor, uid, iban)
+            if not iban:
                 raise PartnerException("Wrong iban")
+
         if not emission:
             emission = 'emissio_genkwh'
 
@@ -46,6 +50,7 @@ class InvestmentActions(ErpWrapper):
         else:
             emission_id = Emission.search(cursor, uid, [('code','=',emission)])[0]
 
+        #ja és soci?
         Soci = self.erp.pool.get('somenergia.soci')
         member_ids = Soci.search(cursor, uid, [
                 ('partner_id','=',partner_id)
@@ -53,11 +58,12 @@ class InvestmentActions(ErpWrapper):
         if not member_ids:
             raise PartnerException("Not a member")
 
-        bank_id = GenerationkwhInvestment.get_or_create_partner_bank(cursor, uid,
-                    partner_id, iban)
-        ResPartner = self.erp.pool.get('res.partner')
-        ResPartner.write(cursor, uid, partner_id, dict(
-            bank_inversions = bank_id,),context)
+        if not tpv_payment:
+            bank_id = GenerationkwhInvestment.get_or_create_partner_bank(cursor, uid,
+                        partner_id, iban)
+            ResPartner = self.erp.pool.get('res.partner')
+            ResPartner.write(cursor, uid, partner_id, dict(
+                bank_inversions = bank_id,),context)
 
         return member_ids, emission_id
 
@@ -850,5 +856,190 @@ class AportacionsActions(InvestmentActions):
         ))
 
         return invoice_id, errors
+
+class AportacionsObligatoriesActions(InvestmentActions):
+
+    @property
+    def journalCode(self):
+        return 'APOOB_FACT'
+
+    @property
+    def productCode(self):
+        return 'APOOB'
+
+    def create_from_form(self, cursor, uid, partner_id, order_date, amount_in_euros, ip, iban, emission=None, context=None):
+        """
+        [WIP] En principi ja hi ha un fluxe definit desde OV (https://www.somenergia.coop/es/hazte-socio-a/) per a la Creació del Soci
+        que inclou el pagament (rebut domiciliat ò tarjeta) de la quota obligatòria. De manera que de de moment no cal implementar aquesta
+        funció sino que caldrà interceptar el fluxe actual que segueix OV en les altes per crear la Aportació Obligatòria .
+        :param: emission = 'emissio_apo_obligatoria'
+        """
+        # if emission == 'emissio_apo_obligatoria':
+        #     raise InvestmentException("Funció no implementada per a les Aportacions de Capital Obligatòries")
+
+        member_ids, emission_id = super(AportacionsObligatoriesActions, self).create_from_form(cursor, uid, partner_id, order_date, amount_in_euros, ip, iban,emission, context)
+        GenerationkwhInvestment = self.erp.pool.get('generationkwh.investment')
+
+
+        Emission = self.erp.pool.get('generationkwh.emission')
+        emi_obj = Emission.read(cursor, uid, emission_id, ['mandate_name','code'])
+
+        if not GenerationkwhInvestment.check_investment_creation(cursor, uid, partner_id, emi_obj['code'], amount_in_euros):
+            raise InvestmentException("Impossible to create investment")
+
+        Soci = self.erp.pool.get('somenergia.soci')
+        member_ids = Soci.search(cursor, uid, [
+                ('partner_id','=',partner_id)
+                ])
+        ResUser = self.erp.pool.get('res.users')
+        user = ResUser.read(cursor, uid, uid, ['name'])
+        IrSequence = self.erp.pool.get('ir.sequence')
+        name = IrSequence.get_next(cursor,uid,'seq.som.aportacions.ob')
+
+        inv = InvestmentState(user['name'], datetime.now())
+        inv.order(
+            name = name,
+            date = order_date,
+            amount = amount_in_euros,
+            iban = iban,
+            ip = ip,
+            )
+        investment_id = GenerationkwhInvestment.create(cursor, uid, dict(
+            inv.erpChanges(),
+            member_id = member_ids[0],
+            emission_id = emission_id,
+        ), context)
+
+        if not context.get('tpv_payment', False):
+            GenerationkwhInvestment.get_or_create_payment_mandate(cursor, uid,
+                partner_id, iban, emi_obj['mandate_name'], gkwh.creditorCode)
+
+        """
+            Ja es deu estar enviant ara un correu quan algú es fa soci?
+        """
+        # total_amount_in_emission = GenerationkwhInvestment.get_investments_amount(cursor, uid, member_ids[0], emission_id=emission_id)
+
+        # mail_context = {}
+        # if total_amount_in_emission > gkwh.amountForlegalAtt:
+        #     attachment_id = self.get_investment_legal_attachment(cursor, uid, partner_id, emission_id)
+        #     if attachment_id:
+        #         mail_context.update({'attachment_ids': [(6, 0, [attachment_id])]})
+
+        # GenerationkwhInvestment.send_mail(cursor, uid, investment_id,
+        #     'generationkwh.investment', '_mail_creacio', context=mail_context)
+
+        return investment_id
+
+    def create_from_transfer(self, cursor, uid, investment_id, new_partner_id, transmission_date, iban, context=None):
+        raise InvestmentException("No es pot transferir una aportació obligatoria de fer-se soci")
+
+    def get_prefix_semantic_id(self):
+        return 'aportacio_ob'
+
+    def get_or_create_investment_account(self, cursor, uid, partner_id):
+        Partner = self.erp.pool.get('res.partner')
+        partner = Partner.browse(cursor, uid, partner_id)
+
+        if not partner.property_account_liquidacio:
+            partner.button_assign_acc_410()
+            partner = partner.browse()[0]
+
+        # a destral té menys 0's que a prod
+        # aa_model = self.erp.pool.get('account.account')
+        # res = aa_model.search(cursor, uid, [('code','=','100000')])
+        # return res[0]
+
+        # aa_model = self.erp.pool.get('account.account')
+        # res = aa_model.search(cursor, uid, [('code','=','100000000000')])
+        # return res[0]
+
+        #ilike per ser compatible amb destral i prod/testing
+        aa_model = self.erp.pool.get('account.account')
+        res = aa_model.search(cursor, uid, [('code','=ilike','100000%')])
+        return res[0]
+
+
+    def get_payment_mode_name(self, cursor, uid):
+        imd_model = self.erp.pool.get('ir.model.data')
+        payment_mode_id = imd_model.get_object_reference(
+            cursor, uid, 'som_generationkwh', 'apo_ob_investment_payment_mode'
+        )[1]
+        PaymentMode = self.erp.pool.get('payment.mode')
+        return PaymentMode.read(cursor, uid, payment_mode_id, ['name'])['name']
+
+    def get_divest_payment_mode(self, cursor, uid):
+        imd_model = self.erp.pool.get('ir.model.data')
+        payment_mode_id = imd_model.get_object_reference(
+            cursor, uid, 'som_generationkwh', 'apo_ob_divestment_payment_mode'
+        )[1]
+        PaymentMode = self.erp.pool.get('payment.mode')
+        return PaymentMode.read(cursor, uid, payment_mode_id, ['name'])['name']
+
+    def divest(self, cursor, uid, id, invoice_ids, errors, date_invoice):
+        User = self.erp.pool.get('res.users')
+        user = User.read(cursor, uid, uid, ['name'])
+        Invoice = self.erp.pool.get('account.invoice')
+        MoveLine = self.erp.pool.get('account.move.line')
+        Investment = self.erp.pool.get('generationkwh.investment')
+
+        inversio = Investment.read(cursor, uid, id, [
+            'log',
+            'nshares',
+            'purchase_date',
+            'amortized_amount',
+            'first_effective_date',
+            'name',
+            'move_line_id',
+            'member_id'
+        ])
+        nominal_amount = inversio['nshares']*gkwh.shareValue
+        daysFromPayment = (isodate(date_invoice) - isodate(inversio['purchase_date'])).days
+
+        #TODO: demanar si per soci també hi ha el mínim de 30 dies
+        # if daysFromPayment < gkwh.waitDaysBeforeDivest:
+        #     errors.append("%s: Too early to divest (< 30 days from purchase)" % inversio['name'])
+        #     return
+
+        #TODO: les obligatòries tenen IRPF? reescriure el mètode? els defaults venen a 0
+        invoice_id, error = Investment.create_divestment_invoice(cursor, uid, id,
+            date_invoice, nominal_amount, 0, 0, 0)
+
+        if error:
+            errors.append(error)
+            return
+
+        Investment.open_invoices(cursor, uid, [invoice_id])
+        Investment.invoices_to_payment_order(cursor, uid,
+                [invoice_id], self.get_divest_payment_mode(cursor, uid))
+        invoice_ids.append(invoice_id)
+
+        #Get moveline id
+        invoice_obj = Invoice.read(cursor, uid, invoice_id, [
+            'move_id',
+        ])
+        ml_invoice = invoice_obj['move_id'][0]
+        movementline_id = MoveLine.search(cursor, uid,
+            [('move_id','=',invoice_obj['move_id'][0])])[0]
+
+        inv = InvestmentState(user['name'], datetime.now(),
+            log = inversio['log'],
+            nominal_amount = nominal_amount,
+            purchase_date = inversio['purchase_date'],
+            amortized_amount = inversio['amortized_amount'],
+            first_effective_date = inversio['first_effective_date'],
+        )
+        inv.divest(
+            date = str(date_invoice),
+            amount = nominal_amount,
+            move_line_id = movementline_id,
+        )
+        Investment.write(cursor, uid, id, inv.erpChanges())
+
+
+
+    #cancelar o renunciar
+    #desinvertir
+    #generar ordre de cobrament
+
 
 # vim: et ts=4 sw=4
