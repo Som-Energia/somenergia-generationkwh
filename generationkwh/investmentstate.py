@@ -250,7 +250,7 @@ class InvestmentState(object):
 
         return ns(
             draft=False,
-            log = self._log("INVOICED: Facturada i remesada\n"),
+            log = self._log("INVOICED: Facturada\n"),
             actions_log = self.addAction(
                 type = 'invoice',
             ))
