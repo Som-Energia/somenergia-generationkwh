@@ -1545,7 +1545,7 @@ class InvestmentTests(testing.OOTestCase):
             inv_0001 = self.Investment.read(cursor, uid, inv_id)
             self.assertLogEquals(inv_0001['log'],
                 u'PAID: Pagament de 1000 € efectuat [None]\n'
-                u'INVOICED: Facturada i remesada\n'
+                u'INVOICED: Facturada\n'
             )
             inv_0001.pop('actions_log')
             inv_0001.pop('log')
@@ -1592,7 +1592,7 @@ class InvestmentTests(testing.OOTestCase):
             inv_0001 = self.Investment.read(cursor, uid, inv_id)
             self.assertLogEquals(inv_0001['log'],
                 u'PAID: Pagament de 1000 € efectuat [None]\n'
-                u'INVOICED: Facturada i remesada\n'
+                u'INVOICED: Facturada\n'
             )
             inv_0001.pop('actions_log')
             inv_0001.pop('log')

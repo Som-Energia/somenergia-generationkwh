@@ -480,7 +480,7 @@ class Investment_Test(unittest.TestCase):
         self.assertEqual(name_emission, "GenerationkWH")
 
         self.assertLogEquals(log,
-            u'INVOICED: Facturada i remesada\n'
+            u'INVOICED: Facturada\n'
             u'SIGN: Inversió signada amb data 2017-01-03\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 4000 €, IBAN: ES7712341234161234567890\n'
@@ -530,7 +530,7 @@ class Investment_Test(unittest.TestCase):
 
         self.assertLogEquals(log,
             u'PAID: Pagament de 2000 € efectuat [None]\n'
-            u'INVOICED: Facturada i remesada\n'
+            u'INVOICED: Facturada\n'
             u'SIGN: Inversió signada amb data 2017-01-03\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
@@ -617,14 +617,14 @@ class Investment_Test(unittest.TestCase):
 
         self.assertLogEquals(result[0]['log'],
             u'PAID: Pagament de 2000 € efectuat [None]\n'
-            u'INVOICED: Facturada i remesada\n'
+            u'INVOICED: Facturada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
 
         self.assertLogEquals(result[1]['log'],
             u'PAID: Pagament de 2000 € efectuat [None]\n'
-            u'INVOICED: Facturada i remesada\n'
+            u'INVOICED: Facturada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.2,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
@@ -652,7 +652,7 @@ class Investment_Test(unittest.TestCase):
 
         self.assertLogEquals(result['log'],
             u'PAID: Pagament de 2000 € efectuat [None]\n'
-            u'INVOICED: Facturada i remesada\n'
+            u'INVOICED: Facturada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
@@ -681,7 +681,7 @@ class Investment_Test(unittest.TestCase):
         self.assertLogEquals(log,
             u'UNPAID: Devolució del pagament de 2000 € [None]\n'
             u'PAID: Pagament de 2000 € efectuat [None]\n'
-            u'INVOICED: Facturada i remesada\n'
+            u'INVOICED: Facturada\n'
             u'SIGN: Inversió signada amb data 2017-01-03\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
@@ -772,7 +772,7 @@ class Investment_Test(unittest.TestCase):
         self.assertLogEquals(result[0]['log'],
             u'UNPAID: Devoluci\xf3 del pagament de 2000 € [None]\n'
             u'PAID: Pagament de 2000 € efectuat [None]\n'
-            u'INVOICED: Facturada i remesada\n'
+            u'INVOICED: Facturada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
@@ -780,7 +780,7 @@ class Investment_Test(unittest.TestCase):
         self.assertLogEquals(result[1]['log'],
             u'UNPAID: Devoluci\xf3 del pagament de 2000 € [None]\n'
             u'PAID: Pagament de 2000 € efectuat [None]\n'
-            u'INVOICED: Facturada i remesada\n'
+            u'INVOICED: Facturada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.2,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
@@ -804,7 +804,7 @@ class Investment_Test(unittest.TestCase):
         log = investment.pop('log')
 
         self.assertLogEquals(log,
-            u'INVOICED: Facturada i remesada\n'
+            u'INVOICED: Facturada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.123,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
@@ -1093,7 +1093,7 @@ class Investment_Test(unittest.TestCase):
         self.assertLogEquals(investment['log'],
             u'AMORTIZATION: Generada amortització de 80.00 € pel 2002-01-05\n'
             u'PAID: Pagament de 2000 € efectuat [None]\n'
-            u'INVOICED: Facturada i remesada\n'
+            u'INVOICED: Facturada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
@@ -1115,7 +1115,7 @@ class Investment_Test(unittest.TestCase):
             u'AMORTIZATION: Generada amortització de 80.00 € pel 2003-01-05\n'
             u'AMORTIZATION: Generada amortització de 80.00 € pel 2002-01-05\n'
             u'PAID: Pagament de 2000 € efectuat [None]\n'
-            u'INVOICED: Facturada i remesada\n'
+            u'INVOICED: Facturada\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
             )
@@ -1699,7 +1699,7 @@ class Investment_Test(unittest.TestCase):
             u'CANCEL: La inversió ha estat cancel·lada\n'
             u'UNPAID: Devolució del pagament de 2000 € [None]\n'
             u'PAID: Pagament de 2000 € efectuat [None]\n'
-            u'INVOICED: Facturada i remesada\n'
+            u'INVOICED: Facturada\n'
             u'SIGN: Inversió signada amb data 2000-01-03\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'
@@ -1750,7 +1750,7 @@ class Investment_Test(unittest.TestCase):
             u'CANCEL: La inversió ha estat cancel·lada\n'
             u'UNPAID: Devolució del pagament de 2000 € [None]\n'
             u'PAID: Pagament de 2000 € efectuat [None]\n'
-            u'INVOICED: Facturada i remesada\n'
+            u'INVOICED: Facturada\n'
             u'SIGN: Inversió signada amb data 2000-01-03\n'
             u'ORDER: Formulari omplert des de la IP 10.10.23.1,'
             u' Quantitat: 2000 €, IBAN: ES7712341234161234567890\n'

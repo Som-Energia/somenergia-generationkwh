@@ -584,7 +584,7 @@ class InvestmentState_Test(unittest.TestCase):
         self.assertChangesEqual(inv, """\
             draft: false
             """,
-            u"INVOICED: Facturada i remesada\n"
+            u"INVOICED: Facturada\n"
             )
 
         self.assertActionsEqual(inv, u"""
