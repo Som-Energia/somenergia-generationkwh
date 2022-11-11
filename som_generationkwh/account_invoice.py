@@ -34,6 +34,7 @@ class AccountInvoice(osv.osv):
             pay_journal_id, writeoff_acc_id, writeoff_period_id,
             writeoff_journal_id, context, name
         )
+
         #TODO: Untested
         today = str(date.today()) #TODO date more real?
         Investment = self.pool.get('generationkwh.investment')
@@ -45,7 +46,24 @@ class AccountInvoice(osv.osv):
                 Investment.mark_as_interested(cursor, uid, invoice_id)
             if self.is_investment_payment(cursor,uid,invoice_id):
                Investment.mark_as_paid(cursor,uid,[investment_id],today,moveline_id)
+               self.change_leads_stage(cursor, uid, ids)
+
         return res
+
+    def change_leads_stage(self, cursor, uid, ids):
+        lead_o = self.pool.get("som.soci.crm.lead")
+
+        leads_to_change = []
+        for id in ids:
+            lead_id = lead_o.search(cursor, uid, [('invoice_id', '=', id)])
+            if len(lead_id) <= 0:
+                continue
+            lead = lead_o.browse(cursor, uid, lead_id[0])
+            invoice = self.browse(cursor, uid, id)
+            if invoice.state == 'paid' and lead.stage_id.name == 'Remesat':
+                leads_to_change.append(lead_id[0])
+
+        lead_o.stage_next(cursor, uid, leads_to_change)
 
     def is_interest_payment(self, cursor, uid, invoice_id):
         ir_md_obj = self.pool.get('ir.model.data')
