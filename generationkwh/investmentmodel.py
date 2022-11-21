@@ -22,6 +22,7 @@ investmentProductCode = 'GENKWH_AE'
 irpfProductCode = 'GENKWH_IRPF'
 investmentPaymentMode = 'GENERATION kWh'
 amortizationPaymentMode = 'GENERATION kWh AMOR'
+amortizationReceivablePaymentMode = 'GENERATION kWh AMOR Cobrar'
 bridgeAccountCode = '555000000004' # Bridge account to concile payments to the bank
 
 amountForlegalAtt = 5000
