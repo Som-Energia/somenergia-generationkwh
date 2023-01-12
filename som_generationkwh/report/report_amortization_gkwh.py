@@ -85,6 +85,7 @@ class AccountInvoice(osv.osv):
         report.amortizationDate = dateFormat(mutable_information.amortizationDate)
         report.amortizationNumPayment = mutable_information.amortizationNumber
         report.irpfAmount = irpf_values['irpf_amount']
+        report.irpfSaving = irpf_values['irpf_saving']
         report.previousYear = previous_year
         report.amortValue = amort_value
         return report
