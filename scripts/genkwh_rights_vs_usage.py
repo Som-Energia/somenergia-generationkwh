@@ -80,8 +80,13 @@ def  main(member_code, date_from, date_to):
         showAssignmentsData(assgnments_id)
 
     #Comprovar drets gastats a Mongo
-
-    kwh_gastats = getCurveMongo(member_id, localisodate(date_from), localisodate(date_to))
+    filter = {
+        "name": long(member_id),
+        "regularization": {
+            "$exists": False
+        }
+    }
+    kwh_gastats = getCurveMongo(filter, localisodate(date_from), localisodate(date_to))
 
     #Comprovar drets gastats a les factures
     kwh_invoices = getInvoiceKwh(member_code, date_from, date_to)

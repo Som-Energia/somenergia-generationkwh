@@ -74,8 +74,9 @@ def getMongoTimeCurve(database, sourceName, filter, firstDate, lastDate):
         source.timefield,
         source.creationfield,
         )
-    if source.get('intname',False):
-        filter = filter and long(filter)
+    if source.get('intname',False): #aqui nomes memberrightusage te true
+        if not hasattr(filter, '__iter__'):
+            filter = filter and long(filter)
 
     return mtc.get(
         start=firstDate,
