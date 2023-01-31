@@ -12,11 +12,12 @@
     ${css}
     img {
         width: 120px;
-        height: 120px;
-        margin-left: 10px;
+        height: 75px;
     }
     .logos {
-        float: left;
+        display: flex;
+        justify-content: center;
+        text-align:center;
     }
     table a:link {
         color: #666;
@@ -27,11 +28,10 @@
         font-family:Arial, Helvetica, sans-serif;
         color:#666;
         font-size:12px;
-        text-shadow: 1px 1px 0px #fff;
         background:#e0e0e0;
         margin-left:auto;
         margin-right:auto;
-        width: 60%;
+        width: 66%;
         border:#ccc 1px solid;
 
         -moz-border-radius:3px;
@@ -43,13 +43,11 @@
         box-shadow: 0 1px 2px #d1d1d1;
     }
     table th {
+        color: black;
         padding:10px 25px;
         border-top:1px solid #fafafa;
         border-bottom:1px solid #e0e0e0;
-
-        background: #ededed;
-        background: -webkit-gradient(linear, left top, left bottom, from(#ededed), to(#ebebeb));
-        background: -moz-linear-gradient(top,  #ededed,  #ebebeb);
+        background: #86bc25;
     }
     table th:first-child {
         text-align: center;
@@ -100,9 +98,9 @@
         text-align: center;
     }
     #cabecera{
-        float: right;
-        padding-top: 20px;
-        text-align: right;
+        float: center;
+        text-align: center;
+        font-family:Arial, Helvetica, sans-serif;
     }
     #warning24{
         font-size: 75%;
@@ -117,14 +115,16 @@ for account.invoice in objects:
  setLang(account.invoice.lang_partner)
 %>
     <div class="logos">
-        <img src="${addons_path}/som_generationkwh/report/Logo-SomEnergia-blanco-quadrado-250x250px.jpg" />
-        <img src="${addons_path}/som_generationkwh/report/Logo_Generation-04-Horizontal.jpg" />
-        <p id="cabecera"><b>Liquidació GenerationkWh</b><br>Emisió: ${data.receiptDate} </ p>
+        <img src="${addons_path}/som_generationkwh/report/Logo-SomEnergia-blanco-quadrado-250x250px.png" />
+        <img src="${addons_path}/som_generationkwh/report/Logo_Generation-04-Horizontal.png" />
+    </ div>
+    <div>
+        <p id="cabecera"><b>Liquidació Generation kWh</b><br>Emissió: ${data.receiptDate} </ p>
     </ div>
     <div>
     <table>
         <tr>
-            <th colspan="2"><b>${_(u"Dades Préstec Generation kWh: ")} ${data.inversionName}</b></th>
+            <th colspan="2"><b>${_(u"Dades préstec Generation kWh: ")} ${data.inversionName}</b></th>
         </tr>
         <tr>
             <td colspan="2"> ${_(u"Titular: ")}${data.ownerName}</td>
@@ -142,28 +142,87 @@ for account.invoice in objects:
     </br>
     <table>
         <tr>
-            <th colspan="2"><b>${_(u"Amortització Actual: ")}${data.amortizationName} </b> </th>
+            <th colspan="2"><b>${_(u"Amortització del préstec: ")}${data.amortizationName} </b> </th>
         </tr>
         <tr>
-            <td>
-                ${_(u"Import: ")}${format_currency(data.amortValue,'EUR', locale='es_ES')}<br>
-                ${_(u"IRPF 19% ")}${data.previousYear}${_(u": ")}-${format_currency(data.irpfAmount,'EUR', locale='es_ES')}<br>
-                ${_(u"Import net: ")}${data.amortizationAmount} €
-            </td>
+            <td> ${_(u"Pagament núm: ")} ${data.amortizationNumPayment} de ${data.amortizationTotalPayments}</td>
+            <td> ${_(u"Import: ")}${format_currency(data.amortValue,'EUR', locale='es_ES')}</td>
+        </tr>
+        <tr>
+            <td> ${_(u"Import pendent de retornar: ")}${data.inversionPendingCapital} € </td>
             <td> ${_(u"Data: ")}${data.amortizationDate} </td>
         </tr>
         <tr>
-            <td> ${_(u"Pagament nº: ")} ${data.amortizationNumPayment} de ${data.amortizationTotalPayments}</td>
-            <td> ${_(u"Pendent de retornar: ")}${data.inversionPendingCapital} € </td>
-        </tr>
-        <tr>
-            <td colspan="2"> <p id="warning24">${_(u"Recordeu: el pagament nº 24 serà doble")}</p></td>
+            <td colspan="2"> <p id="warning24">${_(u"Recorda: el pagament nº 24 serà doble")}</p></td>
         </tr>
     </table>
     </br>
     <table>
         <tr>
-            <th colspan="2"><b> ${_(u"Compte on es realizarà l'ingrés")}</b></th>
+            <th colspan="2"><b>${_(u"Aplicació de la tarifa Generation kWh als teus usos d’energia (any ")}${data.previousYear}${_(u")")}</b></th>
+        </tr>
+        <tr>
+            <td> ${_(u"Quantitat d’energia facturada a preu Generation kWh")}</td>
+            <td> ${formatLang(data.totalGenerationKwh,digits=0)} kWh</td>
+        </tr>
+        <tr>
+            <td> ${_(u"Contractes on s’ha aplicat aquesta tarifa")}</td>
+            <td>
+            %for contract,info in sorted(data.totalContractsWithGkWh.iteritems()):
+                ${formatLang(info['kWh'],digits=0)}${_(" kWh : contracte ")}${contract} - ${info['address']}<br>
+            %endfor
+            </td>
+        </tr>
+        <tr>
+            <td> ${_(u"Import facturat amb tarifa Generation kWh")}</td>
+            <td> ${format_currency(data.totalGenerationAmount,'EUR', locale='es_ES')}</td>
+        </tr>
+        <tr>
+            <td> ${_(u"El que hauria costat sense aplicar-hi la tarifa Generation kWh")}</td>
+            <td> ${format_currency(data.totalAmountNoGeneration,'EUR', locale='es_ES')}</td>
+        </tr>
+        <tr>
+            <td> ${_(u"Estalvi obtingut (guany en espècie)")}</td>
+            <td> ${format_currency(data.totalAmountSaving,'EUR', locale='es_ES')}</td>
+        </tr>
+        <tr>
+            <td> ${_(u"Retenció IRPF o impost de societats (19% sobre l’estalvi)")}</td>
+            <td> ${format_currency(data.irpfAmount,'EUR', locale='es_ES')}</td>
+        </tr>
+    </table>
+    </br>
+    <table>
+        <tr>
+            <th colspan="2"><b>${_(u"Liquidació final")}</b></th>
+        </tr>
+        <tr>
+            <td> ${_(u"Amortització del préstec")}</td>
+            <td> ${format_currency(data.amortValue,'EUR', locale='es_ES')}</td>
+        </tr>
+        <tr>
+            <td> ${_(u"Retenció IRPF o impost de societats")}</td>
+            <td> ${format_currency(data.irpfAmount,'EUR', locale='es_ES')}</td>
+        </tr>
+        <tr>
+            <td>
+            %if data.amortizationAmount > 0:
+            ${_(u"Import al teu favor")}</td>
+            %else:
+            ${_(u"Import a retornar a Som Energia")}
+            %endif
+            <td> ${data.amortizationAmount} €</td>
+        </tr>
+    </table>
+    </br>
+    <table>
+        <tr>
+            <th colspan="2"><b>
+            %if data.amortizationAmount > 0:
+            ${_(u"Compte on es realitzarà l'ingrés")}
+            %else:
+            ${_(u"Compte on es realitzarà el càrrec")}
+            %endif
+            </b></th>
         </tr>
         <tr>
             <td id="account"> ${data.inversionBankAccount} </td>
