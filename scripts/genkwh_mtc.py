@@ -8,7 +8,7 @@ Displays time series from Mongo
 import erppeek
 import io
 import datetime
-from consolemsg import step, success, warn, error, fail
+from consolemsg import step, success, warn, error, fail, u
 import dbconfig
 from yamlns import namespace as ns
 
@@ -249,7 +249,7 @@ def curve(database, type, name, **args):
     print "outputing to {}".format(output)
     if output:
         with io.open(output,'w') as output_file:
-            output_file.write(result)
+            output_file.write(u(result))
     print result
 
 
