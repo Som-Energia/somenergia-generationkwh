@@ -52,7 +52,9 @@ def getInvoiceKwh(member_code, date_from, date_to):
     c.CustomSearchParam.write(to_cs_id, {'value': date_to})
     result = []
     try:
-        result = c.CustomSearchResults.read([], [], context={'search_id': custom_id})
+        # CustomSearchResults read doesn't use the IDs, but if not provided ERPPeek fails
+        # in the read. So we put a dummy list to make it work :)
+        result = c.CustomSearchResults.read([1, 2, 3], [], context={'search_id': custom_id})
     except:
         warn("No hem trobat factures amb Generationkwh")
         return 0
