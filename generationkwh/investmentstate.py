@@ -331,6 +331,7 @@ class InvestmentState(object):
                 ))
 
         return ns(
+            active = False,
             purchase_date = None,
             first_effective_date = None,
             last_effective_date = None,
