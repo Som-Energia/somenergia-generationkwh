@@ -381,19 +381,19 @@ def unassigned(ctx, effectiveon=None, purchaseduntil=None, force=False, insist=F
 @cli.command()
 @click.pass_context
 def clean_terminated(ctx):
-    "delete assignements from terminated contracts"
+    "delete assignments from terminated contracts"
 
     erp(ctx.obj['cfg'])
-    assignement_ids = c.GenerationkwhAssignment.search([
+    assignment_ids = c.GenerationkwhAssignment.search([
         ('contract_id.state', '=', 'baixa')
     ], context={'active_test': False})
-    assignements = c.GenerationkwhAssignment.browse(assignement_ids)
-    for assignement in assignements:
-        contract = assignement.contract_id
+    assignments = c.GenerationkwhAssignment.browse(assignment_ids)
+    for assignment in assignments:
+        contract = assignment.contract_id
         if contract.data_baixa == contract.data_ultima_lectura:
-            click.echo("Deleting assignement %s (polissa %s)"
-                % (assignement.id, contract.name))
-            c.GenerationkwhAssignment.unlink([assignement.id])
+            click.echo("Deleting assignment %s (polissa %s)"
+                % (assignment.id, contract.name))
+            c.GenerationkwhAssignment.unlink([assignment.id])
 
 if __name__ == '__main__':
     cli(obj={})
