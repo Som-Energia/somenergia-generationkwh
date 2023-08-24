@@ -377,6 +377,24 @@ def unassigned(ctx, effectiveon=None, purchaseduntil=None, force=False, insist=F
         )
     click.echo(u'\n'.join(str(i) for i in members))
 
+
+@cli.command()
+@click.pass_context
+def clean_terminated(ctx):
+    "delete assignements from terminated contracts"
+
+    erp(ctx.obj['cfg'])
+    assignement_ids = c.GenerationkwhAssignment.search([
+        ('contract_id.state', '=', 'baixa')
+    ], context={'active_test': False})
+    assignements = c.GenerationkwhAssignment.browse(assignement_ids)
+    for assignement in assignements:
+        contract = assignement.contract_id
+        if contract.data_baixa == contract.data_ultima_lectura:
+            click.echo("Deleting assignement %s (polissa %s)"
+                % (assignement.id, contract.name))
+            c.GenerationkwhAssignment.unlink([assignement.id])
+
 if __name__ == '__main__':
     cli(obj={})
     #main()
