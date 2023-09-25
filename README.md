@@ -51,6 +51,10 @@ dodestral -m som_generationkwh # for destral tests, without production database 
 
 ## CHANGES
 
+### 2.5.8 2023-09-25
+
+- PR [#8](https://github.com/Som-Energia/somenergia-generationkwh/pull/136) Added bank mandate wizard
+
 ### 2.5.7 2020-01-29
 
 - PR #8 Added logic to model 193 lines wizard
