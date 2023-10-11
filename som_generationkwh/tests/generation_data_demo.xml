@@ -274,6 +274,11 @@
             <field name="state" ref="l10n_ES_toponyms.ES17"/>
             <field name="country" ref="base.es"/>
         </record>
+        <record id="assignment_0001" model="generationkwh.assignment">
+            <field name="contract_id" ref="giscedata_polissa.polissa_0001"/>
+            <field name="member_id" ref="soci_0001"/>
+            <field name="priority">1</field>
+        </record>
         <!-- Per crear mandatos -->
         <record model="res.request.link" id="res_partner_document">
             <field name="name">Partner</field>
