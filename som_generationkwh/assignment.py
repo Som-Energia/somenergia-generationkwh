@@ -499,11 +499,11 @@ class GenerationkWhAssignment(osv.osv):
             generation_lines = GenerationkWhInvoiceLineOwner.browse(
                 cursor, uid, generation_line_ids)
 
-            response[assignment.id] = defaultdict(int)
+            response[str(assignment.id)] = defaultdict(int)
             for generation_line in generation_lines:
                 line = generation_line.factura_line_id
-                response[assignment.id][str(line.product_id.name)] += line.quantity
-            response[assignment.id] = dict(response[assignment.id])
+                response[str(assignment.id)][str(line.product_id.name)] += line.quantity
+            response[str(assignment.id)] = dict(response[str(assignment.id)])
 
         return response
 
