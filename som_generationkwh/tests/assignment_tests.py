@@ -19,7 +19,7 @@ class AssignmentTests(testing.OOTestCase):
                 cursor, uid, 'som_generationkwh', 'assignment_0001'
             )[1]
             result = self.Assignement.get_generationkwh_monthly_use(cursor, uid, [assignment_id], '1990-08')
-            self.assertEqual(result, {})
+            self.assertEqual(result, {assignment_id: {}})
 
     def test__get_generationkwh_monthly_use(self):
         with Transaction().start(self.database) as txn:

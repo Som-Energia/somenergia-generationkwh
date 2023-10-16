@@ -488,7 +488,7 @@ class GenerationkWhAssignment(osv.osv):
         GisceInvoice = self.pool.get('giscedata.facturacio.factura')
         GenerationkWhInvoiceLineOwner = self.pool.get('generationkwh.invoice.line.owner')
 
-        response = defaultdict(lambda: defaultdict(int))
+        response = {}
         for assignment in self.browse(cursor, uid, assignment_ids):
             assignment = self.browse(cursor, uid, assignment_ids[0])
 
@@ -499,9 +499,11 @@ class GenerationkWhAssignment(osv.osv):
             generation_lines = GenerationkWhInvoiceLineOwner.browse(
                 cursor, uid, generation_line_ids)
 
+            response[assignment.id] = defaultdict(int)
             for generation_line in generation_lines:
                 line = generation_line.factura_line_id
                 response[assignment.id][str(line.product_id.name)] += line.quantity
+            response[assignment.id] = dict(response[assignment.id])
 
         return response
 
