@@ -490,8 +490,6 @@ class GenerationkWhAssignment(osv.osv):
 
         response = {}
         for assignment in self.browse(cursor, uid, assignment_ids):
-            assignment = self.browse(cursor, uid, assignment_ids[0])
-
             gisce_invoice_ids = GisceInvoice.search(cursor, uid, date_domain+[
                 ('polissa_id', '=', assignment.contract_id.id)])
             generation_line_ids = GenerationkWhInvoiceLineOwner.search(cursor, uid, [
