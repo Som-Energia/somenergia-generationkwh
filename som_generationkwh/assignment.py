@@ -499,8 +499,11 @@ class GenerationkWhAssignment(osv.osv):
 
             response[str(assignment.id)] = defaultdict(int)
             for generation_line in generation_lines:
+                invoice = generation_line.factura_id
                 line = generation_line.factura_line_id
-                response[str(assignment.id)][str(line.product_id.name)] += line.quantity
+                multiplier = 1 if invoice.type in ('out_invoice', 'in_refund') else -1
+                response[str(assignment.id)][str(line.product_id.name)] += (
+                    line.quantity*multiplier)
             response[str(assignment.id)] = dict(response[str(assignment.id)])
 
         return response
