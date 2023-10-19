@@ -2,7 +2,19 @@
 
 from osv import osv, fields
 from datetime import datetime, date
+from dateutil.relativedelta import relativedelta
 from tools.translate import _
+from mongodb_backend.mongodb2 import mdbpool
+
+from generationkwh.sharescurve import MemberSharesCurve
+from generationkwh.rightspershare import RightsPerShare
+from generationkwh.memberrightscurve import MemberRightsCurve
+from generationkwh.memberrightsusage import MemberRightsUsage
+from generationkwh.usagetracker import UsageTracker
+from generationkwh.fareperiodcurve import FarePeriodCurve
+from .remainder import RemainderProvider
+from .investment import InvestmentProvider
+from .holidays import HolidaysProvider
 
 
 class ResPartner(osv.osv):
@@ -87,6 +99,40 @@ class ResPartner(osv.osv):
             Assignments.write(cursor, uid, [assignment_id], {'priority': order})
 
         return self.www_generationkwh_assignments(cursor, uid, id, context)
+
+
+    def www_hourly_remaining_generationkwh(self, cursor, uid, partner_id, context=None):
+        Dealer = self.pool.get('generationkwh.dealer')
+
+        idmap = dict(Dealer.get_members_by_partners(cursor, uid, [partner_id]))
+        if not idmap: return [] # Not a member
+        member_id = idmap[partner_id]
+
+        end_date = date.today()
+        start_date = end_date - relativedelta(years=1)
+
+        rightsPerShare = RightsPerShare(mdbpool.get_db())
+        rightsUsage = MemberRightsUsage(mdbpool.get_db())
+        investment = InvestmentProvider(self, cursor, uid, context)
+        memberActiveShares = MemberSharesCurve(investment)
+        remainders = RemainderProvider(self, cursor, uid, context)
+        generatedRights = MemberRightsCurve(
+            activeShares=memberActiveShares,
+            rightsPerShare=rightsPerShare,
+            remainders=remainders,
+            eager=True,
+        )
+
+        rights = generatedRights.rights_kwh(member_id, start_date, end_date)
+        usage = rightsUsage.usage(member_id, start_date, end_date)
+
+        remaining = UsageTracker.convert_usage_date_quantity(enumerate((
+            produced - used
+            for produced, used
+            in zip(rights, usage)
+        )), start_date)
+
+        return remaining
 
 
 ResPartner()

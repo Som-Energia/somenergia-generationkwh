@@ -53,7 +53,7 @@ class UsageTracker(object):
                     break
 
         self._usage.updateUsage(member, start, usage)
-        usage_date_dict = self.convert_usage_date_quantity(used_now, start, end)
+        usage_date_dict = self.convert_usage_date_quantity(used_now, start)
         return allocated, usage_date_dict
 
     def refund_kwh(self, member, start, end, fare, period, kwh):
@@ -83,7 +83,7 @@ class UsageTracker(object):
                     break
 
         self._usage.updateUsage(member, start, usage)
-        usage_date_dict = self.convert_usage_date_quantity(unused_now, start, end)
+        usage_date_dict = self.convert_usage_date_quantity(unused_now, start)
         return deallocated, usage_date_dict
 
     def usage(self, member, start, end):
@@ -91,8 +91,9 @@ class UsageTracker(object):
         assert type(end) == datetime.date
         return self._usage.usage(member, start, end)
 
-    def convert_usage_date_quantity(self, usage, start_date, end_date):
-        def curveIndexToDate(start, index):
+    @staticmethod
+    def convert_usage_date_quantity(usage, start_date):
+        def curveIndexToDate(index):
             """
                 Maps an index withing an hourly curve starting at 'start' date
                 into a local date.
@@ -120,7 +121,9 @@ class UsageTracker(object):
 
         result = {}
         for i, q in usage:
-            current_date = curveIndexToDate(start_date, i)
+            current_date = curveIndexToDate(i)
+            if not current_date:
+                continue
             current_date_str = datetime.datetime.strftime(current_date, '%Y-%m-%d %H:%M:%S')
             result[current_date_str] = q
 
