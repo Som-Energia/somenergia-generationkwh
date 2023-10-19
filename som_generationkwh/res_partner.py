@@ -11,10 +11,8 @@ from generationkwh.rightspershare import RightsPerShare
 from generationkwh.memberrightscurve import MemberRightsCurve
 from generationkwh.memberrightsusage import MemberRightsUsage
 from generationkwh.usagetracker import UsageTracker
-from generationkwh.fareperiodcurve import FarePeriodCurve
 from .remainder import RemainderProvider
 from .investment import InvestmentProvider
-from .holidays import HolidaysProvider
 
 
 class ResPartner(osv.osv):
