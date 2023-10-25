@@ -22,7 +22,7 @@ jobs:
       # For example, pypy2 and pypy3
       fail-fast: false
       matrix:
-        python-version: [ "2.7", "3.7" ]
+        python-version: [ "2.7", "3.10" ]
     services:
       postgres:
         image: timescale/timescaledb-postgis:latest-pg12
@@ -48,9 +48,20 @@ jobs:
           - 27017:27017
     steps:
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        if: matrix.python-version != '2.7'
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Set up Python 2.7
+        if: matrix.python-version == '2.7'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python2.7 python2.7-dev
+          sudo ln -sf python2.7 /usr/bin/python
+          curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
+          python get-pip.py
+          rm get-pip.py
+          pip install --upgrade pip setuptools wheel
       - name: Download required repositories
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_GITHUB_TOKEN }}
@@ -73,6 +84,7 @@ jobs:
           git clone --depth 1 git@github.com:gisce/crm_poweremail.git $ROOT_DIR_SRC/crm_poweremail
           git clone --depth 1 https://$GITHUB_TOKEN@github.com/gisce/libFacturacioATR.git $ROOT_DIR_SRC/libFacturacioATR
           git clone --depth 1 git@github.com:gisce/ooop.git $ROOT_DIR_SRC/ooop
+          git clone --depth 1 git@github.com:Som-Energia/giscedata_facturacio_indexada_som.git $ROOT_DIR_SRC/giscedata_facturacio_indexada_som
       - name: Install dependencies
         run: |
           sudo apt-get --allow-releaseinfo-change update
@@ -96,6 +108,7 @@ jobs:
           cd $ROOT_DIR_SRC
           pip install -r $ROOT_DIR_SRC/erp/requirements-dev.txt
           pip install -r $ROOT_DIR_SRC/erp/requirements.txt
+          pip install -r $ROOT_DIR_SRC/oorq/requirements.txt
           #pip install --upgrade --force-reinstall https://github.com/gisce/destral/archive/master.zip
           #pip install destral==1.7.3
       - name: Link Addons
