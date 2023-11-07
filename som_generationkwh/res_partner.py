@@ -106,11 +106,33 @@ class ResPartner(osv.osv):
         if not idmap: return [] # Not a member
         member_id = idmap[partner_id]
 
-        end_date = date.today()
+        end_date = self._last_invoiced_date_from_priority_polissa(cursor, uid, member_id)
+        start_date = end_date - relativedelta(years=1)
+
+        rightsUsage = MemberRightsUsage(mdbpool.get_db())
+
+        rights = self.www_hourly_rights_generationkwh(cursor, uid, partner_id, context)
+        usage = rightsUsage.usage(member_id, start_date, end_date)
+
+        remaining = UsageTracker.convert_usage_date_quantity(enumerate((
+            produced - used
+            for produced, used
+            in zip(rights.values(), usage)
+        )), start_date)
+
+        return remaining
+
+    def www_hourly_rights_generationkwh(self, cursor, uid, partner_id, context=None):
+        Dealer = self.pool.get('generationkwh.dealer')
+
+        idmap = dict(Dealer.get_members_by_partners(cursor, uid, [partner_id]))
+        if not idmap: return [] # Not a member
+        member_id = idmap[partner_id]
+
+        end_date = self._last_invoiced_date_from_priority_polissa(cursor, uid, member_id)
         start_date = end_date - relativedelta(years=1)
 
         rightsPerShare = RightsPerShare(mdbpool.get_db())
-        rightsUsage = MemberRightsUsage(mdbpool.get_db())
         investment = InvestmentProvider(self, cursor, uid, context)
         memberActiveShares = MemberSharesCurve(investment)
         remainders = RemainderProvider(self, cursor, uid, context)
@@ -122,15 +144,21 @@ class ResPartner(osv.osv):
         )
 
         rights = generatedRights.rights_kwh(member_id, start_date, end_date)
-        usage = rightsUsage.usage(member_id, start_date, end_date)
 
-        remaining = UsageTracker.convert_usage_date_quantity(enumerate((
-            produced - used
-            for produced, used
-            in zip(rights, usage)
-        )), start_date)
+        return UsageTracker.convert_usage_date_quantity(enumerate((rights)), start_date)
 
-        return remaining
+
+    def _last_invoiced_date_from_priority_polissa(self, cursor, uid, member_id, context=None):
+        Polissa = self.pool.get('giscedata.polissa')
+        Assignments = self.pool.get('generationkwh.assignment')
+        last_invoiced_date = date.today()
+        assignment_id = Assignments.search(cursor, uid, [('member_id', '=', member_id), ('priority','=', '0')])
+        if assignment_id:
+            priority_pol_id = Assignments.read(cursor, uid, assignment_id[0], ['contract_id'])['contract_id'][0]
+            pol = Polissa.browse(cursor, uid, priority_pol_id)
+            if pol.data_ultima_lectura:
+                last_invoiced_date = datetime.strptime(pol.data_ultima_lectura, "%Y-%m-%d").date()
+        return last_invoiced_date
 
 
 ResPartner()
