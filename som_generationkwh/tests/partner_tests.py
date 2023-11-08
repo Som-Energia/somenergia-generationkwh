@@ -4,6 +4,7 @@ from destral.transaction import Transaction
 from destral.patch import PatchNewCursors
 from yamlns import namespace as ns
 from datetime import date
+from freezegun import freeze_time
 
 
 class PartnerTests(testing.OOTestCase):
@@ -326,7 +327,7 @@ class PartnerTests(testing.OOTestCase):
 
             self.assertEqual(last_invoiced_date, date(2023, 11, 7))
 
-
+    @freeze_time("2023-11-07")
     def test__www_hourly_remaining_generationkwh(self):
         with Transaction().start(self.database) as txn:
             cursor = txn.cursor
@@ -348,7 +349,7 @@ class PartnerTests(testing.OOTestCase):
             self.assertEqual(len(remaining), 8431)
             self.assertEqual(sum(remaining.values()), 0)
 
-
+    @freeze_time("2023-11-07")
     def test__www_hourly_rights_generationkwh(self):
         with Transaction().start(self.database) as txn:
             cursor = txn.cursor

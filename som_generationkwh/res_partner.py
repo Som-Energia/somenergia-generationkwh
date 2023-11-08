@@ -106,8 +106,9 @@ class ResPartner(osv.osv):
         if not idmap: return [] # Not a member
         member_id = idmap[partner_id]
 
-        end_date = self._last_invoiced_date_from_priority_polissa(cursor, uid, member_id)
-        start_date = end_date - relativedelta(years=1)
+        last_invoiced_date = self._last_invoiced_date_from_priority_polissa(cursor, uid, member_id)
+        start_date = last_invoiced_date - relativedelta(years=1)
+        end_date = date.today()
 
         rightsUsage = MemberRightsUsage(mdbpool.get_db())
 
@@ -129,8 +130,9 @@ class ResPartner(osv.osv):
         if not idmap: return [] # Not a member
         member_id = idmap[partner_id]
 
-        end_date = self._last_invoiced_date_from_priority_polissa(cursor, uid, member_id)
-        start_date = end_date - relativedelta(years=1)
+        last_invoiced_date = self._last_invoiced_date_from_priority_polissa(cursor, uid, member_id)
+        start_date = last_invoiced_date - relativedelta(years=1)
+        end_date = date.today()
 
         rightsPerShare = RightsPerShare(mdbpool.get_db())
         investment = InvestmentProvider(self, cursor, uid, context)
