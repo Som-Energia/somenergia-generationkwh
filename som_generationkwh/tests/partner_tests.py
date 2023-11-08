@@ -349,7 +349,6 @@ class PartnerTests(testing.OOTestCase):
             self.assertEqual(len(remaining), 8431)
             self.assertEqual(sum(remaining.values()), 0)
 
-    @freeze_time("2023-11-07")
     def test__www_hourly_rights_generationkwh(self):
         with Transaction().start(self.database) as txn:
             cursor = txn.cursor
@@ -366,9 +365,9 @@ class PartnerTests(testing.OOTestCase):
                 {'member_id': member_id, 'contract_id': polissa_id_1, 'priority': 0}
             )
 
-            rights = self.partner_obj.www_hourly_rights_generationkwh(cursor, uid, partner_id)
+            rights = self.partner_obj.www_hourly_rights_generationkwh(cursor, uid, partner_id, '2023-10-01', '2023-11-07')
 
-            self.assertEqual(len(rights), 8783)
+            self.assertEqual(len(rights), 912)
             self.assertEqual(sum(rights.values()), 0)
 
 

@@ -13,6 +13,7 @@ from generationkwh.memberrightsusage import MemberRightsUsage
 from generationkwh.usagetracker import UsageTracker
 from .remainder import RemainderProvider
 from .investment import InvestmentProvider
+import generationkwh.investmentmodel as gkwh
 
 
 class ResPartner(osv.osv):
@@ -112,7 +113,7 @@ class ResPartner(osv.osv):
 
         rightsUsage = MemberRightsUsage(mdbpool.get_db())
 
-        rights = self.www_hourly_rights_generationkwh(cursor, uid, partner_id, context)
+        rights = self.www_hourly_rights_generationkwh(cursor, uid, partner_id, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"), context)
         usage = rightsUsage.usage(member_id, start_date, end_date)
 
         remaining = UsageTracker.convert_usage_date_quantity(enumerate((
@@ -123,16 +124,17 @@ class ResPartner(osv.osv):
 
         return remaining
 
-    def www_hourly_rights_generationkwh(self, cursor, uid, partner_id, context=None):
+    def www_hourly_rights_generationkwh(self, cursor, uid, partner_id, start_date=None, end_date=None, context=None):
+        if not start_date:
+            start_date = gkwh.startDateRights
+        if not end_date:
+            end_date = date.today().strftime("%Y-%m-%d")
+
         Dealer = self.pool.get('generationkwh.dealer')
 
         idmap = dict(Dealer.get_members_by_partners(cursor, uid, [partner_id]))
         if not idmap: return [] # Not a member
         member_id = idmap[partner_id]
-
-        last_invoiced_date = self._last_invoiced_date_from_priority_polissa(cursor, uid, member_id)
-        start_date = last_invoiced_date - relativedelta(years=1)
-        end_date = date.today()
 
         rightsPerShare = RightsPerShare(mdbpool.get_db())
         investment = InvestmentProvider(self, cursor, uid, context)
@@ -145,9 +147,11 @@ class ResPartner(osv.osv):
             eager=True,
         )
 
-        rights = generatedRights.rights_kwh(member_id, start_date, end_date)
+        start_date_dt = datetime.strptime(start_date, "%Y-%m-%d").date()
+        end_date_dt = datetime.strptime(end_date, "%Y-%m-%d").date()
+        rights = generatedRights.rights_kwh(member_id, start_date_dt, end_date_dt)
 
-        return UsageTracker.convert_usage_date_quantity(enumerate((rights)), start_date)
+        return UsageTracker.convert_usage_date_quantity(enumerate((rights)), start_date_dt)
 
 
     def _last_invoiced_date_from_priority_polissa(self, cursor, uid, member_id, context=None):
