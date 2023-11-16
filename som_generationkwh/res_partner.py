@@ -153,6 +153,8 @@ class ResPartner(osv.osv):
 
         return UsageTracker.convert_usage_date_quantity(enumerate((rights)), start_date_dt)
 
+    def last_invoiced_date_from_priority_polissa(self, cursor, uid, member_id, context=None):
+        return self._last_invoiced_date_from_priority_polissa(cursor, uid, member_id, context).strftime("%Y-%m-%d")
 
     def _last_invoiced_date_from_priority_polissa(self, cursor, uid, member_id, context=None):
         Polissa = self.pool.get('giscedata.polissa')
