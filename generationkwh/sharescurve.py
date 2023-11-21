@@ -35,7 +35,7 @@ class LayeredShareCurve(object):
             return numpy.array([], dtype=int)
         hoursADay=25
         nDays=(end-start).days+1 # To Review
-        result = numpy.zeros(nDays*hoursADay, dtype=numpy.int)
+        result = numpy.zeros(nDays*hoursADay, dtype=int)
 
         for investment in self._provider.items():
             if filterValue is not None:
@@ -102,7 +102,7 @@ class PlantSharesCurve(LayeredShareCurve):
 
         hoursADay=25
         nDays=(end-start).days+1
-        result = numpy.zeros(nDays*hoursADay, dtype=numpy.int)
+        result = numpy.zeros(nDays*hoursADay, dtype=int)
         result[:]=self.shares
         return result
 

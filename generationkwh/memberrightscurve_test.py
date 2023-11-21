@@ -17,7 +17,7 @@ class CurveProvider_MockUp(object):
                 localisodate(str(start)),
                 localisodate(str(end))) + 25
         return numpy.array(self._value[n]) if n in self._value else (
-            numpy.zeros(nbins, dtype=numpy.int))
+            numpy.zeros(nbins, dtype=int))
 
     def hourly(self, *args, **kwd):
         return self._value

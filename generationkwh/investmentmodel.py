@@ -28,4 +28,6 @@ bridgeAccountCode = '555000000004' # Bridge account to concile payments to the b
 amountForlegalAtt = 5000
 
 mandatePurposeAmorCobrar = "AMORTITZACIO COBRAR GENERATION kWh"
+
+startDateRights = '2016-05-30'
 # vim: et sw=4 ts=4

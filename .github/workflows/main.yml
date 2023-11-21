@@ -9,21 +9,35 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TRAVIS: 'true' # Skip tests requiring data
+      ROOT_DIR_SRC: ${{github.workspace}}/..
     strategy:
+      fail-fast: false
       matrix:
         python-version:
           - '2.7' # production
-          - '3.8'
           - '3.9'
+          - '3.10'
         mongodb-version:
           - 2
     name: Python ${{ matrix.python-version }}
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        if: matrix.python-version != '2.7'
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Set up Python 2.7
+        if: matrix.python-version == '2.7'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python2.7 python2.7-dev
+          sudo ln -sf python2.7 /usr/bin/python
+          curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
+          python get-pip.py
+          rm get-pip.py
+          pip install --upgrade pip setuptools wheel
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.7.0
         with:
@@ -31,18 +45,18 @@ jobs:
           mongodb-replica-set: test-rs
       - name: Install dependencies
         run: |
+          cd $ROOT_DIR_SRC
+          pip install virtualenv
+          virtualenv venv
+          . $ROOT_DIR_SRC/venv/bin/activate
           pip install https://files.pythonhosted.org/packages/3e/5c/2867e46f03d2fcc3d014a02eeb11ec55f3f8d9eddddcc5578ae8457f84f8/ERPpeek-1.7.1-py2.py3-none-any.whl
-          pip install pytest-cov pytest
-          ./setup.py develop
-      - uses: BSFishy/pip-action@v1
-        with:
-          packages: |
-            coveralls
-            git+https://github.com/som-energia/plantmeter.git@master
+          pip install pytest-cov pytest coveralls plantmeter
+          cd ${{github.workspace}}
+          pip install -e .
       - name: Unit tests
         run: |
+          . $ROOT_DIR_SRC/venv/bin/activate
           pytest
-
       - name: Coveralls
         uses: AndreMiras/coveralls-python-action@develop
         with:
