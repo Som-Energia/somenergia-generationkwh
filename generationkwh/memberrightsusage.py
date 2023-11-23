@@ -14,8 +14,8 @@ class MemberRightsUsage(object):
             self.db,'memberrightusage')
 
     def usage(self, member, start, stop):
-        assert type(start) == datetime.date
-        assert type(stop) == datetime.date
+        assert isinstance(start, datetime.date)
+        assert isinstance(stop, datetime.date)
 
         return self.curve.get(
             filter=member,
@@ -25,9 +25,9 @@ class MemberRightsUsage(object):
             )
 
     def updateUsage(self, member, start, data):
-        assert type(start) == datetime.date
+        assert isinstance(start, datetime.date)
 
-        curve = self.curve.update(
+        self.curve.update(
             start=dateToLocal(start),
             filter=member,
             field='usage_kwh',
