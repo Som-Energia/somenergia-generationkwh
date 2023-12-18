@@ -17,6 +17,7 @@ expirationYears = 25 # number of active years for a Gkwh investment
 mandateName = "PRESTEC GENERATION kWh"
 creditorCode = 'ES24000F55091367'
 journalCode = 'GENKWH'
+journalCodeAmor = 'GENKWH_AMOR'
 
 investmentProductCode = 'GENKWH_AE'
 irpfProductCode = 'GENKWH_IRPF'
