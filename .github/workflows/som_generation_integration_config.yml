@@ -114,6 +114,11 @@ jobs:
           pip install -r $ROOT_DIR_SRC/oorq/requirements.txt
           #pip install --upgrade --force-reinstall https://github.com/gisce/destral/archive/master.zip
           #pip install destral==1.7.3
+      - name: Install somutils for Py3 ${{ matrix.python-version }}
+        if: matrix.python-version != '2.7'
+        run: |
+          . $ROOT_DIR_SRC/venv/bin/activate
+          pip install somutils==1.9.0
       - name: Link Addons
         run: |
           export ROOT_DIR_SRC=${{github.workspace}}/..
