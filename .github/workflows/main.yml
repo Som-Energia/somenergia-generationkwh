@@ -43,6 +43,12 @@ jobs:
         with:
           mongodb-version: ${{ matrix.mongodb-version }}
           mongodb-replica-set: test-rs
+      - name: Download required repositories
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN_GA }}
+        run: |
+          export ROOT_DIR_SRC=${{github.workspace}}/..
+          git clone --depth 1 https://github.com/Som-Energia/somenergia-utils.git -b py2 $ROOT_DIR_SRC/somenergia-utils
       - name: Install dependencies
         run: |
           cd $ROOT_DIR_SRC
@@ -51,6 +57,8 @@ jobs:
           . $ROOT_DIR_SRC/venv/bin/activate
           pip install https://files.pythonhosted.org/packages/3e/5c/2867e46f03d2fcc3d014a02eeb11ec55f3f8d9eddddcc5578ae8457f84f8/ERPpeek-1.7.1-py2.py3-none-any.whl
           pip install pytest-cov pytest coveralls plantmeter
+          cd $ROOT_DIR_SRC/somenergia-utils
+          pip install -e . || "Not installing somenergia-utils Python package"
           cd ${{github.workspace}}
           pip install -e .
       - name: Unit tests
