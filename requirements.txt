@@ -1,4 +1,6 @@
 # libfacturacioatr
+somutils==1.8.9;python_version<="2.7.18"
+somutils>1.8.9;python_version>"2.7.18"
 numpy
 yamlns
 plantmeter
