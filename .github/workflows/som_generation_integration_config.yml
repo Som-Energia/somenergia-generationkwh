@@ -85,7 +85,6 @@ jobs:
           git clone --depth 1 https://$GITHUB_TOKEN@github.com/Som-Energia/libFacturacioATR.git $ROOT_DIR_SRC/libFacturacioATR
           git clone --depth 1 git@github.com:gisce/ooop.git $ROOT_DIR_SRC/ooop
           git clone --depth 1 git@github.com:Som-Energia/giscedata_facturacio_indexada_som.git $ROOT_DIR_SRC/giscedata_facturacio_indexada_som
-          git clone --depth 1 https://github.com/Som-Energia/somenergia-utils.git -b py2 $ROOT_DIR_SRC/somenergia-utils
       - name: Install dependencies
         run: |
           sudo apt-get --allow-releaseinfo-change update
@@ -102,8 +101,6 @@ jobs:
           pip install -e .
           cd $ROOT_DIR_SRC/plantmeter
           pip install -e .
-          cd $ROOT_DIR_SRC/somenergia-utils
-          pip install -e . || "Not installing somenergia-utils Python package"
           cd $ROOT_DIR_SRC/ooop
           git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
           pip install -e .
