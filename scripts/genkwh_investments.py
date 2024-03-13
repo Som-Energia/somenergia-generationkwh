@@ -190,9 +190,12 @@ def notify(
         effectiveon = datetime.date.today()
     investments = c.GenerationkwhInvestment.get_activated_investments_for_a_concret_date(
             str(effectiveon))
-    step("Sending notification mails for investments: {}".format(
-        ','.join(str(i) for i in investments)))
-    c.GenerationkwhInvestment.notifyAssignmentByMail(investments)
+    if investments:
+        step("Sending notification mails for investments: {}".format(
+            ','.join(str(i) for i in investments)))
+        c.GenerationkwhInvestment.notifyInvestmentsByMail(investments)
+    else:
+        step("There are not activated investments to notify.")
     success("Done.")
 
 def main():
