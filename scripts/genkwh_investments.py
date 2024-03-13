@@ -5,6 +5,7 @@ Generates investments from the accounting logs.
 
 from erppeek_wst import Client as ErpPeekClient
 import datetime
+from consolemsg import step, success
 from yamlns import namespace as ns
 from generationkwh.isodates import isodate
 
@@ -50,6 +51,15 @@ def parseArgumments():
         )
     extend = subparsers.add_parser('extend',
         help="extend the expiration date of a set of investments",
+        )
+    notify = subparsers.add_parser('notify',
+        help="notify today (or date) activated contracts",
+        )
+    notify.add_argument(
+        '--effectiveon',
+        type=isodate,
+        metavar='YYYY-MM-DD',
+        help="effective on date to be considered",
         )
     for sub in effective,create:
         sub.add_argument(
@@ -170,6 +180,20 @@ def effective(
         expirationYears,
         force,
         )
+
+def notify(
+        effectiveon=None,
+        **_):
+    "notify to members that have an investment going effective on the date"
+    c = erp()
+    if not effectiveon:
+        effectiveon = datetime.date.today()
+    investments = c.GenerationkwhInvestment.get_activated_investments_for_a_concret_date(
+            str(effectiveon))
+    step("Sending notification mails for investments: {}".format(
+        ','.join(str(i) for i in investments)))
+    c.GenerationkwhInvestment.notifyAssignmentByMail(investments)
+    success("Done.")
 
 def main():
     args = parseArgumments()
