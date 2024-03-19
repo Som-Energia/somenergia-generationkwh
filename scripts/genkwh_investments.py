@@ -187,13 +187,16 @@ def notify(
     "notify to members that have an investment going effective on the date"
     c = erp()
     if not effectiveon:
-        effectiveon = datetime.date.today()
-    investments = c.GenerationkwhInvestment.get_activated_investments_for_a_concret_date(
-            str(effectiveon))
-    if investments:
+        effectiveon = str(datetime.date.today())
+    investment_ids = c.GenerationkwhInvestment.search([
+        ('active', '=', True),
+        ('first_effective_date', '=', effectiveon),
+        ('emission_id.type', '=', 'genkwh'),
+    ])
+    if investment_ids:
         step("Sending notification mails for investments: {}".format(
-            ','.join(str(i) for i in investments)))
-        c.GenerationkwhInvestment.notifyInvestmentsByMail(investments)
+            ','.join(str(i) for i in investment_ids)))
+        c.GenerationkwhInvestment.notifyInvestmentsByMail(investment_ids)
     else:
         step("There are not activated investments to notify.")
     success("Done.")
