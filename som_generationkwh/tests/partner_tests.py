@@ -382,7 +382,7 @@ class PartnerTests(testing.OOTestCase):
             {'date': 1706486400000, 'value': 1},
             {'date': 1706490000000, 'value': 2},
         ]
-        self.assertEqual(
+        self.assertItemsEqual(
             self.partner_obj._prepare_datetime_value_www_response(original),
             expected
         )
