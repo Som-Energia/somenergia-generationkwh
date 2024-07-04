@@ -6,7 +6,7 @@ on:
   pull_request: # PR
 jobs:
   som_generationkwh:
-    uses: Som-Energia/openerp_som_addons/.github/workflows/reusable_workflow.yml@GA_add_som_addons_repo
+    uses: Som-Energia/openerp_som_addons/.github/workflows/reusable_workflow.yml@main
     with:
       module: som_generationkwh
     secrets:
