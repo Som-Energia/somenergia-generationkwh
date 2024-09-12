@@ -47,7 +47,6 @@ class SomenergiaSoci(osv.osv):
         res = {}.fromkeys(ids, {})
         for k in res.keys():
             res[k] = init_dict.copy()
-
         for member_id in ids:
             investments = invest_obj.effective_investments(
                 cursor, uid, member_id, None, None, context=context
@@ -129,6 +128,9 @@ class SomenergiaSoci(osv.osv):
                 self.write(cursor, uid, member_id, member_vals, context=context)
 
         return True
+    def _get_aportacions(self):
+        Investments = self.pool.get('generationkwh.investments')
+        return Investments.search([('emission_id','=',2)])
 
     @job(queue="mailchimp_tasks")
     def arxiva_socia_mailchimp_async(self, cursor, uid, ids, context=None):
@@ -261,9 +263,16 @@ class SomenergiaSoci(osv.osv):
             multi='investments'
         ),
         'investment_ids': fields.one2many(
-            'generationkwh.investment', 'member_id', string="Inversions",
+            'generationkwh.investment', 'member_id', string="Inversions GKWH",
             readonly=True,
             context={'active_test': False},
+            domain=[('emission_id','=',1)],
+        ),
+        'aportacions_ids': fields.one2many(
+            'generationkwh.investment', 'member_id', string="Aportacions",
+            readonly=True,
+            context={'active_test': False},
+            domain=[('emission_id','=',2)],
         ),
         'assignment_ids': fields.one2many(
             'generationkwh.assignment', 'member_id', string="Assignacions"
