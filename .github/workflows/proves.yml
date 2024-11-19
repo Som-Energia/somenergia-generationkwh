@@ -3,18 +3,10 @@
 name: PROVA_WF
 on: push
 
-env:
-  POSTGRES_USER: erp
-  POSTGRES_PASSWORD: erp
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
       - name: Set up Python 2.7
         run: |
           sudo apt-get update
@@ -24,25 +16,9 @@ jobs:
           python get-pip.py
           rm get-pip.py
           pip install --upgrade pip setuptools wheel
-      - name: Download required repositories
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN_GA }}
-        run: |
-          export ROOT_DIR_SRC=${{github.workspace}}/..
-          git clone --depth 1 https://$GITHUB_TOKEN@github.com/Som-Energia/libFacturacioATR.git $ROOT_DIR_SRC/libFacturacioATR
       - name: Install dependencies
         run: |
-          sudo apt-get --allow-releaseinfo-change update
-          sudo apt-get install python2-dev python3-dev libxml2-dev libxmlsec1 libxmlsec1-dev libgdal-dev -y
-          export ROOT_DIR_SRC=${{github.workspace}}/..
-          cd $ROOT_DIR_SRC
-          pip install virtualenv
-          virtualenv venv
-          . $ROOT_DIR_SRC/venv/bin/activate
-          cd $ROOT_DIR_SRC/libFacturacioATR
-          git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
-          pip install -e .
+          pip install pudb
       - name: Setup tmate session
-        if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
         timeout-minutes: 15
