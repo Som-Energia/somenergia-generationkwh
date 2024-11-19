@@ -1,44 +1,59 @@
 # This workflow will pass tests of module passed by input
 
-name: PROVA_WF
+
+name: Install Python 2.7.18 with pyenv
 on: push
 
+
 jobs:
-  build:
+  install_pyenv_python:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Install pyenv
+      # Step 1: Check out the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 2: Install dependencies for pyenv
+      - name: Install Dependencies for pyenv
         run: |
           sudo apt-get update
-          curl https://pyenv.run | bash
-          echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $GITHUB_ENV
-          echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $GITHUB_ENV
-          echo 'eval "$(pyenv init --path)"'
+          sudo apt-get install -y \
+            build-essential \
+            curl \
+            git \
+            libssl-dev \
+            zlib1g-dev
 
-
-      - name: Create virtualenv
-        env:
-           PATH: ${{ env.PYENV_ROOT }}/bin:${{ env.PATH }}
+      # Step 3: Install pyenv
+      - name: Install pyenv
         run: |
-          eval "$(pyenv init --path)"
-          eval "$(pyenv virtualenv-init -)"
+          curl https://pyenv.run | bash
+          echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.bashrc
+          echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.bashrc
+          echo 'eval "$(pyenv init --path)"' >> $HOME/.bashrc
+          # Add to GitHub Actions environment variables
+          echo "PYENV_ROOT=$HOME/.pyenv" >> $GITHUB_ENV
+          echo "PATH=$HOME/.pyenv/bin:$PATH" >> $GITHUB_ENV
 
+      # Step 4: Install Python 2.7.18 with pyenv
+      - name: Install Python 2.7.18
+        env:
+          PATH: ${{ env.PYENV_ROOT }}/bin:${{ env.PATH }}
+        run: |
+          export PATH="$HOME/.pyenv/bin:$PATH"
+          export PYENV_ROOT="$HOME/.pyenv"
+          eval "$(pyenv init --path)"
           pyenv install 2.7.18
           pyenv global 2.7.18
-          pyenv virtualenv 2.7.18 erp
-          pyenv activate erp
 
-          pip install --upgrade pip setuptools wheel
-
-          pip install pudb
-
-      - name: Activate virtualenv
+      # Step 5: Verify Python Installation
+      - name: Verify Python Version
         env:
-           PATH: ${{ env.PYENV_ROOT }}/bin:${{ env.PATH }}
+          PATH: ${{ env.PYENV_ROOT }}/shims:${{ env.PATH }}
         run: |
-          pyenv activate erp
+          export PATH="$HOME/.pyenv/bin:$HOME/.pyenv/shims:$PATH"
+          export PYENV_ROOT="$HOME/.pyenv"
+          eval "$(pyenv init --path)"
+          python --version
 
-      - name: Setup tmate session
-        #if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 15
