@@ -42,3 +42,7 @@ jobs:
           cd $ROOT_DIR_SRC/libFacturacioATR
           git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
           pip install -e .
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 15
