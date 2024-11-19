@@ -7,16 +7,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Install dependencies
+      - name: Install pyenv
         run: |
           sudo apt-get update
           curl https://pyenv.run | bash
-          exec $SHELL
-          export PATH="$HOME/.pyenv/bin:$PATH"
-          eval "$(pyenv init --path)"
+          echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $GITHUB_ENV
+          echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $GITHUB_ENV
+          echo 'eval "$(pyenv init --path)"' >> $GITHUB_ENV
+
+
+      - name: Create virtualenv
+        env:
+           PATH: ${{ env.PYENV_ROOT }}/bin:${{ env.PATH }}
+        run: |
           eval "$(pyenv virtualenv-init -)"
 
           pyenv install 2.7.18
+          pyenv global 2.7.18
           pyenv virtualenv 2.7.18 erp
           pyenv activate erp
 
@@ -24,9 +31,10 @@ jobs:
 
           pip install pudb
 
-      - name: Install dependencies
+      - name: Activate virtualenv
+        env:
+           PATH: ${{ env.PYENV_ROOT }}/bin:${{ env.PATH }}
         run: |
-          export PATH="$HOME/.pyenv/bin:$PATH"
           pyenv activate erp
 
       - name: Setup tmate session
