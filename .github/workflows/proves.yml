@@ -10,26 +10,12 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      # You can use PyPy versions in python-version.
-      # For example, pypy2 and pypy3
-      fail-fast: false
-      matrix:
-        python-version: ${{ fromJSON(inputs.pyversion) }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-
-      - name: Set up Python ${{ matrix.python-version }}
-        if: matrix.python-version != '2.7'
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
       - name: Set up Python 2.7
-        if: matrix.python-version == '2.7'
         run: |
           sudo apt-get update
           sudo apt-get install -y python2.7 python2.7-dev
@@ -38,7 +24,6 @@ jobs:
           python get-pip.py
           rm get-pip.py
           pip install --upgrade pip setuptools wheel
-
       - name: Download required repositories
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN_GA }}
