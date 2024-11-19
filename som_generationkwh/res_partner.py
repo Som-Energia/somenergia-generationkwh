@@ -166,6 +166,7 @@ class ResPartner(osv.osv):
 
         res = []
         print("TEST ANGEL")
+
         for k in sorted(dict_with_data):
             date1 = datetime.strptime(k, '%Y-%m-%d %H:%M:%S').replace(tzinfo=cet)
             date2 = datetime(1970, 1, 1, tzinfo=utc)
