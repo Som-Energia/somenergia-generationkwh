@@ -7,14 +7,28 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Install python version
-        uses: gabrielfalcao/pyenv-action@v18  # https://github.com/marketplace/actions/pyenv-build
-        with:
-          default: "2.7"
-          command: pip install -U pip  # upgrade pip after installing python
       - name: Install dependencies
         run: |
+          sudo apt-get update
+          curl https://pyenv.run | bash
+          exec $SHELL
+          export PATH="$HOME/.pyenv/bin:$PATH"
+          eval "$(pyenv init --path)"
+          eval "$(pyenv virtualenv-init -)"
+
+          pyenv install 2.7.18
+          pyenv virtualenv 2.7.18 erp
+          pyenv activate erp
+
+          pip install --upgrade pip setuptools wheel
+
           pip install pudb
+
+      - name: Install dependencies
+        run: |
+          export PATH="$HOME/.pyenv/bin:$PATH"
+          pyenv activate erp
+
       - name: Setup tmate session
         #if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
