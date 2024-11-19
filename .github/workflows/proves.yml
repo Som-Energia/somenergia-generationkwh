@@ -13,13 +13,13 @@ jobs:
           curl https://pyenv.run | bash
           echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $GITHUB_ENV
           echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $GITHUB_ENV
-          echo 'eval "$(pyenv init --path)"' >> $GITHUB_ENV
 
 
       - name: Create virtualenv
         env:
            PATH: ${{ env.PYENV_ROOT }}/bin:${{ env.PATH }}
         run: |
+          echo 'eval "$(pyenv init --path)"' >> $GITHUB_ENV
           eval "$(pyenv virtualenv-init -)"
 
           pyenv install 2.7.18
