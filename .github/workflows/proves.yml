@@ -4,6 +4,8 @@
 name: Install Python 2.7.18 with pyenv
 on: push
 
+# env: PYENV_ROOT...
+
 
 jobs:
   install_pyenv_python:
@@ -29,31 +31,23 @@ jobs:
       - name: Install pyenv
         run: |
           curl https://pyenv.run | bash
-          echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.bashrc
-          echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.bashrc
-          echo 'eval "$(pyenv init --path)"' >> $HOME/.bashrc
-          # Add to GitHub Actions environment variables
-          echo "PYENV_ROOT=$HOME/.pyenv" >> $GITHUB_ENV
-          echo "PATH=$HOME/.pyenv/bin:$PATH" >> $GITHUB_ENV
+          echo "$HOME/.pyenv/bin:$PATH" >> $GITHUB_PATH
 
       # Step 4: Install Python 2.7.18 with pyenv
       - name: Install Python 2.7.18
-        env:
-          PATH: ${{ env.PYENV_ROOT }}/bin:${{ env.PATH }}
         run: |
-          export PATH="$HOME/.pyenv/bin:$PATH"
-          export PYENV_ROOT="$HOME/.pyenv"
-          eval "$(pyenv init --path)"
           pyenv install 2.7.18
           pyenv global 2.7.18
 
       # Step 5: Verify Python Installation
       - name: Verify Python Version
-        env:
-          PATH: ${{ env.PYENV_ROOT }}/shims:${{ env.PATH }}
         run: |
-          export PATH="$HOME/.pyenv/bin:$HOME/.pyenv/shims:$PATH"
-          export PYENV_ROOT="$HOME/.pyenv"
-          eval "$(pyenv init --path)"
           python --version
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 15
+        if: ${{ failure() }}
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 15
 
