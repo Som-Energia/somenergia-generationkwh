@@ -47,11 +47,11 @@ jobs:
         run: |
           python --version
           pip install pudb
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
-      #   timeout-minutes: 15
-      #   if: ${{ failure() }}
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
-      #   timeout-minutes: 15
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 15
+        if: ${{ failure() }}
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 15
 
