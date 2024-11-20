@@ -40,17 +40,18 @@ jobs:
         run: |
           pyenv install 2.7.18
           pyenv global 2.7.18
+          pip install --upgrade pip
 
       # Step 5: Verify Python Installation
       - name: Verify Python Version
         run: |
           python --version
           pip install pudb
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 15
-        if: ${{ failure() }}
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 15
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+      #   timeout-minutes: 15
+      #   if: ${{ failure() }}
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+      #   timeout-minutes: 15
 
