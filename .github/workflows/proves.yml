@@ -4,7 +4,8 @@
 name: Install Python 2.7.18 with pyenv
 on: push
 
-# env: PYENV_ROOT...
+env:
+  PYENV_ROOT: /home/runner/.pyenv
 
 
 jobs:
@@ -31,7 +32,7 @@ jobs:
       - name: Install pyenv
         run: |
           curl https://pyenv.run | bash
-          echo "$HOME/.pyenv/bin:$PATH" >> $GITHUB_PATH
+          echo "$PYENV_ROOT/bin:$PATH" >> $GITHUB_PATH
 
       # Step 4: Install Python 2.7.18 with pyenv
       - name: Install Python 2.7.18
