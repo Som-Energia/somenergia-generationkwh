@@ -15,7 +15,7 @@ import pymongo
 from bson.son import SON
 
 c = erppeek.Client(**dbconfig.erppeek)
-mongoClient = pymongo.MongoClient(**dbconfig.mongo)
+mongoClient = pymongo.MongoClient(dbconfig.mongodb)
 mongodb = mongoClient.somenergia
 
 soci_o = c.model('somenergia.soci')
