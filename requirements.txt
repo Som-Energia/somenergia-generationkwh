@@ -7,3 +7,4 @@ plantmeter
 python-dateutil
 decorator
 babel
+enerdata>=1.1.0
