@@ -18,9 +18,13 @@
                                context="{'active_test': False, 'member_id':active_id}"/>
                         <field name="gkwh_assignment_notified" readonly="1" select="2"/>
                         <separator string="Inversions" colspan="4"/>
-                        <field name="investment_ids" colspan="4" nolabel="1" height="100"/>
+                        <field name="investment_ids" colspan="4" nolabel="1" height="100" context="{'emisson_id': 2}"/>
                         <separator string="Historial Generation kWh" colspan="4"/>
                         <field colspan="4" name="gkwh_comments" nolabel="1"/>
+                    </page>
+                    <page string="Aportacions">
+                        <separator string="Aportacions al Capital Social" colspan="4"/>
+                        <field name="aportacions_ids" colspan="4" nolabel="1" height="100" domain="[('emisson_id.type','=','apo')]"/>
                     </page>
                 </page>
             </field>
