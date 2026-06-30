@@ -36,7 +36,7 @@ setup(
         'yamlns>=0.6',
         'tqdm<4.63.0' if py2 else 'tqdm', # Py2, depends on import-resources, not supported by py2
         'b2btest',
-        'lxml', # b2btest dependency, to remove
+        'lxml<5.0.0', # b2btest dependency, to remove
         'numpy<1.17' if py2 else 'numpy', # Py2
         'decorator<5' if py2 else 'decorator', # Py2
         'plantmeter',
