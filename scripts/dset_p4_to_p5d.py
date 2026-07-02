@@ -53,7 +53,7 @@ def aggregate_hourly(rows):
 
 def main():
     if len(sys.argv) != 3:
-        print("Ús: python csv_to_p5d.py input.csv output.curva")
+        print("Ús: python dset_p4_to_p5d.py input.csv output.curva")
         return 1
 
     input_path = sys.argv[1]
